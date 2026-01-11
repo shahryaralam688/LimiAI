@@ -1,0 +1,4 @@
+module FLAnimatedImage {
+umbrella header "/Users/shahrukhahmed/Library/Developer/Xcode/DerivedData/Limi-ayhyvigduurrpfctiffvddoddnej/SourcePackages/checkouts/FLAnimatedImage/FLAnimatedImage/include/FLAnimatedImage.h"
+export *
+}

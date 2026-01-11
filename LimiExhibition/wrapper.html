@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PlayCanvas Wrapper</title>
+    <style>
+        html, body, iframe {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe
+        id="playcanvas-app"
+        src="https://playcanv.as/e/p/7c2273a2/"
+        allow="xr-spatial-tracking"
+        allowfullscreen>
+    </iframe>
+
+    <script>
+        // Step 1: Receive messages from PlayCanvas iframe
+        window.addEventListener("message", function(event) {
+            console.log("📩 Host received message from iframe:", event.data);
+
+            // Step 2: Forward message to iOS Swift app (WKWebView)
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.playcanvasHandler) {
+                window.webkit.messageHandlers.playcanvasHandler.postMessage(event.data);
+            }
+        });
+
+        // Step 3: Send commands to PlayCanvas after iframe loads
+        window.onload = function () {
+            const iframe = document.getElementById("playcanvas-app");
+
+            // Wait for PlayCanvas to be ready (5 second delay)
+            setTimeout(() => {
+                iframe.contentWindow.postMessage("light_type:floor", "*");
+                iframe.contentWindow.postMessage("light_amount:3", "*");
+                iframe.contentWindow.postMessage("cable_1:product_3", "*");
+                iframe.contentWindow.postMessage("cable_2:product_1", "*");
+                iframe.contentWindow.postMessage("cable_0:product_2", "*");
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

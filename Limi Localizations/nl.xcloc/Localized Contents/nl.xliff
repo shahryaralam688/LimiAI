@@ -1,0 +1,1629 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="LimiExhibition/Common/InfoPlist.xcstrings" source-language="en" target-language="nl" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleDisplayName" xml:space="preserve">
+        <source>LIMI AI</source>
+        <note>Bundle display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>LIMI AI</source>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NFCReaderUsageDescription" xml:space="preserve">
+        <source>This app needs access to NFC to scan tags.</source>
+        <note>Privacy - NFC Scan Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSBluetoothAlwaysUsageDescription" xml:space="preserve">
+        <source>This app needs Bluetooth to connect to lighting devices.</source>
+        <note>Privacy - Bluetooth Always Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSBluetoothPeripheralUsageDescription" xml:space="preserve">
+        <source>This app needs Bluetooth to communicate with smart devices.</source>
+        <note>Privacy - Bluetooth Peripheral Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
+        <source>Camera access is required for AR features</source>
+        <note>Privacy - Camera Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSLocalNetworkUsageDescription" xml:space="preserve">
+        <source>Discover and control devices on your personal phone.</source>
+        <note>Privacy - Local Network Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSLocationWhenInUseUsageDescription" xml:space="preserve">
+        <source>We use your location to personalize your hotel experience and show nearby services.</source>
+        <note>Privacy - Location When In Use Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSMicrophoneUsageDescription" xml:space="preserve">
+        <source>To capture the room environment via microphone.</source>
+        <note>Privacy - Microphone Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
+        <source>We need access to save screenshots.</source>
+        <note>Privacy - Photo Library Additions Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryUsageDescription" xml:space="preserve">
+        <source>This app needs photo library access to save room scans.</source>
+        <note>Privacy - Photo Library Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSSpeechRecognitionUsageDescription" xml:space="preserve">
+        <source>This app uses speech recognition to understand your voice commands.</source>
+        <note>Privacy - Speech Recognition Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="LimiExhibition/Common/Localizable.xcstrings" source-language="en" target-language="nl" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+    </header>
+    <body>
+      <trans-unit id="" xml:space="preserve">
+        <source/>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@" xml:space="preserve">
+        <source>%@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ Detail View" xml:space="preserve">
+        <source>%@ Detail View</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ detection guide" xml:space="preserve">
+        <source>%@ detection guide</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@ • %@" xml:space="preserve">
+        <source>%1$@ • %2$@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@, %@" xml:space="preserve">
+        <source>%1$@, %2$@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%@:%lld" xml:space="preserve">
+        <source>%1$@:%2$lld</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld" xml:space="preserve">
+        <source>%lld</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld channels" xml:space="preserve">
+        <source>%lld channels</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld devices" xml:space="preserve">
+        <source>%lld devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld km/h" xml:space="preserve">
+        <source>%lld km/h</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld%%" xml:space="preserve">
+        <source>%lld%%</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld°" xml:space="preserve">
+        <source>%lld°</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="/" xml:space="preserve">
+        <source>/</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="0%" xml:space="preserve">
+        <source>0%</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="9:41" xml:space="preserve">
+        <source>9:41</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AI Screens Demo" xml:space="preserve">
+        <source>AI Screens Demo</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AI adjusting environment..." xml:space="preserve">
+        <source>AI adjusting environment...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AI adjusting environment…" xml:space="preserve">
+        <source>AI adjusting environment…</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AR" xml:space="preserve">
+        <source>AR</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AR Experience" xml:space="preserve">
+        <source>AR Experience</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="AR View" xml:space="preserve">
+        <source>AR View</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="About" xml:space="preserve">
+        <source>About</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add Device" xml:space="preserve">
+        <source>Add Device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add Modules" xml:space="preserve">
+        <source>Add Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add More Modules" xml:space="preserve">
+        <source>Add More Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add Your First Device" xml:space="preserve">
+        <source>Add Your First Device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add your device below:" xml:space="preserve">
+        <source>Add your device below:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Add your devices" xml:space="preserve">
+        <source>Add your devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analyze" xml:space="preserve">
+        <source>Analyze</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Analyze Dimensions" xml:space="preserve">
+        <source>Analyze Dimensions</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Animation Intensity:" xml:space="preserve">
+        <source>Animation Intensity:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Apply Brick to Walls" xml:space="preserve">
+        <source>Apply Brick to Walls</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Apply Color" xml:space="preserve">
+        <source>Apply Color</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Available Devices" xml:space="preserve">
+        <source>Available Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BLE" xml:space="preserve">
+        <source>BLE</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BLE Devices" xml:space="preserve">
+        <source>BLE Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="BLE Scanner" xml:space="preserve">
+        <source>BLE Scanner</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Back" xml:space="preserve">
+        <source>Back</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bar 1 (Cool/Warm)" xml:space="preserve">
+        <source>Bar 1 (Cool/Warm)</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bar 2 (Cool/Warm)" xml:space="preserve">
+        <source>Bar 2 (Cool/Warm)</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base" xml:space="preserve">
+        <source>Base</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base 1" xml:space="preserve">
+        <source>Base 1</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base 2" xml:space="preserve">
+        <source>Base 2</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base 3" xml:space="preserve">
+        <source>Base 3</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Base Options" xml:space="preserve">
+        <source>Base Options</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bluetooth is Off" xml:space="preserve">
+        <source>Bluetooth is Off</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Bluetooth is turned off" xml:space="preserve">
+        <source>Bluetooth is turned off</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Brightness" xml:space="preserve">
+        <source>Brightness</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="By Google" xml:space="preserve">
+        <source>By Google</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CCT" xml:space="preserve">
+        <source>CCT</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="CCT LED %lld" xml:space="preserve">
+        <source>CCT LED %lld</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cancelled" xml:space="preserve">
+        <source>Cancelled</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Ch-%lld" xml:space="preserve">
+        <source>Ch-%lld</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Change Photo" xml:space="preserve">
+        <source>Change Photo</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Chat with Limi" xml:space="preserve">
+        <source>Chat with Limi</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Choose your role below:" xml:space="preserve">
+        <source>Choose your role below:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Clear Location" xml:space="preserve">
+        <source>Clear Location</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cold: %lld%%" xml:space="preserve">
+        <source>Cold: %lld%%</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Color" xml:space="preserve">
+        <source>Color</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Color Picker" xml:space="preserve">
+        <source>Color Picker</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Colors" xml:space="preserve">
+        <source>Colors</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Completed" xml:space="preserve">
+        <source>Completed</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connect" xml:space="preserve">
+        <source>Connect</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connect Your Device to Wi-Fi" xml:space="preserve">
+        <source>Connect Your Device to Wi-Fi</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connected" xml:space="preserve">
+        <source>Connected</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connected Devices" xml:space="preserve">
+        <source>Connected Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connected Hubs" xml:space="preserve">
+        <source>Connected Hubs</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connected Space" xml:space="preserve">
+        <source>Connected Space</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connecting with Device" xml:space="preserve">
+        <source>Connecting with Device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connecting…" xml:space="preserve">
+        <source>Connecting…</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Connections List" xml:space="preserve">
+        <source>Connections List</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Continue" xml:space="preserve">
+        <source>Continue</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Continue as a Guest" xml:space="preserve">
+        <source>Continue as a Guest</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Continue with Apple" xml:space="preserve">
+        <source>Continue with Apple</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Continue with Google" xml:space="preserve">
+        <source>Continue with Google</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Control Your Device In Your space" xml:space="preserve">
+        <source>Control Your Device In Your space</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Cool" xml:space="preserve">
+        <source>Cool</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Create Overlays" xml:space="preserve">
+        <source>Create Overlays</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Current Location" xml:space="preserve">
+        <source>Current Location</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Current Location:" xml:space="preserve">
+        <source>Current Location:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Custom" xml:space="preserve">
+        <source>Custom</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Debug" xml:space="preserve">
+        <source>Debug</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Debug Info" xml:space="preserve">
+        <source>Debug Info</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delete" xml:space="preserve">
+        <source>Delete</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Delivered by" xml:space="preserve">
+        <source>Delivered by</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Developer Mode" xml:space="preserve">
+        <source>Developer Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Device Disconnected" xml:space="preserve">
+        <source>Device Disconnected</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Device Manager" xml:space="preserve">
+        <source>Device Manager</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Device added Successfully" xml:space="preserve">
+        <source>Device added Successfully</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Devices" xml:space="preserve">
+        <source>Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Didn't receive the code?" xml:space="preserve">
+        <source>Didn't receive the code?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dimensions for %@ have been printed to the Xcode console." xml:space="preserve">
+        <source>Dimensions for %@ have been printed to the Xcode console.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Disconnect" xml:space="preserve">
+        <source>Disconnect</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Disconnected" xml:space="preserve">
+        <source>Disconnected</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Discovered Devices" xml:space="preserve">
+        <source>Discovered Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Dismiss" xml:space="preserve">
+        <source>Dismiss</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Done" xml:space="preserve">
+        <source>Done</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Edit 3D Models" xml:space="preserve">
+        <source>Edit 3D Models</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Effects" xml:space="preserve">
+        <source>Effects</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Email Address" xml:space="preserve">
+        <source>Email Address</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enable Location" xml:space="preserve">
+        <source>Enable Location</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter Your Email" xml:space="preserve">
+        <source>Enter Your Email</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter file name" xml:space="preserve">
+        <source>Enter file name</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter your Wi-Fi password" xml:space="preserve">
+        <source>Enter your Wi-Fi password</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter your Wi-Fi password to link your device securely. This allows Limi to stay connected, sync with your other devices, and respond instantly — all within your private network." xml:space="preserve">
+        <source>Enter your Wi-Fi password to link your device securely. This allows Limi to stay connected, sync with your other devices, and respond instantly — all within your private network.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Enter your username" xml:space="preserve">
+        <source>Enter your username</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Error" xml:space="preserve">
+        <source>Error</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Error Opening File" xml:space="preserve">
+        <source>Error Opening File</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Exciting Updates Coming!" xml:space="preserve">
+        <source>Exciting Updates Coming!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Experience Now" xml:space="preserve">
+        <source>Experience Now</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Featured Models" xml:space="preserve">
+        <source>Featured Models</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Feedback" xml:space="preserve">
+        <source>Feedback</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Fetch Weather" xml:space="preserve">
+        <source>Fetch Weather</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Find Nearby Devices" xml:space="preserve">
+        <source>Find Nearby Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Found New Device" xml:space="preserve">
+        <source>Found New Device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Gemini" xml:space="preserve">
+        <source>Gemini</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Gemini enables natural conversation with your devices — ask for room adjustments, personalized recommendations, or daily briefings with ease." xml:space="preserve">
+        <source>Gemini enables natural conversation with your devices — ask for room adjustments, personalized recommendations, or daily briefings with ease.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Get Started" xml:space="preserve">
+        <source>Get Started</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Get ready to scan your room" xml:space="preserve">
+        <source>Get ready to scan your room</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Go to Home" xml:space="preserve">
+        <source>Go to Home</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="H %lld°" xml:space="preserve">
+        <source>H %lld°</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hey, Limi AI here!" xml:space="preserve">
+        <source>Hey, Limi AI here!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hey, Limi here!" xml:space="preserve">
+        <source>Hey, Limi here!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Hey, Limi is here!" xml:space="preserve">
+        <source>Hey, Limi is here!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="IP: %@" xml:space="preserve">
+        <source>IP: %@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Install" xml:space="preserve">
+        <source>Install</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Install Modules" xml:space="preserve">
+        <source>Install Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Installed" xml:space="preserve">
+        <source>Installed</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Installed Modules" xml:space="preserve">
+        <source>Installed Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Integration Options" xml:space="preserve">
+        <source>Integration Options</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Intensity" xml:space="preserve">
+        <source>Intensity</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Internet connection required" xml:space="preserve">
+        <source>Internet connection required</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="L %lld°" xml:space="preserve">
+        <source>L %lld°</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LIMI AI is your smart light management and automation assistant!" xml:space="preserve">
+        <source>LIMI AI is your smart light management and automation assistant!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Last Updated: %@&#10;We at [Company Name] respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and disclose information about you when you use our Property Inspection Management App (&quot;the App&quot;) and the associated services. By using the App, you agree to the practices described in this policy.&#10;&#10;1. Information We Collect&#10;We collect the following types of information to provide and improve our services:&#10;&#10;1.1 Personal Information&#10;When you register or use the App, we may collect personal information such as:&#10;• Name&#10;• Email address&#10;• Contact number&#10;• Business information (if applicable)&#10;&#10;1.2 Property Information&#10;To facilitate property inspections, we may collect and store information about the properties you inspect, including:&#10;• Property address and details (e.g., size, type, condition)&#10;• Photos, videos, or documents you upload related to the inspection&#10;• Notes and inspection reports&#10;&#10;1.3 Usage Information&#10;We automatically collect information on how you interact with the App, such as:&#10;• Device information (e.g., IP address, browser type, operating system)&#10;• Log data (e.g., date and time of access, pages viewed, time spent on each page)&#10;• Cookies and similar technologies to enhance user experience&#10;&#10;2. How We Use Your Information&#10;We use the information we collect to:&#10;• Provide, maintain, and improve the App’s features and functionality&#10;• Manage user accounts and provide customer support&#10;• Generate inspection reports and store property information&#10;• Communicate updates, services, or promotional materials (you can opt out at any time)&#10;• Analyze usage trends and enhance user experience&#10;&#10;3. How We Share Your Information&#10;We do not sell your personal information. We may share your information in the following circumstances:&#10;• Service Providers: We may share your information with third-party vendors or service providers who assist us in operating the App (e.g., cloud storage, analytics services).&#10;• Legal Compliance: We may disclose your information to comply with legal obligations, court orders, or government requests.&#10;• Business Transfers: In the event of a merger, acquisition, or sale of all or a portion of our assets, your information may be transferred as part of that transaction.&#10;&#10;4. Data Security&#10;We implement appropriate technical and organizational measures to protect your information from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet is 100%% secure, so we cannot guarantee absolute security.&#10;&#10;5. Data Retention&#10;We retain your personal information only as long as necessary to fulfill the purposes for which it was collected or as required by law. When no longer needed, we securely delete or anonymize your data.&#10;&#10;6. Your Privacy Rights&#10;Depending on your jurisdiction, you may have the following rights regarding your personal information:&#10;• Access: You can request access to the personal information we hold about you.&#10;• Correction: You can request corrections to inaccurate or incomplete personal information.&#10;• Deletion: You may request the deletion of your personal information, subject to legal obligations.&#10;• Opt-out: You can opt out of marketing communications at any time.&#10;To exercise any of these rights, please contact us at [email address].&#10;&#10;7. Third-Party Links&#10;The App may contain links to third-party websites or services. This Privacy Policy does not apply to those websites or services, and we are not responsible for their privacy practices. We encourage you to review their privacy policies.&#10;&#10;8. Children’s Privacy&#10;Our App is not intended for individuals under the age of 18, and we do not knowingly collect personal information from children. If you believe we have collected personal information from a child, please contact us to remove the information.&#10;&#10;9. Changes to this Privacy Policy&#10;We may update this Privacy Policy from time to time to reflect changes in our practices. We will notify you of any material changes by posting the updated policy on the App. Your continued use of the App after such changes constitutes acceptance of the updated Privacy Policy.&#10;&#10;10. Contact Us&#10;If you have any questions about this Privacy Policy or our data practices, please contact us at:&#10;[Company Name]&#10;[Email Address]&#10;[Contact Address]" xml:space="preserve">
+        <source>Last Updated: %@
+We at [Company Name] respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and disclose information about you when you use our Property Inspection Management App ("the App") and the associated services. By using the App, you agree to the practices described in this policy.
+
+1. Information We Collect
+We collect the following types of information to provide and improve our services:
+
+1.1 Personal Information
+When you register or use the App, we may collect personal information such as:
+• Name
+• Email address
+• Contact number
+• Business information (if applicable)
+
+1.2 Property Information
+To facilitate property inspections, we may collect and store information about the properties you inspect, including:
+• Property address and details (e.g., size, type, condition)
+• Photos, videos, or documents you upload related to the inspection
+• Notes and inspection reports
+
+1.3 Usage Information
+We automatically collect information on how you interact with the App, such as:
+• Device information (e.g., IP address, browser type, operating system)
+• Log data (e.g., date and time of access, pages viewed, time spent on each page)
+• Cookies and similar technologies to enhance user experience
+
+2. How We Use Your Information
+We use the information we collect to:
+• Provide, maintain, and improve the App’s features and functionality
+• Manage user accounts and provide customer support
+• Generate inspection reports and store property information
+• Communicate updates, services, or promotional materials (you can opt out at any time)
+• Analyze usage trends and enhance user experience
+
+3. How We Share Your Information
+We do not sell your personal information. We may share your information in the following circumstances:
+• Service Providers: We may share your information with third-party vendors or service providers who assist us in operating the App (e.g., cloud storage, analytics services).
+• Legal Compliance: We may disclose your information to comply with legal obligations, court orders, or government requests.
+• Business Transfers: In the event of a merger, acquisition, or sale of all or a portion of our assets, your information may be transferred as part of that transaction.
+
+4. Data Security
+We implement appropriate technical and organizational measures to protect your information from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet is 100%% secure, so we cannot guarantee absolute security.
+
+5. Data Retention
+We retain your personal information only as long as necessary to fulfill the purposes for which it was collected or as required by law. When no longer needed, we securely delete or anonymize your data.
+
+6. Your Privacy Rights
+Depending on your jurisdiction, you may have the following rights regarding your personal information:
+• Access: You can request access to the personal information we hold about you.
+• Correction: You can request corrections to inaccurate or incomplete personal information.
+• Deletion: You may request the deletion of your personal information, subject to legal obligations.
+• Opt-out: You can opt out of marketing communications at any time.
+To exercise any of these rights, please contact us at [email address].
+
+7. Third-Party Links
+The App may contain links to third-party websites or services. This Privacy Policy does not apply to those websites or services, and we are not responsible for their privacy practices. We encourage you to review their privacy policies.
+
+8. Children’s Privacy
+Our App is not intended for individuals under the age of 18, and we do not knowingly collect personal information from children. If you believe we have collected personal information from a child, please contact us to remove the information.
+
+9. Changes to this Privacy Policy
+We may update this Privacy Policy from time to time to reflect changes in our practices. We will notify you of any material changes by posting the updated policy on the App. Your continued use of the App after such changes constitutes acceptance of the updated Privacy Policy.
+
+10. Contact Us
+If you have any questions about this Privacy Policy or our data practices, please contact us at:
+[Company Name]
+[Email Address]
+[Contact Address]</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Last updated %@" xml:space="preserve">
+        <source>Last updated %@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lat: %.4f" xml:space="preserve">
+        <source>Lat: %.4f</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Later" xml:space="preserve">
+        <source>Later</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Latitude: %.4f" xml:space="preserve">
+        <source>Latitude: %.4f</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Let me help you in seconds." xml:space="preserve">
+        <source>Let me help you in seconds.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Let's personalize your Lifestyle with Limi" xml:space="preserve">
+        <source>Let's personalize your Lifestyle with Limi</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="LiDAR Not Available" xml:space="preserve">
+        <source>LiDAR Not Available</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lights" xml:space="preserve">
+        <source>Lights</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Limi" xml:space="preserve">
+        <source>Limi</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Listen For All Events" xml:space="preserve">
+        <source>Listen For All Events</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Live" xml:space="preserve">
+        <source>Live</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Lng: %.4f" xml:space="preserve">
+        <source>Lng: %.4f</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loading 3D Model..." xml:space="preserve">
+        <source>Loading 3D Model...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loading 3D interior view…" xml:space="preserve">
+        <source>Loading 3D interior view…</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loading Shop..." xml:space="preserve">
+        <source>Loading Shop...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loading models..." xml:space="preserve">
+        <source>Loading models...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Loading..." xml:space="preserve">
+        <source>Loading...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Location Access" xml:space="preserve">
+        <source>Location Access</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Location Usage Example" xml:space="preserve">
+        <source>Location Usage Example</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Location not available" xml:space="preserve">
+        <source>Location not available</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Location-based Features:" xml:space="preserve">
+        <source>Location-based Features:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Log Out" xml:space="preserve">
+        <source>Log Out</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Login" xml:space="preserve">
+        <source>Login</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Login to experience more features" xml:space="preserve">
+        <source>Login to experience more features</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Logout" xml:space="preserve">
+        <source>Logout</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Longitude: %.4f" xml:space="preserve">
+        <source>Longitude: %.4f</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Looking for&#10;nearby devices" xml:space="preserve">
+        <source>Looking for
+nearby devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Make a new scan!" xml:space="preserve">
+        <source>Make a new scan!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Make sure to scan the room by pointing the camera at all surfaces." xml:space="preserve">
+        <source>Make sure to scan the room by pointing the camera at all surfaces.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Make sure your WLED devices are connected to the same Wi-Fi network" xml:space="preserve">
+        <source>Make sure your WLED devices are connected to the same Wi-Fi network</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Marked as completed" xml:space="preserve">
+        <source>Marked as completed</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mini Controller Setting" xml:space="preserve">
+        <source>Mini Controller Setting</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="MiniController" xml:space="preserve">
+        <source>MiniController</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mode" xml:space="preserve">
+        <source>Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Mode: %@" xml:space="preserve">
+        <source>Mode: %@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Modules" xml:space="preserve">
+        <source>Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="My Requests" xml:space="preserve">
+        <source>My Requests</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="My Routines" xml:space="preserve">
+        <source>My Routines</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="My Spaces" xml:space="preserve">
+        <source>My Spaces</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Name Your Scan" xml:space="preserve">
+        <source>Name Your Scan</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Need location for weather data" xml:space="preserve">
+        <source>Need location for weather data</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="New modules with amazing features are on the way." xml:space="preserve">
+        <source>New modules with amazing features are on the way.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No Designs Yet" xml:space="preserve">
+        <source>No Designs Yet</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No WLED devices found" xml:space="preserve">
+        <source>No WLED devices found</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No Wi‑Fi detected. Grant location permission or connect to a network." xml:space="preserve">
+        <source>No Wi‑Fi detected. Grant location permission or connect to a network.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No devices available" xml:space="preserve">
+        <source>No devices available</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No devices connected through Bluetooth" xml:space="preserve">
+        <source>No devices connected through Bluetooth</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No devices linked yet" xml:space="preserve">
+        <source>No devices linked yet</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="No pendant connected to this device" xml:space="preserve">
+        <source>No pendant connected to this device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Not Now" xml:space="preserve">
+        <source>Not Now</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Notification Settings" xml:space="preserve">
+        <source>Notification Settings</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Notifications" xml:space="preserve">
+        <source>Notifications</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Object" xml:space="preserve">
+        <source>Object</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Off" xml:space="preserve">
+        <source>Off</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Offline" xml:space="preserve">
+        <source>Offline</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Offline Mode" xml:space="preserve">
+        <source>Offline Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="On" xml:space="preserve">
+        <source>On</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Online" xml:space="preserve">
+        <source>Online</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open Configurator" xml:space="preserve">
+        <source>Open Configurator</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Open the Xcode console to see events and acknowledgments." xml:space="preserve">
+        <source>Open the Xcode console to see events and acknowledgments.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Or" xml:space="preserve">
+        <source>Or</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="PWM" xml:space="preserve">
+        <source>PWM</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pattern Controls" xml:space="preserve">
+        <source>Pattern Controls</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendant 1" xml:space="preserve">
+        <source>Pendant 1</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendant 2" xml:space="preserve">
+        <source>Pendant 2</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendant 3" xml:space="preserve">
+        <source>Pendant 3</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendant 4" xml:space="preserve">
+        <source>Pendant 4</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendant Options" xml:space="preserve">
+        <source>Pendant Options</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Pendants" xml:space="preserve">
+        <source>Pendants</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please Login First" xml:space="preserve">
+        <source>Please Login First</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please Select Your Ch-%lld Mode" xml:space="preserve">
+        <source>Please Select Your Ch-%lld Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please Select Your Mode" xml:space="preserve">
+        <source>Please Select Your Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please Set Normal MOde " xml:space="preserve">
+        <source>Please Set Normal MOde </source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please Sign in to secure your data and for personalization" xml:space="preserve">
+        <source>Please Sign in to secure your data and for personalization</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please check and enter your email before configuring the LED, and verify that you are a valid user." xml:space="preserve">
+        <source>Please check and enter your email before configuring the LED, and verify that you are a valid user.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please check your connection and try again." xml:space="preserve">
+        <source>Please check your connection and try again.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please connect a device first" xml:space="preserve">
+        <source>Please connect a device first</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please connect to internet." xml:space="preserve">
+        <source>Please connect to internet.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please enter the 6-digit code sent to&#10;%@" xml:space="preserve">
+        <source>Please enter the 6-digit code sent to
+%@</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please log in to view your Wi-Fi devices." xml:space="preserve">
+        <source>Please log in to view your Wi-Fi devices.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please login before using this feature" xml:space="preserve">
+        <source>Please login before using this feature</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Please reconnect your device." xml:space="preserve">
+        <source>Please reconnect your device.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Power" xml:space="preserve">
+        <source>Power</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Presets" xml:space="preserve">
+        <source>Presets</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Privacy Policy" xml:space="preserve">
+        <source>Privacy Policy</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Processing..." xml:space="preserve">
+        <source>Processing...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="RGB" xml:space="preserve">
+        <source>RGB</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="RGB LED %lld" xml:space="preserve">
+        <source>RGB LED %lld</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rainbow Color" xml:space="preserve">
+        <source>Rainbow Color</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Rating" xml:space="preserve">
+        <source>Rating</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recording..." xml:space="preserve">
+        <source>Recording...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Recording... Release to stop" xml:space="preserve">
+        <source>Recording... Release to stop</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Remove Overlays" xml:space="preserve">
+        <source>Remove Overlays</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Request Name" xml:space="preserve">
+        <source>Request Name</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Request Summary" xml:space="preserve">
+        <source>Request Summary</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Request Time" xml:space="preserve">
+        <source>Request Time</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Resend" xml:space="preserve">
+        <source>Resend</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Reset" xml:space="preserve">
+        <source>Reset</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Retry" xml:space="preserve">
+        <source>Retry</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Room Analysis" xml:space="preserve">
+        <source>Room Analysis</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Room Scans" xml:space="preserve">
+        <source>Room Scans</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Run Sequence" xml:space="preserve">
+        <source>Run Sequence</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save" xml:space="preserve">
+        <source>Save</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save Changes" xml:space="preserve">
+        <source>Save Changes</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Save Scan" xml:space="preserve">
+        <source>Save Scan</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Saved Room Scans" xml:space="preserve">
+        <source>Saved Room Scans</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scan for Devices" xml:space="preserve">
+        <source>Scan for Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scanning for BLE devices..." xml:space="preserve">
+        <source>Scanning for BLE devices...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scanning..." xml:space="preserve">
+        <source>Scanning...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Scanning...." xml:space="preserve">
+        <source>Scanning....</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Schedule Summary" xml:space="preserve">
+        <source>Schedule Summary</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Search for a device..." xml:space="preserve">
+        <source>Search for a device...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Searching for devices..." xml:space="preserve">
+        <source>Searching for devices...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Searching…" xml:space="preserve">
+        <source>Searching…</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="See All" xml:space="preserve">
+        <source>See All</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Select Color" xml:space="preserve">
+        <source>Select Color</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Select Space Type" xml:space="preserve">
+        <source>Select Space Type</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Select Your Type" xml:space="preserve">
+        <source>Select Your Type</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Select the method of adding the device" xml:space="preserve">
+        <source>Select the method of adding the device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Send" xml:space="preserve">
+        <source>Send</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Send Link" xml:space="preserve">
+        <source>Send Link</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Send Sample Light Data" xml:space="preserve">
+        <source>Send Sample Light Data</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Set Lighting Based on Location" xml:space="preserve">
+        <source>Set Lighting Based on Location</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Setting" xml:space="preserve">
+        <source>Setting</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Setting Saved" xml:space="preserve">
+        <source>Setting Saved</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Settings" xml:space="preserve">
+        <source>Settings</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Shop" xml:space="preserve">
+        <source>Shop</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign In" xml:space="preserve">
+        <source>Sign In</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign Out" xml:space="preserve">
+        <source>Sign Out</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign in" xml:space="preserve">
+        <source>Sign in</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign in with Google" xml:space="preserve">
+        <source>Sign in with Google</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign in with your Google account to continue" xml:space="preserve">
+        <source>Sign in with your Google account to continue</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Skip" xml:space="preserve">
+        <source>Skip</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Socket Tester" xml:space="preserve">
+        <source>Socket Tester</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Solid Color" xml:space="preserve">
+        <source>Solid Color</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Solid Colors" xml:space="preserve">
+        <source>Solid Colors</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Speed" xml:space="preserve">
+        <source>Speed</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Start Scan" xml:space="preserve">
+        <source>Start Scan</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="State of the art AR Experience" xml:space="preserve">
+        <source>State of the art AR Experience</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="State of the art VR Experience" xml:space="preserve">
+        <source>State of the art VR Experience</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Status: Connected" xml:space="preserve">
+        <source>Status: Connected</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Status: Disconnected" xml:space="preserve">
+        <source>Status: Disconnected</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Stop AI" xml:space="preserve">
+        <source>Stop AI</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Suggestions for you" xml:space="preserve">
+        <source>Suggestions for you</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Summary" xml:space="preserve">
+        <source>Summary</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap" xml:space="preserve">
+        <source>Tap</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap + to add your first device" xml:space="preserve">
+        <source>Tap + to add your first device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap To Take A Picture " xml:space="preserve">
+        <source>Tap To Take A Picture </source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap button below to add Modules" xml:space="preserve">
+        <source>Tap button below to add Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap button below to add devices" xml:space="preserve">
+        <source>Tap button below to add devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap the button below to add devices" xml:space="preserve">
+        <source>Tap the button below to add devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap to chat" xml:space="preserve">
+        <source>Tap to chat</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tap to speak" xml:space="preserve">
+        <source>Tap to speak</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Test Controls" xml:space="preserve">
+        <source>Test Controls</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Test View" xml:space="preserve">
+        <source>Test View</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Testing" xml:space="preserve">
+        <source>Testing</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Testing Mode" xml:space="preserve">
+        <source>Testing Mode</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Texture Scale: %.1f" xml:space="preserve">
+        <source>Texture Scale: %.1f</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="The selected device is not responding. Please try again." xml:space="preserve">
+        <source>The selected device is not responding. Please try again.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This device does not support LiDAR-based AR." xml:space="preserve">
+        <source>This device does not support LiDAR-based AR.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This device does not support the AR experience that requires a LiDAR sensor." xml:space="preserve">
+        <source>This device does not support the AR experience that requires a LiDAR sensor.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="This routine will run as scheduled" xml:space="preserve">
+        <source>This routine will run as scheduled</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Time" xml:space="preserve">
+        <source>Time</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Tip: Nearby scanning works best when you're within 10 feet of the device" xml:space="preserve">
+        <source>Tip: Nearby scanning works best when you're within 10 feet of the device</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Today" xml:space="preserve">
+        <source>Today</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Turn OFF/ON" xml:space="preserve">
+        <source>Turn OFF/ON</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Turn on Bluetooth to scan for nearby devices." xml:space="preserve">
+        <source>Turn on Bluetooth to scan for nearby devices.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Turn on Location" xml:space="preserve">
+        <source>Turn on Location</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Type a message..." xml:space="preserve">
+        <source>Type a message...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Umer" xml:space="preserve">
+        <source>Umer</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unable to load your devices. You can use built-in preset models or retry when connected." xml:space="preserve">
+        <source>Unable to load your devices. You can use built-in preset models or retry when connected.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Uninstall" xml:space="preserve">
+        <source>Uninstall</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Unisntall" xml:space="preserve">
+        <source>Unisntall</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Update Profile" xml:space="preserve">
+        <source>Update Profile</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Updating Profile..." xml:space="preserve">
+        <source>Updating Profile...</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Upgrade" xml:space="preserve">
+        <source>Upgrade</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Use Presets" xml:space="preserve">
+        <source>Use Presets</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Username" xml:space="preserve">
+        <source>Username</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Using built-in presets" xml:space="preserve">
+        <source>Using built-in presets</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="VR Experience" xml:space="preserve">
+        <source>VR Experience</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Verification Code" xml:space="preserve">
+        <source>Verification Code</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Verify" xml:space="preserve">
+        <source>Verify</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="View 3D Model" xml:space="preserve">
+        <source>View 3D Model</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="View and manage your service requests" xml:space="preserve">
+        <source>View and manage your service requests</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Voltage" xml:space="preserve">
+        <source>Voltage</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="WLED" xml:space="preserve">
+        <source>WLED</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="WLED Device Discovery" xml:space="preserve">
+        <source>WLED Device Discovery</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Wall Colors" xml:space="preserve">
+        <source>Wall Colors</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warm" xml:space="preserve">
+        <source>Warm</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Warm: %lld%%" xml:space="preserve">
+        <source>Warm: %lld%%</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="We need your location to provide personalized lighting experiences and weather information." xml:space="preserve">
+        <source>We need your location to provide personalized lighting experiences and weather information.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Weather API Integration:" xml:space="preserve">
+        <source>Weather API Integration:</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome Back" xml:space="preserve">
+        <source>Welcome Back</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome to LIMI" xml:space="preserve">
+        <source>Welcome to LIMI</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome to Limi" xml:space="preserve">
+        <source>Welcome to Limi</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome!" xml:space="preserve">
+        <source>Welcome!</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What is LIMI AI?" xml:space="preserve">
+        <source>What is LIMI AI?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What should Limi do at this time?" xml:space="preserve">
+        <source>What should Limi do at this time?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="What would you like to do?" xml:space="preserve">
+        <source>What would you like to do?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Wi-Fi Devices" xml:space="preserve">
+        <source>Wi-Fi Devices</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Wifi Password" xml:space="preserve">
+        <source>Wifi Password</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You have no existing scans" xml:space="preserve">
+        <source>You have no existing scans</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="You haven’t added any devices yet" xml:space="preserve">
+        <source>You haven’t added any devices yet</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Your device has been disconnected." xml:space="preserve">
+        <source>Your device has been disconnected.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="common.ok" xml:space="preserve">
+        <source>OK</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="e.g. Morning Routine" xml:space="preserve">
+        <source>e.g. Morning Routine</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="home.empty.cta" xml:space="preserve">
+        <source>Add Your First Module</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="home.empty.subtitle" xml:space="preserve">
+        <source>Tap to add Modules</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="home.empty.title" xml:space="preserve">
+        <source>Experience the Future of Smart Living with Limi AI</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="language.restart.message" xml:space="preserve">
+        <source>Please close and reopen the app to apply the language change.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="language.restart.title" xml:space="preserve">
+        <source>Restart Required</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="module.ar_view.title" xml:space="preserve">
+        <source>AR View</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="module.configurator.title" xml:space="preserve">
+        <source>Configurator</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="module.device_manager.title" xml:space="preserve">
+        <source>Device Manager</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="module.room_scan.title" xml:space="preserve">
+        <source>Room Scan</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.ai_app_store" xml:space="preserve">
+        <source>AI App Store</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.ai_connections" xml:space="preserve">
+        <source>AI Connections</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.ai_settings" xml:space="preserve">
+        <source>AI Settings</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.configurator" xml:space="preserve">
+        <source>Configurator</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.edit" xml:space="preserve">
+        <source>Edit Profile</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.login_better" xml:space="preserve">
+        <source>Login for better experience</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.logout" xml:space="preserve">
+        <source>Log Out</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.notifications" xml:space="preserve">
+        <source>Notifications</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.our_website" xml:space="preserve">
+        <source>Our Website</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.privacy_security" xml:space="preserve">
+        <source>Privacy &amp; Security</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="profile.room_scan" xml:space="preserve">
+        <source>Room Scan</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="settings.language" xml:space="preserve">
+        <source>Language</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="settings.title" xml:space="preserve">
+        <source>Settings</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="you@example.com" xml:space="preserve">
+        <source>you@example.com</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="°" xml:space="preserve">
+        <source>°</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="←" xml:space="preserve">
+        <source>←</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="↑" xml:space="preserve">
+        <source>↑</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="→" xml:space="preserve">
+        <source>→</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="↓" xml:space="preserve">
+        <source>↓</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="✨" xml:space="preserve">
+        <source>✨</source>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

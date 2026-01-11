@@ -1,0 +1,1333 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "/" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ • %2$@"
+          }
+        }
+      }
+    },
+    "%@ Detail View" : {
+
+    },
+    "%@ detection guide" : {
+
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@:%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@:%2$lld"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld channels" : {
+
+    },
+    "%lld devices" : {
+
+    },
+    "%lld km/h" : {
+
+    },
+    "%lld%%" : {
+
+    },
+    "%lld°" : {
+
+    },
+    "°" : {
+
+    },
+    "←" : {
+
+    },
+    "→" : {
+
+    },
+    "↑" : {
+
+    },
+    "↓" : {
+
+    },
+    "✨" : {
+
+    },
+    "0%" : {
+
+    },
+    "9:41" : {
+
+    },
+    "About" : {
+
+    },
+    "Add Device" : {
+
+    },
+    "Add Modules" : {
+
+    },
+    "Add More Modules" : {
+
+    },
+    "Add your device below:" : {
+
+    },
+    "Add your devices" : {
+
+    },
+    "Add Your First Device" : {
+
+    },
+    "AI adjusting environment..." : {
+
+    },
+    "AI adjusting environment…" : {
+
+    },
+    "AI Screens Demo" : {
+
+    },
+    "Analyze" : {
+
+    },
+    "Analyze Dimensions" : {
+
+    },
+    "Animation Intensity:" : {
+
+    },
+    "Apply Brick to Walls" : {
+
+    },
+    "Apply Color" : {
+
+    },
+    "AR" : {
+
+    },
+    "AR Experience" : {
+
+    },
+    "AR View" : {
+
+    },
+    "Available Devices" : {
+
+    },
+    "Back" : {
+
+    },
+    "Bar 1 (Cool/Warm)" : {
+
+    },
+    "Bar 2 (Cool/Warm)" : {
+
+    },
+    "Base" : {
+
+    },
+    "Base 1" : {
+
+    },
+    "Base 2" : {
+
+    },
+    "Base 3" : {
+
+    },
+    "Base Options" : {
+
+    },
+    "BLE" : {
+
+    },
+    "BLE Devices" : {
+
+    },
+    "BLE Scanner" : {
+
+    },
+    "Bluetooth is Off" : {
+
+    },
+    "Bluetooth is turned off" : {
+
+    },
+    "Brightness" : {
+
+    },
+    "By Google" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Cancelled" : {
+
+    },
+    "CCT" : {
+
+    },
+    "CCT LED %lld" : {
+
+    },
+    "Ch-%lld" : {
+
+    },
+    "Change Photo" : {
+
+    },
+    "Chat with Limi" : {
+
+    },
+    "Choose your role below:" : {
+
+    },
+    "Clear Location" : {
+
+    },
+    "Close" : {
+
+    },
+    "Cold: %lld%%" : {
+
+    },
+    "Color" : {
+
+    },
+    "Color Picker" : {
+
+    },
+    "Colors" : {
+
+    },
+    "common.ok" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Completed" : {
+
+    },
+    "Connect" : {
+
+    },
+    "Connect Your Device to Wi-Fi" : {
+
+    },
+    "Connected" : {
+
+    },
+    "Connected Devices" : {
+
+    },
+    "Connected Hubs" : {
+
+    },
+    "Connected Space" : {
+
+    },
+    "Connecting with Device" : {
+
+    },
+    "Connecting…" : {
+
+    },
+    "Connections List" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Continue as a Guest" : {
+
+    },
+    "Continue with Apple" : {
+      "extractionState" : "stale"
+    },
+    "Continue with Google" : {
+
+    },
+    "Control Your Device In Your space" : {
+
+    },
+    "Cool" : {
+
+    },
+    "Create Overlays" : {
+
+    },
+    "Current Location" : {
+
+    },
+    "Current Location:" : {
+
+    },
+    "Custom" : {
+
+    },
+    "Debug" : {
+
+    },
+    "Debug Info" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delivered by" : {
+
+    },
+    "Developer Mode" : {
+
+    },
+    "Device added Successfully" : {
+
+    },
+    "Device Disconnected" : {
+
+    },
+    "Device Manager" : {
+      "extractionState" : "manual"
+    },
+    "Devices" : {
+
+    },
+    "Didn't receive the code?" : {
+
+    },
+    "Dimensions for %@ have been printed to the Xcode console." : {
+
+    },
+    "Disconnect" : {
+
+    },
+    "Disconnected" : {
+
+    },
+    "Discovered Devices" : {
+
+    },
+    "Dismiss" : {
+
+    },
+    "Done" : {
+
+    },
+    "e.g. Morning Routine" : {
+
+    },
+    "Edit 3D Models" : {
+
+    },
+    "Effects" : {
+
+    },
+    "Email Address" : {
+
+    },
+    "Enable Location" : {
+
+    },
+    "Enter file name" : {
+
+    },
+    "Enter Your Email" : {
+
+    },
+    "Enter your username" : {
+
+    },
+    "Enter your Wi-Fi password" : {
+
+    },
+    "Enter your Wi-Fi password to link your device securely. This allows Limi to stay connected, sync with your other devices, and respond instantly — all within your private network." : {
+
+    },
+    "Error" : {
+
+    },
+    "Error Opening File" : {
+
+    },
+    "Exciting Updates Coming!" : {
+
+    },
+    "Experience Now" : {
+
+    },
+    "Featured Models" : {
+
+    },
+    "Feedback" : {
+
+    },
+    "Fetch Weather" : {
+
+    },
+    "Find Nearby Devices" : {
+
+    },
+    "Found New Device" : {
+
+    },
+    "Gemini" : {
+
+    },
+    "Gemini enables natural conversation with your devices — ask for room adjustments, personalized recommendations, or daily briefings with ease." : {
+
+    },
+    "Get ready to scan your room" : {
+
+    },
+    "Get Started" : {
+
+    },
+    "Go to Home" : {
+
+    },
+    "H %lld°" : {
+
+    },
+    "Hey, Limi AI here!" : {
+
+    },
+    "Hey, Limi here!" : {
+
+    },
+    "Hey, Limi is here!" : {
+
+    },
+    "home.empty.cta" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Your First Module"
+          }
+        }
+      }
+    },
+    "home.empty.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to add Modules"
+          }
+        }
+      }
+    },
+    "home.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experience the Future of Smart Living with Limi AI"
+          }
+        }
+      }
+    },
+    "Install" : {
+
+    },
+    "Install Modules" : {
+
+    },
+    "Installed" : {
+
+    },
+    "Installed Modules" : {
+
+    },
+    "Integration Options" : {
+
+    },
+    "Intensity" : {
+
+    },
+    "Internet connection required" : {
+
+    },
+    "IP: %@" : {
+
+    },
+    "L %lld°" : {
+
+    },
+    "language.restart.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please close and reopen the app to apply the language change."
+          }
+        }
+      }
+    },
+    "language.restart.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restart Required"
+          }
+        }
+      }
+    },
+    "Last updated %@" : {
+
+    },
+    "Last Updated: %@\nWe at [Company Name] respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and disclose information about you when you use our Property Inspection Management App (\"the App\") and the associated services. By using the App, you agree to the practices described in this policy.\n\n1. Information We Collect\nWe collect the following types of information to provide and improve our services:\n\n1.1 Personal Information\nWhen you register or use the App, we may collect personal information such as:\n• Name\n• Email address\n• Contact number\n• Business information (if applicable)\n\n1.2 Property Information\nTo facilitate property inspections, we may collect and store information about the properties you inspect, including:\n• Property address and details (e.g., size, type, condition)\n• Photos, videos, or documents you upload related to the inspection\n• Notes and inspection reports\n\n1.3 Usage Information\nWe automatically collect information on how you interact with the App, such as:\n• Device information (e.g., IP address, browser type, operating system)\n• Log data (e.g., date and time of access, pages viewed, time spent on each page)\n• Cookies and similar technologies to enhance user experience\n\n2. How We Use Your Information\nWe use the information we collect to:\n• Provide, maintain, and improve the App’s features and functionality\n• Manage user accounts and provide customer support\n• Generate inspection reports and store property information\n• Communicate updates, services, or promotional materials (you can opt out at any time)\n• Analyze usage trends and enhance user experience\n\n3. How We Share Your Information\nWe do not sell your personal information. We may share your information in the following circumstances:\n• Service Providers: We may share your information with third-party vendors or service providers who assist us in operating the App (e.g., cloud storage, analytics services).\n• Legal Compliance: We may disclose your information to comply with legal obligations, court orders, or government requests.\n• Business Transfers: In the event of a merger, acquisition, or sale of all or a portion of our assets, your information may be transferred as part of that transaction.\n\n4. Data Security\nWe implement appropriate technical and organizational measures to protect your information from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet is 100%% secure, so we cannot guarantee absolute security.\n\n5. Data Retention\nWe retain your personal information only as long as necessary to fulfill the purposes for which it was collected or as required by law. When no longer needed, we securely delete or anonymize your data.\n\n6. Your Privacy Rights\nDepending on your jurisdiction, you may have the following rights regarding your personal information:\n• Access: You can request access to the personal information we hold about you.\n• Correction: You can request corrections to inaccurate or incomplete personal information.\n• Deletion: You may request the deletion of your personal information, subject to legal obligations.\n• Opt-out: You can opt out of marketing communications at any time.\nTo exercise any of these rights, please contact us at [email address].\n\n7. Third-Party Links\nThe App may contain links to third-party websites or services. This Privacy Policy does not apply to those websites or services, and we are not responsible for their privacy practices. We encourage you to review their privacy policies.\n\n8. Children’s Privacy\nOur App is not intended for individuals under the age of 18, and we do not knowingly collect personal information from children. If you believe we have collected personal information from a child, please contact us to remove the information.\n\n9. Changes to this Privacy Policy\nWe may update this Privacy Policy from time to time to reflect changes in our practices. We will notify you of any material changes by posting the updated policy on the App. Your continued use of the App after such changes constitutes acceptance of the updated Privacy Policy.\n\n10. Contact Us\nIf you have any questions about this Privacy Policy or our data practices, please contact us at:\n[Company Name]\n[Email Address]\n[Contact Address]" : {
+
+    },
+    "Lat: %.4f" : {
+
+    },
+    "Later" : {
+
+    },
+    "Latitude: %.4f" : {
+
+    },
+    "Let me help you in seconds." : {
+
+    },
+    "Let's personalize your Lifestyle with Limi" : {
+
+    },
+    "LiDAR Not Available" : {
+
+    },
+    "Lights" : {
+
+    },
+    "Limi" : {
+
+    },
+    "LIMI AI is your smart light management and automation assistant!" : {
+
+    },
+    "Listen For All Events" : {
+
+    },
+    "Live" : {
+
+    },
+    "Lng: %.4f" : {
+
+    },
+    "Loading 3D interior view…" : {
+
+    },
+    "Loading 3D Model..." : {
+
+    },
+    "Loading models..." : {
+
+    },
+    "Loading Shop..." : {
+
+    },
+    "Loading..." : {
+
+    },
+    "Location Access" : {
+
+    },
+    "Location not available" : {
+
+    },
+    "Location Usage Example" : {
+
+    },
+    "Location-based Features:" : {
+
+    },
+    "Log Out" : {
+      "extractionState" : "stale"
+    },
+    "Login" : {
+
+    },
+    "Login to experience more features" : {
+
+    },
+    "Logout" : {
+
+    },
+    "Longitude: %.4f" : {
+
+    },
+    "Looking for\nnearby devices" : {
+
+    },
+    "Make a new scan!" : {
+
+    },
+    "Make sure to scan the room by pointing the camera at all surfaces." : {
+
+    },
+    "Make sure your WLED devices are connected to the same Wi-Fi network" : {
+
+    },
+    "Marked as completed" : {
+
+    },
+    "Mini Controller Setting" : {
+
+    },
+    "MiniController" : {
+
+    },
+    "Mode" : {
+
+    },
+    "Mode: %@" : {
+
+    },
+    "module.ar_view.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AR View"
+          }
+        }
+      }
+    },
+    "module.configurator.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurator"
+          }
+        }
+      }
+    },
+    "module.device_manager.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device Manager"
+          }
+        }
+      }
+    },
+    "module.room_scan.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room Scan"
+          }
+        }
+      }
+    },
+    "Modules" : {
+
+    },
+    "My Requests" : {
+
+    },
+    "My Routines" : {
+
+    },
+    "My Spaces" : {
+
+    },
+    "Name Your Scan" : {
+
+    },
+    "Need location for weather data" : {
+
+    },
+    "New modules with amazing features are on the way." : {
+
+    },
+    "No Designs Yet" : {
+
+    },
+    "No devices available" : {
+
+    },
+    "No devices connected through Bluetooth" : {
+
+    },
+    "No devices linked yet" : {
+
+    },
+    "No pendant connected to this device" : {
+
+    },
+    "No Wi‑Fi detected. Grant location permission or connect to a network." : {
+
+    },
+    "No WLED devices found" : {
+
+    },
+    "Not Now" : {
+
+    },
+    "Notification Settings" : {
+
+    },
+    "Notifications" : {
+      "extractionState" : "manual"
+    },
+    "Object" : {
+
+    },
+    "Off" : {
+
+    },
+    "Offline" : {
+
+    },
+    "Offline Mode" : {
+
+    },
+    "OK" : {
+
+    },
+    "On" : {
+
+    },
+    "Online" : {
+
+    },
+    "Open Configurator" : {
+
+    },
+    "Open the Xcode console to see events and acknowledgments." : {
+
+    },
+    "Or" : {
+
+    },
+    "Pattern Controls" : {
+
+    },
+    "Pendant 1" : {
+
+    },
+    "Pendant 2" : {
+
+    },
+    "Pendant 3" : {
+
+    },
+    "Pendant 4" : {
+
+    },
+    "Pendant Options" : {
+
+    },
+    "Pendants" : {
+
+    },
+    "Please check and enter your email before configuring the LED, and verify that you are a valid user." : {
+
+    },
+    "Please check your connection and try again." : {
+
+    },
+    "Please connect a device first" : {
+
+    },
+    "Please connect to internet." : {
+
+    },
+    "Please enter the 6-digit code sent to\n%@" : {
+
+    },
+    "Please log in to view your Wi-Fi devices." : {
+
+    },
+    "Please login before using this feature" : {
+
+    },
+    "Please Login First" : {
+
+    },
+    "Please reconnect your device." : {
+
+    },
+    "Please Select Your Ch-%lld Mode" : {
+
+    },
+    "Please Select Your Mode" : {
+
+    },
+    "Please Set Normal MOde " : {
+
+    },
+    "Please Sign in to secure your data and for personalization" : {
+
+    },
+    "Power" : {
+
+    },
+    "Presets" : {
+
+    },
+    "Privacy Policy" : {
+
+    },
+    "Processing..." : {
+
+    },
+    "profile.ai_app_store" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI App Store"
+          }
+        }
+      }
+    },
+    "profile.ai_connections" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Connections"
+          }
+        }
+      }
+    },
+    "profile.ai_settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Settings"
+          }
+        }
+      }
+    },
+    "profile.configurator" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurator"
+          }
+        }
+      }
+    },
+    "profile.edit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Profile"
+          }
+        }
+      }
+    },
+    "profile.login_better" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login for better experience"
+          }
+        }
+      }
+    },
+    "profile.logout" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log Out"
+          }
+        }
+      }
+    },
+    "profile.notifications" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
+          }
+        }
+      }
+    },
+    "profile.our_website" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Our Website"
+          }
+        }
+      }
+    },
+    "profile.privacy_security" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy & Security"
+          }
+        }
+      }
+    },
+    "profile.room_scan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Room Scan"
+          }
+        }
+      }
+    },
+    "PWM" : {
+
+    },
+    "Rainbow Color" : {
+
+    },
+    "Rating" : {
+
+    },
+    "Recording..." : {
+
+    },
+    "Recording... Release to stop" : {
+
+    },
+    "Remove Overlays" : {
+
+    },
+    "Request Name" : {
+
+    },
+    "Request Summary" : {
+
+    },
+    "Request Time" : {
+
+    },
+    "Resend" : {
+
+    },
+    "Reset" : {
+
+    },
+    "Retry" : {
+
+    },
+    "RGB" : {
+
+    },
+    "RGB LED %lld" : {
+
+    },
+    "Room Analysis" : {
+
+    },
+    "Room Scans" : {
+
+    },
+    "Run Sequence" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save Changes" : {
+
+    },
+    "Save Scan" : {
+
+    },
+    "Saved Room Scans" : {
+
+    },
+    "Scan for Devices" : {
+
+    },
+    "Scanning for BLE devices..." : {
+
+    },
+    "Scanning..." : {
+
+    },
+    "Scanning...." : {
+
+    },
+    "Schedule Summary" : {
+
+    },
+    "Search for a device..." : {
+
+    },
+    "Searching for devices..." : {
+
+    },
+    "Searching…" : {
+
+    },
+    "See All" : {
+
+    },
+    "Select Color" : {
+
+    },
+    "Select Space Type" : {
+
+    },
+    "Select the method of adding the device" : {
+
+    },
+    "Select Your Type" : {
+
+    },
+    "Send" : {
+
+    },
+    "Send Link" : {
+
+    },
+    "Send Sample Light Data" : {
+
+    },
+    "Set Lighting Based on Location" : {
+
+    },
+    "Setting" : {
+
+    },
+    "Setting Saved" : {
+
+    },
+    "Settings" : {
+
+    },
+    "settings.language" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        }
+      }
+    },
+    "settings.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "Shop" : {
+
+    },
+    "Sign in" : {
+
+    },
+    "Sign In" : {
+
+    },
+    "Sign in with Google" : {
+
+    },
+    "Sign in with your Google account to continue" : {
+
+    },
+    "Sign Out" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Socket Tester" : {
+
+    },
+    "Solid Color" : {
+
+    },
+    "Solid Colors" : {
+
+    },
+    "Speed" : {
+
+    },
+    "Start Scan" : {
+
+    },
+    "State of the art AR Experience" : {
+
+    },
+    "State of the art VR Experience" : {
+      "extractionState" : "stale"
+    },
+    "Status: Connected" : {
+
+    },
+    "Status: Disconnected" : {
+
+    },
+    "Stop AI" : {
+
+    },
+    "Suggestions for you" : {
+
+    },
+    "Summary" : {
+
+    },
+    "Tap" : {
+
+    },
+    "Tap + to add your first device" : {
+
+    },
+    "Tap button below to add devices" : {
+
+    },
+    "Tap button below to add Modules" : {
+
+    },
+    "Tap the button below to add devices" : {
+
+    },
+    "Tap to chat" : {
+
+    },
+    "Tap to speak" : {
+
+    },
+    "Tap To Take A Picture " : {
+
+    },
+    "Test Controls" : {
+
+    },
+    "Test View" : {
+
+    },
+    "Testing" : {
+
+    },
+    "Testing Mode" : {
+      "extractionState" : "stale"
+    },
+    "Texture Scale: %.1f" : {
+
+    },
+    "The selected device is not responding. Please try again." : {
+
+    },
+    "This device does not support LiDAR-based AR." : {
+
+    },
+    "This device does not support the AR experience that requires a LiDAR sensor." : {
+
+    },
+    "This routine will run as scheduled" : {
+
+    },
+    "Time" : {
+
+    },
+    "Tip: Nearby scanning works best when you're within 10 feet of the device" : {
+
+    },
+    "Today" : {
+
+    },
+    "Turn OFF/ON" : {
+
+    },
+    "Turn on Bluetooth to scan for nearby devices." : {
+
+    },
+    "Turn on Location" : {
+
+    },
+    "Type a message..." : {
+
+    },
+    "Umer" : {
+
+    },
+    "Unable to load your devices. You can use built-in preset models or retry when connected." : {
+
+    },
+    "Uninstall" : {
+
+    },
+    "Unisntall" : {
+
+    },
+    "Update Profile" : {
+
+    },
+    "Updating Profile..." : {
+
+    },
+    "Upgrade" : {
+
+    },
+    "Use Presets" : {
+
+    },
+    "Username" : {
+
+    },
+    "Using built-in presets" : {
+
+    },
+    "Verification Code" : {
+
+    },
+    "Verify" : {
+
+    },
+    "View 3D Model" : {
+
+    },
+    "View and manage your service requests" : {
+
+    },
+    "Voltage" : {
+      "extractionState" : "stale"
+    },
+    "VR Experience" : {
+      "extractionState" : "stale"
+    },
+    "Wall Colors" : {
+
+    },
+    "Warm" : {
+
+    },
+    "Warm: %lld%%" : {
+
+    },
+    "We need your location to provide personalized lighting experiences and weather information." : {
+
+    },
+    "Weather API Integration:" : {
+
+    },
+    "Welcome Back" : {
+
+    },
+    "Welcome to Limi" : {
+
+    },
+    "Welcome to LIMI" : {
+
+    },
+    "Welcome!" : {
+
+    },
+    "What is LIMI AI?" : {
+
+    },
+    "What should Limi do at this time?" : {
+
+    },
+    "What would you like to do?" : {
+
+    },
+    "Wi-Fi Devices" : {
+
+    },
+    "Wifi Password" : {
+
+    },
+    "WLED" : {
+
+    },
+    "WLED Device Discovery" : {
+
+    },
+    "You have no existing scans" : {
+
+    },
+    "You haven’t added any devices yet" : {
+
+    },
+    "you@example.com" : {
+
+    },
+    "Your device has been disconnected." : {
+
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,39 @@
+Target dependency graph (17 targets)
+Target 'Limi' in project 'Limi'
+➜ Explicit dependency on target 'FocusEntity' in project 'FocusEntity'
+➜ Explicit dependency on target 'WebRTC' in project 'WebRTC'
+➜ Explicit dependency on target 'SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'FLAnimatedImage' in project 'FLAnimatedImage'
+➜ Explicit dependency on target 'SocketIO' in project 'SocketIO'
+Target 'SocketIO' in project 'SocketIO'
+➜ Explicit dependency on target 'SocketIO' in project 'SocketIO'
+➜ Explicit dependency on target 'Starscream' in project 'Starscream'
+Target 'SocketIO' in project 'SocketIO'
+➜ Explicit dependency on target 'Starscream' in project 'Starscream'
+Target 'Starscream' in project 'Starscream'
+➜ Explicit dependency on target 'Starscream' in project 'Starscream'
+➜ Explicit dependency on target 'Starscream_Starscream' in project 'Starscream'
+Target 'Starscream' in project 'Starscream'
+➜ Explicit dependency on target 'Starscream_Starscream' in project 'Starscream'
+Target 'Starscream_Starscream' in project 'Starscream' (no dependencies)
+Target 'FLAnimatedImage' in project 'FLAnimatedImage'
+➜ Explicit dependency on target 'FLAnimatedImage' in project 'FLAnimatedImage'
+Target 'FLAnimatedImage' in project 'FLAnimatedImage' (no dependencies)
+Target 'SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'SDWebImageSwiftUI_SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'SDWebImage' in project 'SDWebImage'
+Target 'SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'SDWebImageSwiftUI_SDWebImageSwiftUI' in project 'SDWebImageSwiftUI'
+➜ Explicit dependency on target 'SDWebImage' in project 'SDWebImage'
+Target 'SDWebImage' in project 'SDWebImage'
+➜ Explicit dependency on target 'SDWebImage' in project 'SDWebImage'
+➜ Explicit dependency on target 'SDWebImage_SDWebImage' in project 'SDWebImage'
+Target 'SDWebImage' in project 'SDWebImage'
+➜ Explicit dependency on target 'SDWebImage_SDWebImage' in project 'SDWebImage'
+Target 'SDWebImage_SDWebImage' in project 'SDWebImage' (no dependencies)
+Target 'SDWebImageSwiftUI_SDWebImageSwiftUI' in project 'SDWebImageSwiftUI' (no dependencies)
+Target 'WebRTC' in project 'WebRTC' (no dependencies)
+Target 'FocusEntity' in project 'FocusEntity'
+➜ Explicit dependency on target 'FocusEntity' in project 'FocusEntity'
+Target 'FocusEntity' in project 'FocusEntity' (no dependencies)

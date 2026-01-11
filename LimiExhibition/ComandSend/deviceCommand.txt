@@ -1,0 +1,27 @@
+
+Bluetooth Packet definition for 1CH HUB testing:
+    -> Three output modes of 1CH HUB, only one will be active at a given time
+        1- PWM | 2- RGB LED | 3- Mini-Controller
+
+1- Hub pwm output control
+ex: duty1 = 50, duty2 = 10 (range 0-100)    ~ "HUB-P-50,10,56"     --> actual msg to be sent from app, UTF-8 encoded string
+
+2- Hub RGB strip output control
+ex: r = 150, g = 120, b = 255 (range 0-255)    ~ "HUB-D-150,120,255"     --> actual msg to be sent from app, UTF-8 encoded string
+
+3- Mini controller from HUB
+     - Mini controller has 7 outputs (5 PWM & 2 RGB LEDs)
+     ~"MC-Px-duty1,duty2"    --> for pwm control
+     ~"MC-Dx-r,g,b"        --> for RGB control
+
+ex for PWM:  
+    - PWM1 = 10,50        ~ "MC-P1-10"     --> actual msg to be sent from app, UTF-8 encoded string
+    - PWM2 = 100,1        ~ "MC-P2-100"     --> actual msg to be sent from app, UTF-8 encoded string
+    - PWM3 = 25,0        ~ "MC-P3-25"         --> actual msg to be sent from app, UTF-8 encoded string
+    - PWM4 = 33,50        ~ "MC-P4-33"     --> actual msg to be sent from app, UTF-8 encoded string
+    - PWM5 = 54,99        ~ "MC-P5-54"     --> actual msg to be sent from app, UTF-8 encoded string
+
+ex for DATA:
+    - D1 = 155,0,255    ~ "MC-D1-155,0,255"     --> actual msg to be sent from app, UTF-8 encoded string
+    - D2 = 0,0,135        ~ "MC-D2-0,0,135"     --> actual msg to be sent from app, UTF-8 encoded string
+     

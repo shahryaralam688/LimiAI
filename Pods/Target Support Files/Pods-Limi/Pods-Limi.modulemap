@@ -1,0 +1,6 @@
+framework module Pods_Limi {
+  umbrella header "Pods-Limi-umbrella.h"
+
+  export *
+  module * { export * }
+}
