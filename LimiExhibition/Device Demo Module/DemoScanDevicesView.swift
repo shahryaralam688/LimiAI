@@ -592,6 +592,7 @@ struct DemoScanDevicesView: View {
     @State private var isShowingRGBDataSheet: Bool = false
     @State private var showLiginSkip: Bool = false
     @State private var ssidNameArray: [String] = []
+    @State private var isConnectingToBLE: Bool = false
     @State private var bleMissedCycles: [String: Int] = [:]
     @State private var bleDisconnectedRecently: Set<String> = []
     private let bleCycleInterval: TimeInterval = 5.0
@@ -676,17 +677,14 @@ struct DemoScanDevicesView: View {
                                     searchDeviceUUID: device.uuid,
                                     onConnect: { name, id in
                                         if device.deviceType == .bluetooth {
-                                            // ✨ NEW: remove matching Bonjour entry first, then proceed with BLE connect
-                                            BonjourServiceBrowser.shared.removeCompletelyMatching(bleName: name, bleId: id)
-
-                                            BluetoothManager.shared.selectAndConnect(name: name, uuidString: id)
+                                            // Start connection process with loading state
                                             self.selectedName = name
                                             self.selectedId = id
                                             self.ssidNameArray = []
-                                            BluetoothManager.shared.readWifiList { list in
-                                                DispatchQueue.main.async { self.ssidNameArray = list }
-                                            }
-                                            self.showAddWifi = true
+                                            self.isConnectingToBLE = true
+                                            
+                                            BonjourServiceBrowser.shared.removeCompletelyMatching(bleName: name, bleId: id)
+                                            BluetoothManager.shared.selectAndConnect(name: name, uuidString: id)
                                         } else {
                                             print("📶 Wi-Fi device tapped: \(name) (\(device.reachability == .online ? "Online" : "Offline"))")
                                             if device.reachability == .online {
@@ -772,8 +770,36 @@ struct DemoScanDevicesView: View {
             bleDisconnectedRecently.insert(id)
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { bleDisconnectedRecently.remove(id) }
         }
+        .onChange(of: ble.isConnected) { _, isConnected in
+            if isConnected && self.isConnectingToBLE {
+                // BLE is now connected! Fetch WiFi list and show WiFi screen
+                BluetoothManager.shared.readWifiList { list in
+                    DispatchQueue.main.async {
+                        self.ssidNameArray = list
+                        self.isConnectingToBLE = false
+                        self.showAddWifi = true
+                    }
+                }
+            }
+        }
         .fullScreenCover(isPresented: $showAddWifi) {
             WifiList(deviceName: selectedName ?? "", deviceId: selectedId ?? "", wifiList: ssidNameArray)
+        }
+        .overlay {
+            if isConnectingToBLE {
+                ZStack {
+                    Color.black.opacity(0.6)
+                        .ignoresSafeArea()
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        Text("Connecting to device...")
+                            .font(.custom("Poppins-Medium", size: 16))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
         }
         .fullScreenCover(isPresented: $showLiginSkip) {
             ConnectedDevicesView()

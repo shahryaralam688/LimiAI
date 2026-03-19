@@ -23,6 +23,7 @@ struct ScanningView: View {
     @State private var showHubHomeView = false // State for fullscreen navigation
     @State private var currentProgress: Int = 1
     @State private var showOfflineAlert = false // Add this state variable
+    @State private var showDeprecatedAlert = false // DEPRECATION: Old flow disabled
     @State private var showDeveloperModeAlert = false
     @StateObject private var sharedDevice = SharedDevice.shared
     @State private var isLoading = false
@@ -161,14 +162,10 @@ struct ScanningView: View {
                                     .foregroundColor(.charlestonGreen)
                                     .onTapGesture {
                                         isLoading = true
-                                        print("Starting device connection...")
-                                        bluetoothManager.connectToDevice(deviceId: device.id)
-                                        showHubHomeView = true
-                                        
-                                        // First wait 2 seconds to show loading
-//                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-//                                                isLoading = false
-//                                                
+                                        print("⚠️ DEPRECATED: ScanningView flow is deprecated. Please use DemoScanDevicesView for proper WiFi provisioning.")
+                                        // Show alert to user instead of breaking flow
+                                        showDeprecatedAlert = true
+                                        isLoading = false
 //                                                // Then handle the connection logic
 //                                                let receivedBytes = SharedDevice.shared.lastReceivedBytes
 //                                                print("⚡️ Checking received bytes: \(receivedBytes)")
@@ -247,6 +244,13 @@ struct ScanningView: View {
                     let window = windowScene?.windows.first
                     window?.rootViewController = UIHostingController(rootView: GetStart())
                 }
+            )
+        }
+        .alert(isPresented: $showDeprecatedAlert) {
+            Alert(
+                title: Text("Old Flow Deprecated"),
+                message: Text("Please go back and use the new 'Add Device' flow from the main menu for proper WiFi provisioning."),
+                dismissButton: .default(Text("OK"))
             )
         }
         // Inside the main ZStack, after all other views and alerts
