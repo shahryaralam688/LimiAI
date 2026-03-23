@@ -516,22 +516,21 @@ struct DevicesButton: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            VStack{
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(deviceType == .bluetooth ? Color(hex: "#111214") : Color(hex: "#1A1A2E"))
-                        .frame(width: 60, height: 60)
-                    VStack(spacing: 2) {
-                        Image(systemName: deviceType == .bluetooth ? "lamp.table.fill" : "wifi")
-                            .font(.system(size: deviceType == .bluetooth ? 24 : 20, weight: .medium))
-                            .foregroundColor(deviceType == .bluetooth ? Color.white : (reachability == .online ? .white : .red))
-                        Text(deviceType == .bluetooth ? "BLE" : (reachability == .online ? "Online" : "Offline"))
-                            .font(.system(size: 8, weight: .bold))
-                            .foregroundColor(reachability == .online ? .white : .red)
-                    }
+            // Status indicator + icon
+            VStack(spacing: 6) {
+                Circle()
+                    .fill(reachability == .online ? Color.emerald : Color.gray)
+                    .frame(width: 12, height: 12)
+                VStack(spacing: 4) {
+                    Image(systemName: deviceType == .bluetooth ? "lamp.table.fill" : "wifi")
+                        .font(.system(size: deviceType == .bluetooth ? 24 : 20, weight: .medium))
+                        .foregroundColor(deviceType == .bluetooth ? Color.white : (reachability == .online ? .white : .red))
+                    Text(deviceType == .bluetooth ? "BLE" : (reachability == .online ? "Online" : "Offline"))
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(reachability == .online ? .white : .red)
                 }
-                Spacer()
             }
+            Spacer()
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(deviceName ?? "Unknown Device")
@@ -771,15 +770,22 @@ struct DemoScanDevicesView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { bleDisconnectedRecently.remove(id) }
         }
         .onChange(of: ble.isConnected) { _, isConnected in
+            print("🔍 onChange triggered: isConnected = \(isConnected), isConnectingToBLE = \(self.isConnectingToBLE)")
             if isConnected && self.isConnectingToBLE {
+                print("✅ BLE connected! Fetching WiFi list...")
                 // BLE is now connected! Fetch WiFi list and show WiFi screen
                 BluetoothManager.shared.readWifiList { list in
+                    print("📶 WiFi list callback received: \(list.count) networks")
                     DispatchQueue.main.async {
                         self.ssidNameArray = list
+                        print("📶 ssidNameArray set: \(self.ssidNameArray)")
                         self.isConnectingToBLE = false
+                        print("✅ Setting showAddWifi = true")
                         self.showAddWifi = true
                     }
                 }
+            } else {
+                print("⚠️ onChange: condition not met (isConnected:\(isConnected), isConnectingToBLE:\(self.isConnectingToBLE))")
             }
         }
         .fullScreenCover(isPresented: $showAddWifi) {
