@@ -123,7 +123,7 @@ class LightControllingSocket: ObservableObject {
         print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControl(message: [String]) {
-        guard message.count >= 4 else {
+        guard message.count >= 5 else {
             print("⚠️ Invalid message format: \(message)")
             return
         }
@@ -133,14 +133,15 @@ class LightControllingSocket: ObservableObject {
         }
         
         let deviceId = message[0].uppercased()
-        let red = Int(message[1]) ?? 0
-        let green = Int(message[2]) ?? 0
-        let blue = Int(message[3]) ?? 0
+        let channelPosition = Int(message[1]) ?? 1
+        let red = Int(message[2]) ?? 0
+        let green = Int(message[3]) ?? 0
+        let blue = Int(message[4]) ?? 0
         
         let lightData: [String: Any] = [
             "deviceId": deviceId,
             "command": [
-                "channel": 1,
+                "channel": channelPosition,
                 "ww": red,
                 "cw": green,
                 "brightness": blue
@@ -154,7 +155,7 @@ class LightControllingSocket: ObservableObject {
         print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControlRGB(message: [String]) {
-        guard message.count >= 4 else {
+        guard message.count >= 6 else {
             print("⚠️ Invalid message format: \(message)")
             return
         }
@@ -164,15 +165,16 @@ class LightControllingSocket: ObservableObject {
         }
         
         let deviceId = message[0].uppercased()
-        let red = Int(message[1]) ?? 0
-        let green = Int(message[2]) ?? 0
-        let blue = Int(message[3]) ?? 0
-        let brightness = Int(message[4]) ?? 0
+        let channelPosition = Int(message[1]) ?? 1
+        let red = Int(message[2]) ?? 0
+        let green = Int(message[3]) ?? 0
+        let blue = Int(message[4]) ?? 0
+        let brightness = Int(message[5]) ?? 0
         
         let lightData: [String: Any] = [
             "deviceId": deviceId,
             "command": [
-                "channel": 1,
+                "channel": channelPosition,
                 "red": red,
                 "green": green,
                 "blue": blue,
@@ -217,6 +219,7 @@ class LightControllingSocket: ObservableObject {
     /// }
     func sendPatternControl(
         deviceId: String,
+        channelPosition: Int,
         patternId: Int,
         red: Int,
         green: Int,
@@ -234,7 +237,7 @@ class LightControllingSocket: ObservableObject {
         let patternData: [String: Any] = [
             "deviceId": upperDeviceId,
             "command": [
-                "channel": 2,
+                "channel": channelPosition,
                 "pattern": [
                     "id": patternId,
                     "speed": speed,

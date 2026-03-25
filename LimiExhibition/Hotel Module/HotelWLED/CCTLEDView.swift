@@ -37,7 +37,7 @@ struct CCTLEDView: View {
 
     // Global Variable
     let chennalMac: String?
-
+    let chennelPosition : Int?
     // PWM
     @AppStorage("led1WarmCold") private var led1warmCold: Double = 50
     /// This is the ONLY brightness value we send to the device (0…100)
@@ -236,10 +236,11 @@ struct CCTLEDView: View {
     private func sendColor() {
         let intensityValue = led1warmCold
         let intensityValue2: Double = abs(intensityValue - 100)
-        let brightnessValue = Int((led2Brightness / 100.0) * 255.0)  // <-- use the single source of truth (0..100)
+        let brightnessValue = Int((led2Brightness / 100.0) * 255.0)
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
             String(Int(intensityValue)),
             String(Int(intensityValue2)),
             String(Int(brightnessValue))
@@ -260,10 +261,11 @@ struct CCTLEDView: View {
         let blueValue = Int(blue * 255)
 
         // Use led2Brightness as current brightness %
-        let brightnessValue = Int((led2Brightness / 100.0) * 255.0) //Int((led2Brightness / 100.0) * 255.0)
+        let brightnessValue = Int((led2Brightness / 100.0) * 255.0)
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
             String(redValue),
             String(greenValue),
             String(blueValue),
@@ -284,9 +286,10 @@ struct CCTLEDView: View {
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
             String(Int(intensityValue)),
             String(Int(intensityValue2)),
-            String(Int(clamped))  // send what user actually set
+            String(Int(clamped))
         ]
         print("🚚 updateBrightness() -> warm=\(Int(intensityValue)) cool=\(Int(intensityValue2)) bri%=\(Int(clamped))")
         pwmIntensityObj.sendLightControl(message: byteArray)
@@ -379,6 +382,7 @@ struct CCTLEDView: View {
 
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
+                String(chennelPosition ?? 1),
                 String(redValue),
                 String(greenValue),
                 String(brightnessValue)
@@ -390,6 +394,7 @@ struct CCTLEDView: View {
             // When lamp is off, send off command
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
+                String(chennelPosition ?? 1),
                 String(0),
                 String(0),
                 String(0),
@@ -694,7 +699,7 @@ struct CCTLEDView: View {
 
 struct CCtLEDView_Previews: PreviewProvider {
     static var previews: some View {
-        CCTLEDView(chennalMac: "80b54ee8b228")
+        CCTLEDView(chennalMac: "80b54ee8b228", chennelPosition: 2)
     }
 }
 
