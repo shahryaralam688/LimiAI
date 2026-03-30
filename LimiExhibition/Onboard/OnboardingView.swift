@@ -137,7 +137,7 @@ struct OnboardingPageView: View {
     @Binding var pageIndex: Int
     let totalPages: Int
 
-    @Binding var showDemoAddDevice: Bool // ✅ binding for showDemoAddDevice
+    @Binding var showDemoAddDevice: Bool
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     @State private var imageOpacity: Double = 0
@@ -151,6 +151,8 @@ struct OnboardingPageView: View {
     @State private var indicatorOpacity: Double = 0
     @State private var wasActive: Bool = false
 
+    private let brandGreen = Color(hex: "#76E094")
+
     private var isActive: Bool {
         pageIndex == index
     }
@@ -158,7 +160,10 @@ struct OnboardingPageView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // 1️⃣ Top image fills the screen
+                // Background
+                Color.black.ignoresSafeArea()
+
+                // Image - preserved exactly as before
                 Image(image)
                     .resizable()
                     .scaledToFill()
@@ -169,38 +174,33 @@ struct OnboardingPageView: View {
                     .animation(.easeOut(duration: 0.8), value: imageOpacity)
 
                 VStack {
-                    Spacer() // push bottom card to bottom
+                    Spacer()
 
-                    // 2️⃣ Bottom card
+                    // Bottom card
                     ZStack(alignment: .top) {
-                        Image("bgOnboarding")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 300 + geo.safeAreaInsets.bottom)
-                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        // Frosted glass card background
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(Color.white.opacity(0.08))
                             .overlay(
-                                // 🔹 White transparent blur effect
-                                Rectangle()
-                                    .fill(.ultraThinMaterial) // system blur
-                                    .background(Color.white.opacity(0.9)) // white tint
-                                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .stroke(brandGreen.opacity(0.15), lineWidth: 1)
                             )
-                            .opacity(0.6)
+                            .background(.ultraThinMaterial)
 
                         // Card content
                         VStack(spacing: 20) {
                             Text(title)
-                                .font(.system(size: 24, weight: .semibold))
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
                                 .multilineTextAlignment(.center)
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
                                 .scaleEffect(titleScale)
                                 .opacity(titleOpacity)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0).delay(0.3), value: titleScale)
                                 .animation(.easeOut(duration: 0.6).delay(0.3), value: titleOpacity)
 
                             Text(description)
-                                .font(.system(size: 16))
-                                .foregroundColor(.black.opacity(0.6))
+                                .font(.system(size: 16, weight: .medium, design: .default))
+                                .foregroundColor(.white.opacity(0.7))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                                 .opacity(descriptionOpacity)
@@ -208,16 +208,23 @@ struct OnboardingPageView: View {
 
                             if pageIndex == totalPages - 1 {
                                 Button(action: {
-                                        hasCompletedOnboarding = true
-                                        showDemoAddDevice = true // showDemoAddDevice triggers on last page
+                                    hasCompletedOnboarding = true
+                                    showDemoAddDevice = true
                                 }) {
-                                    Text( "Get Started")
-                                        .font(.system(size: 17, weight: .semibold))
+                                    Text("Get Started")
+                                        .font(.system(size: 18, weight: .semibold, design: .default))
                                         .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color(hex: "#54BA73"))
+                                        .frame(height: 56)
+                                        .background(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [brandGreen, brandGreen.opacity(0.85)]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
                                         .foregroundColor(.black)
-                                        .cornerRadius(12)
+                                        .cornerRadius(28)
+                                        .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
                                 }
                                 .padding(.horizontal, 30)
                                 .scaleEffect(buttonScale)
@@ -225,35 +232,24 @@ struct OnboardingPageView: View {
                                 .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0).delay(0.7), value: buttonScale)
                                 .animation(.easeOut(duration: 0.5).delay(0.7), value: buttonOpacity)
                             }
-                            if pageIndex != totalPages - 1 {
-                                HStack(spacing: 8) {
-                                    ForEach(0..<totalPages, id: \.self) { index in
-                                        Circle()
-                                            .fill(index == pageIndex ? Color.white : Color.gray)
-                                            .frame(width: 8, height: 8)
-                                    }
+
+                            // Page indicators
+                            HStack(spacing: 8) {
+                                ForEach(0..<totalPages, id: \.self) { idx in
+                                    Circle()
+                                        .fill(idx == pageIndex ? brandGreen : Color.white.opacity(0.3))
+                                        .frame(width: idx == pageIndex ? 20 : 8, height: 8)
+                                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pageIndex)
                                 }
-                                .padding(.top, 56)
-                                .opacity(indicatorOpacity)
-                                .animation(.easeOut(duration: 0.5).delay(0.6), value: indicatorOpacity)
-                            } else {
-                                HStack(spacing: 8) {
-                                    ForEach(0..<totalPages, id: \.self) { index in
-                                        Circle()
-                                            .fill(index == pageIndex ? Color.white : Color.gray)
-                                            .frame(width: 8, height: 8)
-                                    }
-                                }
-                                .padding(.top, 26)
-                                .opacity(indicatorOpacity)
-                                .animation(.easeOut(duration: 0.5).delay(0.6), value: indicatorOpacity)
                             }
-                            
+                            .padding(.top, pageIndex == totalPages - 1 ? 26 : 56)
+                            .opacity(indicatorOpacity)
+                            .animation(.easeOut(duration: 0.5).delay(0.6), value: indicatorOpacity)
 
                             Spacer(minLength: geo.safeAreaInsets.bottom)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.top, 20)
+                        .padding(.top, 24)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 300 + geo.safeAreaInsets.bottom)
@@ -261,6 +257,7 @@ struct OnboardingPageView: View {
                     .opacity(cardOpacity)
                     .animation(.spring(response: 0.7, dampingFraction: 0.8, blendDuration: 0).delay(0.2), value: cardOffset)
                     .animation(.easeOut(duration: 0.6).delay(0.2), value: cardOpacity)
+//                    .padding(.horizontal, 16)
                 }
             }
         }
@@ -292,7 +289,6 @@ struct OnboardingPageView: View {
     }
     
     private func resetAndStartAnimations() {
-        // Reset all animation states
         imageOpacity = 0
         cardOffset = 50
         cardOpacity = 0
@@ -303,7 +299,6 @@ struct OnboardingPageView: View {
         buttonOpacity = 0
         indicatorOpacity = 0
         
-        // Start animations with a slight delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             startAnimations()
         }

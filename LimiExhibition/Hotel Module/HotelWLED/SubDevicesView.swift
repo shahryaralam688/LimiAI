@@ -5,7 +5,7 @@
 //  Created by Shahrukh Ahmed on 05/11/2025.
 //
 
-import SwiftUICore
+import SwiftUI
 import SwiftUI
 import UIKit
 
