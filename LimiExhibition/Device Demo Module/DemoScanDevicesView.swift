@@ -336,10 +336,21 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
         print("📍 Service \(sender.name) resolved to IP: \(ipAddress ?? "unknown")")
 
         var txtRecordDict: [String: String] = [:]
-        if let txtData = sender.txtRecordData(),
-           let txtDict = NetService.dictionary(fromTXTRecord: txtData) as? [String: Data] {
-            for (k, v) in txtDict {
-                txtRecordDict[k] = String(data: v, encoding: .utf8) ?? "N/A"
+        if let txtData = sender.txtRecordData() {
+            // Cast to NSDictionary (Objective-C type) to avoid the bridging crash
+            let txtDict = NetService.dictionary(fromTXTRecord: txtData) as NSDictionary
+            
+            for (key, value) in txtDict {
+                // Safely extract the key as a String
+                if let k = key as? String {
+                    // Check if value is Data and not NSNull
+                    if let v = value as? Data {
+                        txtRecordDict[k] = String(data: v, encoding: .utf8) ?? "N/A"
+                    } else {
+                        // This handles NSNull or any other non-data value
+                        txtRecordDict[k] = ""
+                    }
+                }
             }
         }
 

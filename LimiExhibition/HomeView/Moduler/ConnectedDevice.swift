@@ -90,27 +90,6 @@ struct ConnectedDevicesView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 36)
                 }
-                //
-//                HStack {
-//                    Button(action: {
-//                        showHomeView = true
-//                    }) {
-//                        Image("Solid arrow right sm")
-//                            .foregroundColor(.alabaster)
-//                            .font(.system(size: 18, weight: .medium))
-//                            .frame(width: 44, height: 44)
-//                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-//                            .clipShape(RoundedRectangle(cornerRadius: 12))
-//                    }
-//                    
-//                    Text("Devices")
-//                        .font(.system(size: 28, weight: .semibold))
-//                        .foregroundColor(.white)
-//                    
-//                    Spacer()
-//                }
-//                .padding(.top, 55)
-//                .padding(.horizontal, 16)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 124)
@@ -200,6 +179,7 @@ struct ConnectedDevicesView: View {
                                         WifiDeviceSpace(
                                             chennalMac: device.chennalMac,
                                             chennalCount: device.chennalCount,
+                                            channelTypes: device.channelTypes,
                                             deviceName: device.deviceName,
                                             isOnline: device.isOnline
                                         )
@@ -295,6 +275,7 @@ struct ConnectedDevicesView: View {
                             uuid: w.uuid,
                             chennalMac: w.chennalMac,
                             chennalCount: w.chennalCount,
+                            channelTypes: w.channelTypes,
                             deviceName: w.deviceName,
                             isOnline: w.isOnline
                         )
@@ -326,12 +307,28 @@ struct ConnectedDevicesView: View {
         }
         
         .sheet(item: $selectedWifiDevice) { device in
-            if !(device.chennalCount == 0) {
-                if device.chennalCount == 1 {
-                    CCTLEDView(chennalMac: device.chennalMac)
+            if device.chennalCount == 0 {
+                Color.clear
+                    .onAppear {
+                        showNoPendantAlert = true
+                    }
+                    .alert("No pendant connected to this device", isPresented: $showNoPendantAlert) {
+                        Button("OK") {
+                            selectedWifiDevice = nil
+                        }
+                    }
+            } else if device.chennalCount == 1 {
+                // Single channel - show direct control view based on channel type
+                let channelType = device.channelTypes.first ?? "CCT"
+                let channelPosition = 1
+                if channelType == "CCT" {
+                    CCTLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
                 } else {
-                    WLEDView(chennalMac: device.chennalMac)
+                    WLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
                 }
+            } else if device.chennalCount > 1 {
+                // Multi-channel - show selection popup
+                ChannelSelectionView(device: device)
             } else {
                 Color.clear
                     .onAppear {
@@ -354,9 +351,17 @@ struct ConnectedDevicesView: View {
     
     private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
         var channelCount = 1
+        var channelTypes: [String] = ["CCT"]  // Default to CCT if not specified
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
+            // Parse channelPosition as comma-separated CCT/RGB values
+            if let p = txt["channelPosition"] {
+                let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
+                if !types.isEmpty {
+                    channelTypes = types
+                }
+            }
             if let m = txt["deviceId"] { mac = m }
         }
         return WifiDevice(
@@ -364,6 +369,7 @@ struct ConnectedDevicesView: View {
             uuid: dev.uuid,
             chennalMac: mac,
             chennalCount: channelCount,
+            channelTypes: channelTypes,
             deviceName: dev.name,
             isOnline: (dev.reachability == .online) // <- the important bit
         )
@@ -424,6 +430,7 @@ struct ConnectedDevicesView: View {
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
             "chennalCount": device.chennalCount,
+            "channelTypes": device.channelTypes,
             "deviceName": device.deviceName,
             "isOnline": device.isOnline]
         ]
@@ -457,6 +464,101 @@ struct ConnectedDevicesView: View {
     }
 
 }
+struct WifiDeviceSpace: View {
+    @State private var isOn = false
+    @StateObject private var socket = LightControllingSocket.shared
+    @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
+    private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB","8 CH-HUB", "16 CH-HUB", "Mini Controller","LIMI Device"]
+
+    let chennalMac: String
+    let chennalCount : Int
+    let channelTypes: [String]
+    let deviceName: String
+    let isOnline: Bool
+    
+    private var channelSummary: String {
+        if channelTypes.isEmpty { return "Unknown" }
+        if channelTypes.count == 1 {
+            return channelTypes[0]
+        }
+        // Count CCT and RGB channels
+        let cctCount = channelTypes.filter { $0 == "CCT" }.count
+        let rgbCount = channelTypes.filter { $0 == "RGB" }.count
+        if cctCount > 0 && rgbCount > 0 {
+            return "\(cctCount) CCT + \(rgbCount) RGB"
+        } else if cctCount > 0 {
+            return "\(cctCount) CCT"
+        } else if rgbCount > 0 {
+            return "\(rgbCount) RGB"
+        }
+        return "Mixed"
+    }
+
+    var body: some View {
+        VStack {
+            HStack {
+                Image(systemName: "house.fill")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding(10)
+
+            HStack {
+                Text(deviceName)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.alabaster)
+                Spacer()
+            }
+            .padding(10)
+
+            HStack {
+                Text(channelSummary)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.alabaster)
+
+                Spacer()
+                Circle()
+                    .fill(isOnline ? Color.emerald : Color.gray)
+                    .frame(width: 8, height: 8)
+                Text(isOnline ? "Online" : "Disconnected")
+                    .font(.caption)
+                    .foregroundColor(isOnline ? .green : .gray)
+
+            }
+            .padding(.horizontal, 10)
+        }
+        .frame(height: 165.5)
+        .background(Color(hex: "#24262B"))
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .opacity(isOnline ? 1.0 : 0.7)
+        .onAppear { logResolvedDevice() }
+        .onReceive(bonjourBrowser.$discoveredWiFiDevices) { _ in
+            logResolvedDevice()
+        }
+    }
+
+    private func logResolvedDevice() {
+        guard allowedNames.contains(deviceName) else { return }
+        if let dev = bonjourBrowser.discoveredWiFiDevices.first(where: { $0.name == deviceName }) {
+            print("Resolved Bonjour service: \(dev.name)")
+            let ip = dev.ipAddress ?? "unknown"
+            print("Service \(dev.name) resolved to IP: \(ip)")
+            if let txt = dev.txtRecord, !txt.isEmpty {
+                print("TXT Record for \(dev.name):")
+                for key in txt.keys.sorted() {
+                    if let value = txt[key] {
+                        print("  \(key): \(value)")
+                    }
+                }
+            }
+        }
+    }
+}
+
 #Preview {
     ConnectedDevicesView()
 }

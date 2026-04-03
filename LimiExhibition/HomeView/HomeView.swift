@@ -10,6 +10,7 @@ struct WifiDevice: Identifiable {
     let uuid: String
     let chennalMac: String
     let chennalCount: Int
+    let channelTypes: [String]  // Array of "CCT" or "RGB" for each channel
     let deviceName: String
     var isOnline: Bool
 }
@@ -598,13 +599,13 @@ struct HomeView: View {
 
         }
         // Sheet for Wi-Fi device detail based on channel count
-        .sheet(item: $selectedWifiDevice) { device in
-            if device.chennalCount == 1 {
-                CCTLEDView(chennalMac: device.chennalMac)
-            } else {
-                CCTLEDView(chennalMac: device.chennalMac)
-            }
-        }
+//        .sheet(item: $selectedWifiDevice) { device in
+//            if device.chennalCount == 1 {
+//                CCTLEDView(chennalMac: device.chennalMac)
+//            } else {
+//                CCTLEDView(chennalMac: device.chennalMac)
+//            }
+//        }
         .fullScreenCover(isPresented: $showVoiceView) {
             VoiceView()
         }
@@ -678,6 +679,7 @@ struct HomeView: View {
                             uuid: w.uuid,
                             chennalMac: w.chennalMac,
                             chennalCount: w.chennalCount,
+                            channelTypes: w.channelTypes,
                             deviceName: w.deviceName,
                             isOnline: w.isOnline
                         )
@@ -796,9 +798,17 @@ struct HomeView: View {
     // MARK: - Mapper: BLEDevice -> WifiDevice respecting Bonjour reachability
     private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
         var channelCount = 1
+        var channelTypes: [String] = ["CCT"]  // Default to CCT if not specified
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
+            // Parse channelPosition as comma-separated CCT/RGB values
+            if let p = txt["channelPosition"] {
+                let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
+                if !types.isEmpty {
+                    channelTypes = types
+                }
+            }
             if let m = txt["deviceId"] { mac = m }
         }
         return WifiDevice(
@@ -806,6 +816,7 @@ struct HomeView: View {
             uuid: dev.uuid,
             chennalMac: mac,
             chennalCount: channelCount,
+            channelTypes: channelTypes,
             deviceName: dev.name,
             isOnline: (dev.reachability == .online) // <- the important bit
         )
@@ -831,6 +842,7 @@ struct HomeView: View {
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
             "chennalCount": device.chennalCount,
+            "channelTypes": device.channelTypes,
             "deviceName": device.deviceName,
             "isOnline": device.isOnline]
         ]
@@ -882,81 +894,6 @@ struct HomeView: View {
 }
 
 // MARK: - Device Card (unchanged except for using isOnline from WifiDevice)
-struct WifiDeviceSpace: View {
-    @State private var isOn = false
-    @StateObject private var socket = LightControllingSocket.shared
-    @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
-    private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB","8 CH-HUB", "16 CH-HUB", "Mini Controller","LIMI Device"]
-
-    let chennalMac: String
-    let chennalCount : Int
-    let deviceName: String
-    let isOnline: Bool
-
-    var body: some View {
-        VStack {
-            HStack {
-                Image(systemName: "house.fill")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.white)
-                Spacer()
-            }
-            .padding(10)
-
-            HStack {
-                Text(deviceName)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
-                Spacer()
-            }
-            .padding(10)
-
-            HStack {
-                Text(chennalCount == 1 ? "CCT" :"RGB")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
-
-                Spacer()
-                Circle()
-                    .fill(isOnline ? Color.emerald : Color.gray)
-                    .frame(width: 8, height: 8)
-                Text(isOnline ? "Online" : "Disconnected")
-                    .font(.caption)
-                    .foregroundColor(isOnline ? .green : .gray)
-
-            }
-            .padding(.horizontal, 10)
-        }
-        .frame(height: 165.5)
-        .background(Color(hex: "#24262B"))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .opacity(isOnline ? 1.0 : 0.7)
-        .onAppear { logResolvedDevice() }
-        .onReceive(bonjourBrowser.$discoveredWiFiDevices) { _ in
-            logResolvedDevice()
-        }
-    }
-
-    private func logResolvedDevice() {
-        guard allowedNames.contains(deviceName) else { return }
-        if let dev = bonjourBrowser.discoveredWiFiDevices.first(where: { $0.name == deviceName }) {
-            print("Resolved Bonjour service: \(dev.name)")
-            let ip = dev.ipAddress ?? "unknown"
-            print("Service \(dev.name) resolved to IP: \(ip)")
-            if let txt = dev.txtRecord, !txt.isEmpty {
-                print("TXT Record for \(dev.name):")
-                for key in txt.keys.sorted() {
-                    if let value = txt[key] {
-                        print("  \(key): \(value)")
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 // MARK: - Custom Shape for Rounded Corners

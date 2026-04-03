@@ -5,7 +5,7 @@
 //  Created by Mac Mini on 02/10/2025.
 //
 
-import SwiftUICore
+import SwiftUI
 import SwiftUI
 import UIKit
 

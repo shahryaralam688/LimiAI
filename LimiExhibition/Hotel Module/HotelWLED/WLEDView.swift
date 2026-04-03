@@ -445,7 +445,8 @@ struct WLEDView: View {
     }
     // Golable Variavble
     let chennalMac: String?
-    
+    let chennelPosition : Int?
+
     let selectColorObj =  LightControllingSocket.shared
     @State private var showSolidColor: Bool = true // State variable to toggle between sliders
 
@@ -695,6 +696,7 @@ struct WLEDView: View {
         // Convert all to strings for message array
         let byteArray: [String] = [
             String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
             String(redValue),
             String(greenValue),
             String(blueValue),
@@ -720,6 +722,7 @@ struct WLEDView: View {
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
             String(redValue),
             String(greenValue),
             String(blueValue),
@@ -871,6 +874,7 @@ struct WLEDView: View {
 
         LightControllingSocket.shared.sendPatternControl(
             deviceId: mac,
+            channelPosition: chennelPosition ?? 1,
             patternId: patternId,
             red: redValue,
             green: greenValue,
@@ -891,14 +895,15 @@ struct WLEDView: View {
             let greenValue = Int(green * 255)
             let blueValue = Int(blue * 255)
             // When lamp is on, send current color with brightness
-            let brightnessValue = Int((RGBBrightness / 100.0) * 255.0) // 0-100 range Int((RGBBrightness / 100.0) * 255.0)
+            let brightnessValue = Int((RGBBrightness / 100.0) * 255.0)
             
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
-                String(redValue), // R: 0
-                String(greenValue), // G: 0
-                String(blueValue),  // B: 0
-                String(brightnessValue)  // B: 0
+                String(chennelPosition ?? 1),
+                String(redValue),
+                String(greenValue),
+                String(blueValue),
+                String(brightnessValue)
             ]
             
             sendMessage(message: byteArray)
@@ -906,11 +911,11 @@ struct WLEDView: View {
             // When lamp is off, send off command
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
-                String(0), // R: 0
-                String(0), // G: 0
-                String(0),  // B: 0
-                String(0)  // B: 0
-
+                String(chennelPosition ?? 1),
+                String(0),
+                String(0),
+                String(0),
+                String(0)
             ]
             
             sendMessage(message: byteArray)
@@ -1256,6 +1261,6 @@ struct WLEDView: View {
 
 struct WLEDView_Previews: PreviewProvider {
     static var previews: some View {
-        WLEDView(chennalMac: "80b54ee8b228")
+        WLEDView(chennalMac: "80b54ee8b228", chennelPosition: 2)
     }
 }

@@ -7,148 +7,39 @@ struct LocationStorageView: View {
     @StateObject private var storageManager = LocationStorageManager()
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var contentOpacity = 0.0
+    @State private var contentOffset: CGFloat = 20
+    
+    private let brandGreen = Color(hex: "#76E094")
     
     var body: some View {
         ZStack {
-            // Background color
-            Color(hex: "#111214")
-                .ignoresSafeArea()
+            Color.black.ignoresSafeArea()
+            
             VStack {
-                ZStack {
-                    ZStack(alignment: .bottom) {
-                        Image("GetStartImage")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 256)
-                            .clipped()
-                        
-                        // Bottom gradient overlay
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.black.opacity(1.0),
-                                Color.black.opacity(0.8)
-                            ]),
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                        .frame(height: 40)  // height of the blurred border
-                        .blur(radius: 60)   // controls softness of blur
-
-                    }
-                    .frame(height: 256)
-                    .ignoresSafeArea(edges: .top)
-                    // Header
-                    VStack(spacing: 16) {
-                        Image("logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 201, height: 40)
-                        
-                        Text("Enable Location")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        
-                        Text("We need your location to provide personalized lighting experiences and weather information.")
-                            .font(.body)
-                            .foregroundColor(.white.opacity(0.8))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                    }
-                    
-                }
-
+                headerSection
                 
                 Spacer()
                 
-                // Current Location Display
-                if let location = locationManager.currentLocation {
-                    VStack(spacing: 12) {
-                        Text("Current Location")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.9))
-                        
-                        VStack(spacing: 4) {
-                            Text("Latitude: \(location.coordinate.latitude, specifier: "%.4f")")
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.7))
-                            Text("Longitude: \(location.coordinate.longitude, specifier: "%.4f")")
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.7))
-                        }
-                        
-                        if let address = storageManager.currentAddress {
-                            Text(address)
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
-                        }
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 20)
-                }
+                locationDisplaySection
                 
                 Spacer()
                 
-                // Action Buttons
-                VStack(spacing: 16) {
-                    Button(action: {
-                        locationManager.requestLocationPermission()
-                        saveLocationAndContinue()
-
-                    }) {
-                        HStack {
-                            Image(systemName: "location.fill")
-                            Text("Turn on Location")
-                        }
-                        .font(.headline)
-                        .foregroundColor(.charlestonGreen)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Color.emerald)
-                        .cornerRadius(19)
-                    }
-                    .padding()
-                    .padding(.bottom, 50)
-                    .padding(.horizontal, 16)
-                    
-//                    if locationManager.currentLocation != nil {
-//                        Button(action: {
-//                            saveLocationAndContinue()
-//                        }) {
-//                            HStack {
-//                                Image(systemName: "checkmark.circle.fill")
-//                                Text("Save Location & Continue")
-//                            }
-//                            .font(.headline)
-//                            .foregroundColor(.white)
-//                            .frame(maxWidth: .infinity)
-//                            .frame(height: 50)
-//                            .background(Color.green)
-//                            .cornerRadius(25)
-//                        }
-//                        .padding(.horizontal, 16)
-//                    }
-                    
-//                    Button(action: {
-//                        skipLocationSetup()
-//                    }) {
-//                        Text("Skip for now")
-//                            .font(.subheadline)
-//                            .foregroundColor(.white.opacity(0.7))
-//                            .underline()
-//                    }
-                }
-                
+                actionButtonsSection
             }
+            .opacity(contentOpacity)
+            .offset(y: contentOffset)
         }
         .alert("Location Access", isPresented: $showingAlert) {
             Button("OK") { }
         } message: {
             Text(alertMessage)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.6)) {
+                contentOpacity = 1.0
+                contentOffset = 0
+            }
         }
         .onReceive(locationManager.$authorizationStatus) { status in
             handleLocationAuthorizationChange(status)
@@ -157,6 +48,104 @@ struct LocationStorageView: View {
             if let location = location {
                 storageManager.reverseGeocodeLocation(location)
             }
+        }
+    }
+    
+    private var headerSection: some View {
+        VStack(spacing: 24) {
+            Image("logo")
+                .resizable()
+                .renderingMode(.template)
+                .foregroundColor(brandGreen)
+                .scaledToFit()
+                .frame(width: 201, height: 40)
+                .shadow(color: brandGreen.opacity(0.3), radius: 20, x: 0, y: 0)
+            
+            VStack(spacing: 12) {
+                Text("Enable Location")
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text("We need your location to provide personalized lighting experiences and weather information.")
+                    .font(.system(size: 16, weight: .medium, design: .default))
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+        }
+        .padding(.top, 80)
+    }
+    
+    private var locationDisplaySection: some View {
+        Group {
+            if let location = locationManager.currentLocation {
+                VStack(spacing: 16) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "location.fill")
+                            .foregroundColor(brandGreen)
+                        Text("Current Location")
+                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .foregroundColor(.white)
+                    }
+                    
+                    VStack(spacing: 6) {
+                        Text("Latitude: \(location.coordinate.latitude, specifier: "%.4f")")
+                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .foregroundColor(.white.opacity(0.6))
+                        Text("Longitude: \(location.coordinate.longitude, specifier: "%.4f")")
+                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    
+                    if let address = storageManager.currentAddress {
+                        Text(address)
+                            .font(.system(size: 15, weight: .medium, design: .default))
+                            .foregroundColor(.white.opacity(0.9))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
+                    }
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(brandGreen.opacity(0.2), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 20)
+            }
+        }
+    }
+    
+    private var actionButtonsSection: some View {
+        VStack(spacing: 16) {
+            Button(action: {
+                locationManager.requestLocationPermission()
+                saveLocationAndContinue()
+            }) {
+                HStack(spacing: 12) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text("Turn on Location")
+                        .font(.system(size: 18, weight: .semibold, design: .default))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [brandGreen, brandGreen.opacity(0.85)]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(28)
+                .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 50)
         }
     }
     
