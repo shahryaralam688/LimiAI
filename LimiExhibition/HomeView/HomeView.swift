@@ -10,7 +10,7 @@ struct WifiDevice: Identifiable {
     let uuid: String
     let chennalMac: String
     let chennalCount: Int
-    let chennalPosition: Int  // Channel position from TXT record
+    let channelTypes: [String]  // Array of "CCT" or "RGB" for each channel
     let deviceName: String
     var isOnline: Bool
 }
@@ -679,7 +679,7 @@ struct HomeView: View {
                             uuid: w.uuid,
                             chennalMac: w.chennalMac,
                             chennalCount: w.chennalCount,
-                            chennalPosition: w.chennalPosition,
+                            channelTypes: w.channelTypes,
                             deviceName: w.deviceName,
                             isOnline: w.isOnline
                         )
@@ -798,11 +798,17 @@ struct HomeView: View {
     // MARK: - Mapper: BLEDevice -> WifiDevice respecting Bonjour reachability
     private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
         var channelCount = 1
-        var channelPosition = 1
+        var channelTypes: [String] = ["CCT"]  // Default to CCT if not specified
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
-            if let p = txt["channelPosition"], let pos = Int(p) { channelPosition = pos }
+            // Parse channelPosition as comma-separated CCT/RGB values
+            if let p = txt["channelPosition"] {
+                let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
+                if !types.isEmpty {
+                    channelTypes = types
+                }
+            }
             if let m = txt["deviceId"] { mac = m }
         }
         return WifiDevice(
@@ -810,7 +816,7 @@ struct HomeView: View {
             uuid: dev.uuid,
             chennalMac: mac,
             chennalCount: channelCount,
-            chennalPosition: channelPosition,
+            channelTypes: channelTypes,
             deviceName: dev.name,
             isOnline: (dev.reachability == .online) // <- the important bit
         )
@@ -836,7 +842,7 @@ struct HomeView: View {
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
             "chennalCount": device.chennalCount,
-            "chennalPosition": device.chennalPosition,
+            "channelTypes": device.channelTypes,
             "deviceName": device.deviceName,
             "isOnline": device.isOnline]
         ]
