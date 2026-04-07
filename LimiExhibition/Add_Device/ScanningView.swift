@@ -166,37 +166,7 @@ struct ScanningView: View {
                                         // Show alert to user instead of breaking flow
                                         showDeprecatedAlert = true
                                         isLoading = false
-//                                                // Then handle the connection logic
-//                                                let receivedBytes = SharedDevice.shared.lastReceivedBytes
-//                                                print("⚡️ Checking received bytes: \(receivedBytes)")
-//                                                
-//                                                showDevicesList = false
-//                                                if UserRoleManager.shared.currentRole == .productionUser  {
-//                                                    showDeveloperModeAlert = true
-//                                                    let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-//                                                    let window = windowScene?.windows.first
-//                                                    window?.rootViewController = UIHostingController(rootView: ContentView())
-//                                                    
-//                                                } else {
-//                                                        if !SharedDevice.shared.lastReceivedBytes.isEmpty &&
-//                                                       SharedDevice.shared.lastReceivedBytes[0] == 91 {
-//                                                        print("✅ Normal mode detected: \(SharedDevice.shared.lastReceivedBytes)")
-//                                                        print("Regular user - showing hub home")
-//                                                        showHubHomeView = true
-//                                                        
-//                                                        // Send device info to the API
-//                                                        let deviceInfo = String(describing: SharedDevice.shared.connectedDevice)
-//                                                        sendDeviceInfo(deviceInfo: deviceInfo)
-//
-//                                                    } else {
-//                                                        print("❌ Invalid mode")
-//                                                        print("Expected: Normal mode (91)")
-//                                                        print("Received: \(SharedDevice.shared.lastReceivedBytes)")
-//                                                        bluetoothManager.disconnectCurrentDevice()
-//                                                        showOfflineAlert = true
-//                                                    }
-//                                                }
-//                                            }
+
                                     }
                             }
                         }

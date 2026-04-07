@@ -19,7 +19,11 @@ struct WifiDevice: Identifiable {
 extension HomeView {
     private func startBLEScan() {
         bluetoothManager.startScanning { devices in
-            let filtered = devices.filter { allowedNames.contains($0.name) && !bleAcceptedIds.contains($0.id) && !bleRejectedIds.contains($0.id) }
+            let filtered = devices.filter { 
+                (allowedNames.contains($0.name) || $0.name.lowercased().hasPrefix("limi1ch-")) 
+                && !bleAcceptedIds.contains($0.id) 
+                && !bleRejectedIds.contains($0.id) 
+            }
             if let match = filtered.first {
                 DispatchQueue.main.async {
                     if pendingBLEDevice?.id != match.id {
@@ -640,10 +644,10 @@ struct HomeView: View {
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
             let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
 
-            // Only keep allowed device names
+            // Only keep allowed device names or devices with limi1ch- prefix
             let filtered = newDevices.filter { dev in
                 let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                return normalizedAllowed.contains(n)
+                return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
             }
 
             // UUIDs seen in this tick
@@ -802,8 +806,8 @@ struct HomeView: View {
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
-            // Parse channelPosition as comma-separated CCT/RGB values
-            if let p = txt["channelPosition"] {
+            // Parse channelTypes from TXT (firmware sends as 'channelTypes')
+            if let p = txt["channelTypes"] {
                 let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
                 if !types.isEmpty {
                     channelTypes = types

@@ -236,10 +236,9 @@ struct ConnectedDevicesView: View {
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
             let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
             
-            // Only keep allowed device names
             let filtered = newDevices.filter { dev in
                 let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                return normalizedAllowed.contains(n)
+                return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
             }
             
             // UUIDs seen in this tick
@@ -355,8 +354,8 @@ struct ConnectedDevicesView: View {
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
-            // Parse channelPosition as comma-separated CCT/RGB values
-            if let p = txt["channelPosition"] {
+            // Parse channelTypes from TXT (firmware sends as 'channelTypes')
+            if let p = txt["channelTypes"] {
                 let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
                 if !types.isEmpty {
                     channelTypes = types
@@ -378,10 +377,10 @@ struct ConnectedDevicesView: View {
     private func updateWifiDevices(with newDevices: [BLEDevice]) {
         let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
         
-        // Filter only allowed device names
+        // Filter only allowed device names or limi1ch- prefix
         let filtered = newDevices.filter { dev in
             let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            return normalizedAllowed.contains(n)
+            return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
         }
         
         // Track current UUIDs
@@ -469,6 +468,12 @@ struct WifiDeviceSpace: View {
     @StateObject private var socket = LightControllingSocket.shared
     @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
     private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB","8 CH-HUB", "16 CH-HUB", "Mini Controller","LIMI Device"]
+    
+    private func isAllowedDeviceName(_ name: String) -> Bool {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
+        return normalizedAllowed.contains(normalized) || normalized.hasPrefix("limi1ch-")
+    }
 
     let chennalMac: String
     let chennalCount : Int
@@ -542,7 +547,7 @@ struct WifiDeviceSpace: View {
     }
 
     private func logResolvedDevice() {
-        guard allowedNames.contains(deviceName) else { return }
+        guard isAllowedDeviceName(deviceName) else { return }
         if let dev = bonjourBrowser.discoveredWiFiDevices.first(where: { $0.name == deviceName }) {
             print("Resolved Bonjour service: \(dev.name)")
             let ip = dev.ipAddress ?? "unknown"

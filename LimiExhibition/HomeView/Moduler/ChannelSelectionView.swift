@@ -10,15 +10,20 @@ import SwiftUI
 struct ChannelSelectionView: View {
     let device: WifiDevice
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedChannelIndex: Int? = nil
-    @State private var showChannelControl: Bool = false
+    @State private var selectedChannel: ChannelInfo? = nil
+    
+    struct ChannelInfo: Identifiable {
+        let id: Int
+        let type: String
+        let position: Int
+    }
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 // Device info header
                 VStack(spacing: 8) {
-                    Text(device.deviceName)
+                    Text("Channel " + String(device.chennalCount))
                         .font(.custom("Poppins-SemiBold", size: 20))
                         .foregroundColor(.white)
                     
@@ -44,8 +49,11 @@ struct ChannelSelectionView: View {
                         ForEach(0..<device.channelTypes.count, id: \.self) { index in
                             let channelType = device.channelTypes[index]
                             Button(action: {
-                                selectedChannelIndex = index
-                                showChannelControl = true
+                                selectedChannel = ChannelInfo(
+                                    id: index,
+                                    type: channelType,
+                                    position: index + 1
+                                )
                             }) {
                                 HStack(spacing: 16) {
                                     // Channel number indicator
@@ -131,22 +139,17 @@ struct ChannelSelectionView: View {
                         .foregroundColor(.white)
                 }
             }
-            .fullScreenCover(isPresented: $showChannelControl) {
-                if let index = selectedChannelIndex {
-                    let channelType = device.channelTypes[index]
-                    let channelPosition = index + 1  // 1-based channel position
-                    
-                    if channelType == "CCT" {
-                        CCTLEDView(
-                            chennalMac: device.chennalMac,
-                            chennelPosition: channelPosition
-                        )
-                    } else {
-                        WLEDView(
-                            chennalMac: device.chennalMac,
-                            chennelPosition: channelPosition
-                        )
-                    }
+            .sheet(item: $selectedChannel) { channel in
+                if channel.type == "CCT" {
+                    CCTLEDView(
+                        chennalMac: device.chennalMac,
+                        chennelPosition: channel.position
+                    )
+                } else {
+                    WLEDView(
+                        chennalMac: device.chennalMac,
+                        chennelPosition: channel.position
+                    )
                 }
             }
         }

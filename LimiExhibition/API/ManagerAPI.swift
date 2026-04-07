@@ -9,7 +9,7 @@ import Foundation
 struct APIConstants {
     
     // MARK: - Base URL
-    static let baseURL = "https://athens-butterfly-belief-reveal.trycloudflare.com/"
+    static let baseURL = "https://dev.api.limitless-lighting.co.uk/"
     
     // Auth
     static let loginGoogle = baseURL + "client/google/login"
