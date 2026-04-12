@@ -35,13 +35,13 @@ struct SignInView: View {
                 
                 Text("Invisible by design, Intelligent by nature")
                     .font(.custom("Poppins-Medium", size: 32))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6) // 130% of 32pt
 
                 Text("Login with the options below")
                     .font(.custom("Poppins-Regular", size: 15))
-                    .foregroundColor(Color(hex: "E9E9E9"))
+                    .foregroundColor(Color.appTextQuiet)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)        // 120% of 15pt = 18pt → 18 - 15 = 3pt extraenvelope.front
                     .kerning(-0.15)        // Letter spacing -0.15px (Figma)
@@ -59,15 +59,15 @@ struct SignInView: View {
                             .font(.system(size: 16, weight: .semibold))
                             .tracking(-0.3)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, minHeight: 56)
                     .overlay(
                         RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color(hex: "#5F5F5F"), lineWidth: 4) // ← 1-point border
+                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
                     )
                     
                 }
-                .background(Color(hex: "#24262B"))
+                .background(Color.appSurfacePrimary)
                 .cornerRadius(22)
                 .frame(width: 343)              // same width you had
                 .padding(.horizontal, 20)
@@ -98,16 +98,16 @@ struct SignInView: View {
                         .padding(.horizontal, 20)
                         .frame(height: 56)
                         .frame(width: 343)
-                        .background(Color(hex: "#24262B"))
+                        .background(Color.appSurfacePrimary)
                         .cornerRadius(22)
                         .overlay(
                             RoundedRectangle(cornerRadius: 22)
-                                .stroke(Color(hex: "#5F5F5F"), lineWidth: 2) // ← 1-point border
+                                .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
                         )
                     }
                     
                 }
-                .background(Color(hex: "#24262B"))
+                .background(Color.appSurfacePrimary)
                 .cornerRadius(22)
                 .frame(width: 343)              // same width you had
                 .padding(.horizontal, 20)
@@ -132,11 +132,11 @@ struct SignInView: View {
                             .font(.system(size: 16, weight: .semibold))
                             .tracking(-0.3)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, minHeight: 56)
                     .overlay(
                         RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color(hex: "#5F5F5F"), lineWidth: 4) // ← 1-point border
+                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
                     )
                 }
                 .padding(.horizontal, 20)
@@ -149,7 +149,7 @@ struct SignInView: View {
 
                 Text("Continue as a Guest")
                     .font(.custom("Poppins-Medium", size: 16))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .kerning(0)
                     .multilineTextAlignment(.center)
                     .underline()
@@ -163,7 +163,7 @@ struct SignInView: View {
                 HStack(spacing: 0) {
                     Text("By continuing you are agreeing to our ")
                         .font(.custom("Poppins-Regular", size: 12))
-                        .foregroundColor(Color(hex: "E9E9E9"))
+                        .foregroundColor(Color.appTextQuiet)
                         .kerning(-0.15)
                     
                     Button(action: {
@@ -174,14 +174,14 @@ struct SignInView: View {
                     }) {
                         Text("Terms")
                             .font(.custom("Poppins-Medium", size: 16))
-                            .foregroundColor(Color(hex: "E9E9E9"))
-                            .underline(true, color: Color(hex: "E9E9E9"))
+                            .foregroundColor(Color.appTextQuiet)
+                            .underline(true, color: Color.appTextQuiet)
                             .kerning(-0.15)
                     }
                     
                     Text(" and ")
                         .font(.custom("Poppins-Regular", size: 12))
-                        .foregroundColor(Color(hex: "E9E9E9"))
+                        .foregroundColor(Color.appTextQuiet)
                         .kerning(-0.15)
                     
                     Button(action: {
@@ -191,8 +191,8 @@ struct SignInView: View {
                     }) {
                         Text("Privacy Policy")
                             .font(.custom("Poppins-Medium", size: 16))
-                            .foregroundColor(Color(hex: "E9E9E9"))
-                            .underline(true, color: Color(hex: "E9E9E9"))
+                            .foregroundColor(Color.appTextQuiet)
+                            .underline(true, color: Color.appTextQuiet)
                             .kerning(-0.15)
                     }
                 }

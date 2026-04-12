@@ -69,7 +69,7 @@ struct HotelRequestView: View {
             // Content
             contentView
         }
-        .background(Color.black)
+        .background(Color.themeBlack)
         .ignoresSafeArea(edges: .bottom)
         .sheet(item: $selectedItem) { item in
             RequestSummaryView(
@@ -109,7 +109,7 @@ struct HotelRequestView: View {
             HStack {
                 Text("My Requests")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -122,7 +122,7 @@ struct HotelRequestView: View {
         .padding(.bottom, 38)
         .background(
             RoundedRectangle(cornerRadius: 0)
-                .fill(Color(hex: "#393C43"))
+                .fill(Color.appSurfaceTertiary)
                 .clipShape(
                     .rect(
                         topLeadingRadius: 0,
@@ -147,10 +147,10 @@ struct HotelRequestView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .foregroundColor(selectedTab == tab ? .white : Color(hex: "#676C75"))
+                        .foregroundColor(selectedTab == tab ? .themeWhite : Color.appSurfaceChip)
                         .background(
                             RoundedRectangle(cornerRadius: 14)
-                                .fill(selectedTab == tab ? Color(hex: "#676C75" ) : Color.clear)
+                                .fill(selectedTab == tab ? Color.appSurfaceChip : Color.clear)
                         )
                 }
             }
@@ -158,7 +158,7 @@ struct HotelRequestView: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
         .padding(.horizontal, 24)
     }
@@ -199,12 +199,12 @@ struct HotelRequestView: View {
                 HStack {
                     Text(section.date)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.themeBlack)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0.33, green: 0.73, blue: 0.45))
+                                .fill(Color.appBrandPrimary)
                         )
                     Spacer()
                 }
@@ -240,7 +240,7 @@ private struct ActiveRequestCard: View {
             // Image thumbnail
             RoundedRectangle(cornerRadius: 16)
 //                .fill(Color.gray.opacity(0.3))
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
 
                 .frame(width: 80, height: 80)
                 .overlay(
@@ -248,7 +248,7 @@ private struct ActiveRequestCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 80, height: 80)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 )
             
             // Content
@@ -260,19 +260,19 @@ private struct ActiveRequestCard: View {
                     .padding(.horizontal, 10)
                     .background(
                         Capsule()
-                            .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                            .stroke(Color.appBrandAccent, lineWidth: 0.8)
                             .background(
-                                Capsule().fill(Color(hex: "#393C43"))
+                                Capsule().fill(Color.appSurfaceTertiary)
                             )
                     )
                 Text(request.title)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 // Progress Bar
                 if let progress = request.progress {
                     ProgressView(value: progress)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .white))
+                        .progressViewStyle(LinearProgressViewStyle(tint: .themeWhite))
                         .scaleEffect(y: 2)
                 }
             }
@@ -282,7 +282,7 @@ private struct ActiveRequestCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
     }
     
@@ -306,33 +306,33 @@ private struct HistoryRequestCard: View {
         HStack(spacing: 16) {
             // Image thumbnail
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
                 .frame(width: 80, height: 80)
                 .overlay(
                     Image(getSystemImageName())
                         .resizable()
                         .scaledToFit()
                         .frame(width: 80, height: 80)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 )
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
                     .background(
                         Capsule()
-                            .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                            .stroke(Color.appBrandAccent, lineWidth: 0.8)
                             .background(
-                                Capsule().fill(Color(hex: "#393C43"))
+                                Capsule().fill(Color.appSurfaceTertiary)
                             )
                     )
                 Text(request.title)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 // Time with clock icon
                 HStack(spacing: 6) {
@@ -351,7 +351,7 @@ private struct HistoryRequestCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
     }
     
@@ -392,15 +392,15 @@ private struct CancelledRequestCard: View {
                     .padding(.horizontal, 10)
                     .background(
                         Capsule()
-                            .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                            .stroke(Color.appBrandAccent, lineWidth: 0.8)
                             .background(
-                                Capsule().fill(Color(hex: "#393C43"))
+                                Capsule().fill(Color.appSurfaceTertiary)
                             )
                     )
                 
                 Text(request.title)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 Text("Cancelled")
                     .font(.system(size: 14, weight: .medium))
@@ -412,7 +412,7 @@ private struct CancelledRequestCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
     }
 }

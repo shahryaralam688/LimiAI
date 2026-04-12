@@ -37,8 +37,8 @@ struct DemoAddDevicesView: View {
                     // Bottom border blur in black
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color.black.opacity(1.0),
-                            Color.black.opacity(0.8)
+                            Color.themeBlack.opacity(1.0),
+                            Color.themeBlack.opacity(0.8)
                         ]),
                         startPoint: .bottom,
                         endPoint: .top
@@ -65,7 +65,7 @@ struct DemoAddDevicesView: View {
                                     .padding(12) // space inside the circle
                                     .background(
                                         Rectangle()
-                                            .fill(Color(hex: "#24262B")) // gray background
+                                            .fill(Color.appSurfacePrimary) // gray background
                                             .cornerRadius(16)
                                     )
                             }
@@ -100,7 +100,7 @@ struct DemoAddDevicesView: View {
                 HStack{
                     Text("My Spaces")
                         .font(.custom("Poppins-Medium", size: 20))   // 500 weight = Medium
-                        .foregroundColor(Color(hex: "#C9C4BD"))      // matches #C9C4BD
+                        .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
                         .multilineTextAlignment(.center)             // aligns text centrally
                         .lineSpacing(0)                              // 100% line height = no extra spacing
                         .kerning(0)// letter-spacing: 0px
@@ -110,14 +110,14 @@ struct DemoAddDevicesView: View {
                 VStack(spacing: 16){
                     Text("You haven’t added any devices yet")
                         .font(.custom("Poppins-Medium", size: 16))   // 500 weight = Medium
-                        .foregroundColor(Color(hex: "#C9C4BD"))      // matches #C9C4BD
+                        .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
                         .multilineTextAlignment(.center)             // text-align: center
                         .lineSpacing(16 * 0.4)                       // 140% line height
                         .kerning(0)
                     
                     Text("Tap button below to add devices")
                         .font(.custom("Poppins-Regular", size: 14)) // weight 400 = Regular
-                        .foregroundColor(Color(hex: "#A19D98"))     // custom color
+                        .foregroundColor(Color.appTextMuted)     // custom color
                         .multilineTextAlignment(.center)            // text-align: center
                         .lineSpacing(14 * 0.4)                      // line-height: 140% → +40% of font size
                         .kerning(0)                                 // letter-spacing: 0px
@@ -144,7 +144,7 @@ struct DemoAddDevicesView: View {
                         .padding(.vertical, 14)
                         .padding(.horizontal, 20)
                         .background(Color.emerald)
-                        .foregroundColor(.black)
+                        .foregroundColor(.themeBlack)
                         .cornerRadius(12)
 
                     }
@@ -153,7 +153,7 @@ struct DemoAddDevicesView: View {
                 .frame(maxWidth: .infinity)
                 .background(
                     LinearGradient(
-                        gradient: Gradient(colors: [Color(hex: "#24262B"), Color(hex: "#24262B")]),
+                        gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -164,7 +164,7 @@ struct DemoAddDevicesView: View {
                         .strokeBorder(
                             style: StrokeStyle(lineWidth: 1, dash: [2, 2])
                         )
-                        .foregroundColor(Color(hex: "#787572"))
+                        .foregroundColor(Color.appBorderSecondary)
                 )
                 .cornerRadius(8)
                 .opacity(1)
@@ -173,8 +173,8 @@ struct DemoAddDevicesView: View {
             Spacer()
             Text("Skip")
                 .font(.custom("Poppins-Medium", size: 16)) // font-family + style
-                .foregroundColor(Color(hex: "#F2EBE3"))    // background color in design is likely text color
-                .underline(true, color: Color(hex: "#F2EBE3")) // underline as specified
+                .foregroundColor(Color.appTextPrimary)    // background color in design is likely text color
+                .underline(true, color: Color.appTextPrimary) // underline as specified
                 .kerning(0)                               // letter-spacing: 0%
                 .lineSpacing(0)                            // line-height: 100%
                 .padding(.bottom, 50)
@@ -184,7 +184,7 @@ struct DemoAddDevicesView: View {
 
 
         }
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea(.all)
         
         .fullScreenCover(isPresented: $showLoginSkip) {

@@ -10,11 +10,11 @@ struct LocationStorageView: View {
     @State private var contentOpacity = 0.0
     @State private var contentOffset: CGFloat = 20
     
-    private let brandGreen = Color(hex: "#76E094")
+    private let brandGreen = Color.appBrandSecondary
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.themeBlack.ignoresSafeArea()
             
             VStack {
                 headerSection
@@ -64,11 +64,11 @@ struct LocationStorageView: View {
             VStack(spacing: 12) {
                 Text("Enable Location")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 Text("We need your location to provide personalized lighting experiences and weather information.")
                     .font(.system(size: 16, weight: .medium, design: .default))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.themeWhite.opacity(0.7))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -85,22 +85,22 @@ struct LocationStorageView: View {
                             .foregroundColor(brandGreen)
                         Text("Current Location")
                             .font(.system(size: 18, weight: .semibold, design: .default))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                     }
                     
                     VStack(spacing: 6) {
                         Text("Latitude: \(location.coordinate.latitude, specifier: "%.4f")")
                             .font(.system(size: 13, weight: .medium, design: .monospaced))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.themeWhite.opacity(0.6))
                         Text("Longitude: \(location.coordinate.longitude, specifier: "%.4f")")
                             .font(.system(size: 13, weight: .medium, design: .monospaced))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.themeWhite.opacity(0.6))
                     }
                     
                     if let address = storageManager.currentAddress {
                         Text(address)
                             .font(.system(size: 15, weight: .medium, design: .default))
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.themeWhite.opacity(0.9))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                     }
@@ -108,7 +108,7 @@ struct LocationStorageView: View {
                 .padding(24)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.themeWhite.opacity(0.05))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(brandGreen.opacity(0.2), lineWidth: 1)
@@ -131,7 +131,7 @@ struct LocationStorageView: View {
                     Text("Turn on Location")
                         .font(.system(size: 18, weight: .semibold, design: .default))
                 }
-                .foregroundColor(.black)
+                .foregroundColor(.themeBlack)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(

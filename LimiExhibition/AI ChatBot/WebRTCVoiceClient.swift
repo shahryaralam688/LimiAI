@@ -544,7 +544,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         // with headers: Authorization: Bearer <ephemeral-key>, OpenAI-Beta: realtime=v1, Content-Type: application/sdp
         // and raw SDP in the body, returning SDP answer as text.
         let model = "gpt-realtime"
-        guard let url = URL(string: "https://api.openai.com/v1/realtime?model=\(model)") else { fail("Invalid OpenAI URL"); return }
+        guard let url = URL(string: AppURLs.External.openAIRealtime(model: model)) else { fail("Invalid OpenAI URL"); return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
@@ -999,4 +999,3 @@ private extension WebRTCVoiceClient {
         }
     }
 }
-

@@ -57,7 +57,7 @@ struct ConnectedDevicesView: View {
                 //
                 ZStack {
                     Rectangle()
-                        .fill(Color(hex: "#2A2C33"))
+                        .fill(Color.appSurfaceSecondary)
                         .cornerRadius(32)
                         .frame(height: 124)
                     
@@ -70,7 +70,7 @@ struct ConnectedDevicesView: View {
                                 .foregroundColor(.alabaster)
                                 .font(.system(size: 18, weight: .medium))
                                 .frame(width: 44, height: 44)
-                                .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                                .background(Color.appInputFill)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         
@@ -78,11 +78,11 @@ struct ConnectedDevicesView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Devices")
                                 .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                             
                             Text("Control Your Device In Your space")
                                 .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(Color(hex: "#B6BAC2"))
+                                .foregroundColor(Color.appTextTertiary)
                         }
                         
                         Spacer()
@@ -95,7 +95,7 @@ struct ConnectedDevicesView: View {
             .frame(height: 124)
             .background(
                 RoundedRectangle(cornerRadius: 40)
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
             )
             .padding(.horizontal, 0)
             
@@ -105,7 +105,7 @@ struct ConnectedDevicesView: View {
                     HStack{
                         Text("Connected Space")
                             .font(.custom("Poppins-Medium", size: 18))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .multilineTextAlignment(.center)
                             .lineSpacing(18 * 0.2)
                             .tracking(-0.15 / 18)
@@ -124,14 +124,14 @@ struct ConnectedDevicesView: View {
                                 VStack(spacing: 16) {
                                     Text("You haven’t added any devices yet")
                                         .font(.custom("Poppins-Medium", size: 16))
-                                        .foregroundColor(Color(hex: "#C9C4BD"))
+                                        .foregroundColor(Color.appTextSecondary)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(16 * 0.4)
                                         .kerning(0)
                                     
                                     Text("Tap the button below to add devices")
                                         .font(.custom("Poppins-Regular", size: 14))
-                                        .foregroundColor(Color(hex: "#A19D98"))
+                                        .foregroundColor(Color.appTextMuted)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(14 * 0.4)
                                         .kerning(0)
@@ -142,16 +142,16 @@ struct ConnectedDevicesView: View {
                                         HStack {
                                             Image(systemName: "plus")
                                                 .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.black)
+                                                .foregroundColor(Color.themeBlack)
                                             Text("Add Your First Device")
                                                 .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.black)
+                                                .foregroundColor(Color.themeBlack)
                                         }
                                         .font(.system(size: 17, weight: .semibold))
                                         .padding(.vertical, 14)
                                         .padding(.horizontal, 20)
-                                        .background(Color.white)
-                                        .foregroundColor(.black)
+                                        .background(Color.themeWhite)
+                                        .foregroundColor(.themeBlack)
                                         .cornerRadius(12)
                                     }
                                 }
@@ -159,7 +159,7 @@ struct ConnectedDevicesView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     LinearGradient(
-                                        gradient: Gradient(colors: [Color(hex: "#24262B"), Color(hex: "#24262B")]),
+                                        gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
@@ -167,7 +167,7 @@ struct ConnectedDevicesView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
-                                        .foregroundColor(Color(hex: "#787572"))
+                                        .foregroundColor(Color.appBorderSecondary)
                                 )
                                 .cornerRadius(8)
                                 .opacity(1)
@@ -211,7 +211,7 @@ struct ConnectedDevicesView: View {
             }
             
         }
-        .background(Color.black)
+        .background(Color.themeBlack)
         .ignoresSafeArea()
         .onAppear {
             UserDataManager.shared.refreshUserData()
@@ -504,7 +504,7 @@ struct WifiDeviceSpace: View {
             HStack {
                 Image(systemName: "house.fill")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 Spacer()
             }
             .padding(10)
@@ -536,9 +536,9 @@ struct WifiDeviceSpace: View {
             .padding(.horizontal, 10)
         }
         .frame(height: 165.5)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.themeBlack.opacity(0.1), radius: 5, x: 0, y: 2)
         .opacity(isOnline ? 1.0 : 0.7)
         .onAppear { logResolvedDevice() }
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { _ in

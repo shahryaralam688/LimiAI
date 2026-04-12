@@ -37,7 +37,7 @@ private struct TestingARPreviewContent: View {
                             .font(.system(size: 14, weight: .semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .foregroundColor(activeTab == "base" ? .white : .gray)
+                            .foregroundColor(activeTab == "base" ? .themeWhite : .gray)
                             .background(activeTab == "base" ? Color.blue : Color.clear)
                     }
 
@@ -46,11 +46,11 @@ private struct TestingARPreviewContent: View {
                             .font(.system(size: 14, weight: .semibold))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .foregroundColor(activeTab == "pendants" ? .white : .gray)
+                            .foregroundColor(activeTab == "pendants" ? .themeWhite : .gray)
                             .background(activeTab == "pendants" ? Color.blue : Color.clear)
                     }
                 }
-                .background(Color.black.opacity(0.3))
+                .background(Color.themeBlack.opacity(0.3))
                 .cornerRadius(8)
                 .frame(height: 40)
 
@@ -69,12 +69,12 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Base 1")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
 
@@ -85,12 +85,12 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Base 2")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
 
@@ -101,17 +101,17 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Base 3")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
                     }
                     .padding(12)
-                    .background(Color.black.opacity(0.4))
+                    .background(Color.themeBlack.opacity(0.4))
                     .cornerRadius(8)
                 } else {
                     VStack(spacing: 10) {
@@ -127,12 +127,12 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Pendant 1")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
 
@@ -143,12 +143,12 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Pendant 2")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
 
@@ -159,12 +159,12 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Pendant 3")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
 
@@ -175,17 +175,17 @@ private struct TestingARPreviewContent: View {
                                     .frame(width: 8, height: 8)
                                 Text("Pendant 4")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                 Spacer()
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.05))
+                            .background(Color.themeWhite.opacity(0.05))
                             .cornerRadius(6)
                         }
                     }
                     .padding(12)
-                    .background(Color.black.opacity(0.4))
+                    .background(Color.themeBlack.opacity(0.4))
                     .cornerRadius(8)
                 }
 

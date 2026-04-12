@@ -21,8 +21,8 @@ struct SearchBarView: View {
                 .frame(height: 45)
                 .background(
                     RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.white.opacity(0.9))
-                        .shadow(color: Color.black.opacity(0.1), radius: searchFieldFocused ? 8 : 3, x: 0, y: 2)
+                        .fill(Color.themeWhite.opacity(0.9))
+                        .shadow(color: Color.themeBlack.opacity(0.1), radius: searchFieldFocused ? 8 : 3, x: 0, y: 2)
                         .overlay(
                             RoundedRectangle(cornerRadius: 15)
                                 .stroke(Color.eton.opacity(searchFieldFocused ? 0.5 : 0), lineWidth: 2)
@@ -70,7 +70,7 @@ struct SearchBarView: View {
                             )
                         )
                         .frame(width: 45, height: 45)
-                        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 3)
+                        .shadow(color: Color.themeBlack.opacity(0.15), radius: 5, x: 0, y: 3)
                     
                     // Icon
                     Image(systemName: "cube.transparent")

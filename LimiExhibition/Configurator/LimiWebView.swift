@@ -191,10 +191,10 @@ struct LimiContentView: View {
         NavigationView {
             ZStack(alignment: .topLeading) {
                 if let token = AuthManager.shared.getToken(),
-                   let url = URL(string: "https://limi-configurator-ios.vercel.app/configurator?token=\(token)") {
+                   let url = URL(string: AppURLs.Web.configurator(token: token)) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
-                } else if let url = URL(string: "https://limi-configurator-ios.vercel.app/configurator") {
+                } else if let url = URL(string: AppURLs.Web.configurator()) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
                 }
@@ -255,7 +255,7 @@ struct LimiContentView: View {
         }
         .onAppear {
             if let token = AuthManager.shared.getToken() {
-                let url = "https://limi-configurator-ios.vercel.app/configurator?token=\(token)"
+                let url = AppURLs.Web.configurator(token: token)
                 print("Configurator URL: \(url)")
             } else {
                 print("No token found")

@@ -37,7 +37,7 @@ struct HomeDetailView: View {
                                 presentationMode.wrappedValue.dismiss()
                             }) {
                                 Image(systemName: "chevron.left")
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.themeBlack)
                                     .font(.title2)
                                     .padding()
                             }
@@ -122,8 +122,8 @@ struct ControllerButton: View {
                 .font(.system(size: 14, weight: .medium))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
-                .foregroundColor(isSelected ? .white : .charlestonGreen)
-                .background(isSelected ? Color.emerald : Color.white)
+                .foregroundColor(isSelected ? .themeWhite : .charlestonGreen)
+                .background(isSelected ? Color.emerald : Color.themeWhite)
                 .cornerRadius(20)
                 .shadow(color: isSelected ? Color.emerald.opacity(0.3) : Color.gray.opacity(0.1), radius: 4, x: 0, y: 2)
                 .overlay(

@@ -70,12 +70,12 @@ struct DemoARView: View {
                     ForEach(0..<3, id: \.self) { index in
                         if index == currentPage {
                             Capsule()
-                                .fill(Color.white)
+                                .fill(Color.themeWhite)
                                 .frame(width: 28, height: 8)
                                 .opacity(1.0)
                         } else {
                             Circle()
-                                .fill(Color(hex: "#555A60"))
+                                .fill(Color.appSurfaceField)
                                 .frame(width: 8, height: 8)
                                 .opacity(0.6)
                         }
@@ -86,7 +86,7 @@ struct DemoARView: View {
             Spacer()
         }
         .padding(.bottom, 32)
-        .background(Color.black)
+        .background(Color.themeBlack)
         .ignoresSafeArea()
     }
 }
@@ -118,13 +118,13 @@ struct ARCardView: View {
                 // Title
                 Text(title)
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Subtitle
                 Text("State of the art AR Experience")
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color(hex: "#B6BAC2"))
+                    .foregroundColor(Color.appTextTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Spacer(minLength: 16)
@@ -139,10 +139,10 @@ struct ARCardView: View {
                 }) {
                     Text("Experience Now")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(Color(hex: "#111111"))
+                        .foregroundColor(Color.appTextInverse)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(Color.white)
+                        .background(Color.themeWhite)
                         .cornerRadius(26)
                 }
                 .disabled(isLoading)
@@ -151,9 +151,9 @@ struct ARCardView: View {
             .padding(.top, 16)
             .padding(.vertical, 20)
         }
-        .background(Color(hex: "#22242A"))
+        .background(Color.appSurfaceFloating)
         .cornerRadius(32)
-        .shadow(color: Color.black.opacity(0.4), radius: 18, x: 0, y: 8)
+        .shadow(color: Color.themeBlack.opacity(0.4), radius: 18, x: 0, y: 8)
         .frame(height: 449)
         .padding(.horizontal, 16)
         .fullScreenCover(isPresented: $showCustomView) {
@@ -175,17 +175,17 @@ struct ARCardView: View {
         }
 
         if isLoading {
-            Color.black.opacity(0.5)
+            Color.themeBlack.opacity(0.5)
                 .ignoresSafeArea()
 
             ProgressView("Loading 3D Model...")
-                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                .foregroundColor(.white)
+                .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
+                .foregroundColor(.themeWhite)
         }
         }
     }
     private func downloadUSDZUsingAPI(downloadId: String) {
-        guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/3d-models/web-configurator/download/\(downloadId)") else {
+        guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else {
             print("❌ Invalid download URL")
             return
         }

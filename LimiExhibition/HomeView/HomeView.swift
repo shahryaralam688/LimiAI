@@ -111,7 +111,7 @@ struct HomeView: View {
         NavigationStack {
             ZStack {
                 // MARK: - Background
-                Color.black
+                Color.themeBlack
                     .ignoresSafeArea()
                     .overlay(
                         Image("bg blur")
@@ -146,7 +146,7 @@ struct HomeView: View {
 //                        HStack{
 //                            Text("Active Modules")
 //                                .font(.system(size: 18, weight: .semibold))
-//                                .foregroundColor(.white)
+//                                .foregroundColor(.themeWhite)
 //                                .padding(.horizontal, 16)
 //                                .padding(.top, 24)
 //                            Spacer()
@@ -158,14 +158,14 @@ struct HomeView: View {
                             VStack(spacing: 16){
                                 Text("home.empty.title".localized)
                                     .font(.custom("Poppins-Medium", size: 16))   // 500 weight = Medium
-                                    .foregroundColor(Color(hex: "#C9C4BD"))      // matches #C9C4BD
+                                    .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
                                     .multilineTextAlignment(.center)             // text-align: center
                                     .lineSpacing(16 * 0.4)                       // 140% line height
                                     .kerning(0)
                                 
                                 Text("home.empty.subtitle".localized)
                                     .font(.custom("Poppins-Regular", size: 14)) // weight 400 = Regular
-                                    .foregroundColor(Color(hex: "#A19D98"))     // custom color
+                                    .foregroundColor(Color.appTextMuted)     // custom color
                                     .multilineTextAlignment(.center)            // text-align: center
                                     .lineSpacing(14 * 0.4)                      // line-height: 140% → +40% of font size
                                     .kerning(0)                                 // letter-spacing: 0px
@@ -191,8 +191,8 @@ struct HomeView: View {
                                     .font(.system(size: 17, weight: .semibold))
                                     .padding(.vertical, 14)
                                     .padding(.horizontal, 20)
-                                    .background(Color.white)
-                                    .foregroundColor(.black)
+                                    .background(Color.themeWhite)
+                                    .foregroundColor(.themeBlack)
                                     .cornerRadius(12)
                                     
                                 }
@@ -201,7 +201,7 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity)
                             .background(
                                 LinearGradient(
-                                    gradient: Gradient(colors: [Color(hex: "#24262B"), Color(hex: "#24262B")]),
+                                    gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
@@ -212,7 +212,7 @@ struct HomeView: View {
                                     .strokeBorder(
                                         style: StrokeStyle(lineWidth: 1, dash: [2, 2])
                                     )
-                                    .foregroundColor(Color(hex: "#787572"))
+                                    .foregroundColor(Color.appBorderSecondary)
                             )
                             .cornerRadius(8)
                             .opacity(1)
@@ -245,7 +245,7 @@ struct HomeView: View {
                                                         .font(.custom("Poppins-Medium", size: 16))
                                                         .kerning(-0.15)
                                                         .lineSpacing(2) // 120% line-height ke close
-                                                        .foregroundColor(.white)
+                                                        .foregroundColor(.themeWhite)
                                                     
                                                     
                                                     
@@ -254,7 +254,7 @@ struct HomeView: View {
                                                             .font(.custom("Poppins-Regular", size: 12))
                                                             .kerning(-0.15)
                                                             .lineSpacing(1.5) // ~120% line-height
-                                                            .foregroundColor(.white)
+                                                            .foregroundColor(.themeWhite)
                                                         
                                                         
                                                         Spacer()
@@ -265,14 +265,14 @@ struct HomeView: View {
                                                             Image(systemName: "ellipsis")
                                                                 .rotationEffect(.degrees(90))
                                                                 .font(.system(size: 16, weight: .semibold))
-                                                                .foregroundColor(.white)
+                                                                .foregroundColor(.themeWhite)
                                                         }
                                                     }
                                                     
                                                 }
                                                 .frame(minHeight: 120)
                                                 .padding(12)
-                                                .background(Color(hex: "#2A2D33"))
+                                                .background(Color.appSurfaceSecondaryAlt)
                                                 .cornerRadius(12)
                                                 .scaleEffect(isModuleEditMode ? 0.97 : 1.0)
                                                 .rotationEffect(.degrees(isModuleEditMode ? -1.8 : 0))
@@ -298,11 +298,11 @@ struct HomeView: View {
                                                     }) {
                                                         ZStack {
                                                             Circle()
-                                                                .fill(Color.white)
+                                                                .fill(Color.themeWhite)
                                                                 .frame(width: 22, height: 22)
                                                             Image(systemName: "xmark")
                                                                 .font(.system(size: 11, weight: .bold))
-                                                                .foregroundColor(.black)
+                                                                .foregroundColor(.themeBlack)
                                                         }
                                                     }
                                                     .buttonStyle(.plain)
@@ -343,21 +343,21 @@ struct HomeView: View {
                                     Text(hasModules ? "Add More Modules" : "Add Modules")
                                         .font(.system(size: 16, weight: .semibold))
                                 }
-                                .foregroundColor(hasModules ? Color(hex: "#1F1F1F") : .white)
+                                .foregroundColor(hasModules ? Color.appCanvasMuted : .themeWhite)
                                 .frame(width: 195)
                                 .padding(.vertical, 14)
                                 .background(
-                                    hasModules ? AnyView(AnyView(Color.white)) : AnyView(Color.clear)
+                                    hasModules ? AnyView(AnyView(Color.themeWhite)) : AnyView(Color.clear)
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 24)
-                                        .stroke(Color.white, lineWidth: hasModules ? 0 : 1.5)
+                                        .stroke(Color.themeWhite, lineWidth: hasModules ? 0 : 1.5)
                                 )
                                 .cornerRadius(24)
                             }
                             
                             .scaleEffect(isModulesButtonAnimating ? 0.95 : 1.0)
-                            .shadow(color: hasModules ? Color.white.opacity(0.5) : Color.clear,
+                            .shadow(color: hasModules ? Color.themeWhite.opacity(0.5) : Color.clear,
                                     radius: hasModules ? 16 : 0,
                                     x: 0,
                                     y: 0)
@@ -386,7 +386,7 @@ struct HomeView: View {
                                     .padding(.horizontal, 6)
                                     .background(
                                         RoundedRectangle(cornerRadius: 3)
-                                            .fill(Color(hex:"#24262B").opacity(1))
+                                            .fill(Color.appSurfacePrimary.opacity(1))
                                     )
                                     .frame(width: .infinity, height: 24, alignment: .center)
                                     .opacity(1)
@@ -437,7 +437,7 @@ struct HomeView: View {
                                     }) {
                                         Text("Not Now")
                                             .font(.custom("Poppins-SemiBold", size: 16))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 14)
                                             .background(
@@ -450,9 +450,9 @@ struct HomeView: View {
                                 
                             }
                             .padding(16)
-                            .background(Color(hex: "#24262B"))
+                            .background(Color.appSurfacePrimary)
                             .cornerRadius(16)
-                            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 6)
+                            .shadow(color: Color.themeBlack.opacity(0.3), radius: 10, x: 0, y: 6)
                             .padding(.horizontal, 16)
                             .padding(.bottom, 24)
                         }
@@ -463,7 +463,7 @@ struct HomeView: View {
                     if showModuleActionMenu, let module = selectedModuleForAction {
                         ZStack {
                             // Dark overlay background
-                            Color.black.opacity(0.45)
+                            Color.themeBlack.opacity(0.45)
                                 .ignoresSafeArea()
                                 .onTapGesture {
                                     showModuleActionMenu = false
@@ -476,13 +476,13 @@ struct HomeView: View {
                                 VStack(spacing: 8) {
                                     Text(module.title)
                                         .font(.system(size: 17, weight: .semibold))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
                                         .multilineTextAlignment(.center)
                                         .tracking(-0.3)
 
                                     Text("What would you like to do?")
                                         .font(.system(size: 13, weight: .regular))
-                                        .foregroundColor(Color.white.opacity(0.7))
+                                        .foregroundColor(Color.themeWhite.opacity(0.7))
                                         .multilineTextAlignment(.center)
                                         .tracking(-0.2)
                                 }
@@ -491,7 +491,7 @@ struct HomeView: View {
                                 .padding(.bottom, 12)
 
                                 Divider()
-                                    .background(Color.white.opacity(0.08))
+                                    .background(Color.themeWhite.opacity(0.08))
 
                                 // Delete Button
                                 Button(action: {
@@ -505,11 +505,11 @@ struct HomeView: View {
                                     HStack(spacing: 12) {
                                         Image(systemName: "square.and.arrow.up")
                                             .font(.system(size: 17, weight: .semibold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
 
                                         Text("Unisntall")
                                             .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
 
                                         Spacer()
                                     }
@@ -518,7 +518,7 @@ struct HomeView: View {
                                 }
 
                                 Divider()
-                                    .background(Color.white.opacity(0.08))
+                                    .background(Color.themeWhite.opacity(0.08))
 
                                 // Later Button
                                 Button(action: {
@@ -529,11 +529,11 @@ struct HomeView: View {
                                     HStack(spacing: 12) {
                                         Image(systemName: "clock.fill")
                                             .font(.system(size: 17, weight: .semibold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
 
                                         Text("Later")
                                             .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
 
                                         Spacer()
                                     }
@@ -542,12 +542,12 @@ struct HomeView: View {
                                 }
                             }
                             .background(
-                                Color(hex: "#24262B")
+                                Color.appSurfacePrimary
                                     .opacity(0.8)
-                                    .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 18)
+                                    .shadow(color: Color.themeBlack.opacity(0.5), radius: 20, x: 0, y: 18)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 24)
-                                            .stroke(Color(hex: "#5F5F5F"), lineWidth: 4) // ← 1-point border
+                                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
                                     )
                             )
                             .cornerRadius(24)
@@ -741,16 +741,16 @@ struct HomeView: View {
 //                showProfileFromHome = true
 //            }) {
 //                ZStack {
-//                    Color(hex: "#171717").cornerRadius(20)
+//                    Color.appCanvasElevated.cornerRadius(20)
 //                    Image("bottom_profile_view")
 //                        .renderingMode(.template)
 //                        .resizable()
 //                        .scaledToFit()
 //                        .frame(width: 22, height: 22)
-//                        .foregroundColor(Color(hex: "#FFFFFF"))
+//                        .foregroundColor(Color.themeWhite)
 //
 //                    Circle()
-//                        .stroke(Color(hex: "#FFFFFF"), lineWidth: 1.4)
+//                        .stroke(Color.themeWhite, lineWidth: 1.4)
 //                        .frame(width: 44, height: 44)
 //                }
 //                .frame(width: 48, height: 48)
@@ -762,29 +762,29 @@ struct HomeView: View {
     private var voiceOrb: some View {
         ZStack {
             Circle()
-                .fill(Color.black)
+                .fill(Color.themeBlack)
                 .frame(width: 260, height: 260)
-                .shadow(color: Color.black.opacity(0.9), radius: 60, x: 0, y: 18)
+                .shadow(color: Color.themeBlack.opacity(0.9), radius: 60, x: 0, y: 18)
                 .overlay(
                     // INNER SHADOW (inset shadow equivalent)
                     Circle()
-                        .stroke(Color(hex: "#fff").opacity(3), lineWidth: 3)
+                        .stroke(Color.themeWhite.opacity(3), lineWidth: 3)
                         .blur(radius: 10)
                         .offset(x: -6, y: -1)
                         .mask(
                             Circle()
-                                .fill(Color.black)
+                                .fill(Color.themeBlack)
                         )
                 )
 
             VStack(spacing: 12) {
                 Text("Hey, Limi here!")
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
                 Text("Tap to chat")
                     .font(.system(size: 15))
-                    .foregroundColor(Color.white.opacity(0.65))
+                    .foregroundColor(Color.themeWhite.opacity(0.65))
 //                OrbView(intensity: $orbIntensity, currentVolume: $orbVolume)
 //                    .frame(width: 160, height: 160)
 

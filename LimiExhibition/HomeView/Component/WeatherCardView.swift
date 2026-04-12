@@ -15,7 +15,7 @@ struct WeatherCardView: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.01, green: 0.07, blue: 0.12)
+            Color.appWeatherBackground
                 .ignoresSafeArea()
 
             GeometryReader { geometry in
@@ -24,8 +24,8 @@ struct WeatherCardView: View {
                         .fill(
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color(red: 0.0, green: 0.44, blue: 0.6),
-                                    Color(red: 0.01, green: 0.06, blue: 0.11)
+                                    Color.appWeatherTop,
+                                    Color.appWeatherBottom
                                 ]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -39,10 +39,10 @@ struct WeatherCardView: View {
                             HStack(alignment: .firstTextBaseline, spacing: 8) {
                                 Text(day)
                                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
 
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(Color.themeWhite)
                                     .frame(width: 8, height: 8)
                             }
 
@@ -51,12 +51,12 @@ struct WeatherCardView: View {
                                 HStack(alignment: .top, spacing: 0) {
                                     Text("\(temperature)")
                                         .font(.system(size: 140, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
                                         .fixedSize()
 
                                     Text("°")
                                         .font(.system(size: 72, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
                                         .padding(.top, 12)
                                 }
                                 .layoutPriority(1)
@@ -64,22 +64,22 @@ struct WeatherCardView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack(spacing: 6) {
                                         Image(systemName: "wind")
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                             .font(.system(size: 18, weight: .medium))
 
                                         Text("\(windSpeedKmh) km/h")
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                     }
 
                                     HStack(spacing: 6) {
                                         Image(systemName: "humidity")
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                             .font(.system(size: 18, weight: .medium))
 
                                         Text("\(humidityPercent)%")
                                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                     }
                                 }
                                 .padding(.top, 20)
@@ -89,18 +89,18 @@ struct WeatherCardView: View {
                             HStack(alignment: .top) {
                                 Text("Last updated \(lastUpdated)")
                                     .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0.63, green: 0.72, blue: 0.8))
+                                    .foregroundColor(Color.appWeatherText)
 
                                 Spacer(minLength: 24)
 
                                 VStack(alignment: .trailing, spacing: 4) {
                                     Text("H \(high)°")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
 
                                     Text("L \(low)°")
                                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
                                 }
                             }
 
@@ -108,17 +108,17 @@ struct WeatherCardView: View {
                             HStack(spacing: 8) {
                                 ZStack {
                                     Circle()
-                                        .stroke(Color.white.opacity(0.9), lineWidth: 1.5)
+                                        .stroke(Color.themeWhite.opacity(0.9), lineWidth: 1.5)
                                         .frame(width: 26, height: 26)
 
                                     Image(systemName: "mappin.and.ellipse")
                                         .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.themeWhite)
                                 }
 
                                 Text("\(country), \(city)")
                                     .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                             }
                             .padding(.top, 4)
                         }
@@ -132,16 +132,16 @@ struct WeatherCardView: View {
 
                             ZStack {
                                 Circle()
-                                    .fill(Color.white.opacity(0.15))
+                                    .fill(Color.themeWhite.opacity(0.15))
                                     .frame(width: min(geometry.size.width * 0.33, 180),
                                            height: min(geometry.size.width * 0.33, 180))
 
                                 ZStack {
                                     Circle()
-                                        .fill(Color.white)
+                                        .fill(Color.themeWhite)
 
                                     Circle()
-                                        .fill(Color(red: 0.0, green: 0.44, blue: 0.6))
+                                        .fill(Color.appWeatherTop)
                                         .offset(x: 28)
                                 }
                                 .frame(width: min(geometry.size.width * 0.26, 150),
@@ -152,7 +152,7 @@ struct WeatherCardView: View {
 
                             Text(condition)
                                 .font(.system(size: 18, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0.63, green: 0.72, blue: 0.8))
+                                .foregroundColor(Color.appWeatherText)
                                 .padding(.bottom, 16)
                         }
                         .padding(.trailing, 24)

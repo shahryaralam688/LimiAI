@@ -15,7 +15,7 @@ struct StaticLightPreviewView: View {
             StaticLightARViewContainer(macAddress: "avcd")
                 .ignoresSafeArea()
         }
-        .background(Color.fromHex("#111214"))
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
     }
 }
@@ -148,7 +148,7 @@ struct StaticLightARViewContainer: UIViewRepresentable {
         arView.cameraMode = .nonAR
 
         // Set the 3D background color behind the model (matches dark hex-style background)
-        arView.environment.background = .color(UIColor(Color.fromHex("#111214")))
+        arView.environment.background = .color(UIColor(Color.appCanvasPrimary))
 
         // Prefer a downloaded model in Documents/Configurator/<downloadId>.usdz, where downloadId is mapped from macAddress
         let fileManager = FileManager.default

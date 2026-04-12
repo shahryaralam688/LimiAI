@@ -44,7 +44,7 @@ struct LocationUsageExample: View {
                     }
                     .padding()
                     .background(Color.blue)
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .cornerRadius(8)
                 } else {
                     Text("Need location for weather data")

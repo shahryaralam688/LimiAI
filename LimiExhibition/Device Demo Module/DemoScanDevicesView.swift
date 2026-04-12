@@ -97,20 +97,20 @@ struct AnimatedSearchButton: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(LinearGradient(gradient: Gradient(colors: [Color(hex: "#2E2E2E"), Color(hex: "#3A3A3A")]), startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(gradient: Gradient(colors: [Color.appSurfaceNeutral, Color.appSurfaceNeutralAlt]), startPoint: .top, endPoint: .bottom))
                 .frame(width: 160, height: 160)
-                .shadow(color: Color.white.opacity(glowIntensity), radius: 25, x: 0, y: 8)
+                .shadow(color: Color.themeWhite.opacity(glowIntensity), radius: 25, x: 0, y: 8)
                 .scaleEffect(isAnimating ? 1.05 : 1.0)
                 .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isAnimating)
 
             Image(systemName: iconName)
                 .font(.system(size: 48, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .scaleEffect(isAnimating ? 1.1 : 1.0)
                 .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
 
             Circle()
-                .stroke(Color.white.opacity(0.4), lineWidth: 2)
+                .stroke(Color.themeWhite.opacity(0.4), lineWidth: 2)
                 .frame(width: 180, height: 180)
                 .scaleEffect(isAnimating ? 1.2 : 1.0)
                 .opacity(isAnimating ? 0.0 : 0.8)
@@ -535,10 +535,10 @@ struct DevicesButton: View {
                 VStack(spacing: 4) {
                     Image(systemName: deviceType == .bluetooth ? "lamp.table.fill" : "wifi")
                         .font(.system(size: deviceType == .bluetooth ? 24 : 20, weight: .medium))
-                        .foregroundColor(deviceType == .bluetooth ? Color.white : (reachability == .online ? .white : .red))
+                        .foregroundColor(deviceType == .bluetooth ? Color.themeWhite : (reachability == .online ? .themeWhite : .red))
                     Text(deviceType == .bluetooth ? "BLE" : (reachability == .online ? "Online" : "Offline"))
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(reachability == .online ? .white : .red)
+                        .foregroundColor(reachability == .online ? .themeWhite : .red)
                 }
             }
             Spacer()
@@ -546,17 +546,17 @@ struct DevicesButton: View {
                 HStack {
                     Text(deviceName ?? "Unknown Device")
                         .font(.custom("Poppins-Medium", size: 12))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.black)
+                        .background(Color.themeBlack)
                         .cornerRadius(4)
                     Spacer()
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(searchDeviceUUID ?? "XTP-1245")
                         .font(.custom("Poppins-Bold", size: 20))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     if deviceType == .wifi, let ip = ipAddress {
                         Text("IP: \(ip)")
                             .font(.custom("Poppins-Regular", size: 12))
@@ -579,8 +579,8 @@ struct DevicesButton: View {
             Spacer()
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(hex: "#24262B")))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "#4A4A4A"), lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.appSurfacePrimary))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.appBorderQuaternary, lineWidth: 1))
     }
 }
 
@@ -629,7 +629,7 @@ struct DemoScanDevicesView: View {
                             .scaledToFit()
                             .frame(width: 20, height: 20)
                             .padding(12)
-                            .background(Rectangle().fill(Color(hex: "#24262B")).cornerRadius(16))
+                            .background(Rectangle().fill(Color.appSurfacePrimary).cornerRadius(16))
                     }
                     Spacer()
                     Text("Add Device")
@@ -654,7 +654,7 @@ struct DemoScanDevicesView: View {
                 HStack{
                     Text("Available Devices")
                         .font(.custom("Poppins-Medium", size: 20))
-                        .foregroundColor(Color(hex: "#C9C4BD"))
+                        .foregroundColor(Color.appTextSecondary)
                         .padding(.horizontal, 16)
                     Spacer()
                 }
@@ -752,7 +752,7 @@ struct DemoScanDevicesView: View {
                             .foregroundColor(Color.charlestonGreen)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background( Color.white)
+                            .background( Color.themeWhite)
                             .cornerRadius(8)
                     }
                     .padding(.horizontal, 32)
@@ -760,7 +760,7 @@ struct DemoScanDevicesView: View {
                 }
             }
         }
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
         .onAppear {
             BluetoothManager.shared.startScanning { devices in
                 let mapped = devices.map { BLEDevice(name: $0.name, uuid: $0.id, deviceType: .bluetooth, reachability: .online, lastSeen: Date()) }
@@ -805,15 +805,15 @@ struct DemoScanDevicesView: View {
         .overlay {
             if isConnectingToBLE {
                 ZStack {
-                    Color.black.opacity(0.6)
+                    Color.themeBlack.opacity(0.6)
                         .ignoresSafeArea()
                     VStack(spacing: 20) {
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                             .scaleEffect(1.5)
                         Text("Connecting to device...")
                             .font(.custom("Poppins-Medium", size: 16))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                     }
                 }
             }

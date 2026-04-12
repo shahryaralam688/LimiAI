@@ -33,7 +33,7 @@
 //                        Image(systemName: "plus.circle.fill")
 //                            .font(.system(size: 25))
 //                            .foregroundColor(.blue)
-//                            .background(Color.white.opacity(0.8))
+//                            .background(Color.themeWhite.opacity(0.8))
 //                            .clipShape(Circle())
 //                    }
 //                    
@@ -42,8 +42,8 @@
 //                    }) {
 //                        Text("Reset")
 //                            .padding(10)
-//                            .background(Color.black.opacity(0.6))
-//                            .foregroundColor(.white)
+//                            .background(Color.themeBlack.opacity(0.6))
+//                            .foregroundColor(.themeWhite)
 //                            .cornerRadius(8)
 //                    }
 //                    
@@ -59,7 +59,7 @@
 //                    }
 //                    .padding(10)
 //                    .background(Color.green.opacity(0.6))
-//                    .foregroundColor(.white)
+//                    .foregroundColor(.themeWhite)
 //                    .cornerRadius(8)
 //                    
 //                    Button(action: {
@@ -67,7 +67,7 @@
 //                    }) {
 //                        Image(systemName: "xmark.circle.fill")
 //                            .font(.system(size: 30))
-//                            .foregroundColor(.white)
+//                            .foregroundColor(.themeWhite)
 //                    }
 //                }
 //                .padding()
@@ -83,7 +83,7 @@
 //                    VStack(spacing: 20) {
 //                        Text("Select 3D Model")
 //                            .font(.headline)
-//                            .foregroundColor(.white)
+//                            .foregroundColor(.themeWhite)
 //                        
 //                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
 //                            ForEach(availableModels, id: \.name) { model in
@@ -95,12 +95,12 @@
 //                                            .font(.system(size: 40))
 //                                            .foregroundColor(.blue)
 //                                            .frame(width: 80, height: 60)
-//                                            .background(Color.white.opacity(0.2))
+//                                            .background(Color.themeWhite.opacity(0.2))
 //                                            .cornerRadius(10)
 //                                        
 //                                        Text(model.displayName)
 //                                            .font(.caption)
-//                                            .foregroundColor(.white)
+//                                            .foregroundColor(.themeWhite)
 //                                    }
 //                                }
 //                            }
@@ -113,7 +113,7 @@
 //                        .padding()
 //                    }
 //                    .padding()
-//                    .background(Color.black.opacity(0.8))
+//                    .background(Color.themeBlack.opacity(0.8))
 //                    .cornerRadius(15)
 //                    .padding()
 //                }
@@ -129,7 +129,7 @@
 //                    VStack(spacing: 20) {
 //                        Text("Select \(selectedMaterialType) Texture")
 //                            .font(.headline)
-//                            .foregroundColor(.white)
+//                            .foregroundColor(.themeWhite)
 //                        
 //                        Text("Material: \(selectedMaterialName)")
 //                            .font(.subheadline)
@@ -157,7 +157,7 @@
 //                                        
 //                                        Text(getTextureDisplayName(textureName))
 //                                            .font(.caption)
-//                                            .foregroundColor(.white)
+//                                            .foregroundColor(.themeWhite)
 //                                    }
 //                                }
 //                            }
@@ -170,7 +170,7 @@
 //                        .padding()
 //                    }
 //                    .padding()
-//                    .background(Color.black.opacity(0.8))
+//                    .background(Color.themeBlack.opacity(0.8))
 //                    .cornerRadius(15)
 //                    .padding()
 //                }
@@ -178,7 +178,7 @@
 //                .animation(.easeInOut, value: showTextureMenu)
 //            }
 //        }
-//        .background(Color.black.edgesIgnoringSafeArea(.all))
+//        .background(Color.themeBlack.edgesIgnoringSafeArea(.all))
 //        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowTextureMenu"))) { notification in
 //            if let userInfo = notification.userInfo,
 //               let materialType = userInfo["materialType"] as? String,

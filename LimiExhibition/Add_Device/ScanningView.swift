@@ -40,10 +40,10 @@ struct ScanningView: View {
                         onBack()
                     }) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .font(.title2)
                             .padding()
-                            .background(Circle().fill(Color.black.opacity(0.3)))
+                            .background(Circle().fill(Color.themeBlack.opacity(0.3)))
                     }
                     Spacer()
                 }
@@ -71,7 +71,7 @@ struct ScanningView: View {
                     // Rotating circle
                     Circle()
                         .trim(from: 0, to: 0.8)
-                        .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                        .stroke(Color.themeWhite.opacity(0.5), lineWidth: 1)
                         .frame(width: 280, height: 280)
                         .rotationEffect(Angle(degrees: rotation))
                         .onAppear {
@@ -225,14 +225,14 @@ struct ScanningView: View {
         }
         // Inside the main ZStack, after all other views and alerts
         if isLoading {
-            Color.black.opacity(0.5)
+            Color.themeBlack.opacity(0.5)
                 .edgesIgnoringSafeArea(.all)
             VStack {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                     .scaleEffect(2)
                 Text("Connecting with Device")
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .font(.headline)
                     .padding(.top, 20)
             }
@@ -292,7 +292,7 @@ struct ScanningView: View {
     }
     
     private func openBluetoothSettings() {
-        if let url = URL(string: "App-Prefs:root=Bluetooth"),
+        if let url = URL(string: AppURLs.Settings.bluetooth),
            UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }

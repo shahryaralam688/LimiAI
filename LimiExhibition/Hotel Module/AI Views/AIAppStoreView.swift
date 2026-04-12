@@ -16,7 +16,7 @@ struct AIAppStoreView: View {
                 .padding(.bottom, 38)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                             .rect(
                                 topLeadingRadius: 0,

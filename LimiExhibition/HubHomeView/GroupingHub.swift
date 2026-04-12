@@ -35,7 +35,7 @@ struct GroupingView: View {
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .cornerRadius(8)
                 }
                 .padding()

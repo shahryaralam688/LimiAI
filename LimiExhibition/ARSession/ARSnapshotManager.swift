@@ -69,7 +69,7 @@ final class ARSnapshotManager {
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
             imageView.layer.cornerRadius = 12
-            imageView.layer.borderColor = UIColor.white.withAlphaComponent(0.8).cgColor
+            imageView.layer.borderColor = UIColor.appWhite.withAlphaComponent(0.8).cgColor
             imageView.layer.borderWidth = 1
 
             // Start slightly off-screen bottom-left, animate in

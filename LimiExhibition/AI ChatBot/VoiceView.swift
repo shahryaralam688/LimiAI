@@ -61,7 +61,7 @@ struct VoiceView: View {
             ZStack {
                 if networkMonitor.isConnected {
                     // Background gradient when online
-                    Color(hex: "#111214")
+                    Color.appCanvasPrimary
                         .ignoresSafeArea()
 
                     if isChatMode {
@@ -100,17 +100,17 @@ struct VoiceView: View {
                         }
                     }
                 } else {
-                    Color(hex: "#111214")
+                    Color.appCanvasPrimary
                         .ignoresSafeArea()
 
                     VStack(spacing: 12) {
                         Spacer()
                         Text("Internet connection required")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                         Text("Please check your connection and try again.")
                             .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.themeWhite.opacity(0.8))
                         Spacer()
                     }
                     .multilineTextAlignment(.center)
@@ -224,7 +224,7 @@ struct VoiceView: View {
                         .padding(12) // space inside the circle
                         .background(
                             Rectangle()
-                                .fill(Color(hex: "#24262B")) // gray background
+                                .fill(Color.appSurfacePrimary) // gray background
                                 .cornerRadius(16)
                         )
                 }
@@ -234,13 +234,13 @@ struct VoiceView: View {
                     showAIConnection = true
                 }) {
                     Text("Upgrade")
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(
                             Capsule()
-                                .fill(Color(hex: "#2ECC71")) // green background
+                                .fill(Color.appSuccess) // green background
                         )
                 }
                 .frame(maxWidth: 150)
@@ -277,7 +277,7 @@ struct VoiceView: View {
             // Chat title
             Text("Chat with Limi")
                 .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
             
             Spacer()
             
@@ -300,8 +300,8 @@ struct VoiceView: View {
                 .multilineTextAlignment(.center)             // text-align: center
                 .lineSpacing((20 * 1.3) - 20)                // line-height: 130% → extra spacing
                 .kerning(-0.4)                               // letter-spacing: -2% of 20px
-                .foregroundColor(.white)                     // text color
-                .shadow(color: Color.white.opacity(0.3),
+                .foregroundColor(.themeWhite)                     // text color
+                .shadow(color: Color.themeWhite.opacity(0.3),
                         radius: 10, x: 0, y: 0)              // shadow
 
             Text("Let me help you in seconds.")
@@ -310,8 +310,8 @@ struct VoiceView: View {
                 .multilineTextAlignment(.center)           // text-align: center
                 .lineSpacing((16 * 1.4) - 16)              // line-height: 140% → extra spacing
                 .kerning(-0.16)                            // letter-spacing: -1% of font size
-                .foregroundColor(.white)                   // text color
-                .shadow(color: Color.white.opacity(0.3),
+                .foregroundColor(.themeWhite)                   // text color
+                .shadow(color: Color.themeWhite.opacity(0.3),
                         radius: 10, x: 0, y: 0)            // same shadow
 
 
@@ -411,8 +411,8 @@ struct VoiceView: View {
                             .fill(
                                 RadialGradient(
                                     colors: [
-                                        Color(red: 0.15, green: 0.2, blue: 0.25),
-                                        Color(red: 0.08, green: 0.12, blue: 0.16)
+                                        Color.appAIGradientStart,
+                                        Color.appAIGradientEnd
                                     ],
                                     center: .center,
                                     startRadius: 20,
@@ -480,14 +480,14 @@ struct VoiceView: View {
                             ZStack {
                                 Circle()
                                     .fill(
-                                        Color.white
+                                        Color.themeWhite
 
                                     )
                                     .frame(width: 100, height: 100)
                                     .overlay(
                                         Circle()
                                             .stroke(
-                                                Color.white
+                                                Color.themeWhite
 
                                             )
                                     )
@@ -504,7 +504,7 @@ struct VoiceView: View {
                     }
                     .background(
                         Rectangle()
-                            .stroke(Color(hex: "#111214"))
+                            .stroke(Color.appCanvasPrimary)
                             .frame(height: 132)
                             .frame(maxWidth: .infinity)
                             .cornerRadius(40)
@@ -529,7 +529,7 @@ struct VoiceView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 20, height: 20)     // icon size
-                                .foregroundColor(.white)          // icon color
+                                .foregroundColor(.themeWhite)          // icon color
                                 .padding()                        // padding to center inside circle
                         }
                         .frame(width: 50, height: 50)             // circle size
@@ -551,7 +551,7 @@ struct VoiceView: View {
         VStack(spacing: 0) {
             // Divider
             Rectangle()
-                .fill(Color.white.opacity(0.1))
+                .fill(Color.themeWhite.opacity(0.1))
                 .frame(height: 1)
             
             HStack(spacing: 12) {
@@ -564,13 +564,13 @@ struct VoiceView: View {
 
                         Text("Recording... Release to stop")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.white.opacity(0.08))
+                            .fill(Color.themeWhite.opacity(0.08))
                     )
                 } else {
                     // Text input field
@@ -583,10 +583,10 @@ struct VoiceView: View {
                                 .fill(.ultraThinMaterial)
                                 .background(
                                     RoundedRectangle(cornerRadius: 25)
-                                        .fill(Color.white.opacity(0.05))
+                                        .fill(Color.themeWhite.opacity(0.05))
                                 )
                         )
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 
                 // Send / Mic button (WhatsApp-style behavior + recording UI)
@@ -607,7 +607,7 @@ struct VoiceView: View {
                         .font(.system(size: 32))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [.darkGray.opacity(0.8), .white],
+                                colors: [.darkGray.opacity(0.8), .themeWhite],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -619,7 +619,7 @@ struct VoiceView: View {
 //            .background(
 //                Rectangle()
 //                    .fill(.ultraThinMaterial)
-//                    .background(Color.black.opacity(0.2))
+//                    .background(Color.themeBlack.opacity(0.2))
 //            )
         }
     }
@@ -654,19 +654,19 @@ struct VoiceView: View {
     
     // MARK: - Color Definitions
     private var charlesGreen: Color {
-        Color(red: 0.0, green: 0.5, blue: 0.0) // #008000
+        Color.darkGreen // #008000
     }
     
     private var eton: Color {
-        Color(red: 0.58, green: 0.75, blue: 0.48) // #96C07B
+        Color.appChatUserBubbleAlt // #96C07B
     }
     
     private var emerald: Color {
-        Color(red: 0.31, green: 0.78, blue: 0.47) // #50C878
+        Color.appChatUserBubble // #50C878
     }
     
     private var alabaster: Color {
-        Color(red: 0.96, green: 0.96, blue: 0.96) // #F5F5F5
+        Color.appNeutralLight // #F5F5F5
     }
     
     // MARK: - Computed Properties
@@ -834,16 +834,16 @@ struct ChatInputBar: View {
     @Binding var text: String
     var onSend: () -> Void
 
-    private let barBackground = Color(red: 44/255, green: 44/255, blue: 44/255) // #2C2C2C
-    private let sendGreen = Color(red: 76/255, green: 175/255, blue: 80/255)     // #4CAF50
-    private let placeholderColor = Color(red: 176/255, green: 176/255, blue: 176/255) // #B0B0B0
+    private let barBackground = Color.appChatBar // #2C2C2C
+    private let sendGreen = Color.appChatSend     // #4CAF50
+    private let placeholderColor = Color.appPlaceholderGray // #B0B0B0
 
     var body: some View {
         HStack(spacing: 8) {
             TextField("", text: $text, prompt: Text("Type a message...").foregroundColor(placeholderColor))
                 .textFieldStyle(.plain)
                 .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .padding(.leading, 12)
                 .padding(.vertical, 12)
 
@@ -865,7 +865,7 @@ struct ChatInputBar: View {
             RoundedRectangle(cornerRadius: 25, style: .continuous)
                 .fill(barBackground)
         )
-        .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 2)
+        .shadow(color: Color.themeBlack.opacity(0.35), radius: 8, x: 0, y: 2)
         .submitLabel(.send)
         .onSubmit(handleSend)
     }
@@ -898,7 +898,7 @@ struct ConversationBubbleView: View {
             VStack(alignment: isUser ? .trailing : .leading, spacing: 4) {
                 Text(message)
                     .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .background(
@@ -906,12 +906,12 @@ struct ConversationBubbleView: View {
                             .fill(
                                 isUser ?
                                 LinearGradient(
-                                    colors: [Color(red: 0.31, green: 0.78, blue: 0.47), Color(red: 0.0, green: 0.5, blue: 0.0)],
+                                    colors: [Color.appChatUserBubble, Color.darkGreen],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ) :
                                 LinearGradient(
-                                    colors: [Color.white.opacity(0.08), Color.white.opacity(0.04)],
+                                    colors: [Color.themeWhite.opacity(0.08), Color.themeWhite.opacity(0.04)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
@@ -920,7 +920,7 @@ struct ConversationBubbleView: View {
                                 RoundedRectangle(cornerRadius: 18)
                                     .stroke(
                                         LinearGradient(
-                                            colors: [Color.white.opacity(0.15), Color.clear],
+                                            colors: [Color.themeWhite.opacity(0.15), Color.clear],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -929,7 +929,7 @@ struct ConversationBubbleView: View {
                             )
                     )
                     .shadow(
-                        color: isUser ? Color(red: 0.31, green: 0.78, blue: 0.47).opacity(0.3) : Color.black.opacity(0.2),
+                        color: isUser ? Color.appChatUserBubble.opacity(0.3) : Color.themeBlack.opacity(0.2),
                         radius: 6,
                         x: 0,
                         y: 2
@@ -939,7 +939,7 @@ struct ConversationBubbleView: View {
                     HStack(spacing: 4) {
                         ForEach(0..<3, id: \.self) { index in
                             Circle()
-                                .fill(Color(red: 0.31, green: 0.78, blue: 0.47))
+                                .fill(Color.appChatUserBubble)
                                 .frame(width: 4, height: 4)
                                 .scaleEffect(isLive ? 1.2 : 0.8)
                                 .opacity(isLive ? 1.0 : 0.5)
@@ -953,7 +953,7 @@ struct ConversationBubbleView: View {
                         
                         Text("Live")
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(Color(red: 0.31, green: 0.78, blue: 0.47))
+                            .foregroundColor(Color.appChatUserBubble)
                     }
                     .padding(.trailing, isUser ? 0 : 16)
                     .padding(.leading, isUser ? 16 : 0)
@@ -1000,7 +1000,7 @@ struct ChatBubbleView: View {
                                     endPoint: .bottomTrailing
                                 ) :
                                 LinearGradient(
-                                    colors: [Color.white.opacity(0.1), Color.white.opacity(0.05)],
+                                    colors: [Color.themeWhite.opacity(0.1), Color.themeWhite.opacity(0.05)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
@@ -1009,7 +1009,7 @@ struct ChatBubbleView: View {
                                 RoundedRectangle(cornerRadius: 20)
                                     .stroke(
                                         LinearGradient(
-                                            colors: [Color.white.opacity(0.2), Color.clear],
+                                            colors: [Color.themeWhite.opacity(0.2), Color.clear],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -1018,7 +1018,7 @@ struct ChatBubbleView: View {
                             )
                     )
                     .shadow(
-                        color: message.isUser ? Color.purple.opacity(0.3) : Color.black.opacity(0.3),
+                        color: message.isUser ? Color.purple.opacity(0.3) : Color.themeBlack.opacity(0.3),
                         radius: 8,
                         x: 0,
                         y: 4
@@ -1027,7 +1027,7 @@ struct ChatBubbleView: View {
                 // Timestamp
                 Text(formatTime(message.timestamp))
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.themeWhite.opacity(0.5))
                     .padding(.horizontal, 4)
             }
             

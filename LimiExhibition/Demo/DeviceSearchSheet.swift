@@ -93,9 +93,9 @@ struct DeviceSearchSheet: View {
                                         .foregroundColor(.emerald)
                                 }
                                 .padding()
-                                .background(Color.white)
+                                .background(Color.themeWhite)
                                 .cornerRadius(10)
-                                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                                .shadow(color: Color.themeBlack.opacity(0.1), radius: 3, x: 0, y: 1)
                             }
                         }
                     }

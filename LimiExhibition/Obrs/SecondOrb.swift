@@ -24,7 +24,7 @@ struct GSAPLayoutAnimation: View {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
                         .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .frame(width: 80, height: 80)
                         .background(Circle().fill(Color.blue))
                         .opacity(opacity)
@@ -36,7 +36,7 @@ struct GSAPLayoutAnimation: View {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
                         .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .opacity(opacity)
                 }
             }
@@ -46,7 +46,7 @@ struct GSAPLayoutAnimation: View {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
                         .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .frame(width: 100, height: 100)
                         .background(Rectangle().fill(Color.green))
                         .opacity(opacity)
@@ -58,7 +58,7 @@ struct GSAPLayoutAnimation: View {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
                         .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .frame(width: 80, height: 80)
                         .background(Circle().fill(Color.orange))
                         .opacity(opacity)

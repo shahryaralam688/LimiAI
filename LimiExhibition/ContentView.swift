@@ -225,8 +225,8 @@ struct LEDToggleButton: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .fill(Color.themeWhite)
+                .shadow(color: Color.themeBlack.opacity(0.1), radius: 4, x: 0, y: 2)
         )
     }
 }
@@ -275,7 +275,7 @@ struct SendButton: View {
             if showingSaveMessage {
                 Text("Setting Saved")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding()
                     .background(Color.charlestonGreen.opacity(0.8))
                     .cornerRadius(10)

@@ -22,7 +22,7 @@ struct SpacesListView: View {
                     .font(.custom("Poppins-Medium", size: 18))
                     .tracking(-0.0083) // matches -0.15px letter spacing
                     .lineSpacing(3.6)  // ~120% line-height
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
             }
             .padding(.horizontal, 5)

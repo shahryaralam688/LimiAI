@@ -57,7 +57,7 @@ struct ARSurfaceGuideView: View {
                 HStack(spacing: 12) {
                     Image(systemName: type.iconName)
                         .font(.title2)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .scaleEffect(pulseAnimation ? 1.2 : 1.0)
                         .animation(
                             .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
@@ -67,12 +67,12 @@ struct ARSurfaceGuideView: View {
                     Text(type.title)
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 
 //                Text(type.instruction)
 //                    .font(.subheadline)
-//                    .foregroundColor(.white.opacity(0.8))
+//                    .foregroundColor(.themeWhite.opacity(0.8))
 //                    .multilineTextAlignment(.center)
 //                    .lineLimit(2)
             }
@@ -108,7 +108,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.3), Color.white.opacity(0.1)],
+                        colors: [Color.themeWhite.opacity(0.3), Color.themeWhite.opacity(0.1)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -117,7 +117,7 @@ struct ARSurfaceGuideView: View {
                 .rotation3DEffect(.degrees(65), axis: (x: 1, y: 0, z: 0))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.6), lineWidth: 2)
+                        .stroke(Color.themeWhite.opacity(0.6), lineWidth: 2)
                         .frame(width: 200, height: 60)
                         .rotation3DEffect(.degrees(65), axis: (x: 1, y: 0, z: 0))
                 )
@@ -135,7 +135,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.1), Color.white.opacity(0.3)],
+                        colors: [Color.themeWhite.opacity(0.1), Color.themeWhite.opacity(0.3)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -145,7 +145,7 @@ struct ARSurfaceGuideView: View {
                 .offset(y: -15)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.6), lineWidth: 2)
+                        .stroke(Color.themeWhite.opacity(0.6), lineWidth: 2)
                         .frame(width: 200, height: 60)
                         .rotation3DEffect(.degrees(-65), axis: (x: 1, y: 0, z: 0))
                         .offset(y: -15)
@@ -165,7 +165,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.2), Color.white.opacity(0.1)],
+                        colors: [Color.themeWhite.opacity(0.2), Color.themeWhite.opacity(0.1)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -174,7 +174,7 @@ struct ARSurfaceGuideView: View {
                 .rotation3DEffect(.degrees(-8), axis: (x: 0, y: 1, z: 0))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.6), lineWidth: 2)
+                        .stroke(Color.themeWhite.opacity(0.6), lineWidth: 2)
                         .frame(width: 180, height: 120)
                         .rotation3DEffect(.degrees(-8), axis: (x: 0, y: 1, z: 0))
                 )
@@ -191,11 +191,11 @@ struct ARSurfaceGuideView: View {
         ZStack {
             // Phone outline with modern design
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white, lineWidth: 2.5)
+                .stroke(Color.themeWhite, lineWidth: 2.5)
                 .frame(width: 36, height: 64)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.15))
+                        .fill(Color.themeWhite.opacity(0.15))
                         .frame(width: 36, height: 64)
                 )
             
@@ -212,13 +212,13 @@ struct ARSurfaceGuideView: View {
             
             // Camera notch
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.white.opacity(0.8))
+                .fill(Color.themeWhite.opacity(0.8))
                 .frame(width: 12, height: 3)
                 .offset(y: -22)
             
             // Animated scanning line
             Rectangle()
-                .fill(Color.white.opacity(0.8))
+                .fill(Color.themeWhite.opacity(0.8))
                 .frame(width: 24, height: 1)
                 .offset(y: animate ? -15 : 15)
                 .animation(
@@ -254,7 +254,7 @@ struct ARSurfaceGuideView: View {
             // Horizontal lines
             ForEach(0..<rows, id: \.self) { row in
                 Rectangle()
-                    .fill(Color.white.opacity(0.4))
+                    .fill(Color.themeWhite.opacity(0.4))
                     .frame(width: totalWidth, height: 1)
                     .offset(y: CGFloat(row) * spacing - totalHeight / 2)
             }
@@ -262,7 +262,7 @@ struct ARSurfaceGuideView: View {
             // Vertical lines
             ForEach(0..<columns, id: \.self) { column in
                 Rectangle()
-                    .fill(Color.white.opacity(0.4))
+                    .fill(Color.themeWhite.opacity(0.4))
                     .frame(width: 1, height: totalHeight)
                     .offset(x: CGFloat(column) * spacing - totalWidth / 2)
             }
@@ -271,7 +271,7 @@ struct ARSurfaceGuideView: View {
             ForEach(0..<rows, id: \.self) { row in
                 ForEach(0..<columns, id: \.self) { column in
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.themeWhite)
                         .frame(width: 4, height: 4)
                         .opacity(dotOpacity(row: row, column: column, rows: rows, columns: columns))
                         .scaleEffect(pulseAnimation ? 1.2 : 0.8)
@@ -313,5 +313,5 @@ struct ARSurfaceGuideView: View {
             .frame(height: 200)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color.black)
+    .background(Color.themeBlack)
 }

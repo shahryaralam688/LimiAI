@@ -38,7 +38,7 @@ struct PortalWebView: View {
             // Header Section
             ZStack {
                 Rectangle()
-                    .fill(Color(hex: "#2A2C33"))
+                    .fill(Color.appSurfaceSecondary)
                     .cornerRadius(32)
                     .frame(height: 124)
                 
@@ -51,7 +51,7 @@ struct PortalWebView: View {
                             .foregroundColor(.alabaster)
                             .font(.system(size: 18, weight: .medium))
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                            .background(Color.appInputFill)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
@@ -59,11 +59,11 @@ struct PortalWebView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("AR Experience")
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                         
                         Text("Login to experience more features")
                             .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color(hex: "#B6BAC2"))
+                            .foregroundColor(Color.appTextTertiary)
                     }
                     
                     Spacer()
@@ -79,7 +79,7 @@ struct PortalWebView: View {
                     }) {
                         Text("Presets")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedTab == .presets ? .white : Color(white: 0.7))
+                            .foregroundColor(selectedTab == .presets ? .themeWhite : Color(white: 0.7))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(
@@ -100,7 +100,7 @@ struct PortalWebView: View {
                     }) {
                         Text("Custom")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedTab == .custom ? .white : Color(white: 0.7))
+                            .foregroundColor(selectedTab == .custom ? .themeWhite : Color(white: 0.7))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(
@@ -137,9 +137,9 @@ struct PortalWebView: View {
                                         ZStack {
                                             RadialGradient(
                                                 gradient: Gradient(colors: [
-                                                    Color.black.opacity(0.95),
-                                                    Color.black.opacity(0.6),
-                                                    Color.black.opacity(0.0)
+                                                    Color.themeBlack.opacity(0.95),
+                                                    Color.themeBlack.opacity(0.6),
+                                                    Color.themeBlack.opacity(0.0)
                                                 ]),
                                                 center: .center,
                                                 startRadius: 10,
@@ -151,11 +151,11 @@ struct PortalWebView: View {
                                                 HStack(spacing: 8) {
                                                     Text("No Designs Yet")
                                                         .font(.system(size: 22, weight: .semibold))
-                                                        .foregroundColor(.white)
+                                                        .foregroundColor(.themeWhite)
 
                                                     Image(systemName: "info.circle")
                                                         .font(.system(size: 18, weight: .regular))
-                                                        .foregroundColor(Color.white.opacity(0.8))
+                                                        .foregroundColor(Color.themeWhite.opacity(0.8))
                                                 }
 
                                                 Button(action: {
@@ -165,16 +165,16 @@ struct PortalWebView: View {
                                                 }) {
                                                     Text("Open Configurator")
                                                         .font(.system(size: 16, weight: .semibold))
-                                                        .foregroundColor(.white)
+                                                        .foregroundColor(.themeWhite)
                                                         .padding(.horizontal, 40)
                                                         .padding(.vertical, 14)
                                                         .background(
                                                             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                                                .fill(Color.black.opacity(0.9))
+                                                                .fill(Color.themeBlack.opacity(0.9))
                                                         )
                                                         .overlay(
                                                             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                                                .stroke(Color.themeWhite.opacity(0.12), lineWidth: 1)
                                                         )
                                                 }
                                             }
@@ -223,7 +223,7 @@ struct PortalWebView: View {
                 .zIndex(1)
             }
         }
-        .background(Color.black)
+        .background(Color.themeBlack)
         .ignoresSafeArea(edges: [.top, .bottom])
         .onAppear {
             checkLightConfigs()
@@ -252,7 +252,7 @@ struct PortalWebView: View {
 
 extension PortalWebView {
     private func checkLightConfigs() {
-        guard let url = URL(string: "https://dev.api1.limitless-lighting.co.uk/admin/products/users/light-configs/check") else { return }
+        guard let url = URL(string: APIConstants.lightConfigsCheck) else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -349,7 +349,7 @@ struct WebViewContainer: UIViewRepresentable {
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         if let token = AuthManager.shared.getToken(),
-           let url = URL(string: "https://limi-configurator-ios.vercel.app/ar_view?token=\(token)&inApp=1") {
+           let url = URL(string: AppURLs.Web.arPortal(token: token)) {
             
             webView.load(URLRequest(url: url))
         }
@@ -386,7 +386,7 @@ struct WebViewContainer: UIViewRepresentable {
         }
 
         private func fetchLightConfig(for spanID: String) {
-            let urlString = APIConstants.lightConfigs + "\(spanID)?filter=true"
+            let urlString = APIConstants.lightConfig(spanID)
             guard let url = URL(string: urlString) else { return }
 
             var request = URLRequest(url: url)
@@ -417,7 +417,7 @@ struct WebViewContainer: UIViewRepresentable {
         }
 
         private func downloadUSDZUsingAPI(downloadId: String) {
-            guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/3d-models/web-configurator/download/\(downloadId)") else {
+            guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else {
                 print("❌ Invalid download URL")
                 return
             }

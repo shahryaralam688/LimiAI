@@ -31,8 +31,8 @@ struct CCTLEDView: View {
     // Rainbow Color Bar Variable
     @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50 // kept for backwards-compat, not used to send
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = "#50C878" // Default emerald hex
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? "#50C878")
+    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
+    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
     private var hexColor: Color { Color(hex: selectedColorHex) }
 
     // Global Variable
@@ -73,7 +73,7 @@ struct CCTLEDView: View {
                                         .clipped()
                                 } else {
                                     if let token = AuthManager.shared.getToken(),
-                                       let url = URL(string: "https://limi-configurator-ios-version-2.vercel.app/configurator?token=\(token)") {
+                                       let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
                                         LimiWebViewCon(url: url, macAddress: chennalMac)
                                             .frame(height: 450)
                                             .cornerRadius(16)
@@ -95,9 +95,9 @@ struct CCTLEDView: View {
                                 }) {
                                     Image(systemName: "gearshape.fill")
                                         .font(.system(size: 16, weight: .semibold))
-//                                        .foregroundColor((selectedTopTab == 1 ? Color.black : Color.white))
+//                                        .foregroundColor((selectedTopTab == 1 ? Color.themeBlack : Color.themeWhite))
                                         .frame(width: 36, height: 36)
-                                        .background((selectedTopTab == 1 ? Color.white : Color.gray.opacity(0.4)))
+                                        .background((selectedTopTab == 1 ? Color.themeWhite : Color.gray.opacity(0.4)))
                                         .clipShape(Circle())
                                 }
                                 
@@ -173,7 +173,7 @@ struct CCTLEDView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color(hex: "#24262B"))
+                            .fill(Color.appSurfacePrimary)
                     )
                     .padding(.bottom, 20)
 
@@ -186,16 +186,16 @@ struct CCTLEDView: View {
                 Spacer(minLength: 30)
             }.padding()
         }
-        .background(Color.fromHex("#111214"))
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
                     .font(.custom("Poppins-Medium", size: 14))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.black.opacity(0.8))
+                    .background(Color.themeBlack.opacity(0.8))
                     .cornerRadius(12)
                     .padding(.top, 12)
                     .transition(.opacity)
@@ -241,12 +241,12 @@ struct CCTLEDView: View {
         let byteArray: [String] = [
             String(chennalMac ?? ""),
             String(chennelPosition ?? 1),
-            String(Int(intensityValue)),
             String(Int(intensityValue2)),
+            String(Int(intensityValue)),
             String(Int(brightnessValue))
         ]
 
-        print("🔶 sendColor() -> warm=\(Int(intensityValue)) cool=\(Int(intensityValue2)) bri%=\(Int(brightnessValue))")
+        print("🔶 sendColor() -> cw=\(Int(intensityValue2)) ww=\(Int(intensityValue)) bri255=\(Int(brightnessValue))")
         pwmIntensityObj.sendLightControl(message: byteArray)
     }
 
@@ -284,14 +284,15 @@ struct CCTLEDView: View {
         let intensityValue = led1warmCold
         let intensityValue2: Double = abs(intensityValue - 100)
 
+        let brightness255 = Int((clamped / 100.0) * 255.0)
         let byteArray: [String] = [
             String(chennalMac ?? ""),
             String(chennelPosition ?? 1),
-            String(Int(intensityValue)),
             String(Int(intensityValue2)),
-            String(Int(clamped))
+            String(Int(intensityValue)),
+            String(brightness255)
         ]
-        print("🚚 updateBrightness() -> warm=\(Int(intensityValue)) cool=\(Int(intensityValue2)) bri%=\(Int(clamped))")
+        print("🚚 updateBrightness() -> cw=\(Int(intensityValue2)) ww=\(Int(intensityValue)) bri%=\(Int(clamped)) bri255=\(brightness255)")
         pwmIntensityObj.sendLightControl(message: byteArray)
     }
 
@@ -347,13 +348,13 @@ struct CCTLEDView: View {
                     ZStack {
                         // Background pill
                         Rectangle()
-                            .fill(isOn ? Color.white : Color.gray.opacity(0.3))
+                            .fill(isOn ? Color.themeWhite : Color.gray.opacity(0.3))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
 
                         // Inner dot
                         Circle()
-                            .fill(Color.black)
+                            .fill(Color.themeBlack)
                             .frame(width: 20, height: 20)
                             .offset(x: isOn ? 12 : -12, y: 0)
                             .animation(.easeInOut(duration: 0.2), value: isOn)
@@ -363,7 +364,7 @@ struct CCTLEDView: View {
             }
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func sendLampState() {
@@ -441,7 +442,7 @@ struct CCTLEDView: View {
                         .frame(width: 30, height: 30)
                         .overlay(
                             Circle()
-                                .stroke(Color.white, lineWidth: 3)
+                                .stroke(Color.themeWhite, lineWidth: 3)
                                 .shadow(radius: 2)
                         )
                         .offset(x: selectedHue * (geometry.size.width - 30))
@@ -465,7 +466,7 @@ struct CCTLEDView: View {
             .frame(height: 40)
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var brightnessBar: some View {
@@ -474,7 +475,7 @@ struct CCTLEDView: View {
             brightnessSliderContainer
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var brightnessTitle: some View {
@@ -500,23 +501,23 @@ struct CCTLEDView: View {
 
     private var leftCircle: some View {
         Circle()
-            .fill(Color(hex: "#24262B"))
+            .fill(Color.appSurfacePrimary)
             .frame(width: 46, height: 46)
             .overlay(
                 Text("0%")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             )
     }
 
     private var rightCircle: some View {
         Circle()
-            .fill(Color(hex: "#24262B"))
+            .fill(Color.appSurfacePrimary)
             .frame(width: 46, height: 46)
             .overlay(
                 Text("\(Int(100))%")  // use computed %
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             )
     }
 
@@ -536,7 +537,7 @@ struct CCTLEDView: View {
         Capsule()
             .fill(
                 LinearGradient(
-                    colors: [Color.fromHex("#444444"), Color.fromHex("#999999")],
+                    colors: [Color.appSliderDark, Color.appSliderMid],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
@@ -548,7 +549,7 @@ struct CCTLEDView: View {
         HStack {
             ForEach(0..<10) { index in
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 4, height: 4)
                 if index < 9 {
                     Spacer()
@@ -560,15 +561,15 @@ struct CCTLEDView: View {
 
     private func sliderThumb(geometry: GeometryProxy) -> some View {
         Circle()
-            .fill(Color.fromHex("#DDDDDD"))
+            .fill(Color.appSliderLight)
             .frame(width: 28, height: 28)
             .overlay(
                 Circle()
-                    .stroke(Color.black, lineWidth: 1)
+                    .stroke(Color.themeBlack, lineWidth: 1)
             )
             .overlay(
                 Circle()
-                    .fill(Color.fromHex("#202020"))
+                    .fill(Color.appSliderThumb)
                     .frame(width: 8, height: 8)
             )
             .position(
@@ -600,14 +601,14 @@ struct CCTLEDView: View {
     }
 
     private var sliderBackground: some View {
-        Color.black.opacity(0.3)
+        Color.themeBlack.opacity(0.3)
             .cornerRadius(70)
     }
 
     private var sliderBorder: some View {
         RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.black.opacity(0.68), lineWidth: 2)
-            .shadow(color: Color.black.opacity(0.68), radius: 4, x: 0, y: 1)
+            .stroke(Color.themeBlack.opacity(0.68), lineWidth: 2)
+            .shadow(color: Color.themeBlack.opacity(0.68), radius: 4, x: 0, y: 1)
             .clipShape(RoundedRectangle(cornerRadius: 70))
     }
 
@@ -629,11 +630,11 @@ struct CCTLEDView: View {
                                 // Effect icon based on name
                                 Image(systemName: effectIcon(for: effect.name))
                                     .font(.title2)
-                                    .foregroundColor(selectedEffect == effect.id ? .white : .primary)
+                                    .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
 
                                 Text(effect.name)
                                     .font(.caption)
-                                    .foregroundColor(selectedEffect == effect.id ? .white : .primary)
+                                    .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
                             }
@@ -658,7 +659,7 @@ struct CCTLEDView: View {
             }
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // Helper function to get appropriate SF Symbol for effect names
@@ -738,9 +739,9 @@ struct HorizontalWarmCoolSlider: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(red: 1.0, green: 0.95, blue: 0.8), // warm
-                                Color.white,
-                                Color(red: 0.8, green: 0.9, blue: 1.0)   // cool
+                                Color.spotlightWarm, // warm
+                                Color.themeWhite,
+                                Color.spotlightCool   // cool
                             ],
                             startPoint: .leading,
                             endPoint: .trailing
@@ -752,7 +753,7 @@ struct HorizontalWarmCoolSlider: View {
                 HStack {
                     ForEach(0..<10) { i in
                         Circle()
-                            .fill(Color.white.opacity(0.9))
+                            .fill(Color.themeWhite.opacity(0.9))
                             .frame(width: 3, height: 3)
                         if i < 9 { Spacer() }
                     }
@@ -760,10 +761,10 @@ struct HorizontalWarmCoolSlider: View {
 
                 // Thumb
                 Circle()
-                    .fill(Color.fromHex("#DDDDDD"))
+                    .fill(Color.appSliderLight)
                     .frame(width: thumbSize, height: thumbSize)
-                    .overlay(Circle().stroke(Color.black.opacity(0.9), lineWidth: 1))
-                    .overlay(Circle().fill(Color.fromHex("#202020")).frame(width: 8, height: 8))
+                    .overlay(Circle().stroke(Color.themeBlack.opacity(0.9), lineWidth: 1))
+                    .overlay(Circle().fill(Color.appSliderThumb).frame(width: 8, height: 8))
                     .position(x: x, y: geo.size.height/2)
                     .shadow(radius: 1)
                     .gesture(

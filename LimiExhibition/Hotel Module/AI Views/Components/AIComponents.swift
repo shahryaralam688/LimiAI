@@ -3,20 +3,20 @@ import SwiftUI
 // MARK: - Design Tokens
 struct AIDesignTokens {
     // Colors
-    static let bgBase = Color.black
-    static let bgSurface = Color(hex: "#1F1F1F")
-    static let bgCard = Color(hex: "#393C43")
-    static let textPrimary = Color.white
-    static let textSecondary = Color(hex: "#B9BDC7")
-    static let textMuted = Color(hex: "#9AA0A6")
-    static let brandEmerald = Color(hex: "#54BA73")
-    static let brandEmeraldPressed = Color(hex: "#46A663")
-    static let brandEmerald20 = Color(hex: "#54BA73").opacity(0.20)
-    static let accentWarn = Color(hex: "#FF9292")
-    static let strokeSoft = Color.white.opacity(0.08)
-    static let chipBg = Color.white.opacity(0.06)
-    static let badgeBg = Color.white.opacity(0.10)
-    static let toggleOff = Color.white.opacity(0.24)
+    static let bgBase = Color.themeBlack
+    static let bgSurface = Color.appCanvasMuted
+    static let bgCard = Color.appSurfaceTertiary
+    static let textPrimary = Color.themeWhite
+    static let textSecondary = Color.appBorderField
+    static let textMuted = Color.appTextSubtle
+    static let brandEmerald = Color.appBrandPrimary
+    static let brandEmeraldPressed = Color.appBrandPrimary
+    static let brandEmerald20 = Color.appBrandPrimary.opacity(0.20)
+    static let accentWarn = Color.appDanger
+    static let strokeSoft = Color.themeWhite.opacity(0.08)
+    static let chipBg = Color.themeWhite.opacity(0.06)
+    static let badgeBg = Color.themeWhite.opacity(0.10)
+    static let toggleOff = Color.themeWhite.opacity(0.24)
     
     // Spacing
     static let spacingXXS: CGFloat = 4
@@ -62,15 +62,15 @@ struct AIButton: View {
         Button(action: action) {
             Text(title)
                 .font(AIDesignTokens.titleFont)
-                .foregroundColor(Color.black)
+                .foregroundColor(Color.themeBlack)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(style == .primary ? Color.white : Color.clear)
+                        .fill(style == .primary ? Color.themeWhite : Color.clear)
                         .overlay(
                             RoundedRectangle(cornerRadius: AIDesignTokens.radiusXSS)
-                                .stroke(style == .outline ? Color.white : Color.clear, lineWidth: 1)
+                                .stroke(style == .outline ? Color.themeWhite : Color.clear, lineWidth: 1)
                         )
                 )
         }
@@ -124,14 +124,14 @@ struct AICustomToggleStyle: ToggleStyle {
             ZStack(alignment: configuration.isOn ? .trailing : .leading) {
                 // Track
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(configuration.isOn ? Color.white :  Color(hex: "#8C8C8C")  )
+                    .fill(configuration.isOn ? Color.themeWhite :  Color.appTextDisabled  )
                     .frame(width: 52, height: 30)
 
                 // Thumb / ball
                 Circle()
-                    .fill(configuration.isOn ? Color.emerald : Color(hex: "#4B4B4B"))
+                    .fill(configuration.isOn ? Color.emerald : Color.appBorderTertiary)
                     .frame(width: 26, height: 26)
-                    .shadow(color: Color.black.opacity(0.3), radius: 2, x: 0, y: 1)
+                    .shadow(color: Color.themeBlack.opacity(0.3), radius: 2, x: 0, y: 1)
                     .padding(2)
             }
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isOn)
@@ -165,7 +165,7 @@ struct AIAppBar: View {
                     .foregroundColor(.alabaster)
                     .font(.system(size: 18, weight: .medium))
                     .frame(width: 44, height: 44)
-                    .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                    .background(Color.appInputFill)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             
@@ -239,18 +239,18 @@ struct ModelCard: View {
                     } label: {
                         Text(isConnected ? "Connect" : "Disconnect")
                             .font(.headline)
-                            .foregroundColor(isConnected ? .black : .white)
+                            .foregroundColor(isConnected ? .themeBlack : .themeWhite)
                             .frame(maxWidth: .infinity)
                             .frame(height: 32)
                             .background(
                                 // ✅ Fill emerald when connected, transparent when not
                                 RoundedRectangle(cornerRadius: 8)
-                                    .fill(isConnected ? Color.white : Color.clear)
+                                    .fill(isConnected ? Color.themeWhite : Color.clear)
                             )
                             .overlay(
                                 // ✅ Always keep emerald border
                                 RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.white, lineWidth: 1)
+                                    .stroke(Color.themeWhite, lineWidth: 1)
                             )
                     }
                     .animation(.easeInOut(duration: 0.2), value: isConnected)
@@ -267,7 +267,7 @@ struct ModelCard: View {
         .background(
             RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
                 .fill(AIDesignTokens.bgCard)
-                .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
+                .shadow(color: Color.themeBlack.opacity(0.5), radius: 12, x: 0, y: 6)
         )
     }
 }
@@ -317,16 +317,16 @@ struct InfoBanner: View {
         VStack(alignment: .leading, spacing: AIDesignTokens.spacingMD) {
             Text(title)
                 .font(AIDesignTokens.h2Font)
-                .foregroundColor(.black)
+                .foregroundColor(.themeBlack)
             
             Text(description)
                 .font(AIDesignTokens.bodyFont)
-                .foregroundColor(.black)
+                .foregroundColor(.themeBlack)
             
             Button(action: onCTA) {
                 Text(ctaText)
                     .font(AIDesignTokens.titleFont)
-                    .foregroundColor(.black)
+                    .foregroundColor(.themeBlack)
                     .underline()
             }
         }
@@ -334,7 +334,7 @@ struct InfoBanner: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(.white)
+                .fill(Color.themeWhite)
         )
     }
 }

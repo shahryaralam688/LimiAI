@@ -33,7 +33,7 @@ struct ElegantGradientBackgroundView: View {
                 gradient: Gradient(colors: [
                     Color.charlestonGreen,
 
-                    Color(red: 243/255, green: 235/255, blue: 226/255)  // Alabaster
+                    Color.alabaster  // Alabaster
                 ]),
                 startPoint: .top,
                 endPoint: .bottom
@@ -87,8 +87,8 @@ struct GetStart: View {
                     // Bottom border blur in black
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color.black.opacity(1.0),
-                            Color.black.opacity(0.8)
+                            Color.themeBlack.opacity(1.0),
+                            Color.themeBlack.opacity(0.8)
                         ]),
                         startPoint: .bottom,
                         endPoint: .top
@@ -115,7 +115,7 @@ struct GetStart: View {
                                     .padding(12) // space inside the circle
                                     .background(
                                         Rectangle()
-                                            .fill(Color(hex: "#24262B")) // gray background
+                                            .fill(Color.appSurfacePrimary) // gray background
                                             .cornerRadius(16)
                                     )
                             }
@@ -198,12 +198,12 @@ struct GetStart: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
 
         
     
 //            ZStack(alignment: .top) {
-//                Color.black
+//                Color.themeBlack
 //                VStack(spacing: 0) {
 //                    VStack {
 //                        Image("wire")
@@ -233,7 +233,7 @@ struct GetStart: View {
 //                                    heroScale = 1.0
 //                                }
 //                            }
-//                            .shadow(color: .white, radius: 4)
+//                            .shadow(color: .themeWhite, radius: 4)
 //                    }
 //                    Spacer(minLength: 0)
 //                }
@@ -416,7 +416,7 @@ struct GetStart: View {
 //                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
 //                            .overlay(
 //                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-//                                    .stroke(Color.white, lineWidth: 1)
+//                                    .stroke(Color.themeWhite, lineWidth: 1)
 //                            )
 //                    }
 //                )
@@ -549,7 +549,7 @@ struct GetStartedButton: View {
             HStack {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                 } else {
                     Text("Continue")
                         .font(.system(size: 16, weight: .medium))
@@ -565,8 +565,8 @@ struct GetStartedButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .padding(.horizontal, 20)
-            .background(Color(hex: "#54BA73"))
-            .foregroundColor(.black)
+            .background(Color.appBrandPrimary)
+            .foregroundColor(.themeBlack)
             .cornerRadius(12)
             .opacity(isVisible ? 1 : 0)
             .offset(y: isVisible ? 0 : 20)
@@ -704,7 +704,7 @@ struct RoleCard: View {
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isSelected ? Color.emerald : Color(hex: "#111214"))
+                        .fill(isSelected ? Color.emerald : Color.appCanvasPrimary)
                         .scaleEffect(isSelected ? 1 : 0.95)
 
 

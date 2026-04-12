@@ -38,9 +38,9 @@ struct CurvedSlider: View {
                     .stroke(
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(red: 1.0, green: 0.95, blue: 0.8),
-                                Color.white,
-                                Color(red: 0.8, green: 0.9, blue: 1.0)
+                                Color.spotlightWarm,
+                                Color.themeWhite,
+                                Color.spotlightCool
                             ]),
                             startPoint: .leading,
                             endPoint: .trailing
@@ -52,23 +52,23 @@ struct CurvedSlider: View {
                 // Knob with percentage popup
                 ZStack {
                     Circle()
-                        .fill(Color.white.opacity(0.5))
+                        .fill(Color.themeWhite.opacity(0.5))
                         .frame(width: knobSize + 8, height: knobSize + 8)
                         .blur(radius: 4)
 
                     Circle()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.white, Color.white.opacity(0.9)]),
+                                gradient: Gradient(colors: [Color.themeWhite, Color.themeWhite.opacity(0.9)]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: knobSize, height: knobSize)
-                        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                        .shadow(color: Color.themeBlack.opacity(0.2), radius: 2, x: 0, y: 1)
 
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.themeWhite)
                         .frame(width: knobSize * 0.6, height: knobSize * 0.6)
                 }
                 .overlay(
@@ -235,7 +235,7 @@ struct CurvedSlider_Previews: PreviewProvider {
                     .padding(.top, 20)
             }
             .padding(40)
-            .background(Color(.systemBackground))
+            .background(Color(uiColor: .systemBackground))
         }
     }
 }

@@ -20,10 +20,10 @@ struct GlowOrbView: View {
                 .fill(
                     RadialGradient(
                         gradient: Gradient(colors: [
-                            Color.white,
-                            Color(red: 0.49, green: 0.93, blue: 1.0),
-                            Color(red: 0.13, green: 0.9, blue: 0.53),
-                            Color(red: 0.13, green: 0.9, blue: 0.53).opacity(0.2)
+                            Color.themeWhite,
+                            Color.aqua,
+                            Color.mint,
+                            Color.mint.opacity(0.2)
                         ]),
                         center: .center,
                         startRadius: 2,
@@ -44,7 +44,7 @@ struct GlowOrbView: View {
                         )
                         .blur(radius: 0.3)
                 )
-                .shadow(color: .white.opacity(0.9), radius: 12)
+                .shadow(color: .themeWhite.opacity(0.9), radius: 12)
                 .shadow(color: Color.green.opacity(0.35), radius: 28)
                 .scaleEffect(pulse ? 1.06 : 0.98)
 
@@ -181,7 +181,7 @@ private struct EllipticalOrbitingCircle: View {
 
             Image(systemName: icon)
                 .font(.system(size: size * 0.4, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
         }
         .rotationEffect(.degrees(internalSpin))
         .onAppear {
@@ -203,16 +203,16 @@ private struct AngularSweep: View {
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: [
-                        .init(color: .white.opacity(0.0), location: 0.00),
-                        .init(color: .white.opacity(0.15), location: 0.08),
-                        .init(color: .white.opacity(0.35), location: 0.12),
-                        .init(color: .white.opacity(0.0), location: 0.18),
+                        .init(color: .themeWhite.opacity(0.0), location: 0.00),
+                        .init(color: .themeWhite.opacity(0.15), location: 0.08),
+                        .init(color: .themeWhite.opacity(0.35), location: 0.12),
+                        .init(color: .themeWhite.opacity(0.0), location: 0.18),
                         .init(color: Color.emerald.opacity(0.25), location: 0.28),
                         .init(color: Color.eton.opacity(0.25), location: 0.35),
-                        .init(color: .white.opacity(0.0), location: 0.45),
-                        .init(color: .white.opacity(0.2), location: 0.52),
-                        .init(color: .white.opacity(0.0), location: 0.60),
-                        .init(color: .white.opacity(0.0), location: 1.00)
+                        .init(color: .themeWhite.opacity(0.0), location: 0.45),
+                        .init(color: .themeWhite.opacity(0.2), location: 0.52),
+                        .init(color: .themeWhite.opacity(0.0), location: 0.60),
+                        .init(color: .themeWhite.opacity(0.0), location: 1.00)
                     ]),
                     center: .center
                 ),
@@ -243,7 +243,7 @@ private struct Sparkles: View {
                     let r: CGFloat = 1.2 + 1.6 * CGFloat(abs(phase))
                     var star = Path()
                     star.addEllipse(in: CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2))
-                    context.fill(star, with: .color(Color.white.opacity(alpha)))
+                    context.fill(star, with: .color(Color.themeWhite.opacity(alpha)))
                 }
             }
         }
@@ -266,7 +266,7 @@ private struct RandomNumberGeneratorWithSeed: RandomNumberGenerator {
 // MARK: - Preview
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.themeBlack.ignoresSafeArea()
         GlowOrbView()
     }
 }

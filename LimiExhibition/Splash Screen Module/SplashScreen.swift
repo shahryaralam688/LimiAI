@@ -16,7 +16,7 @@ struct SplashScreen: View {
     @State private var hardwareOpacity = 0.0
     @State private var pulsePhase = 0.0
 
-    private let brandGreen = Color(hex: "#76E094")
+    private let brandGreen = Color.appBrandSecondary
 
     var body: some View {
         Group {
@@ -51,7 +51,7 @@ struct SplashScreen: View {
 
     private var splashContent: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.themeBlack.ignoresSafeArea()
 
             // Hardware imagery layer - uncomment and replace "hardwareDevice" with your asset
             // Image("hardwareDevice")
@@ -77,7 +77,7 @@ struct SplashScreen: View {
                 VStack(spacing: 8) {
                     Text("Limi")
                         .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
 
                     Text("The Operating System for Physical Space")
                         .font(.system(size: 16, weight: .medium, design: .default))

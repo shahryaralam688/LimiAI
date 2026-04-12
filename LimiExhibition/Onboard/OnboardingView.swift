@@ -105,7 +105,7 @@ struct OnboardingView: View {
 //                        hasCompletedOnboarding = true
 //                        showDemoAddDevice = true // ✅ showDemoAddDevice triggers on Skip
 //                    }
-//                    .foregroundColor(.white)
+//                    .foregroundColor(.themeWhite)
 //                    .padding(.top, 50)
 //                    .padding(.trailing, 20)
 //                    .opacity(skipButtonOpacity)
@@ -151,7 +151,7 @@ struct OnboardingPageView: View {
     @State private var indicatorOpacity: Double = 0
     @State private var wasActive: Bool = false
 
-    private let brandGreen = Color(hex: "#76E094")
+    private let brandGreen = Color.appBrandSecondary
 
     private var isActive: Bool {
         pageIndex == index
@@ -161,7 +161,7 @@ struct OnboardingPageView: View {
         GeometryReader { geo in
             ZStack {
                 // Background
-                Color.black.ignoresSafeArea()
+                Color.themeBlack.ignoresSafeArea()
 
                 // Image - preserved exactly as before
                 Image(image)
@@ -180,7 +180,7 @@ struct OnboardingPageView: View {
                     ZStack(alignment: .top) {
                         // Frosted glass card background
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(Color.white.opacity(0.08))
+                            .fill(Color.themeWhite.opacity(0.08))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                                     .stroke(brandGreen.opacity(0.15), lineWidth: 1)
@@ -192,7 +192,7 @@ struct OnboardingPageView: View {
                             Text(title)
                                 .font(.system(size: 26, weight: .bold, design: .rounded))
                                 .multilineTextAlignment(.center)
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .scaleEffect(titleScale)
                                 .opacity(titleOpacity)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0).delay(0.3), value: titleScale)
@@ -200,7 +200,7 @@ struct OnboardingPageView: View {
 
                             Text(description)
                                 .font(.system(size: 16, weight: .medium, design: .default))
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(.themeWhite.opacity(0.7))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                                 .opacity(descriptionOpacity)
@@ -222,7 +222,7 @@ struct OnboardingPageView: View {
                                                 endPoint: .trailing
                                             )
                                         )
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.themeBlack)
                                         .cornerRadius(28)
                                         .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
                                 }
@@ -237,7 +237,7 @@ struct OnboardingPageView: View {
                             HStack(spacing: 8) {
                                 ForEach(0..<totalPages, id: \.self) { idx in
                                     Circle()
-                                        .fill(idx == pageIndex ? brandGreen : Color.white.opacity(0.3))
+                                        .fill(idx == pageIndex ? brandGreen : Color.themeWhite.opacity(0.3))
                                         .frame(width: idx == pageIndex ? 20 : 8, height: 8)
                                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pageIndex)
                                 }

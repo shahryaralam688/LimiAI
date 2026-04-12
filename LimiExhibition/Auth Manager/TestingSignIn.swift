@@ -13,7 +13,7 @@ struct TestingSignIn: View {
     var body: some View {
         ZStack {
             // Background
-            Color.black.ignoresSafeArea()
+            Color.themeBlack.ignoresSafeArea()
             
             VStack(spacing: 40) {
                 if authManager.isSignedIn {
@@ -21,16 +21,16 @@ struct TestingSignIn: View {
                     VStack(spacing: 24) {
                         Text("Welcome!")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                         
                         VStack(spacing: 12) {
                             Text(authManager.userName)
                                 .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                             
                             Text(authManager.userEmail)
                                 .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.themeWhite.opacity(0.8))
                         }
                         
                         Button {
@@ -38,7 +38,7 @@ struct TestingSignIn: View {
                         } label: {
                             Text("Sign Out")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
                                 .background(Color.red)
@@ -52,11 +52,11 @@ struct TestingSignIn: View {
                         VStack(spacing: 16) {
                             Text("Welcome to LIMI")
                                 .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                             
                             Text("Sign in with your Google account to continue")
                                 .font(.system(size: 16, weight: .regular))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.themeWhite.opacity(0.8))
                                 .multilineTextAlignment(.center)
                         }
                         
@@ -68,17 +68,17 @@ struct TestingSignIn: View {
                                 // Google Icon
                                 Image(systemName: "globe")
                                     .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.themeBlack)
                                 
                                 Text("Sign in with Google")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.themeBlack)
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color.white)
+                            .background(Color.themeWhite)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                            .shadow(color: .themeBlack.opacity(0.1), radius: 8, x: 0, y: 4)
                         }
                         .padding(.horizontal, 40)
                     }
@@ -93,7 +93,7 @@ struct GoogleIconView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.white)
+                .fill(Color.themeWhite)
                 .frame(width: 24, height: 24)
             
             // Simplified Google "G" icon using SF Symbols

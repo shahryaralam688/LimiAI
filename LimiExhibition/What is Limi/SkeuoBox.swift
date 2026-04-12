@@ -14,8 +14,8 @@ struct SkeuoBox: View {
             Text("Enter Your Email")
                 .font(.title2.bold())
                 .foregroundColor(.charlestonGreen)
-                .shadow(color: .white.opacity(0.5), radius: 1, x: -1, y: -1)
-                .shadow(color: .black.opacity(0.2), radius: 1, x: 1, y: 1)
+                .shadow(color: .themeWhite.opacity(0.5), radius: 1, x: -1, y: -1)
+                .shadow(color: .themeBlack.opacity(0.2), radius: 1, x: 1, y: 1)
         }
         .padding()
         .frame(maxWidth: .infinity)
@@ -23,9 +23,9 @@ struct SkeuoBox: View {
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                .stroke(Color.themeWhite.opacity(0.2), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+        .shadow(color: .themeBlack.opacity(0.1), radius: 10, x: 0, y: 4)
         .padding()
     }
 }

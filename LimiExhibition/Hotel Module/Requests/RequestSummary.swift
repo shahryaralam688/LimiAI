@@ -20,7 +20,7 @@ struct RequestSummaryView: View {
                             .foregroundColor(.alabaster)
                             .font(.system(size: 18, weight: .medium))
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                            .background(Color.appInputFill)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
@@ -41,7 +41,7 @@ struct RequestSummaryView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 24)
             }
-            .background(Color(hex: "#393C43"))
+            .background(Color.appSurfaceTertiary)
             .clipShape(
                 .rect(
                     topLeadingRadius: 0,
@@ -62,19 +62,19 @@ struct RequestSummaryView: View {
                         .padding(.horizontal, 10)
                         .background(
                             Capsule()
-                                .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                                .stroke(Color.appBrandAccent, lineWidth: 0.8)
                                 .background(
-                                    Capsule().fill(Color(hex: "#393C43"))
+                                    Capsule().fill(Color.appSurfaceTertiary)
                                 )
                         )
                     
                     Text(item.title)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
-                .background(Color(hex: "#24262B"))
+                .background(Color.appSurfacePrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 
                 // Request Time Card
@@ -86,15 +86,15 @@ struct RequestSummaryView: View {
                         .padding(.horizontal, 10)
                         .background(
                             Capsule()
-                                .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                                .stroke(Color.appBrandAccent, lineWidth: 0.8)
                                 .background(
-                                    Capsule().fill(Color(hex: "#393C43"))
+                                    Capsule().fill(Color.appSurfaceTertiary)
                                 )
                         )
                     
                     Text(requestTime)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     Text("Delivered by")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.alabaster)
@@ -102,15 +102,15 @@ struct RequestSummaryView: View {
                         .padding(.horizontal, 10)
                         .background(
                             Capsule()
-                                .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                                .stroke(Color.appBrandAccent, lineWidth: 0.8)
                                 .background(
-                                    Capsule().fill(Color(hex: "#393C43"))
+                                    Capsule().fill(Color.appSurfaceTertiary)
                                 )
                         )
                     
                     Text(deliveredBy)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     Text("Summary")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.alabaster)
@@ -118,21 +118,21 @@ struct RequestSummaryView: View {
                         .padding(.horizontal, 10)
                         .background(
                             Capsule()
-                                .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                                .stroke(Color.appBrandAccent, lineWidth: 0.8)
                                 .background(
-                                    Capsule().fill(Color(hex: "#393C43"))
+                                    Capsule().fill(Color.appSurfaceTertiary)
                                 )
                         )
                     
                     Text(summary)
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .lineSpacing(4)
                         .multilineTextAlignment(.leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
-                .background(Color(hex: "#24262B"))
+                .background(Color.appSurfacePrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 
                 
@@ -144,7 +144,7 @@ struct RequestSummaryView: View {
                 }) {
                     Text("Feedback")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(.themeBlack)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
                         .background(Color.emerald)
@@ -155,7 +155,7 @@ struct RequestSummaryView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.themeBlack.ignoresSafeArea())
     }
 }
 

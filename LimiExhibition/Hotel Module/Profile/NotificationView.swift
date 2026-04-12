@@ -42,7 +42,7 @@ struct NotificationView: View {
                             .foregroundColor(.alabaster)
                             .font(.system(size: 18, weight: .medium))
                             .frame(width: 44, height: 44)
-                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                            .background(Color.appInputFill)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         
                     }
@@ -58,7 +58,7 @@ struct NotificationView: View {
                 .frame(height: 124)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                         .rect(
                             topLeadingRadius: 40,
@@ -107,7 +107,7 @@ struct NotificationToggleCard: View {
                 .foregroundColor(.alabaster)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                             .rect(
                                 topLeadingRadius: 16,
@@ -130,11 +130,11 @@ struct NotificationToggleCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                .stroke(Color.themeWhite.opacity(0.06), lineWidth: 1)
         )
     }
 }

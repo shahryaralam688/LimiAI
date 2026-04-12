@@ -83,7 +83,7 @@ final class OnboardingViewModel: ObservableObject {
         let whereLimiUsed = selectedUseCase?.rawValue
         let puroseOfLimi = Array(selectedGoals).map { $0.rawValue }
 
-        guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/sendUserPreference") else { return }
+        guard let url = URL(string: APIConstants.sendUserPreference) else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -136,7 +136,7 @@ struct OnboardingFlowView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.themeBlack.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     if step <= 3 {
@@ -202,9 +202,9 @@ struct OnboardingHeader: View {
                 // let parent handle back if needed
             }) {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(10)
-                    .background(Color.white.opacity(0.08))
+                    .background(Color.themeWhite.opacity(0.08))
                     .clipShape(Circle())
             }
 
@@ -212,18 +212,18 @@ struct OnboardingHeader: View {
 
                 Text("Personalize")
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
             Spacer()
             
             Text("\(step) of \(total)")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Color(hex: "43EB25"))      // text color
+                .foregroundColor(Color.appBrandAccent)      // text color
                 .padding(.horizontal, 12)                   // Figma: padding X = 12
                 .padding(.vertical, 6)                      // Figma: padding Y = 6
                 .background(
                     RoundedRectangle(cornerRadius: 11)      // Figma: corner radius = 11
-                        .fill(Color(hex: "17543B"))         // Figma: fill color
+                        .fill(Color.appSuccessDark)         // Figma: fill color
                 )
 
             
@@ -244,19 +244,19 @@ struct NameStepView: View {
         VStack(alignment: .leading, spacing: 32) {
             Text("What should we call you?")
                 .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .frame(maxWidth: .infinity, alignment: .center)
 
             TextField("Enter Your Name", text: $name)
                 .textInputAutocapitalization(.words)
                 .disableAutocorrection(true)
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .font(.system(size: 30, weight: .medium))
                 .padding(.vertical, 8)
                 .overlay(
                     Rectangle()
                         .frame(height: 1)
-                        .foregroundColor(.white.opacity(0.3)),
+                        .foregroundColor(.themeWhite.opacity(0.3)),
                     alignment: .bottom
                 )
 
@@ -283,12 +283,12 @@ struct UseCaseStepView: View {
             VStack(spacing: 8) {
                 Text("Where will you use LIMI?")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, alignment: .center)
 
                 Text("(Select any one)")
                     .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.themeWhite.opacity(0.6))
             }
 
             Spacer().frame(height: 12)
@@ -325,12 +325,12 @@ struct GoalsStepView: View {
             VStack(spacing: 8) {
                 Text("What do you want LIMI to help with?")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, alignment: .center)
 
                 Text("(Select one or more)")
                     .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.themeWhite.opacity(0.6))
             }
 
             Spacer().frame(height: 12)
@@ -375,10 +375,10 @@ struct BluetoothStepView: View {
 
             Text("Allow LIMI AI to use\nBluetooth")
                 .font(.system(size: 28, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
 
             Text("LIMI AI needs permission to use your mobile device's Bluetooth connection so nearby products can be automatically discovered.")
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(.themeWhite.opacity(0.8))
                 .font(.system(size: 16))
                 .lineSpacing(4)
 
@@ -388,7 +388,7 @@ struct BluetoothStepView: View {
                 Text("Skip")
                     .underline()
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.bottom, 12)
@@ -419,7 +419,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(isEnabled ? Color.green : Color.gray.opacity(0.5))
-                .foregroundColor(.black)
+                .foregroundColor(.themeBlack)
                 .cornerRadius(28)
         }
         .disabled(!isEnabled)
@@ -435,13 +435,13 @@ struct SelectableRow: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.white.opacity(0.08))
+                .background(Color.themeWhite.opacity(0.08))
                 .overlay(
                     RoundedRectangle(cornerRadius: 28)
-                        .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                        .stroke(isSelected ? Color.themeWhite : Color.clear, lineWidth: 2)
                 )
                 .cornerRadius(28)
         }

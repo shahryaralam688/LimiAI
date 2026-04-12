@@ -16,7 +16,7 @@ struct AIConnectionsView: View {
             .padding(.top, 24)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                             .rect(
                                 topLeadingRadius: 40,

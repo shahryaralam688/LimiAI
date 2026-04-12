@@ -57,7 +57,7 @@ struct EmptyStateView: View {
                         Text("Add Device")
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 20)
                     .background(

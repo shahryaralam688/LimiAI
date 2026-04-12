@@ -15,18 +15,18 @@ struct PWM2LEDView: View {
 
     var body: some View {
         ZStack{
-            Color(hex:"#24262B").ignoresSafeArea()
+            Color.appSurfacePrimary.ignoresSafeArea()
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
             }
 //            .background(
 //                Rectangle()
-//                    .fill(Color.black)
+//                    .fill(Color.themeBlack)
 //                    .opacity(1)
 //                    .cornerRadius(22)
 //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -54,8 +54,8 @@ struct PWM2LEDView: View {
                     Ellipse()
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5").opacity(0.3),
-                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5").opacity(0.3)
+                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3),
+                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3)
                             ]),
                             startPoint: .center,
                             endPoint: .trailing
@@ -75,12 +75,12 @@ struct PWM2LEDView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.white, radius: 4)
+                        .shadow(color:.themeWhite, radius: 4)
 //                    Ellipse()
 //                        .fill(LinearGradient(
 //                            gradient: Gradient(colors: [
-//                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5"),
-//                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5").opacity(0.4)
+//                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow),
+//                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.4)
 //                            ]),
 //                            startPoint: .center,
 //                            endPoint: .trailing
@@ -291,7 +291,7 @@ struct PendantLampControlView: View {
             .frame(height: 243)
             .background(
                 Rectangle()
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .opacity(1)
                     .cornerRadius(22)
                     .padding(.horizontal, 16)
@@ -539,11 +539,11 @@ struct PWM2LEDWifiView: View {
 
     var body: some View {
         ZStack{
-            Color(hex:"#24262B").ignoresSafeArea()
+            Color.appSurfacePrimary.ignoresSafeArea()
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -563,8 +563,8 @@ struct PWM2LEDWifiView: View {
                     Ellipse()
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5").opacity(0.3),
-                                Color(hex: led1warmCold <= 50 ? "#FFFFFF" : "#FFE4B5").opacity(0.3)
+                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3),
+                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3)
                             ]),
                             startPoint: .center,
                             endPoint: .trailing
@@ -584,7 +584,7 @@ struct PWM2LEDWifiView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.white, radius: 4)
+                        .shadow(color:.themeWhite, radius: 4)
 
                 }
                 .padding(.top, -120)
@@ -772,7 +772,7 @@ struct PendantLampControlWifiView: View {
             .frame(height: 243)
             .background(
                 Rectangle()
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .opacity(1)
                     .cornerRadius(22)
                     .padding(.horizontal, 16)

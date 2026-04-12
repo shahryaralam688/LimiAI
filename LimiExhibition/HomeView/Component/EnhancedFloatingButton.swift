@@ -73,7 +73,7 @@ struct EnhancedFloatingButton: View {
                 
                 Image(systemName: "plus")
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .scaleEffect(isAnimating ? 0.8 : 1.0)
                     .rotationEffect(.degrees(isAnimating ? 90 : 0))
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimating)
@@ -140,7 +140,7 @@ struct WifiFloatingButton: View {
                 
                 Image(systemName: "plus")
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .scaleEffect(isAnimating ? 0.8 : 1.0)
                     .rotationEffect(.degrees(isAnimating ? 90 : 0))
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimating)

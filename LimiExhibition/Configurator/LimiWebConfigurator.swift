@@ -303,7 +303,7 @@ struct LimiWebViewCon: UIViewRepresentable {
             isLoading.wrappedValue = true
         }
         private func downloadUSDZUsingAPI(downloadId: String) {
-            guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/3d-models/web-configurator/download/\(downloadId)") else {
+            guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else {
                 print("❌ Invalid download URL")
                 return
             }
@@ -389,10 +389,10 @@ struct LimiContentViewcCon: View {
         NavigationView {
             ZStack(alignment: .topLeading) {
                 if let token = AuthManager.shared.getToken(),
-                   let url = URL(string: "https://limi-configurator-ios-version-2.vercel.app/configurator?token=\(token)") {
+                   let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
-                } else if let url = URL(string: "https://limi-configurator-ios-version-2.vercel.app/configurator") {
+                } else if let url = URL(string: AppURLs.Web.configuratorV2()) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
                 }
@@ -415,7 +415,7 @@ struct LimiContentViewcCon: View {
         }
         .onAppear {
             if let token = AuthManager.shared.getToken() {
-                let url = "https://limi-configurator-ios.vercel.app/configurator?token=\(token)"
+                let url = AppURLs.Web.configurator(token: token)
                 print("Configurator URL: \(url)")
             } else {
                 print("No token found")

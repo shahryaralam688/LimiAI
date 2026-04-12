@@ -29,7 +29,7 @@ struct LightScreen: View {
                                endPoint: .bottom)
                 
                 RadialGradient(
-                    gradient: Gradient(colors: [Color.white.opacity(0.3), Color.clear]),
+                    gradient: Gradient(colors: [Color.themeWhite.opacity(0.3), Color.clear]),
                     center: .topLeading,
                     startRadius: 0,
                     endRadius: UIScreen.main.bounds.width * 1.3
@@ -49,10 +49,10 @@ struct LightScreen: View {
                     if showToast {
                         Text("AI adjusting environment…")
                             .font(.subheadline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(Color.black.opacity(0.8))
+                            .background(Color.themeBlack.opacity(0.8))
                             .cornerRadius(8)
                             .transition(.move(edge: .top).combined(with: .opacity))
                             .zIndex(1)
@@ -67,7 +67,7 @@ struct LightScreen: View {
                             .padding()
                             .frame(width: 150, height: 60)
                             .background(Color.emerald)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(10)
                     }
                     .padding(.top, 20)

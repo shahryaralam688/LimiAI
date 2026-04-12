@@ -9,13 +9,13 @@ struct VerticalSlider: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .bottom) {
-                LinearGradient(gradient: Gradient(colors: [.white, .white]), startPoint: .top, endPoint: .bottom)
+                LinearGradient(gradient: Gradient(colors: [.themeWhite, .themeWhite]), startPoint: .top, endPoint: .bottom)
                     .opacity(0.4)
                     .cornerRadius(20)
-                    .shadow(color: .black, radius: 5)
+                    .shadow(color: .themeBlack, radius: 5)
 
                 Rectangle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(height: CGFloat((clampedValue - range.lowerBound) / (range.upperBound - range.lowerBound)) * geo.size.height)
                     .cornerRadius(25)
             }

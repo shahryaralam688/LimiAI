@@ -15,7 +15,7 @@ class ScanSyncManager {
             return
         }
 
-        guard let url = URL(string: "https://your-backend-url.com/api/scans") else { return }
+        guard let url = URL(string: APIConstants.roomPlanScans) else { return }
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpMethod = "GET"

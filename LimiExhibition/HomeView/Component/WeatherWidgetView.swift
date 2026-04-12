@@ -5,16 +5,16 @@ import CoreLocation
 
 struct WeatherWidgetView: View {
     // Colors using existing Color.swift definitions and hex colors
-    private let bgDark      = Color(hex: "#1F2126")   // card background
-    private let bgDarker    = Color(hex: "#17181D")   // lower card
-    private let chipDark    = Color(hex: "#2A2C33")   // "Today" chip
-    private let dividerGray = Color.white.opacity(0.12)
+    private let bgDark      = Color.appSurfacePanel   // card background
+    private let bgDarker    = Color.appSurfaceDarker   // lower card
+    private let chipDark    = Color.appSurfaceSecondary   // "Today" chip
+    private let dividerGray = Color.themeWhite.opacity(0.12)
     private let textPrimary = Color.alabaster
     private let textMuted   = Color.alabaster.opacity(0.6)
     private let accentSun   = Color.yellow
-    private let accentCloud = Color(hex: "#19C6D7")
+    private let accentCloud = Color.appInfo
     private let shadowGlow1 = Color.yellow.opacity(0.45)
-    private let shadowGlow2 = Color(hex: "#6FE8F0").opacity(0.45)
+    private let shadowGlow2 = Color.appInfoBright.opacity(0.45)
 
     // Runtime weather state
     @StateObject private var locationManager = LocationManager()
@@ -32,7 +32,7 @@ struct WeatherWidgetView: View {
                         .fill(bgDark)
                         .overlay(
                             // subtle top-to-bottom tint
-                            LinearGradient(colors: [Color.white.opacity(0.05), .clear],
+                            LinearGradient(colors: [Color.themeWhite.opacity(0.05), .clear],
                                            startPoint: .top, endPoint: .bottom)
                                 .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                         )
@@ -47,7 +47,7 @@ struct WeatherWidgetView: View {
                             .frame(width: 131.78, height: 25.53) // Figma width & height
                             .background(
                                 Rectangle()
-                                    .fill(Color(hex: "#191B1E"))
+                                    .fill(Color.appCanvasStrong)
                                     .clipShape(
                                         RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
                                     )
@@ -71,9 +71,9 @@ struct WeatherWidgetView: View {
                                 .fill(
                                     RadialGradient(
                                         gradient: Gradient(colors: [
-                                            Color(hex: "#FFEB85").opacity(0.2),  // lighter at edges
-                                            Color(hex: "#FFEB85").opacity(0.1),  // warmer mid tone
-                                            Color(hex: "#FFEB85").opacity(0.2)   // darker in center
+                                            Color.appWarning.opacity(0.2),  // lighter at edges
+                                            Color.appWarning.opacity(0.1),  // warmer mid tone
+                                            Color.appWarning.opacity(0.2)   // darker in center
                                         ]),
                                         center: .center,
                                         startRadius: 0,
@@ -140,7 +140,7 @@ struct WeatherWidgetView: View {
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: 28.83)
-                        .stroke(Color.white, lineWidth: 1)
+                        .stroke(Color.themeWhite, lineWidth: 1)
                         .clipShape(
                             RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
                         )
@@ -173,7 +173,7 @@ struct WeatherWidgetView: View {
 //                .frame(width: 283)
 //                .background(
 //                    Rectangle()
-//                        .fill(Color(hex: "#191B1E"))
+//                        .fill(Color.appCanvasStrong)
 //                        .clipShape(
 //                            RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
 //                        )
@@ -182,7 +182,7 @@ struct WeatherWidgetView: View {
 //                )
 //                .overlay(
 //                    RoundedRectangle(cornerRadius: 28.83)
-//                        .stroke(Color.white, lineWidth: 1)
+//                        .stroke(Color.themeWhite, lineWidth: 1)
 //                        .clipShape(
 //                            RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
 //                        )
@@ -287,7 +287,7 @@ struct WeatherWidgetView_Previews: PreviewProvider {
         WeatherWidgetView()
 //            .previewLayout(.sizeThatFits)
 //            .padding()
-            .background(Color.black) // show outer glow nicely
+            .background(Color.themeBlack) // show outer glow nicely
             .preferredColorScheme(.dark)
     }
 }

@@ -27,17 +27,17 @@ struct RainbowSlider: View {
                 .cornerRadius(15)
                 .overlay(
                     RoundedRectangle(cornerRadius: 15)
-                        .stroke(Color.white.opacity(0.5), lineWidth: 2)
+                        .stroke(Color.themeWhite.opacity(0.5), lineWidth: 2)
                 )
                 .frame(height: 40)
                 
                 Circle()
                     .frame(width: 38, height: 38)
                     .foregroundColor(selectedColor)
-                    .shadow(color: Color.black.opacity(0.3), radius: 5)
+                    .shadow(color: Color.themeBlack.opacity(0.3), radius: 5)
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.7), lineWidth: 2)
+                            .stroke(Color.themeWhite.opacity(0.7), lineWidth: 2)
                     )
                     .position(
                         x: max(10, min(geometry.size.width - 10, geometry.size.width * CGFloat(value / 100))),

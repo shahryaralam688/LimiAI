@@ -28,7 +28,7 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             // Background color
-            Color(hex: "#111214")
+            Color.appCanvasPrimary
                 .ignoresSafeArea(.all)
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -48,8 +48,8 @@ struct LoginView: View {
                         // Bottom gradient overlay
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(hex: "#111214"),
-                                Color(hex: "#111214")
+                                Color.appCanvasPrimary,
+                                Color.appCanvasPrimary
                             ]),
                             startPoint: .bottom,
                             endPoint: .top
@@ -123,7 +123,7 @@ struct LoginView: View {
                     .padding(.horizontal, 20)
                     .frame(height: 56)
                     .frame(width: 343)
-                    .background(Color(hex: "#111214"))
+                    .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.emerald, lineWidth: 2)
@@ -158,7 +158,7 @@ struct LoginView: View {
                                         Image("Monotone arrow right")
                                             .resizable()
                                             .frame(width: 20, height: 20)
-                                            .foregroundColor(Color(hex: "#0B0E0C"))
+                                            .foregroundColor(Color.appCanvasTertiary)
                                     }
                                 }
                                 Spacer()
@@ -207,7 +207,7 @@ struct LoginView: View {
                             }
                         }
                     )
-                    .signInWithAppleButtonStyle(.white) // or .white
+                    .signInWithAppleButtonStyle(.white) // or .themeWhite
                     .frame(height: 56)
                     .frame(width: 343)
                     .cornerRadius(22)
@@ -241,7 +241,7 @@ struct LoginView: View {
                             .padding(.horizontal, 20)
                             .frame(height: 56)
                             .frame(width: 343)
-                            .background(Color(hex: "#5F5F5F"))
+                            .background(Color.appBorderPrimary)
                             .cornerRadius(22)
                         }
                     }
@@ -263,9 +263,9 @@ struct LoginView: View {
                         Image("Solid arrow right sm")
                             .resizable()
                             .frame(width: 18, height: 18)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .frame(width: 48, height: 48)
-                            .background(Color(hex: "#24262B"))
+                            .background(Color.appSurfacePrimary)
                             .cornerRadius(16)
                     }
                     
@@ -408,7 +408,7 @@ struct OTPVerificationView: View {
                 VStack(spacing: 15) {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.black)
+                        .foregroundColor(.themeBlack)
                         .padding()
                         .background(
                             Circle()
@@ -541,7 +541,7 @@ struct OTPVerificationView: View {
             .padding(.vertical, 40)
             .background(
                 RoundedRectangle(cornerRadius: 30)
-                    .fill(Color.black.opacity(0.95))
+                    .fill(Color.themeBlack.opacity(0.95))
                     .shadow(color: Color.alabaster.opacity(0.1), radius: 20, x: 0, y: 10)
             )
             .padding(.horizontal, 50)
@@ -851,7 +851,7 @@ struct LoginSkipView: View {
     var body: some View {
         ZStack {
             // Background color
-            Color(hex: "#111214")
+            Color.appCanvasPrimary
                 .ignoresSafeArea(.all)
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -867,9 +867,9 @@ struct LoginSkipView: View {
                             Image("Solid arrow right sm")
                                 .resizable()
                                 .frame(width: 18, height: 18)
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .frame(width: 48, height: 48)
-                                .background(Color(hex: "#24262B"))
+                                .background(Color.appSurfacePrimary)
                                 .cornerRadius(16)
                         }
                         
@@ -906,8 +906,8 @@ struct LoginSkipView: View {
 //                        // Bottom gradient overlay
 //                        LinearGradient(
 //                            gradient: Gradient(colors: [
-//                                Color(hex: "#111214"),
-//                                Color(hex: "#111214")
+//                                Color.appCanvasPrimary,
+//                                Color.appCanvasPrimary
 //                            ]),
 //                            startPoint: .bottom,
 //                            endPoint: .top
@@ -975,7 +975,7 @@ struct LoginSkipView: View {
                             // Actual TextField
                             TextField("", text: $email)
                                 .font(.custom("Poppins-Regular", size: 16))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .padding(4) // same padding as placeholder
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
@@ -990,17 +990,17 @@ struct LoginSkipView: View {
                     .padding(.horizontal, 20)
                     .frame(height: 56)
                     .frame(width: 343)
-                    .background(Color(hex: "#111214"))
+                    .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white, lineWidth: 2)
+                            .stroke(Color.themeWhite, lineWidth: 2)
                     )
                     .cornerRadius(20)
                     .padding(.horizontal, 20)        
 //                    Text("Continue as a Guest")
 //                        .font(.custom("Poppins-Medium", size: 16)) // font-family + style
-//                        .foregroundColor(Color(hex: "#F2EBE3"))    // background color in design is likely text color
-//                        .underline(true, color: Color(hex: "#F2EBE3")) // underline as specified
+//                        .foregroundColor(Color.appTextPrimary)    // background color in design is likely text color
+//                        .underline(true, color: Color.appTextPrimary) // underline as specified
 //                        .kerning(0)                               // letter-spacing: 0%
 //                        .lineSpacing(0)                            // line-height: 100%
 //                        .padding(.top, 14)
@@ -1029,17 +1029,17 @@ struct LoginSkipView: View {
                             Image("Monotone arrow right")
                                 .resizable()
                                 .frame(width: 20, height: 20)
-                                .foregroundColor(isEmailValid ? Color(hex: "#0B0E0C") : Color(hex: "#00000066"))
+                                .foregroundColor(isEmailValid ? Color.appCanvasTertiary : Color.appOverlayTint)
                             Spacer()
                         }
                         .padding(.horizontal, 20)
                         .frame(height: 56)
                         .frame(width: 343)
-                        .background(isEmailValid ? Color.emerald : Color.white)
+                        .background(isEmailValid ? Color.emerald : Color.themeWhite)
                         .cornerRadius(22)
                         .overlay(
                             RoundedRectangle(cornerRadius: 22)
-                                .stroke(Color(hex: "#5F5F5F"), lineWidth: 2) // ← 1-point border
+                                .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
                         )
 
 
@@ -1086,14 +1086,14 @@ struct LoginSkipView: View {
 //                                .font(.system(size: 16, weight: .semibold))
 //                                .tracking(-0.3)
 //                        }
-//                        .foregroundColor(.white)
+//                        .foregroundColor(.themeWhite)
 //                        .frame(maxWidth: .infinity, minHeight: 56)
 //                        .overlay(
 //                            RoundedRectangle(cornerRadius: 22)
-//                                .stroke(Color(hex: "#5F5F5F"), lineWidth: 4) // ← 1-point border
+//                                .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
 //                        )
 //                    }
-//                    .background(Color(hex: "#24262B"))
+//                    .background(Color.appSurfacePrimary)
 //                    .cornerRadius(22)
 //                    .frame(width: 343)              // same width you had
 //                    .padding(.horizontal, 20)
@@ -1125,11 +1125,11 @@ struct LoginSkipView: View {
 //                            .padding(.horizontal, 20)
 //                            .frame(height: 56)
 //                            .frame(width: 343)
-//                            .background(Color(hex: "#24262B"))
+//                            .background(Color.appSurfacePrimary)
 //                            .cornerRadius(22)
 //                            .overlay(
 //                                RoundedRectangle(cornerRadius: 22)
-//                                    .stroke(Color(hex: "#5F5F5F"), lineWidth: 2) // ← 1-point border
+//                                    .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
 //                            )
 //                        }
 //                    }
@@ -1362,7 +1362,7 @@ import AuthenticationServices
 //            }, onCompletion: { result in
 //                authManager.handleAppleSignIn(result: result)
 //            })
-//            .signInWithAppleButtonStyle(.black)
+//            .signInWithAppleButtonStyle(.themeBlack)
 //            .frame(width: 280, height: 50)
 //            .cornerRadius(10)
 //            .padding()

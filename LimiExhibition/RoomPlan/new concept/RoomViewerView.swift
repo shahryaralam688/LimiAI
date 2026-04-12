@@ -846,7 +846,7 @@
 //            
 //            // Create ceiling material (white by default)
 //            var material = SimpleMaterial()
-//            material.baseColor = .color(.white)
+//            material.baseColor = .color(.themeWhite)
 //            material.metallic = .float(0.0)
 //            material.roughness = .float(0.7)
 //            

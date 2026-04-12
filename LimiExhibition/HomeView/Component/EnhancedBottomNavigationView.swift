@@ -22,9 +22,9 @@ struct EnhancedBottomNavigationView: View {
             ZStack {
                 // Background capsule
                 Rectangle()
-                    .fill(Color(hex: "#1C1C1C").opacity(0.8))
+                    .fill(Color.appSurfaceInset.opacity(0.8))
                     .frame(height: 80)
-                    .shadow(color: .black.opacity(0.4), radius: 8, y: -2)
+                    .shadow(color: .themeBlack.opacity(0.4), radius: 8, y: -2)
                     .onAppear { animateGlow = true }
 
                 // Tab buttons
@@ -74,10 +74,10 @@ struct EnhancedBottomNavigationView: View {
             if showLidarToast {
                 Text("This device does not support LiDAR-based AR.")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.black.opacity(0.8))
+                    .background(Color.themeBlack.opacity(0.8))
                     .cornerRadius(12)
                     .padding(.top, 8)
                     .transition(.opacity)
@@ -123,10 +123,10 @@ struct EnhancedBottomNavigationView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 22, height: 22)
-                    .foregroundColor(selectedTab == index ? .emerald : .white.opacity(0.8))
+                    .foregroundColor(selectedTab == index ? .emerald : .themeWhite.opacity(0.8))
                 Text(title)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(selectedTab == index ? .white : .white.opacity(0.7))
+                    .foregroundColor(selectedTab == index ? .themeWhite : .themeWhite.opacity(0.7))
             }
             .frame(width: 64, height: 50)
             .contentShape(Rectangle())
@@ -140,7 +140,7 @@ struct EnhancedBottomNavigationView: View {
             showVoiceView = true
         } label: {
             ZStack {
-                Color(hex: "#3a3d42")
+                Color.appSurfaceQuaternary
                 OrbView(intensity: $orbIntensity, currentVolume: $orbVolume)
                     .frame(width: 160, height: 160)
             }
@@ -171,5 +171,5 @@ struct EnhancedBottomNavigationView: View {
         isLoaded: .constant(true),
         isSidebarOpen: .constant(false)
     )
-    .background(Color.black) // optional, just to see the bar clearly
+    .background(Color.themeBlack) // optional, just to see the bar clearly
 }

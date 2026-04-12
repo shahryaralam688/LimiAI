@@ -223,8 +223,7 @@ class GoogleAuthManager: NSObject, ObservableObject {
     }
 
     private func sendTokenToBackend(_ token: String, serverAuthCode: String? = nil, grantedScopes: [String]? = nil) {
-//        guard let url = URL(string: APIConstants.loginGoogle ) else { return }
-        guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/google/login" ) else { return }
+        guard let url = URL(string: APIConstants.loginGoogle) else { return }
         print("[Backend] 🔵 sendTokenToBackend() called")
         print("[Backend] URL: \(url.absoluteString)")
         var request = URLRequest(url: url)

@@ -50,21 +50,21 @@ struct ProfileView: View {
                         .foregroundColor(.alabaster)
                         .font(.system(size: 18, weight: .medium))
                         .frame(width: 44, height: 44)
-                        .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                        .background(Color.appInputFill)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding()
                 .padding(.top)
                 Text("settings.title".localized)
                     .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.top)
                 Spacer()
             }
             
             .background(
                 Rectangle()
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
                     .frame(height: 114)
                     .cornerRadius(40)
             )
@@ -73,16 +73,16 @@ struct ProfileView: View {
             VStack {
                 HStack(spacing: 12) {
                     Image(systemName: "globe")
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("settings.language".localized)
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
 
                         Text(LanguageSettings.currentLanguage() == .zhHant ? AppLanguage.zhHant.displayName : AppLanguage.en.displayName)
                             .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.themeWhite.opacity(0.7))
                     }
 
                     Spacer()
@@ -95,7 +95,7 @@ struct ProfileView: View {
                     }
                 }
                 .padding(14)
-                .background(Color(hex: "#393C43"))
+                .background(Color.appSurfaceTertiary)
                 .cornerRadius(12)
                 .padding(.horizontal)
             }
@@ -120,7 +120,7 @@ struct ProfileView: View {
                                 .scaledToFill()
                             //maybe need to create image here i think.
                         } placeholder: {
-                            Circle() .fill(Color.gray.opacity(0.3)) .overlay( Image(systemName: "person.fill") .foregroundColor(.white) .font(.system(size: 40)) )
+                            Circle() .fill(Color.gray.opacity(0.3)) .overlay( Image(systemName: "person.fill") .foregroundColor(.themeWhite) .font(.system(size: 40)) )
                         }
                         .resizable() // make it resizable
                         .scaledToFill()
@@ -133,7 +133,7 @@ struct ProfileView: View {
                     
                     Text(displayName)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .onChange(of: userDataManager.userData) { oldValue, newValue in
                             print("📱 ProfileView - User data updated. Username: \(newValue?.username ?? "nil")")
                             debugMessage = "Last updated: \(Date())\nUsername: \(newValue?.username ?? "none")"
@@ -152,7 +152,7 @@ struct ProfileView: View {
                                 showProfileEditView = true
                             }
                         }
-                        .background(Color(hex: "1F1F1F"))
+                        .background(Color.appCanvasMuted)
                         .cornerRadius(12)
                     } else {
                         VStack(spacing: 1) {
@@ -160,7 +160,7 @@ struct ProfileView: View {
                                 showloginView = true
                             }
                         }
-                        .background(Color(hex: "1F1F1F"))
+                        .background(Color.appCanvasMuted)
                         .cornerRadius(12)
                     }
                     // Section 2: AI
@@ -188,7 +188,7 @@ struct ProfileView: View {
                             }
                         }
                     }
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .cornerRadius(12)
 
                     // Section 3: Apps & Notifications
@@ -204,7 +204,7 @@ struct ProfileView: View {
                             showRoomPlanScreen = true
                         }
                     }
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .cornerRadius(12)
 
                     // Section 4: Privacy & Website
@@ -217,7 +217,7 @@ struct ProfileView: View {
                             showWebSiteView = true
                         }
                     }
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .cornerRadius(12)
                     
                     if role != "Installer User created"{
@@ -232,14 +232,14 @@ struct ProfileView: View {
                         }) {
                             HStack {
                                 Image(systemName: "arrowshape.turn.up.left.fill")
-                                    .foregroundColor(Color(hex: "FF9292"))
+                                    .foregroundColor(Color.appDanger)
                                 Text("profile.logout".localized)
-                                    .foregroundColor(Color(hex: "FF9292"))
+                                    .foregroundColor(Color.appDanger)
                                     .font(.system(size: 16, weight: .semibold))
                                 Spacer()
                             }
                             .padding()
-                            .background(Color(hex: "#393C43"))
+                            .background(Color.appSurfaceTertiary)
                             .cornerRadius(12)
                         }
                     }
@@ -250,14 +250,14 @@ struct ProfileView: View {
             }
 
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.themeBlack.ignoresSafeArea())
         .overlay(
             Group {
                 if isChangingLanguage {
                     ZStack {
-                        Color.black.opacity(0.45).ignoresSafeArea()
+                        Color.themeBlack.opacity(0.45).ignoresSafeArea()
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                             .scaleEffect(1.25)
                     }
                 }
@@ -289,7 +289,7 @@ struct ProfileView: View {
         .overlay(
             ZStack {
                 if showLoginToast {
-                    Color.black.opacity(0.5)
+                    Color.themeBlack.opacity(0.5)
                         .ignoresSafeArea()
                         .onTapGesture {
                             showLoginToast = false
@@ -298,7 +298,7 @@ struct ProfileView: View {
                     VStack(spacing: 16) {
                         Text("Please Login First")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                         
                         Text("Please login before using this feature")
                             .font(.system(size: 14, weight: .regular))
@@ -311,10 +311,10 @@ struct ProfileView: View {
                             }) {
                                 Text("Close")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.themeWhite)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color(hex: "#393C43"))
+                                    .background(Color.appSurfaceTertiary)
                                     .cornerRadius(8)
                             }
                             
@@ -333,7 +333,7 @@ struct ProfileView: View {
                         }
                     }
                     .padding(20)
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .cornerRadius(16)
                     .padding(20)
                 }
@@ -396,7 +396,7 @@ private struct ProfileRow: View {
             }
             .padding()
         }
-        .background(Color(hex: "393C43"))
+        .background(Color.appSurfaceTertiary)
     }
 }
 

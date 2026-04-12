@@ -13,7 +13,7 @@
 //        HStack{
 //            Text("Connected Space")
 //                .font(.custom("Poppins-Medium", size: 18))
-//                .foregroundColor(.white)
+//                .foregroundColor(.themeWhite)
 //                .multilineTextAlignment(.center)
 //                .lineSpacing(18 * 0.2)
 //                .tracking(-0.15 / 18)
@@ -31,14 +31,14 @@
 //                    VStack(spacing: 16) {
 //                        Text("You haven’t added any devices yet")
 //                            .font(.custom("Poppins-Medium", size: 16))
-//                            .foregroundColor(Color(hex: "#C9C4BD"))
+//                            .foregroundColor(Color.appTextSecondary)
 //                            .multilineTextAlignment(.center)
 //                            .lineSpacing(16 * 0.4)
 //                            .kerning(0)
 //
 //                        Text("Tap the button below to add devices")
 //                            .font(.custom("Poppins-Regular", size: 14))
-//                            .foregroundColor(Color(hex: "#A19D98"))
+//                            .foregroundColor(Color.appTextMuted)
 //                            .multilineTextAlignment(.center)
 //                            .lineSpacing(14 * 0.4)
 //                            .kerning(0)
@@ -58,7 +58,7 @@
 //                            .padding(.vertical, 14)
 //                            .padding(.horizontal, 20)
 //                            .background(Color.emerald)
-//                            .foregroundColor(.black)
+//                            .foregroundColor(.themeBlack)
 //                            .cornerRadius(12)
 //                        }
 //                    }
@@ -66,7 +66,7 @@
 //                    .frame(maxWidth: .infinity)
 //                    .background(
 //                        LinearGradient(
-//                            gradient: Gradient(colors: [Color(hex: "#24262B"), Color(hex: "#24262B")]),
+//                            gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
 //                            startPoint: .top,
 //                            endPoint: .bottom
 //                        )
@@ -74,7 +74,7 @@
 //                    .overlay(
 //                        RoundedRectangle(cornerRadius: 8)
 //                            .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
-//                            .foregroundColor(Color(hex: "#787572"))
+//                            .foregroundColor(Color.appBorderSecondary)
 //                    )
 //                    .cornerRadius(8)
 //                    .opacity(1)

@@ -10,11 +10,11 @@ import SwiftUI
 struct DataRGBView: View {
     @AppStorage("lampRGB") private var isOn: Bool = false
     @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = "#50C878" // Default emerald hex
+    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
     private var hexColor: Color {
         Color(hex: selectedColorHex)
     }
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? "#50C878")
+    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
     @State private var showingColorPicker = false
     @State private var selectedMode: ColorMode = .solid
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
@@ -52,11 +52,11 @@ struct DataRGBView: View {
 //                .aspectRatio(contentMode: .fill)
 //                .blur(radius: 20) // Adjust the blur radius as needed (1-20)
 //                .edgesIgnoringSafeArea(.all)
-            Color(hex:"#24262B").ignoresSafeArea()
+            Color.appSurfacePrimary.ignoresSafeArea()
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -89,7 +89,7 @@ struct DataRGBView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.white, radius: 4)
+                        .shadow(color:.themeWhite, radius: 4)
                     
                     
                     
@@ -176,7 +176,7 @@ struct DataRGBView: View {
 //                                .padding(8)
 //                                .bold()
 //                                .background(!showSolidColor ? Color.yellow : selectedColor)
-//                                .foregroundColor(.white)
+//                                .foregroundColor(.themeWhite)
 //                                .cornerRadius(8)
 //                        }
 //                        .padding(.top)
@@ -206,7 +206,7 @@ struct DataRGBView: View {
                             Text("Rainbow Color")
                                 .padding(8)
                                 .background(!showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)
@@ -252,7 +252,7 @@ struct DataRGBView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.black)
+                        .fill(Color.themeBlack)
                 )
                 .padding(.bottom, 20)
                 
@@ -520,7 +520,7 @@ struct ColorCircleSlider: View {
                     .frame(width: circleSize, height: circleSize)
                     .overlay(
                         Circle()
-                            .stroke(Color.white, lineWidth: 2)
+                            .stroke(Color.themeWhite, lineWidth: 2)
                             .opacity(index == selectedIndex ? 1 : 0.6)
                     )
                     .scaleEffect(index == selectedIndex ? selectedScale : 1.0)
@@ -552,12 +552,12 @@ struct ColorPresetButton: View {
                 .frame(width: 50, height: 50)
                 .overlay(
                     Circle()
-                        .stroke(Color.white, lineWidth: 2)
+                        .stroke(Color.themeWhite, lineWidth: 2)
                 )
                 .shadow(color: color.opacity(0.3), radius: 5, x: 0, y: 2)
                 .overlay(
                     Circle()
-                        .stroke(selectedColor == color ? Color.black : Color.clear, lineWidth: 3)
+                        .stroke(selectedColor == color ? Color.themeBlack : Color.clear, lineWidth: 3)
                 )
                 .onTapGesture {
                     selectedColor = color
@@ -622,11 +622,11 @@ struct ColorPickerView: View {
 struct DataRGBWifiView: View {
     @AppStorage("lampRGB") private var isOn: Bool = false
     @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = "#50C878" // Default emerald hex
+    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
     private var hexColor: Color {
         Color(hex: selectedColorHex)
     }
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? "#50C878")
+    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
     @State private var showingColorPicker = false
     @State private var selectedMode: ColorMode = .solid
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
@@ -659,11 +659,11 @@ struct DataRGBWifiView: View {
     var body: some View {
         ZStack{
 
-            Color(hex:"#24262B").ignoresSafeArea()
+            Color.appSurfacePrimary.ignoresSafeArea()
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -696,7 +696,7 @@ struct DataRGBWifiView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.white, radius: 4)
+                        .shadow(color:.themeWhite, radius: 4)
                     
                     
                     
@@ -790,7 +790,7 @@ struct DataRGBWifiView: View {
                             Text("Rainbow Color")
                                 .padding(8)
                                 .background(!showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)
@@ -836,7 +836,7 @@ struct DataRGBWifiView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.black)
+                        .fill(Color.themeBlack)
                 )
                 .padding(.bottom, 20)
                 

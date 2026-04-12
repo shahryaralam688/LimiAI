@@ -31,7 +31,7 @@ struct DemoAddDeviceView: View {
                         .font(.title)
                         .padding()
                         .background(Color.blue)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .cornerRadius(10)
                 }
             }

@@ -17,7 +17,7 @@ struct Room3DView: UIViewRepresentable {
         let scnView = SCNView()
         scnView.scene = SCNScene()
         scnView.allowsCameraControl = true
-        scnView.backgroundColor = .white
+        scnView.backgroundColor = .appWhite
         if let scene = scnView.scene {
             buildScene(in: scene)
         }

@@ -45,7 +45,7 @@ struct WifiList: View {
                             .padding(12) // space inside the circle
                             .background(
                                 Rectangle()
-                                    .fill(Color(hex: "#24262B")) // gray background
+                                    .fill(Color.appSurfacePrimary) // gray background
                                     .cornerRadius(16)
                             )
                     }
@@ -63,8 +63,8 @@ struct WifiList: View {
 
 //                    Text("Skip")
 //                        .font(.custom("Poppins-Medium", size: 16)) // font-family + style
-//                        .foregroundColor(Color(hex: "#F2EBE3"))    // background color in design is likely text color
-//                        .underline(true, color: Color(hex: "#F2EBE3")) // underline as specified
+//                        .foregroundColor(Color.appTextPrimary)    // background color in design is likely text color
+//                        .underline(true, color: Color.appTextPrimary) // underline as specified
 //                        .kerning(0)                               // letter-spacing: 0%
 //                        .lineSpacing(0)                            // line-height: 100%
 //                        .padding(.top, 14)
@@ -128,13 +128,13 @@ struct WifiList: View {
                 .scrollContentBackground(.hidden)
                 .background(
                     Rectangle()
-                        .fill(Color(hex: "#24262B"))
+                        .fill(Color.appSurfacePrimary)
                         .cornerRadius(24)
                 )
                 .ignoresSafeArea(edges: .bottom)
             }
         }
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
         .fullScreenCover(isPresented: $isShowingAddingWifiSheet) {
             DemoAddingWifiView(deviceName: deviceName, deviceId: deviceId,  wifiSSID : wifiSSIDs )
 

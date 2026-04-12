@@ -71,7 +71,7 @@ struct ProfileEditView: View {
 //            .navigationTitle("Edit Profile").bold(true).foregroundColor(.alabaster)
             .navigationBarTitleDisplayMode(.inline)
             .background(
-                Color.black
+                Color.themeBlack
 //
 //                LinearGradient(
 //                                gradient: Gradient(colors: [
@@ -262,7 +262,7 @@ struct ProfileEditView: View {
                             )
                     )
             )
-            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .shadow(color: Color.themeBlack.opacity(0.05), radius: 2, x: 0, y: 1)
             .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
         }
     }
@@ -272,7 +272,7 @@ struct ProfileEditView: View {
             HStack(spacing: 12) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                         .scaleEffect(0.9)
                 } else {
                     Image(systemName: "checkmark.circle.fill")

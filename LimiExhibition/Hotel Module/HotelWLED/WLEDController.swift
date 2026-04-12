@@ -21,7 +21,7 @@ struct WLEDDevice: Identifiable, Codable {
     var isOnline: Bool = true
     
     var baseURL: String {
-        return "http://\(ip):\(port)"
+        return AppURLs.WLED.deviceBase(ip: ip, port: port)
     }
     
     init(name: String, ip: String, port: Int, location: String) {
@@ -293,7 +293,7 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     }
     
     private func checkWLEDDevice(ip: String) {
-        let deviceURL = "http://\(ip)/json/info"
+        let deviceURL = AppURLs.WLED.deviceInfo(ip: ip)
         
         guard let url = URL(string: deviceURL) else { return }
         
@@ -317,7 +317,7 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
                     // Check if this looks like a WLED device
                     if let name = json["name"] as? String {
                         print("🎯 SSDP - Found WLED device via direct scan: \(name) at \(ip)")
-                        self?.addDevice(name: name, ip: ip, port: 80, location: "http://\(ip)")
+                        self?.addDevice(name: name, ip: ip, port: 80, location: AppURLs.WLED.deviceBase(ip: ip))
                     }
                 }
             } catch {
@@ -370,7 +370,7 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     }
     
     private func fetchDeviceName(ip: String, port: Int, location: String, server: String) {
-        let deviceURL = "http://\(ip):\(port)/json/info"
+        let deviceURL = AppURLs.WLED.deviceInfo(ip: ip, port: port)
         
         guard let url = URL(string: deviceURL) else {
             print("❌ SSDP - Invalid device URL: \(deviceURL)")
@@ -442,7 +442,7 @@ extension SSDPDiscoveryManager: NetServiceBrowserDelegate, NetServiceDelegate {
         for addressData in addresses {
             if let (ip, port) = ipPortFrom(addressData: addressData) {
                 let name = sender.name
-                let location = "http://\(ip):\(port)"
+                let location = AppURLs.WLED.deviceBase(ip: ip, port: port)
                 print("✅ mDNS - Resolved WLED service: \(name) -> \(ip):\(port)")
                 addDevice(name: name, ip: ip, port: port, location: location)
                 break
@@ -636,7 +636,7 @@ struct WLEDDiscoveryView: View {
                 
                 Spacer()
             }
-            .background(Color(hex: "292929"))
+            .background(Color.appCanvasHotel)
             .ignoresSafeArea(edges: .bottom)
             .navigationBarHidden(true)
             .onAppear {
@@ -652,7 +652,7 @@ struct WLEDDiscoveryView: View {
             Text("WLED Device Discovery")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
             
             Button(action: {
                 discoveryManager.startDiscovery()
@@ -661,7 +661,7 @@ struct WLEDDiscoveryView: View {
                     if discoveryManager.isScanning {
                         ProgressView()
                             .scaleEffect(0.8)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                     } else {
                         Image(systemName: "magnifyingglass")
                     }
@@ -669,7 +669,7 @@ struct WLEDDiscoveryView: View {
                     Text(discoveryManager.isScanning ? "Scanning..." : "Scan for Devices")
                         .fontWeight(.medium)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
@@ -684,7 +684,7 @@ struct WLEDDiscoveryView: View {
                     .font(.caption)
             }
         }
-        .background(Color(hex: "292929"))
+        .background(Color.appCanvasHotel)
         .ignoresSafeArea(edges: .bottom)
     }
     
@@ -734,7 +734,7 @@ struct DeviceRowView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(device.name)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     
                     Text("\(device.ip):\(device.port)")
                         .font(.caption)
@@ -793,7 +793,7 @@ struct WLEDDeviceControlView: View {
                 Spacer()
             }
             .padding()
-            .background(Color.black.ignoresSafeArea())
+            .background(Color.themeBlack.ignoresSafeArea())
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
@@ -853,7 +853,7 @@ struct WLEDDeviceControlView: View {
         HStack {
             Text("Power")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
             
             Spacer()
             
@@ -878,7 +878,7 @@ struct WLEDDeviceControlView: View {
             HStack {
                 Text("Brightness")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 Spacer()
                 
@@ -906,7 +906,7 @@ struct WLEDDeviceControlView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Color")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
             
             ColorPicker("Select Color", selection: $selectedColor, supportsOpacity: false)
                 .labelsHidden()

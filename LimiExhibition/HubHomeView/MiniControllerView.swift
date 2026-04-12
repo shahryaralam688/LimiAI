@@ -78,11 +78,11 @@ struct MiniControllerView: View {
 
     var body: some View {
         ZStack {
-            Color(hex:"#24262B").ignoresSafeArea()
+            Color.appSurfacePrimary.ignoresSafeArea()
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.black)
+                    .fill(Color.themeBlack)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -101,7 +101,7 @@ struct MiniControllerView: View {
                 ZStack {
                     
                     Ellipse()
-                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .white) : .white)
+                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .themeWhite) : .themeWhite)
                         .frame(width: 235, height: 135)
                         .opacity(
                             mode == "RGB"
@@ -124,10 +124,10 @@ struct MiniControllerView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.white, radius: 4)
+                        .shadow(color:.themeWhite, radius: 4)
 //                    
 //                    Ellipse()
-//                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .white) : .white)
+//                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .themeWhite) : .themeWhite)
 //                        .frame(width: 120, height: 45)
 //                        .opacity(
 //                            mode == "RGB"
@@ -214,8 +214,8 @@ struct MiniControllerView: View {
                                             Circle()
                                                 .fill(selectedColor)
                                                 .frame(width: 24, height: 24)
-                                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                                .overlay(Circle().stroke(Color.themeWhite, lineWidth: 2))
+                                                .shadow(color: Color.themeBlack.opacity(0.1), radius: 2, x: 0, y: 1)
                                         }
                                         
                                         // Rainbow Color Picker
@@ -223,8 +223,8 @@ struct MiniControllerView: View {
                                             RainbowSlider(value: $colorValue, selectedColor: $selectedColor)
                                                 .frame(height: 40)
                                                 .cornerRadius(12)
-                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white, lineWidth: 2))
-                                                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.themeWhite, lineWidth: 2))
+                                                .shadow(color: Color.themeBlack.opacity(0.1), radius: 3, x: 0, y: 2)
                                                 .onChange(of: colorValue) { oldValue, newValue in
                                                     selectedColor = getColorFromSlider(newValue)
                                                     sendHapticFeedback()
@@ -239,8 +239,8 @@ struct MiniControllerView: View {
                                                     Circle()
                                                         .fill(color)
                                                         .frame(width: 30, height: 30)
-                                                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                                                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                                        .overlay(Circle().stroke(Color.themeWhite, lineWidth: 2))
+                                                        .shadow(color: Color.themeBlack.opacity(0.1), radius: 2, x: 0, y: 1)
                                                         .onTapGesture {
                                                             selectedColor = color
                                                             sendColorToLED(color, ledNumber: lednumber)
@@ -272,13 +272,13 @@ struct MiniControllerView: View {
                         }) {
                             Text("CCT")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(mode == "CCT" ? .white : .gray)
+                                .foregroundColor(mode == "CCT" ? .themeWhite : .gray)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
                         .background(
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(mode == "CCT" ? Color(hex:"#24262B") : Color.clear)
+                                .fill(mode == "CCT" ? Color.appSurfacePrimary : Color.clear)
                         )
                         
                         Button(action: {
@@ -288,19 +288,19 @@ struct MiniControllerView: View {
                         }) {
                             Text("RGB")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(mode == "RGB" ? .white : .gray)
+                                .foregroundColor(mode == "RGB" ? .themeWhite : .gray)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
                         .background(
                             RoundedRectangle(cornerRadius: 18)
-                                .fill(mode == "RGB" ? Color(hex:"#24262B") : Color.clear)
+                                .fill(mode == "RGB" ? Color.appSurfacePrimary : Color.clear)
                         )
                     }
                     .background(
                         RoundedRectangle(cornerRadius: 18)
-                            .fill(Color.black)
-                            .stroke(Color.black, lineWidth: 5)
+                            .fill(Color.themeBlack)
+                            .stroke(Color.themeBlack, lineWidth: 5)
                     )
                     .padding(.horizontal, 20)
                     
@@ -596,26 +596,26 @@ struct MiniButton: View {
                 // Icon container with rounded square background
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isSelected ? Color.black : Color.gray.opacity(0.3))
+                        .fill(isSelected ? Color.themeBlack : Color.gray.opacity(0.3))
                         .frame(width: 50, height: 50)
                     
                     // LED/Light icon
                     Image(systemName: title.contains("RGB") ? "lightbulb.fill" : "lamp.desk.fill")
                         .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(isSelected ? (selectedColor ?? color) : Color.white.opacity(0.7))
+                        .foregroundColor(isSelected ? (selectedColor ?? color) : Color.themeWhite.opacity(0.7))
                 }
                 
                 // Text label below icon
                 Text(title)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .multilineTextAlignment(.center)
             }
             .frame(width: 60, height: 80)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(hex: "#24262B"))
-                    .shadow(color: isSelected ? (selectedColor ?? color).opacity(0.3) : Color.black.opacity(0.1),
+                    .fill(Color.appSurfacePrimary)
+                    .shadow(color: isSelected ? (selectedColor ?? color).opacity(0.3) : Color.themeBlack.opacity(0.1),
                             radius: isSelected ? 8 : 4,
                             x: 0,
                             y: isSelected ? 4 : 2)

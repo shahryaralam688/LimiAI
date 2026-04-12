@@ -24,7 +24,7 @@ struct TemporaryAddDeviceView: View {
     var body: some View {
         ZStack {
             // Background color
-            Color(hex: "#111214")
+            Color.appCanvasPrimary
                 .ignoresSafeArea(.all)
             
             
@@ -40,8 +40,8 @@ struct TemporaryAddDeviceView: View {
                         // Bottom gradient overlay
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(hex: "#111214"),
-                                Color(hex: "#111214")
+                                Color.appCanvasPrimary,
+                                Color.appCanvasPrimary
                             ]),
                             startPoint: .bottom,
                             endPoint: .top
@@ -114,7 +114,7 @@ struct TemporaryAddDeviceView: View {
                     .padding(.horizontal, 20)
                     .frame(height: 56)
                     .frame(width: 343)
-                    .background(Color(hex: "#111214"))
+                    .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(Color.emerald, lineWidth: 2)
@@ -143,7 +143,7 @@ struct TemporaryAddDeviceView: View {
                             Image("Monotone arrow right")
                                 .resizable()
                                 .frame(width: 20, height: 20)
-                                .foregroundColor(isEmailValid ? Color(hex: "#0B0E0C") : Color(hex: "#00000066"))
+                                .foregroundColor(isEmailValid ? Color.appCanvasTertiary : Color.appOverlayTint)
                         }
                         .padding(.horizontal, 20)
                         .frame(height: 56)
@@ -171,9 +171,9 @@ struct TemporaryAddDeviceView: View {
                         Image("Solid arrow right sm")
                             .resizable()
                             .frame(width: 18, height: 18)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .frame(width: 48, height: 48)
-                            .background(Color(hex: "#24262B"))
+                            .background(Color.appSurfacePrimary)
                             .cornerRadius(16)
                     }
                     
@@ -322,7 +322,7 @@ import SwiftUI
 //                VStack(spacing: 15) {
 //                    Image(systemName: "lock.shield.fill")
 //                        .font(.system(size: 60))
-//                        .foregroundColor(.black)
+//                        .foregroundColor(.themeBlack)
 //                        .padding()
 //                        .background(
 //                            Circle()
@@ -455,7 +455,7 @@ import SwiftUI
 //            .padding(.vertical, 40)
 //            .background(
 //                RoundedRectangle(cornerRadius: 30)
-//                    .fill(Color.black.opacity(0.95))
+//                    .fill(Color.themeBlack.opacity(0.95))
 //                    .shadow(color: Color.alabaster.opacity(0.1), radius: 20, x: 0, y: 10)
 //            )
 //            .padding(.horizontal, 50)

@@ -15,7 +15,7 @@ class WeatherService: ObservableObject {
     // IMPORTANT: Replace with your actual OpenWeatherMap API key
     // Get your free key at: https://openweathermap.org/api
     private let apiKey = "YOUR_API_KEY_HERE"
-    private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
+    private let baseURL = AppURLs.External.weatherAPI
     
     private init() {}
     

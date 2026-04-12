@@ -27,7 +27,7 @@ struct WebView: UIViewRepresentable {
 // MARK: - WebView Screen Component
 struct WebViewScreen: View {
     @Binding var showWebView: Bool
-    let websiteURL = URL(string: "https://limiai.co/")!
+    let websiteURL = URL(string: AppURLs.Web.mainWebsite)!
     @State private var isLoading = true
     @State private var loadingProgress = 0.0
     @State private var animateShimmer = false
@@ -41,7 +41,7 @@ struct WebViewScreen: View {
                 if isLoading {
                     ZStack {
                         // Background blur
-                        Color.black.opacity(0.05)
+                        Color.themeBlack.opacity(0.05)
                             .edgesIgnoringSafeArea(.all)
                         
                         VStack(spacing: 20) {
@@ -84,13 +84,13 @@ struct WebViewScreen: View {
                                 .padding(.vertical, 10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.white.opacity(0.9))
-                                        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 3)
+                                        .fill(Color.themeWhite.opacity(0.9))
+                                        .shadow(color: Color.themeBlack.opacity(0.05), radius: 5, x: 0, y: 3)
                                 )
                                 // Shimmer effect
                                 .overlay(
                                     GeometryReader { geometry in
-                                        Color.white.opacity(0.3)
+                                        Color.themeWhite.opacity(0.3)
                                             .frame(width: 30)
                                             .blur(radius: 10)
                                             .rotationEffect(.degrees(30))
@@ -104,7 +104,7 @@ struct WebViewScreen: View {
                                     .mask(
                                         Text("Loading Shop...")
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                     )
                                     .onAppear {
                                         animateShimmer = true
@@ -142,4 +142,3 @@ struct WebViewScreen: View {
         }
     }
 }
-

@@ -3,7 +3,7 @@ import UIKit
 import AVKit
 import SwiftUI
 extension UIColor {
-    static let charlestonGreens = UIColor(red: 23/255, green: 29/255, blue: 30/255, alpha: 1.0)
+    static let charlestonGreens = UIColor(Color.charlestonGreen)
 }
 class AnimationVideoView: UIViewController {
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false

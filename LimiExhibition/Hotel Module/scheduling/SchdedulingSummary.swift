@@ -31,7 +31,7 @@ struct SchedulingSummaryView: View {
                 .padding(.bottom, 34)
             }
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.themeBlack.ignoresSafeArea())
     }
     
     // MARK: - Header
@@ -44,7 +44,7 @@ struct SchedulingSummaryView: View {
                         .foregroundColor(.alabaster)
                         .font(.system(size: 18, weight: .medium))
                         .frame(width: 44, height: 44)
-                        .background(Color(red: 0.15, green: 0.15, blue: 0.15))
+                        .background(Color.appInputFill)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 
@@ -64,7 +64,7 @@ struct SchedulingSummaryView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
-        .background(Color(hex: "#393C43"))
+        .background(Color.appSurfaceTertiary)
         .clipShape(
             .rect(
                 topLeadingRadius: 0,
@@ -84,12 +84,12 @@ struct SchedulingSummaryView: View {
             
             TextField("e.g. Morning Routine", text: $schedule.type)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .padding(.vertical, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
@@ -115,13 +115,13 @@ struct SchedulingSummaryView: View {
                 axis: .vertical
             )
             .font(.system(size: 16, weight: .regular))
-            .foregroundColor(.white)
+            .foregroundColor(.themeWhite)
             .lineLimit(3)
             .padding(.vertical, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
@@ -133,13 +133,13 @@ struct SchedulingSummaryView: View {
             Toggle(isOn: $schedule.isCompleted) {
                 Text(schedule.isCompleted ? "Marked as completed" : "This routine will run as scheduled")
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             }
             .tint(Color.emerald)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
@@ -154,7 +154,7 @@ struct SchedulingSummaryView: View {
         } label: {
             Text("Save Changes")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.black)
+                .foregroundColor(.themeBlack)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(Color.emerald)
@@ -172,9 +172,9 @@ struct SchedulingSummaryView: View {
             .padding(.horizontal, 10)
             .background(
                 Capsule()
-                    .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                    .stroke(Color.appBrandAccent, lineWidth: 0.8)
                     .background(
-                        Capsule().fill(Color(hex: "#393C43"))
+                        Capsule().fill(Color.appSurfaceTertiary)
                     )
             )
     }

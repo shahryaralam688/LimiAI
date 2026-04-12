@@ -66,13 +66,13 @@ struct HeaderView: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.white, Color.alabaster.opacity(0.9)]),
+                                gradient: Gradient(colors: [Color.themeWhite, Color.alabaster.opacity(0.9)]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: 45, height: 45)
-                        .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 3)
+                        .shadow(color: Color.themeBlack.opacity(0.15), radius: 5, x: 0, y: 3)
                     
                     // Icon
                     Image(systemName: isSidebarOpen ? "xmark" : "line.horizontal.3")
@@ -95,7 +95,7 @@ struct HeaderView: View {
                 
                 // Animated gradient overlay
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.white.opacity(0.1), Color.clear]),
+                    gradient: Gradient(colors: [Color.themeWhite.opacity(0.1), Color.clear]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -104,14 +104,14 @@ struct HeaderView: View {
                 
                 // Decorative elements
                 Circle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.themeWhite.opacity(0.1))
                     .frame(width: 100, height: 100)
                     .offset(x: -120, y: 20)
                     .scaleEffect(logoScale)
                     .animation(.easeInOut(duration: 4).repeatForever(autoreverses: true), value: logoScale)
                 
                 Circle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.themeWhite.opacity(0.1))
                     .frame(width: 80, height: 80)
                     .offset(x: 140, y: -30)
                     .scaleEffect(2 - logoScale)
@@ -122,7 +122,7 @@ struct HeaderView: View {
             )
         )
         .shadow(
-            color: Color.black.opacity(0.65),
+            color: Color.themeBlack.opacity(0.65),
             radius: 10,
             x: 0,
             y: 5

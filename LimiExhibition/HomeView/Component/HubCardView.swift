@@ -94,7 +94,7 @@ struct HubCardView: View {
                         }) {
                             Text(selectedMode == nil ? "Mode" : "Mode: \(selectedMode!)")
                                 .font(.title)
-                                .foregroundColor(.black)
+                                .foregroundColor(.themeBlack)
                                 .opacity(buttonOpacity)
                                 .animation(isAnimating ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .none, value: buttonOpacity)
                         }

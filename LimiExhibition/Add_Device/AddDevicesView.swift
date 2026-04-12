@@ -83,7 +83,7 @@ struct AddDevicesView: View {
         .background(
             RoundedRectangle(cornerRadius: 30)
                 .fill(Color.alabaster.opacity(0.9))
-                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .shadow(color: Color.themeBlack.opacity(0.1), radius: 20, x: 0, y: 10)
         )
         .padding(.horizontal, 16)
         .padding(.vertical, 20)
@@ -141,7 +141,7 @@ struct ConnectionOptionCard: View {
                     
                     Image(systemName: icon)
                         .font(.system(size: 22))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -162,7 +162,7 @@ struct ConnectionOptionCard: View {
                     .foregroundColor(.charlestonGreen)
             }
             .padding()
-            .background(Color.white)
+            .background(Color.themeWhite)
             .cornerRadius(16)
             .shadow(color: Color.charlestonGreen.opacity(0.05), radius: 10, x: 0, y: 5)
             .scaleEffect(isPressed ? 0.97 : 1.0)

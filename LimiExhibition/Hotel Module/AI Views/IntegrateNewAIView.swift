@@ -17,7 +17,7 @@ struct IntegrateNewAIView: View {
                 .padding(.bottom, 38)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                             .rect(
                                 topLeadingRadius: 0,
@@ -40,7 +40,7 @@ struct IntegrateNewAIView: View {
                             .frame(width: 72, height: 72)
                             .background(
                                 RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
-                                    .fill(Color.white)
+                                    .fill(Color.themeWhite)
                             )
                         
                         VStack(alignment: .leading, spacing: 2) {
@@ -67,7 +67,7 @@ struct IntegrateNewAIView: View {
                         
                         Text("Gemini enables natural conversation with your devices — ask for room adjustments, personalized recommendations, or daily briefings with ease.")
                             .font(AIDesignTokens.bodyFont)
-                            .foregroundColor(Color(hex: "#D1D5DB"))
+                            .foregroundColor(Color.appBorderSubtle)
                             .lineSpacing(4)
                     }
                     
