@@ -10,7 +10,6 @@ import SwiftUI
 struct DemoARView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var currentPage = 1
-    @Environment(\.presentationMode) var presentationMode
     @StateObject private var networkMonitor = NetworkMonitor()
 
     

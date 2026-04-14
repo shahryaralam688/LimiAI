@@ -113,14 +113,7 @@
                 .shadow(color: Color.charlestonGreen.opacity(0.3), radius: 20)
                 
                 HStack {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 24))
-                            .bold()
-                    }
+                    LimiBackButton { dismiss() }
                     .padding(.leading)
                     Spacer()
                 }

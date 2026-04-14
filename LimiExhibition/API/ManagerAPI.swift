@@ -8,11 +8,13 @@ import Foundation
 
 struct APIConstants {
     // MARK: - Base URL
-    static let baseURL = "https://dev.api.limitless-lighting.co.uk/"
-    static let secondaryBaseURL = "https://dev.api1.limitless-lighting.co.uk/"
+    static let baseURL = "https://ear-legitimate-warehouse-employ.trycloudflare.com/"
+    static let secondaryBaseURL = "https://ear-legitimate-warehouse-employ.trycloudflare.com/"
     
     // Auth
     static let loginGoogle = baseURL + "client/google/login"
+    /// Apple Sign-In: POST JSON `{ "identity_token": "<jwt>", "user": "<apple user id>" }` → same token shape as Google login.
+    static let loginApple = baseURL + "client/apple/login"
     static let LoginInstallerUser = baseURL + "client/installer_user"
     static let sendOTP = baseURL + "client/send_otp"
     static let verifyOTP = baseURL + "client/verify_otp"

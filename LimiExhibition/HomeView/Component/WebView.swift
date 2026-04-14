@@ -128,17 +128,11 @@ struct WebViewScreen: View {
                 }
             }
             .navigationBarTitle("Shop", displayMode: .inline)
-            .navigationBarItems(
-                leading: Button(action: {
-                    showWebView = false
-                }) {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .foregroundColor(.eton)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    LimiBackButton { showWebView = false }
                 }
-            )
+            }
         }
     }
 }

@@ -27,16 +27,9 @@ struct PrivacyPolicyView: View {
         VStack{
             VStack{
                 HStack {
-                    Button(action: {
+                    LimiBackButton {
                         onBack()
                         dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .background(Color.appInputFill)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
                     Text("Privacy Policy")
@@ -65,17 +58,9 @@ struct PrivacyPolicyView: View {
             Spacer()
             ScrollView{
                 VStack(alignment: .leading, spacing: 16) {
-                    Button(action: {
+                    LimiPrimaryButton(title: "Grant Google Permissions") {
                         print("[PrivacyPolicyView] Grant Google Permissions button tapped")
                         showGooglePermissionAlert = true
-                    }) {
-                        Text("Grant Google Permissions")
-                            .font(.headline)
-                            .foregroundColor(.themeWhite)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.blue)
-                            .cornerRadius(12)
                     }
                     .disabled(isRequestingGooglePermissions)
                     .alert("Google Permissions", isPresented: $showGooglePermissionAlert) {

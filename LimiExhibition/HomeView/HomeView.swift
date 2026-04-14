@@ -107,19 +107,12 @@ struct HomeView: View {
         )
     }
 
+    @State private var isWeatherExpanded: Bool = false
+
     var body: some View {
         NavigationStack {
             ZStack {
-                // MARK: - Background
-                Color.themeBlack
-                    .ignoresSafeArea()
-                    .overlay(
-                        Image("bg blur")
-                            .scaledToFit()
-                            .ignoresSafeArea()
-                            .offset(y: -500)
-                            .offset(x: -80)
-                    )
+                DeepSpaceBackground(showParticles: false)
                     .contentShape(Rectangle())
                     .onTapGesture {
                         if isModuleEditMode {
@@ -135,283 +128,68 @@ struct HomeView: View {
                             isModuleEditMode = true
                         }
                     }
-                VStack{
-//                    header
-//                        .padding(.horizontal)
-                    
-                    WeatherWidgetView()
 
-//
-//                    if !modulesManager.getAddedModules().isEmpty {
-//                        HStack{
-//                            Text("Active Modules")
-//                                .font(.system(size: 18, weight: .semibold))
-//                                .foregroundColor(.themeWhite)
-//                                .padding(.horizontal, 16)
-//                                .padding(.top, 24)
-//                            Spacer()
-//                        }
-//                    }
-                    
-                    if modulesManager.getAddedModules().isEmpty {
-                        VStack{
-                            VStack(spacing: 16){
-                                Text("home.empty.title".localized)
-                                    .font(.custom("Poppins-Medium", size: 16))   // 500 weight = Medium
-                                    .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
-                                    .multilineTextAlignment(.center)             // text-align: center
-                                    .lineSpacing(16 * 0.4)                       // 140% line height
-                                    .kerning(0)
-                                
-                                Text("home.empty.subtitle".localized)
-                                    .font(.custom("Poppins-Regular", size: 14)) // weight 400 = Regular
-                                    .foregroundColor(Color.appTextMuted)     // custom color
-                                    .multilineTextAlignment(.center)            // text-align: center
-                                    .lineSpacing(14 * 0.4)                      // line-height: 140% → +40% of font size
-                                    .kerning(0)                                 // letter-spacing: 0px
-                                
-                                // Add devices Button
-                                Button(action: {
-                                    showModulerView = true
-                                }) {
-                                    HStack {
-                                        
-                                        Image(systemName: "plus")
-                                            .font(.custom("Poppins-Medium", size: 14))
-                                            .foregroundColor(Color.charlestonGreen)
-                                            .lineSpacing(0) // line-height: 100% (no extra spacing)
-                                            .kerning(0)     // letter-spacing: 0%
-                                        Text("home.empty.cta".localized)
-                                            .font(.custom("Poppins-Medium", size: 14))
-                                            .foregroundColor(Color.charlestonGreen)
-                                            .lineSpacing(0) // line-height: 100% (no extra spacing)
-                                            .kerning(0)     // letter-spacing: 0%
-                                        
-                                    }
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .padding(.vertical, 14)
-                                    .padding(.horizontal, 20)
-                                    .background(Color.themeWhite)
-                                    .foregroundColor(.themeBlack)
-                                    .cornerRadius(12)
-                                    
-                                }
-                            }
-                            .frame( height: 304)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                            .overlay(
-                                // Dashed border
-                                RoundedRectangle(cornerRadius: 8)
-                                    .strokeBorder(
-                                        style: StrokeStyle(lineWidth: 1, dash: [2, 2])
-                                    )
-                                    .foregroundColor(Color.appBorderSecondary)
-                            )
-                            .cornerRadius(8)
-                            .opacity(1)
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        // Weather — tap to expand/collapse
+                        WeatherWidgetView(isExpanded: $isWeatherExpanded)
+                            .padding(.top, 60)
+
+                        if modulesManager.getAddedModules().isEmpty {
+                            emptyStateView
+                                .padding(.top, 20)
+                        } else {
+                            modulesGrid
+                                .padding(.top, 20)
                         }
-                        .padding(.top, 24)
-                        .padding(.horizontal)
-                        Spacer()
-                        
-                    } else {
-                        // MARK: - Main Content
-                        ScrollView(showsIndicators: false) {
-                            VStack(alignment: .leading, spacing: 24) {
-                                let addedModules = modulesManager.getAddedModules()
-                                
-                                if !addedModules.isEmpty {
-                                    
-                                    
-                                    LazyVGrid(columns: columns, spacing: 16) {
-                                        ForEach(addedModules) { module in
-                                            ZStack(alignment: .topLeading) {
-                                                VStack(alignment: .leading, spacing: 12) {
-                                                    HStack {
-                                                        Image(module.icon)
-                                                            .font(.system(size: 20, weight: .semibold))
-                                                            .foregroundColor(.emerald)
-                                                        Spacer()
-                                                    }
-                                                    Spacer()
-                                                    Text(module.title)
-                                                        .font(.custom("Poppins-Medium", size: 16))
-                                                        .kerning(-0.15)
-                                                        .lineSpacing(2) // 120% line-height ke close
-                                                        .foregroundColor(.themeWhite)
-                                                    
-                                                    
-                                                    
-                                                    HStack {
-                                                        Text("settings.title".localized)
-                                                            .font(.custom("Poppins-Regular", size: 12))
-                                                            .kerning(-0.15)
-                                                            .lineSpacing(1.5) // ~120% line-height
-                                                            .foregroundColor(.themeWhite)
-                                                        
-                                                        
-                                                        Spacer()
-                                                        Button(action: {
-                                                            selectedModuleForAction = module
-                                                            showModuleActionMenu = true
-                                                        }) {
-                                                            Image(systemName: "ellipsis")
-                                                                .rotationEffect(.degrees(90))
-                                                                .font(.system(size: 16, weight: .semibold))
-                                                                .foregroundColor(.themeWhite)
-                                                        }
-                                                    }
-                                                    
-                                                }
-                                                .frame(minHeight: 120)
-                                                .padding(12)
-                                                .background(Color.appSurfaceSecondaryAlt)
-                                                .cornerRadius(12)
-                                                .scaleEffect(isModuleEditMode ? 0.97 : 1.0)
-                                                .rotationEffect(.degrees(isModuleEditMode ? -1.8 : 0))
-                                                .animation(
-                                                    isModuleEditMode ? .easeInOut(duration: 0.15).repeatForever(autoreverses: true) : .default,
-                                                    value: isModuleEditMode
-                                                )
-                                                .onTapGesture {
-                                                    if !isModuleEditMode {
-                                                        handleModuleTap(module)
-                                                    }
-                                                }
-                                                .onLongPressGesture(minimumDuration: 0.5) {
-                                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                        isModuleEditMode = true
-                                                    }
-                                                }
-                                                
-                                                if isModuleEditMode {
-                                                    Button(action: {
-                                                        selectedModuleForAction = module
-                                                        showModuleActionMenu = true
-                                                    }) {
-                                                        ZStack {
-                                                            Circle()
-                                                                .fill(Color.themeWhite)
-                                                                .frame(width: 22, height: 22)
-                                                            Image(systemName: "xmark")
-                                                                .font(.system(size: 11, weight: .bold))
-                                                                .foregroundColor(.themeBlack)
-                                                        }
-                                                    }
-                                                    .buttonStyle(.plain)
-                                                    .offset(x: -6, y: -6)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal, 16)
-                                }
-                            }
-                            .padding(.top, 24
-                            )
-                            .padding(.bottom, 40)
-                        }
+
+                        Spacer(minLength: 120)
                     }
-                    
                 }
-                if isModuleEditMode {
-                VStack {
-                    Spacer()
-                    
-                    let hasModules = !modulesManager.getAddedModules().isEmpty
-                    if !modulesManager.getAddedModules().isEmpty {
-                        
-                        HStack{
+                if isModuleEditMode && !modulesManager.getAddedModules().isEmpty {
+                    VStack {
+                        Spacer()
+                        HStack {
                             Spacer()
-                            Button(action: {
-                                isModulesButtonAnimating = true
+                            LimiPillButton(title: "Add More Modules") {
                                 showModulerView = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                    isModulesButtonAnimating = false
-                                }
-                            }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: hasModules ? "plus.circle" : "plus.circle")
-                                        .font(.system(size: 16, weight: .semibold))
-                                    Text(hasModules ? "Add More Modules" : "Add Modules")
-                                        .font(.system(size: 16, weight: .semibold))
-                                }
-                                .foregroundColor(hasModules ? Color.appCanvasMuted : .themeWhite)
-                                .frame(width: 195)
-                                .padding(.vertical, 14)
-                                .background(
-                                    hasModules ? AnyView(AnyView(Color.themeWhite)) : AnyView(Color.clear)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .stroke(Color.themeWhite, lineWidth: hasModules ? 0 : 1.5)
-                                )
-                                .cornerRadius(24)
                             }
-                            
-                            .scaleEffect(isModulesButtonAnimating ? 0.95 : 1.0)
-                            .shadow(color: hasModules ? Color.themeWhite.opacity(0.5) : Color.clear,
-                                    radius: hasModules ? 16 : 0,
-                                    x: 0,
-                                    y: 0)
-                            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: isModulesButtonAnimating)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 24)
                         }
                     }
                 }
-            }
 
                     if showBLEFoundCard, let device = pendingBLEDevice {
                         VStack {
-                            VStack(spacing: 12) {
+                            Spacer()
+                            VStack(spacing: 14) {
                                 Text("Found New Device")
-                                    .font(.custom("Poppins-SemiBold", size: 24))
-                                    .foregroundColor(Color.alabaster)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(24 * 0.4)
-                                    .tracking(-0.005 * 24)
-                                
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .foregroundColor(.appTextPrimary)
+
                                 Text(device.name)
-                                    .font(.custom("Poppins-SemiBold", size: 14))
-                                    .foregroundColor(Color.alabaster)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.orbGlow4)
                                     .padding(.vertical, 4)
-                                    .padding(.horizontal, 6)
+                                    .padding(.horizontal, 10)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 3)
-                                            .fill(Color.appSurfacePrimary.opacity(1))
+                                        Capsule().fill(Color.orbGlow4.opacity(0.12))
                                     )
-                                    .frame(width: .infinity, height: 24, alignment: .center)
-                                    .opacity(1)
-                                    .rotationEffect(.degrees(0))
-                                
+
                                 Text(device.id)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                
-                                HStack(spacing: 16) {
-                                    
-                                    // ✅ Connect Button (Filled Green)
-                                    Button(action: {
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.appTextMuted)
+
+                                HStack(spacing: 12) {
+                                    LimiPrimaryButton(title: "Connect", height: 46) {
                                         if let dev = pendingBLEDevice {
-                                            // Remember decision and dismiss card
                                             bleAcceptedIds.insert(dev.id)
                                             showBLEFoundCard = false
                                             pendingBLEDevice = nil
-                                            
-                                            // Persist selection and connect
                                             selectedDeviceName = dev.name
                                             selectedDeviceId = dev.id
                                             BluetoothManager.shared.selectAndConnect(name: dev.name, uuidString: dev.id)
-                                            
-                                            // Fetch Wi-Fi list (FB04) then present DemoAddingWifiView with first SSID
                                             BluetoothManager.shared.readWifiList { list in
                                                 DispatchQueue.main.async {
                                                     self.selectedWifiSSID = list
@@ -419,40 +197,17 @@ struct HomeView: View {
                                                 }
                                             }
                                         }
-                                    }) {
-                                        Text("Connect")
-                                            .font(.custom("Poppins-SemiBold", size: 16))
-                                            .foregroundColor(Color.charlestonGreen)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 14)
-                                            .background(Color.emerald)
-                                            .cornerRadius(12)
                                     }
-                                    
-                                    // ❌ Not Now Button (Outlined)
-                                    Button(action: {
+                                    LimiSecondaryButton(title: "Not Now", height: 46) {
                                         if let id = pendingBLEDevice?.id { bleRejectedIds.insert(id) }
                                         showBLEFoundCard = false
                                         pendingBLEDevice = nil
-                                    }) {
-                                        Text("Not Now")
-                                            .font(.custom("Poppins-SemiBold", size: 16))
-                                            .foregroundColor(.themeWhite)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 14)
-                                            .background(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(Color.emerald, lineWidth: 1.5)
-                                            )
                                     }
                                 }
-                                .padding(.horizontal, 24)
-                                
+                                .padding(.horizontal, 4)
                             }
-                            .padding(16)
-                            .background(Color.appSurfacePrimary)
-                            .cornerRadius(16)
-                            .shadow(color: Color.themeBlack.opacity(0.3), radius: 10, x: 0, y: 6)
+                            .padding(20)
+                            .glassCard(cornerRadius: 20, fillOpacity: 0.12)
                             .padding(.horizontal, 16)
                             .padding(.bottom, 24)
                         }
@@ -462,38 +217,29 @@ struct HomeView: View {
                     // MARK: - Module Action Menu Popup
                     if showModuleActionMenu, let module = selectedModuleForAction {
                         ZStack {
-                            // Dark overlay background
-                            Color.themeBlack.opacity(0.45)
+                            Color.black.opacity(0.5)
                                 .ignoresSafeArea()
                                 .onTapGesture {
                                     showModuleActionMenu = false
                                     isModuleEditMode = false
                                 }
-                            
 
-                            // Popup menu
                             VStack(spacing: 0) {
-                                VStack(spacing: 8) {
+                                VStack(spacing: 6) {
                                     Text(module.title)
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundColor(.themeWhite)
-                                        .multilineTextAlignment(.center)
-                                        .tracking(-0.3)
-
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.appTextPrimary)
                                     Text("What would you like to do?")
-                                        .font(.system(size: 13, weight: .regular))
-                                        .foregroundColor(Color.themeWhite.opacity(0.7))
-                                        .multilineTextAlignment(.center)
-                                        .tracking(-0.2)
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.appTextSecondary)
                                 }
-                                .padding(.top, 18)
-                                .padding(.horizontal, 20)
-                                .padding(.bottom, 12)
+                                .padding(.top, 20)
+                                .padding(.bottom, 14)
 
-                                Divider()
-                                    .background(Color.themeWhite.opacity(0.08))
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.06))
+                                    .frame(height: 1)
 
-                                // Delete Button
                                 Button(action: {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                         modulesManager.toggleModuleStatus(for: module.id)
@@ -503,60 +249,45 @@ struct HomeView: View {
                                     isModuleEditMode = false
                                 }) {
                                     HStack(spacing: 12) {
-                                        Image(systemName: "square.and.arrow.up")
-                                            .font(.system(size: 17, weight: .semibold))
-                                            .foregroundColor(.themeWhite)
-
-                                        Text("Unisntall")
+                                        Image(systemName: "trash")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.appDanger)
+                                        Text("Uninstall")
                                             .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.themeWhite)
-
+                                            .foregroundColor(.appDanger)
                                         Spacer()
                                     }
                                     .padding(.vertical, 14)
-                                    .padding(.horizontal, 18)
+                                    .padding(.horizontal, 20)
                                 }
 
-                                Divider()
-                                    .background(Color.themeWhite.opacity(0.08))
+                                Rectangle()
+                                    .fill(Color.white.opacity(0.06))
+                                    .frame(height: 1)
 
-                                // Later Button
                                 Button(action: {
                                     showModuleActionMenu = false
                                     selectedModuleForAction = nil
                                     isModuleEditMode = false
                                 }) {
                                     HStack(spacing: 12) {
-                                        Image(systemName: "clock.fill")
-                                            .font(.system(size: 17, weight: .semibold))
-                                            .foregroundColor(.themeWhite)
-
-                                        Text("Later")
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(.themeWhite)
-
+                                        Image(systemName: "xmark")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.appTextSecondary)
+                                        Text("Cancel")
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundColor(.appTextSecondary)
                                         Spacer()
                                     }
                                     .padding(.vertical, 14)
-                                    .padding(.horizontal, 18)
+                                    .padding(.horizontal, 20)
                                 }
                             }
-                            .background(
-                                Color.appSurfacePrimary
-                                    .opacity(0.8)
-                                    .shadow(color: Color.themeBlack.opacity(0.5), radius: 20, x: 0, y: 18)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 24)
-                                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
-                                    )
-                            )
-                            .cornerRadius(24)
-                            .padding(.horizontal, 40)
-                            .padding(.bottom, 8)
+                            .glassCard(cornerRadius: 20, fillOpacity: 0.12)
+                            .padding(.horizontal, 36)
                             .transition(.scale(scale: 0.9).combined(with: .opacity))
-                            
                         }
-                        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: showModuleActionMenu)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showModuleActionMenu)
                         .zIndex(5)
                     }
                 
@@ -566,22 +297,20 @@ struct HomeView: View {
                 viewModel.setupInitialState()
                 
             }
-            .overlay(
-                Group {
-                    if !isModuleEditMode {
-                        EnhancedBottomNavigationView(
-                            showARScan: $viewModel.showARScan,
-                            showCustomer: $viewModel.showCustomer,
-                            showGrouping: $viewModel.showGrouping,
-                            showWebView: $viewModel.showWebView,
-                            selectedTab: $viewModel.selectedTab,
-                            isLoaded: $viewModel.isLoaded,
-                            isSidebarOpen: $viewModel.isSidebarOpen
-                        )
-                    }
-                },
-                alignment: .bottom
-            )
+            .overlay(alignment: .bottom) {
+                if !isModuleEditMode {
+                    EnhancedBottomNavigationView(
+                        showARScan: $viewModel.showARScan,
+                        showCustomer: $viewModel.showCustomer,
+                        showGrouping: $viewModel.showGrouping,
+                        showWebView: $viewModel.showWebView,
+                        selectedTab: $viewModel.selectedTab,
+                        isLoaded: $viewModel.isLoaded,
+                        isSidebarOpen: $viewModel.isSidebarOpen
+                    )
+                    .ignoresSafeArea(.keyboard)
+                }
+            }
 
         }
         .frame(maxWidth: .infinity)
@@ -723,6 +452,113 @@ struct HomeView: View {
         }
         // hello world
     }
+    // MARK: - Empty State
+
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 32, weight: .light))
+                .foregroundColor(.appTextMuted)
+
+            Text("home.empty.title".localized)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.appTextSecondary)
+                .multilineTextAlignment(.center)
+
+            Text("home.empty.subtitle".localized)
+                .font(.system(size: 14))
+                .foregroundColor(.appTextMuted)
+                .multilineTextAlignment(.center)
+
+            LimiPrimaryButton(title: "home.empty.cta".localized, height: 48) {
+                showModulerView = true
+            }
+            .padding(.horizontal, 40)
+        }
+        .padding(24)
+        .padding(.vertical, 20)
+        .glassCard(cornerRadius: 20, strokeOpacity: 0.06, fillOpacity: 0.04)
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Modules Grid
+
+    private var modulesGrid: some View {
+        LazyVGrid(columns: columns, spacing: 14) {
+            let addedModules = modulesManager.getAddedModules()
+            ForEach(addedModules) { module in
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Image(module.icon)
+                                .renderingMode(.template)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.orbGlow4)
+                            Spacer()
+                        }
+                        Spacer()
+                        Text(module.title)
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
+
+                        HStack {
+                            Text("settings.title".localized)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.appTextSecondary)
+                            Spacer()
+                            Button(action: {
+                                selectedModuleForAction = module
+                                showModuleActionMenu = true
+                            }) {
+                                Image(systemName: "ellipsis")
+                                    .rotationEffect(.degrees(90))
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.appTextMuted)
+                            }
+                        }
+                    }
+                    .frame(minHeight: 110)
+                    .padding(14)
+                    .glassCard(cornerRadius: 16, fillOpacity: 0.05)
+                    .scaleEffect(isModuleEditMode ? 0.97 : 1.0)
+                    .rotationEffect(.degrees(isModuleEditMode ? -1.5 : 0))
+                    .animation(
+                        isModuleEditMode ? .easeInOut(duration: 0.15).repeatForever(autoreverses: true) : .default,
+                        value: isModuleEditMode
+                    )
+                    .onTapGesture {
+                        if !isModuleEditMode { handleModuleTap(module) }
+                    }
+                    .onLongPressGesture(minimumDuration: 0.5) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            isModuleEditMode = true
+                        }
+                    }
+
+                    if isModuleEditMode {
+                        Button(action: {
+                            selectedModuleForAction = module
+                            showModuleActionMenu = true
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.appDanger)
+                                    .frame(width: 22, height: 22)
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .offset(x: -6, y: -6)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 40)
+    }
+
     private var header: some View {
         HStack {
             HStack(spacing: 12) {

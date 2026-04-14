@@ -328,13 +328,21 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
             DispatchQueue.main.async {
                 self.isSignedIn = true
                 self.userProfileImage = "" // Still empty for Apple Sign-In
-                if !identityToken.isEmpty {
-                    self.sendTokenToBackend(identityToken)
-//                    self.sendAppleTokenToBackend(identityToken)
+                guard !identityToken.isEmpty else {
+                    self.appleSignInCompletion?(false)
+                    self.appleSignInCompletion = nil
+                    return
                 }
-                
-                self.appleSignInCompletion?(true)
-                self.appleSignInCompletion = nil
+                AppleLoginAPI.exchange(identityToken: identityToken, appleUserId: userId) { [weak self] result in
+                    switch result {
+                    case .success:
+                        self?.appleSignInCompletion?(true)
+                    case .failure(let err):
+                        print("[AppleAuth] Exchange failed: \(err.localizedDescription)")
+                        self?.appleSignInCompletion?(false)
+                    }
+                    self?.appleSignInCompletion = nil
+                }
             }
         } else {
             DispatchQueue.main.async {
@@ -361,44 +369,5 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
             return window
         }
         return ASPresentationAnchor()
-    }
-    
-    // Send Apple identity token to backend
-    private func sendAppleTokenToBackend(_ token: String) {
-        guard let url = URL(string: APIConstants.loginGoogle) else { return }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let body: [String: String] = ["identity_token": token]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Backend error: \(error)")
-                return
-            }
-            
-            if let http = response as? HTTPURLResponse {
-                print("Backend status: \(http.statusCode)")
-            }
-            
-            guard let data = data else { return }
-            
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let dataField = json["data"] as? [String: Any],
-                   let token = dataField["token"] as? String {
-                    print("Extracted Apple Token:", token)
-                    // Option A: defer setting global isAuthenticated until onboarding completes
-                    AuthManager.shared.saveToken(token, updateAuthState: false)
-                    AuthManager.shared.clearRole()
-                } else {
-                    print("Token not found in Apple response.")
-                }
-            } catch {
-                print("JSON parsing error:", error)
-            }
-        }.resume()
     }
 }

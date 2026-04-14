@@ -34,17 +34,9 @@ struct NotificationView: View {
         VStack{
             VStack{
                 HStack {
-                    Button(action: {
+                    LimiBackButton {
                         onBack()
                         dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .background(Color.appInputFill)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        
                     }
                     
                     Text("Notification Settings")

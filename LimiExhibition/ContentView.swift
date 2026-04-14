@@ -97,26 +97,19 @@ struct MainLEDView: View {
 
                     Button(action: {
                         bluetoothManager.disconnectCurrentDevice()
-                        showGetStartScreen = true // Set state variable to true
-                        
+                        showGetStartScreen = true
                     }) {
-                        HStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.charlestonGreen.opacity(0.1))
-                                    .frame(width: 36, height: 36)
-
-                                Image(systemName: "arrow.left.square.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.charlestonGreen.opacity(0.8))
-                            }
-
+                        HStack(spacing: 10) {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .font(.system(size: 16))
+                                .foregroundColor(.appDanger)
                             Text("Logout")
-                                .font(.headline)
-                                .foregroundColor(.charlestonGreen.opacity(0.8))
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.appDanger)
                         }
                         .padding(.vertical, 12)
                         .padding(.horizontal, 20)
+                        .glassCard(cornerRadius: 14, fillOpacity: 0.04)
                     }
                     .padding(.bottom, 20)
 

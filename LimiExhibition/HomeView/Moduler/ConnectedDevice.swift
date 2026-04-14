@@ -29,7 +29,7 @@ struct ConnectedDevicesView: View {
     @State private var selectedDeviceName: String = ""
     @State private var selectedDeviceId: String = ""
     @State private var selectedWifiSSID: [String] = []
-    @Environment(\.presentationMode) var presentationMode
+    
 
     @State private var showHomeView: Bool = false
     @State private var showNoPendantAlert: Bool = false
@@ -63,16 +63,7 @@ struct ConnectedDevicesView: View {
                     
                     HStack(alignment: .bottom, spacing: 16) {
                         // Back Button
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            Image("Solid arrow right sm")
-                                .foregroundColor(.alabaster)
-                                .font(.system(size: 18, weight: .medium))
-                                .frame(width: 44, height: 44)
-                                .background(Color.appInputFill)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
+                        LimiBackButton { dismiss() }
                         
                         // Title and Subtitle
                         VStack(alignment: .leading, spacing: 4) {
@@ -136,23 +127,8 @@ struct ConnectedDevicesView: View {
                                         .lineSpacing(14 * 0.4)
                                         .kerning(0)
                                     
-                                    Button(action: {
+                                    LimiPrimaryButton(title: "Add Your First Device") {
                                         isShowingDevice = true
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "plus")
-                                                .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.themeBlack)
-                                            Text("Add Your First Device")
-                                                .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.themeBlack)
-                                        }
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .padding(.vertical, 14)
-                                        .padding(.horizontal, 20)
-                                        .background(Color.themeWhite)
-                                        .foregroundColor(.themeBlack)
-                                        .cornerRadius(12)
                                     }
                                 }
                                 .frame(height: 304)

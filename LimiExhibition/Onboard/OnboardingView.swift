@@ -207,24 +207,9 @@ struct OnboardingPageView: View {
                                 .animation(.easeOut(duration: 0.6).delay(0.5), value: descriptionOpacity)
 
                             if pageIndex == totalPages - 1 {
-                                Button(action: {
+                                LimiPrimaryButton(title: "Get Started", height: 56) {
                                     hasCompletedOnboarding = true
                                     showDemoAddDevice = true
-                                }) {
-                                    Text("Get Started")
-                                        .font(.system(size: 18, weight: .semibold, design: .default))
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 56)
-                                        .background(
-                                            LinearGradient(
-                                                gradient: Gradient(colors: [brandGreen, brandGreen.opacity(0.85)]),
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                        .foregroundColor(.themeBlack)
-                                        .cornerRadius(28)
-                                        .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
                                 }
                                 .padding(.horizontal, 30)
                                 .scaleEffect(buttonScale)

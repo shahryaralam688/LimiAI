@@ -24,12 +24,12 @@ struct ChannelSelectionView: View {
                 // Device info header
                 VStack(spacing: 8) {
                     Text("Channel " + String(device.chennalCount))
-                        .font(.custom("Poppins-SemiBold", size: 20))
-                        .foregroundColor(.themeWhite)
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                     
                     Text("Select a channel to control")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.themeWhite.opacity(0.7))
+                        .font(.system(size: 14))
+                        .foregroundColor(.appTextSecondary)
                     
                     HStack(spacing: 4) {
                         Text("Device ID:")
@@ -59,7 +59,7 @@ struct ChannelSelectionView: View {
                                     // Channel number indicator
                                     ZStack {
                                         Circle()
-                                            .fill(channelType == "CCT" ? Color.orange.opacity(0.3) : Color.purple.opacity(0.3))
+                                            .fill(channelType == "CCT" ? Color.appOrange.opacity(0.3) : Color.appPurple.opacity(0.3))
                                             .frame(width: 50, height: 50)
                                         
                                         Text("\(index + 1)")
@@ -74,7 +74,7 @@ struct ChannelSelectionView: View {
                                         
                                         Text(channelType == "CCT" ? "Warm/Cool White" : "RGB Color")
                                             .font(.custom("Poppins-Regular", size: 12))
-                                            .foregroundColor(channelType == "CCT" ? Color.orange : Color.purple)
+                                            .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     }
                                     
                                     Spacer()
@@ -86,12 +86,12 @@ struct ChannelSelectionView: View {
                                         Text(channelType)
                                             .font(.custom("Poppins-Medium", size: 12))
                                     }
-                                    .foregroundColor(channelType == "CCT" ? .orange : .purple)
+                                    .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(channelType == "CCT" ? Color.orange.opacity(0.2) : Color.purple.opacity(0.2))
+                                            .fill(channelType == "CCT" ? Color.appOrange.opacity(0.2) : Color.appPurple.opacity(0.2))
                                     )
                                     
                                     Image(systemName: "chevron.right")
@@ -122,21 +122,21 @@ struct ChannelSelectionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Close")
-                                .font(.custom("Poppins-Medium", size: 14))
-                        }
-                        .foregroundColor(.themeWhite)
-                    }
+                    LimiBackButton(icon: "xmark") { dismiss() }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
                     Text("Device Channels")
-                        .font(.custom("Poppins-SemiBold", size: 17))
-                        .foregroundColor(.themeWhite)
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Text("Advanced")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.orbGlow4)
+                    }
                 }
             }
             .sheet(item: $selectedChannel) { channel in

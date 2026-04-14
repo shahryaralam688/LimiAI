@@ -41,17 +41,12 @@ struct AddDeviceView: View {
                 VStack {
                     HStack {
                         if showBackButton {
-                            Button(action: {
-                                // Navigate to HomeView
+                            LimiBackButton {
                                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                    let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
                                     window.rootViewController = UIHostingController(rootView: HomeView())
                                     window.makeKeyAndVisible()
                                 }
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(.alabaster)
-                                    .font(.title)
                             }
                             .padding(.leading, 30)
                             .padding(.top, -6)

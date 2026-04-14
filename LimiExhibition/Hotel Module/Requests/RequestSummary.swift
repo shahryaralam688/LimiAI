@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RequestSummaryView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     let item: RequestMainItem       // 👈 pichle view se aayega
     let requestTime: String
@@ -13,16 +13,7 @@ struct RequestSummaryView: View {
             // Top Header with rounded corners
             VStack(spacing: 0) {
                 HStack {
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .background(Color.appInputFill)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
+                    LimiBackButton { dismiss() }
                     
                     Spacer()
                     
@@ -139,16 +130,8 @@ struct RequestSummaryView: View {
                 Spacer()
                 
                 // Feedback Button
-                Button(action: {
+                LimiPrimaryButton(title: "Feedback") {
                     print("Feedback tapped")
-                }) {
-                    Text("Feedback")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.themeBlack)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.emerald)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
                 .padding(.bottom, 34)
             }

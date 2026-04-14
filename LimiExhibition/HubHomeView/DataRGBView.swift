@@ -592,7 +592,7 @@ struct RainbowView: View {
 
 struct ColorPickerView: View {
     @Binding var selectedColor: Color
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationView {
@@ -609,11 +609,11 @@ struct ColorPickerView: View {
                 Spacer()
             }
             .navigationTitle("Color Picker")
-            .navigationBarItems(
-                trailing: Button("Done") {
-                    presentationMode.wrappedValue.dismiss()
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
                 }
-            )
+            }
         }
     }
 }

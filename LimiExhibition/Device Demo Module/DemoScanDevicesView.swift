@@ -621,15 +621,8 @@ struct DemoScanDevicesView: View {
         VStack {
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    Button {
+                    LimiBackButton {
                         if let onBack { onBack() } else { dismiss() }
-                    } label: {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .padding(12)
-                            .background(Rectangle().fill(Color.appSurfacePrimary).cornerRadius(16))
                     }
                     Spacer()
                     Text("Add Device")

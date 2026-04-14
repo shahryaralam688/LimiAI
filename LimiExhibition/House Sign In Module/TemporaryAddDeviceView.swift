@@ -165,17 +165,7 @@ struct TemporaryAddDeviceView: View {
             VStack {
                 HStack {
                     // Back Button
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .frame(width: 18, height: 18)
-                            .foregroundColor(.themeWhite)
-                            .frame(width: 48, height: 48)
-                            .background(Color.appSurfacePrimary)
-                            .cornerRadius(16)
-                    }
+                    LimiBackButton { dismiss() }
                     
                     Spacer()
                     

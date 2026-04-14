@@ -10,7 +10,7 @@ import SwiftUI
 
 struct HomeDetailView: View {
     let hub: Hub
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
 
     @State private var selectedController: ControllerType = .pwm2LED
     @State private var isTransitioning = false
@@ -33,14 +33,8 @@ struct HomeDetailView: View {
                 VStack {
                     VStack(spacing: 0) {
                         HStack {
-                            Button(action: {
-                                presentationMode.wrappedValue.dismiss()
-                            }) {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(.themeBlack)
-                                    .font(.title2)
-                                    .padding()
-                            }
+                            LimiBackButton { dismiss() }
+                                .padding(.leading, 16)
                             HubHeaderView(title: hub.name)
                         }
                         .padding(.horizontal)
@@ -115,24 +109,30 @@ struct ControllerButton: View {
     let isSelected: Bool
     let isDisabled: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: .medium))
-                .padding(.horizontal, 16)
+                .font(.system(size: 14, weight: .semibold))
+                .padding(.horizontal, 18)
                 .padding(.vertical, 10)
-                .foregroundColor(isSelected ? .themeWhite : .charlestonGreen)
-                .background(isSelected ? Color.emerald : Color.themeWhite)
-                .cornerRadius(20)
-                .shadow(color: isSelected ? Color.emerald.opacity(0.3) : Color.gray.opacity(0.1), radius: 4, x: 0, y: 2)
+                .foregroundColor(isSelected ? .appCanvasPrimary : .appTextPrimary)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(
+                            isSelected
+                            ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
+                            : AnyShapeStyle(Color.white.opacity(0.06))
+                        )
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(isSelected ? Color.emerald : Color.gray.opacity(0.3), lineWidth: 1)
+                    Capsule(style: .continuous)
+                        .stroke(Color.white.opacity(isSelected ? 0 : 0.1), lineWidth: 0.5)
                 )
         }
         .disabled(isDisabled)
-        .opacity(isDisabled ? 0.5 : 1.0)
+        .opacity(isDisabled ? 0.4 : 1.0)
+        .tapScale()
     }
 }
 #Preview {

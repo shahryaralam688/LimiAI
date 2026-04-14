@@ -183,7 +183,7 @@ struct LimiWebView: UIViewRepresentable {
 
 
 struct LimiContentView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var navigateToARPortal = false
     @State private var showNoLiDARAlert = false
 
@@ -200,18 +200,7 @@ struct LimiContentView: View {
                 }
                 HStack{
                     // 🔙 Back Button
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 20, weight: .bold))
-                            .frame(width: 34, height: 34) // fixed size
-                            .background(
-                                Circle()
-                                    .fill(Color.charlestonGreen)
-                            )
-                    }
+                    LimiBackButton { dismiss() }
 
                     // 🟩 ARKit Button
                     Button(action: {

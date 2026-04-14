@@ -2,23 +2,21 @@ import SwiftUI
 
 // MARK: - Design Tokens
 struct AIDesignTokens {
-    // Colors
-    static let bgBase = Color.themeBlack
+    static let bgBase = Color.appCanvasPrimary
     static let bgSurface = Color.appCanvasMuted
-    static let bgCard = Color.appSurfaceTertiary
-    static let textPrimary = Color.themeWhite
-    static let textSecondary = Color.appBorderField
-    static let textMuted = Color.appTextSubtle
+    static let bgCard = Color.appSurfaceCard
+    static let textPrimary = Color.appTextPrimary
+    static let textSecondary = Color.appTextSecondary
+    static let textMuted = Color.appTextMuted
     static let brandEmerald = Color.appBrandPrimary
     static let brandEmeraldPressed = Color.appBrandPrimary
     static let brandEmerald20 = Color.appBrandPrimary.opacity(0.20)
     static let accentWarn = Color.appDanger
-    static let strokeSoft = Color.themeWhite.opacity(0.08)
-    static let chipBg = Color.themeWhite.opacity(0.06)
-    static let badgeBg = Color.themeWhite.opacity(0.10)
-    static let toggleOff = Color.themeWhite.opacity(0.24)
-    
-    // Spacing
+    static let strokeSoft = Color.white.opacity(0.06)
+    static let chipBg = Color.white.opacity(0.04)
+    static let badgeBg = Color.white.opacity(0.06)
+    static let toggleOff = Color.white.opacity(0.16)
+
     static let spacingXXS: CGFloat = 4
     static let spacingXS: CGFloat = 6
     static let spacingSM: CGFloat = 8
@@ -27,8 +25,7 @@ struct AIDesignTokens {
     static let spacingXL: CGFloat = 20
     static let spacingXXL: CGFloat = 24
     static let spacing3XL: CGFloat = 32
-    
-    // Radii
+
     static let radiusXSS: CGFloat = 4
     static let radiusXS: CGFloat = 8
     static let radiusSM: CGFloat = 12
@@ -36,9 +33,8 @@ struct AIDesignTokens {
     static let radiusLG: CGFloat = 20
     static let radiusXL: CGFloat = 24
     static let radiusPill: CGFloat = 999
-    
-    // Typography
-    static let h1Font = Font.system(size: 28, weight: .semibold, design: .rounded)
+
+    static let h1Font = Font.system(size: 28, weight: .bold, design: .rounded)
     static let h2Font = Font.system(size: 20, weight: .semibold, design: .rounded)
     static let titleFont = Font.system(size: 18, weight: .semibold)
     static let bodyFont = Font.system(size: 16, weight: .regular)
@@ -49,89 +45,72 @@ struct AIDesignTokens {
 
 struct AIButton: View {
     let title: String
-    let style: ButtonStyle
-//    let height: CGFloat?
+    let style: ButtonVariant
     let action: () -> Void
-    
-    enum ButtonStyle {
+
+    enum ButtonVariant {
         case primary
         case outline
     }
-    
+
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(AIDesignTokens.titleFont)
-                .foregroundColor(Color.themeBlack)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(style == .primary ? Color.themeWhite : Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: AIDesignTokens.radiusXSS)
-                                .stroke(style == .outline ? Color.themeWhite : Color.clear, lineWidth: 1)
-                        )
-                )
+        if style == .primary {
+            LimiPrimaryButton(title: title, action: action)
+        } else {
+            LimiSecondaryButton(title: title, action: action)
         }
-        .buttonStyle(PlainButtonStyle())
     }
 }
 
 struct AITag: View {
     let label: String
-    
+
     var body: some View {
         Text(label)
-            .font(AIDesignTokens.captionFont)
-            .foregroundColor(AIDesignTokens.textPrimary)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(.orbGlow4)
             .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.vertical, 5)
             .background(
-                RoundedRectangle(cornerRadius: AIDesignTokens.radiusXSS)
-                    .fill(AIDesignTokens.bgBase)
+                Capsule()
+                    .fill(Color.orbGlow4.opacity(0.12))
             )
     }
 }
 
 struct TokenPill: View {
     let tokenCount: String
-    
+
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: "bolt.fill")
-                .font(.system(size: 16))
-                .foregroundColor(AIDesignTokens.brandEmerald)
+                .font(.system(size: 12))
+                .foregroundColor(.orbGlow3)
             Text(tokenCount)
-                .font(AIDesignTokens.captionFont)
-                .foregroundColor(AIDesignTokens.textPrimary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.appTextSecondary)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-//        .background(
-//            RoundedRectangle(cornerRadius: AIDesignTokens.radiusPill)
-//                .fill(AIDesignTokens.chipBg)
-//        )
     }
 }
 
-// Custom toggle style with separate thumb color
 struct AICustomToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
             configuration.label
 
             ZStack(alignment: configuration.isOn ? .trailing : .leading) {
-                // Track
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(configuration.isOn ? Color.themeWhite :  Color.appTextDisabled  )
+                    .fill(
+                        configuration.isOn
+                        ? LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
+                        : LinearGradient(colors: [Color.white.opacity(0.1), Color.white.opacity(0.1)], startPoint: .leading, endPoint: .trailing)
+                    )
                     .frame(width: 52, height: 30)
 
-                // Thumb / ball
                 Circle()
-                    .fill(configuration.isOn ? Color.emerald : Color.appBorderTertiary)
+                    .fill(Color.white)
                     .frame(width: 26, height: 26)
-                    .shadow(color: Color.themeBlack.opacity(0.3), radius: 2, x: 0, y: 1)
+                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                     .padding(2)
             }
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isOn)
@@ -144,7 +123,7 @@ struct AICustomToggleStyle: ToggleStyle {
 
 struct AIToggle: View {
     @Binding var isOn: Bool
-    
+
     var body: some View {
         Toggle("", isOn: $isOn)
             .labelsHidden()
@@ -157,27 +136,19 @@ struct AIToggle: View {
 struct AIAppBar: View {
     let title: String
     let onBack: () -> Void
-    
+
     var body: some View {
-        HStack {
-            Button(action: onBack) {
-                Image("Solid arrow right sm")
-                    .foregroundColor(.alabaster)
-                    .font(.system(size: 18, weight: .medium))
-                    .frame(width: 44, height: 44)
-                    .background(Color.appInputFill)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            
+        HStack(spacing: 14) {
+            LimiBackButton(action: onBack)
+
             Text(title)
-                .font(AIDesignTokens.h1Font)
-                .foregroundColor(AIDesignTokens.textPrimary)
-            
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
+
             Spacer()
         }
         .padding(.horizontal, AIDesignTokens.spacingLG)
-        .frame(height: 92)
-        .background(Color.clear)
+        .frame(height: 72)
     }
 }
 
@@ -189,86 +160,77 @@ struct ModelCard: View {
     let tokenCount: String
     let isConnected: Bool
     let onAction: () -> Void
-    
-    
 
-    
+    @State private var isHovered = false
+
     var body: some View {
-        VStack(spacing: AIDesignTokens.spacingLG) {
-            // Tags row
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.orbGlow1.opacity(0.1))
+                        .frame(width: 52, height: 52)
 
-            // Main content row
-            HStack(spacing: AIDesignTokens.spacingLG) {
-                // Icon
-                VStack() {
-                Image( iconName)
-//                    .font(.system(size: 36))
-                    .foregroundColor(AIDesignTokens.textPrimary)
-//                    .frame(width: 72, height: 72)
-                    .background(
-                        RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
-                            .fill(AIDesignTokens.bgSurface)
-                    )
-                    Spacer()
+                    Image(iconName)
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(.orbGlow4)
                 }
-                
-                // Content
-                VStack(alignment: .leading, spacing: AIDesignTokens.spacingSM) {
-                    HStack {
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 6) {
                         ForEach(tags, id: \.self) { tag in
                             AITag(label: tag)
                         }
-                        Spacer()
                     }
-                    
                     Text(title)
-                        .font(AIDesignTokens.h2Font)
-                        .foregroundColor(AIDesignTokens.textPrimary)
-                    
-                    HStack(spacing: 10) {
-                        Text(connectionStatus)
-                            .font(AIDesignTokens.bodyFont)
-                            .foregroundColor(AIDesignTokens.textSecondary)
-                        
-                        TokenPill(tokenCount: tokenCount)
-                    }
-                    // ✅ Connect / Connected button
-                    Button {
-                        onAction()  // triggers parent toggle
-                        print("Connect button tapped")
-                    } label: {
-                        Text(isConnected ? "Connect" : "Disconnect")
-                            .font(.headline)
-                            .foregroundColor(isConnected ? .themeBlack : .themeWhite)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 32)
-                            .background(
-                                // ✅ Fill emerald when connected, transparent when not
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(isConnected ? Color.themeWhite : Color.clear)
-                            )
-                            .overlay(
-                                // ✅ Always keep emerald border
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.themeWhite, lineWidth: 1)
-                            )
-                    }
-                    .animation(.easeInOut(duration: 0.2), value: isConnected)
-
-
-
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                 }
-                
+
                 Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    Circle()
+                        .fill(isConnected ? Color.appSuccess : Color.appTextMuted)
+                        .frame(width: 8, height: 8)
+                    Text(connectionStatus)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.appTextSecondary)
+                }
             }
 
+            HStack {
+                TokenPill(tokenCount: tokenCount)
+                Spacer()
+
+                Button(action: onAction) {
+                    Text(isConnected ? "Connected" : "Connect")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(isConnected ? .appCanvasPrimary : .appTextPrimary)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    isConnected
+                                    ? LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
+                                    : LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing)
+                                )
+                        )
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(isConnected ? 0 : 0.12), lineWidth: 1)
+                        )
+                }
+                .animation(.easeInOut(duration: 0.2), value: isConnected)
+            }
         }
-        .padding(AIDesignTokens.spacingMD)
-        .background(
-            RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
-                .fill(AIDesignTokens.bgCard)
-                .shadow(color: Color.themeBlack.opacity(0.5), radius: 12, x: 0, y: 6)
-        )
+        .padding(16)
+        .glassCard(cornerRadius: 20, strokeOpacity: 0.06, fillOpacity: 0.06)
+        .tapScale()
     }
 }
 
@@ -277,33 +239,33 @@ struct ConnectionRow: View {
     let title: String
     let subtitle: String
     @Binding var isEnabled: Bool
-    
+
     var body: some View {
-        HStack(spacing: AIDesignTokens.spacingLG) {
-            Image(systemName: iconName)
-                .font(.system(size: 24))
-                .foregroundColor(AIDesignTokens.textPrimary)
-                .frame(width: 24, height: 24)
-            
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.orbGlow2.opacity(0.08))
+                    .frame(width: 44, height: 44)
+                Image(systemName: iconName)
+                    .font(.system(size: 18))
+                    .foregroundColor(.orbGlow3)
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(AIDesignTokens.h2Font)
-                    .foregroundColor(AIDesignTokens.textPrimary)
-                
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.appTextPrimary)
                 Text(subtitle)
-                    .font(AIDesignTokens.bodyFont)
-                    .foregroundColor(AIDesignTokens.textSecondary)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.appTextSecondary)
+                    .lineLimit(2)
             }
-            
+
             Spacer()
-            
             AIToggle(isOn: $isEnabled)
         }
-        .padding(AIDesignTokens.spacingLG)
-        .background(
-            RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
-                .fill(AIDesignTokens.bgCard)
-        )
+        .padding(14)
+        .glassCard(cornerRadius: 16, fillOpacity: 0.05)
     }
 }
 
@@ -312,29 +274,42 @@ struct InfoBanner: View {
     let description: String
     let ctaText: String
     let onCTA: () -> Void
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: AIDesignTokens.spacingMD) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(AIDesignTokens.h2Font)
-                .foregroundColor(.themeBlack)
-            
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
             Text(description)
-                .font(AIDesignTokens.bodyFont)
-                .foregroundColor(.themeBlack)
-            
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(.appTextSecondary)
+                .lineSpacing(4)
             Button(action: onCTA) {
-                Text(ctaText)
-                    .font(AIDesignTokens.titleFont)
-                    .foregroundColor(.themeBlack)
-                    .underline()
+                HStack(spacing: 4) {
+                    Text(ctaText)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
+                }
             }
         }
-        .padding(AIDesignTokens.spacingXXL)
+        .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.themeWhite)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.orbGlow1.opacity(0.08), Color.orbGlow2.opacity(0.04)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.orbGlow1.opacity(0.12), lineWidth: 0.5)
         )
     }
 }
@@ -343,27 +318,21 @@ struct IntegrationOption: View {
     let title: String
     let subtitle: String
     @Binding var isEnabled: Bool
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(AIDesignTokens.h2Font)
-                    .foregroundColor(AIDesignTokens.textPrimary)
-                
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.appTextPrimary)
                 Text(subtitle)
-                    .font(AIDesignTokens.bodyFont)
-                    .foregroundColor(AIDesignTokens.textSecondary)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.appTextSecondary)
             }
-            
             Spacer()
-            
             AIToggle(isOn: $isEnabled)
         }
-        .padding(AIDesignTokens.spacingXL)
-        .background(
-            RoundedRectangle(cornerRadius: AIDesignTokens.radiusLG)
-                .fill(AIDesignTokens.bgCard)
-        )
+        .padding(16)
+        .glassCard(cornerRadius: 16, fillOpacity: 0.05)
     }
 }

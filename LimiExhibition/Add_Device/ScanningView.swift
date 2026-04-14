@@ -36,14 +36,8 @@ struct ScanningView: View {
             VStack(spacing: 24) {
                 // Navigation bar
                 HStack {
-                    Button(action: {
+                    LimiBackButton {
                         onBack()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.themeWhite)
-                            .font(.title2)
-                            .padding()
-                            .background(Circle().fill(Color.themeBlack.opacity(0.3)))
                     }
                     Spacer()
                 }

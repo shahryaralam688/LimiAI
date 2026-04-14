@@ -51,6 +51,16 @@ class AuthManager: ObservableObject {
         }
     }
 
+    /// `Authorization` header value for API calls: ensures a single `Bearer` prefix.
+    func authorizationHeaderValue() -> String? {
+        guard let raw = getToken() else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.lowercased().hasPrefix("bearer ") {
+            return trimmed
+        }
+        return "Bearer \(trimmed)"
+    }
+
     func isTokenValid() -> Bool {
         let expiryTime = UserDefaults.standard.double(forKey: expiryKey)
         let currentTime = Date().timeIntervalSince1970

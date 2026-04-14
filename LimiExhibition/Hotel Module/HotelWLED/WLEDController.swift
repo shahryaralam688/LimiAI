@@ -774,7 +774,7 @@ struct WLEDDeviceControlView: View {
     @State private var brightness: Double = 128
     @State private var isOn = false
     @State private var selectedColor = Color.red
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     init(device: WLEDDevice) {
         self.device = device
@@ -796,11 +796,11 @@ struct WLEDDeviceControlView: View {
             .background(Color.themeBlack.ignoresSafeArea())
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(
-                trailing: Button("Done") {
-                    presentationMode.wrappedValue.dismiss()
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
                 }
-            )
+            }
             .task {
                 await controller.fetchState()
                 if let state = controller.deviceState {

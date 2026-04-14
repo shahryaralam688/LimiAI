@@ -257,17 +257,7 @@ struct LoginView: View {
             VStack {
                 HStack {
                     // Back Button
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .frame(width: 18, height: 18)
-                            .foregroundColor(.themeWhite)
-                            .frame(width: 48, height: 48)
-                            .background(Color.appSurfacePrimary)
-                            .cornerRadius(16)
-                    }
+                    LimiBackButton { dismiss() }
                     
                     Spacer()
                     
@@ -357,7 +347,7 @@ import SwiftUI
 
 struct OTPVerificationView: View {
     var email: String
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
 //    @State private var showAddDevices = false
     @EnvironmentObject var authManager: AuthManager
@@ -622,7 +612,7 @@ struct OTPVerificationView: View {
                             }
                             // Dismiss the OTP sheet shortly after triggering navigation
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                self.presentationMode.wrappedValue.dismiss()
+                                self.dismiss()
                             }
                         } else {
                             errorMessage = jsonResponse["error_message"] as? String ?? "Invalid OTP"
@@ -861,17 +851,7 @@ struct LoginSkipView: View {
                 VStack(spacing: 0) {
                     HStack {
                         // Back Button
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image("Solid arrow right sm")
-                                .resizable()
-                                .frame(width: 18, height: 18)
-                                .foregroundColor(.themeWhite)
-                                .frame(width: 48, height: 48)
-                                .background(Color.appSurfacePrimary)
-                                .cornerRadius(16)
-                        }
+                        LimiBackButton { dismiss() }
                         
                         Spacer()
                         

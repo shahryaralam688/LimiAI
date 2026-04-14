@@ -39,14 +39,7 @@ struct SchedulingSummaryView: View {
     private var header: some View {
         VStack(spacing: 0) {
             HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.alabaster)
-                        .font(.system(size: 18, weight: .medium))
-                        .frame(width: 44, height: 44)
-                        .background(Color.appInputFill)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+                LimiBackButton { dismiss() }
                 
                 Spacer()
                 
@@ -146,19 +139,9 @@ struct SchedulingSummaryView: View {
     // MARK: - Save Button
     
     private var saveButton: some View {
-        Button {
-            // Changes are already bound to `schedule`.
-            // Here you could trigger persistence if needed.
+        LimiPrimaryButton(title: "Save Changes", height: 56) {
             print("✅ Schedule updated: \(schedule.type) at \(schedule.time)")
             dismiss()
-        } label: {
-            Text("Save Changes")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.themeBlack)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.emerald)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
     

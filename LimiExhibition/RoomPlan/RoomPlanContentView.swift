@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct RoomPlanContentView: View {
-    @Environment(\.presentationMode) var presentationMode
     @Environment(RoomCaptureController.self) private var captureController
     @State private var navigateToHome = false
     @State private var files: [String] = []
@@ -79,16 +78,7 @@ struct RoomPlanContentView: View {
             .navigationTitle("Room Scans")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        navigateToHome = true
-                    }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(.charlestonGreen)
-                            Text("Back")
-                                .foregroundColor(.charlestonGreen)
-                        }
-                    }
+                    LimiBackButton { navigateToHome = true }
                 }
 
 //                ToolbarItem(placement: .navigationBarTrailing) {

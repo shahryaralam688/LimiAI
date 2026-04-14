@@ -27,23 +27,12 @@ struct DemoAddingWifiView: View {
 
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    Button {
+                    LimiBackButton {
                         if let onBack {
                             onBack()
                         } else {
                             dismiss()
                         }
-                    } label: {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .padding(12) // space inside the circle
-                            .background(
-                                Rectangle()
-                                    .fill(Color.appSurfacePrimary) // gray background
-                                    .cornerRadius(16)
-                            )
                     }
                     Spacer()
                     Text("Add Device")
@@ -157,7 +146,7 @@ struct DemoAddingWifiView: View {
             }
             Spacer()
             // Add devices Button
-            Button(action: {
+            LimiPrimaryButton(title: isProvisioning ? "Connecting…" : (ble.isConnected ? "Connected" : "Add Your First Device")) {
                 guard !wifiSSID.isEmpty else { resultStatus = "error"; resultMessage = "SSID is required"; return }
                 isProvisioning = true
                 resultMessage = ""
@@ -171,29 +160,6 @@ struct DemoAddingWifiView: View {
                 }
 
                 showWifiConected = true
-            }) {
-                HStack {
-                    Spacer()
-                    
-                    Text(isProvisioning ? "Connecting…" : (ble.isConnected ? "Connected" : "Add Your First Device"))
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
-                        .lineSpacing(0) // line-height: 100% (no extra spacing)
-                        .kerning(0)     // letter-spacing: 0%
-                    Image("Monotone arrow right")
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
-                        .lineSpacing(0) // line-height: 100% (no extra spacing)
-                        .kerning(0)     // letter-spacing: 0%
-                    Spacer()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .padding(.vertical, 14)
-                .padding(.horizontal, 20)
-                .background(Color.themeWhite)
-                .foregroundColor(.themeBlack)
-                .cornerRadius(19)
-
             }
             .disabled(isProvisioning)
             .padding(.horizontal, 16)

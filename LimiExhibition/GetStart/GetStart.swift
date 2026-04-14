@@ -101,23 +101,12 @@ struct GetStart: View {
                     // Content overlay on top of image
                     VStack(alignment: .center, spacing:12){
                         HStack{
-                            Button {
+                            LimiBackButton {
                                 if let onBack {
                                     onBack()
                                 } else {
                                     dismiss()
                                 }
-                            } label: {
-                                Image("Solid arrow right sm")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
-                                    .padding(12) // space inside the circle
-                                    .background(
-                                        Rectangle()
-                                            .fill(Color.appSurfacePrimary) // gray background
-                                            .cornerRadius(16)
-                                    )
                             }
                             Spacer()
                             Image("LoginViewLogo")
