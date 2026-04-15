@@ -33,7 +33,7 @@ struct WebViewScreen: View {
     @State private var animateShimmer = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 WebView(url: websiteURL)
                 
@@ -79,7 +79,7 @@ struct WebViewScreen: View {
                             
                             Text("Loading Shop...")
                                 .font(.headline)
-                                .foregroundColor(.charlestonGreen)
+                                .foregroundColor(.appTextInverse)
                                 .padding(.horizontal, 30)
                                 .padding(.vertical, 10)
                                 .background(

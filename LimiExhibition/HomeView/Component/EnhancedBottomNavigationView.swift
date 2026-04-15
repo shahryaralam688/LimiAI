@@ -192,45 +192,30 @@ struct EnhancedBottomNavigationView: View {
     // MARK: - Blob Menu (organic blobs orbit around FAB, sweep left→top→right)
 
     private var blobMenuItems: some View {
-        let items: [(icon: String, color: Color, action: () -> Void)] = [
-            ("photo.on.rectangle.angled", Color(hex: "9B5DE5"), {
+        let neumorphBase = Color.appSurfaceTertiary
+        let items: [(icon: String, action: () -> Void)] = [
+            ("square.3.layers.3d", {
+                closeFAB()
+            }),
+            ("brain", {
+                closeFAB(); showVoiceView = true
+            }),
+            ("desktopcomputer", {
                 closeFAB()
                 if deviceSupportsLiDAR { showARScan = true }
                 else { withAnimation { showLidarToast = true } }
-            }),
-            ("video.fill", Color(hex: "E53E3E"), {
-                closeFAB(); showVoiceView = true
-            }),
-            ("bag.fill", Color(hex: "F6AD55"), {
-                closeFAB()
             })
         ]
 
-        // Arc positions matching the screenshot:
-        // item 0 (purple) — bottom-left
-        // item 1 (red)    — top-center
-        // item 2 (orange) — right
         let finalOffsets: [(x: CGFloat, y: CGFloat)] = [
             (-62, -72),
             (0,   -100),
             (62,  -72)
         ]
 
-        // Each blob gets a unique rotation so they look irregular
-        let blobAngles: [Double] = [25, -10, 15]
-        // Different blob variants for each item
-        let blobScales: [(w: CGFloat, h: CGFloat)] = [
-            (60, 64),
-            (64, 60),
-            (58, 66)
-        ]
-
         return ZStack {
             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                 let isShown = isFABOpen && revealedCount > index
-
-                // Animate along a circular arc from center (0,0)
-                // When appearing, item orbits from behind the FAB to its position
                 let arcProgress: CGFloat = isShown ? 1.0 : 0.0
 
                 Button(action: {
@@ -238,16 +223,30 @@ struct EnhancedBottomNavigationView: View {
                     item.action()
                 }) {
                     ZStack {
-                        BlobShape()
-                            .fill(item.color)
-                            .frame(width: blobScales[index].w, height: blobScales[index].h)
-                            .rotationEffect(.degrees(blobAngles[index] + (isShown ? 0 : -40)))
-                            .shadow(color: item.color.opacity(0.45), radius: 10, y: 3)
+                        Circle()
+                            .fill(neumorphBase)
+                            .frame(width: 56, height: 56)
+                            .overlay(
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.07), Color.clear],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                            )
+                            .shadow(color: Color.white.opacity(0.05), radius: 6, x: -3, y: -3)
+                            .shadow(color: Color.black.opacity(0.6), radius: 8, x: 4, y: 4)
 
                         Image(systemName: item.icon)
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
-                            .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                            .foregroundColor(.white.opacity(0.85))
+                            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
                     }
                 }
                 .buttonStyle(.plain)
@@ -257,7 +256,6 @@ struct EnhancedBottomNavigationView: View {
                 )
                 .scaleEffect(isShown ? 1.0 : 0.1)
                 .opacity(isShown ? 1.0 : 0)
-                .rotationEffect(.degrees(isShown ? 0 : -60))
                 .animation(
                     .spring(response: 0.42, dampingFraction: 0.62)
                     .delay(isShown ? Double(index) * 0.1 : Double(2 - index) * 0.05),

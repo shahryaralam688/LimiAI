@@ -622,7 +622,7 @@ struct WLEDDiscoveryView: View {
     @State private var selectedDevice: WLEDDevice?
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 // Header
                 headerView
@@ -680,7 +680,7 @@ struct WLEDDiscoveryView: View {
             
             if let errorMessage = discoveryManager.errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(.red)
+                    .foregroundColor(.appDanger)
                     .font(.caption)
             }
         }
@@ -692,15 +692,15 @@ struct WLEDDiscoveryView: View {
         VStack(spacing: 20) {
             Image(systemName: "wifi.slash")
                 .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .foregroundColor(.appTextMuted)
             
             Text("No WLED devices found")
                 .font(.title2)
-                .foregroundColor(.gray)
+                .foregroundColor(.appTextMuted)
             
             Text("Make sure your WLED devices are connected to the same Wi-Fi network")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(.appTextMuted)
                 .multilineTextAlignment(.center)
         }
         .padding()
@@ -738,7 +738,7 @@ struct DeviceRowView: View {
                     
                     Text("\(device.ip):\(device.port)")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appTextMuted)
                 }
                 
                 Spacer()
@@ -750,11 +750,11 @@ struct DeviceRowView: View {
                     
                     Text(device.isOnline ? "Online" : "Offline")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appTextMuted)
                 }
                 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appTextMuted)
             }
             .padding()
             .background(
@@ -782,7 +782,7 @@ struct WLEDDeviceControlView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 30) {
                 // Device Info
                 deviceInfoView
@@ -793,7 +793,7 @@ struct WLEDDeviceControlView: View {
                 Spacer()
             }
             .padding()
-            .background(Color.themeBlack.ignoresSafeArea())
+            .background(Color.appCanvasPrimary.ignoresSafeArea())
             .navigationTitle(device.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -821,16 +821,16 @@ struct WLEDDeviceControlView: View {
                     .frame(width: 12, height: 12)
                 
                 Text(controller.isConnected ? "Connected" : "Disconnected")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appTextMuted)
             }
             
             Text("\(device.ip):\(device.port)")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(.appTextMuted)
             
             if let errorMessage = controller.errorMessage {
                 Text(errorMessage)
-                    .foregroundColor(.red)
+                    .foregroundColor(.appDanger)
                     .font(.caption)
             }
         }
@@ -883,7 +883,7 @@ struct WLEDDeviceControlView: View {
                 Spacer()
                 
                 Text("\(Int((brightness / 255) * 100))%")
-                    .foregroundColor(.gray)
+                    .foregroundColor(.appTextMuted)
             }
             
             Slider(value: $brightness, in: 0...255, step: 1)

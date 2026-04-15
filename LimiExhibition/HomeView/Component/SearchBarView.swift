@@ -76,7 +76,7 @@ struct SearchBarView: View {
                     Image(systemName: "cube.transparent")
                         .resizable()
                         .renderingMode(.template)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 22, height: 22)
                         .scaleEffect(isLoaded ? 1.0 : 0.95)
                 }

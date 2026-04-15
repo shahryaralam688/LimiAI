@@ -1,5 +1,5 @@
 //
-//  NotificationView 2.swift
+//  PrivacyPolicyView.swift
 //  Limi
 //
 //  Created by Shahrukh Ahmed on 20/11/2025.
@@ -155,7 +155,7 @@ If you have any questions about this Privacy Policy or our data practices, pleas
 [Email Address]
 [Contact Address]
 """)
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextSecondary)
                     .padding(.top, 8)
                 }
                 .padding()

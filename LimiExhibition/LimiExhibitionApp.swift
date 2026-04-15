@@ -26,6 +26,7 @@ struct YourApp: App {
                 .environment(bgLogic)
                 .environment(\.locale, Locale(identifier: LanguageSettings.currentLanguage().rawValue == AppLanguage.system.rawValue ? Locale.current.identifier : LanguageSettings.currentLanguage().rawValue))
                 .environment(\.layoutDirection, LanguageSettings.currentLanguage().isRTL ? .rightToLeft : .leftToRight)
+                .preferredColorScheme(.dark)
                 .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
                     languageRefreshID = UUID()
                 }

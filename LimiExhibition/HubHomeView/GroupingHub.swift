@@ -6,7 +6,7 @@ struct GroupingView: View {
     @Binding var showGrouping: Bool
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 List {
                     ForEach(bluetoothManager.storedHubs.prefix(5)) { hub in

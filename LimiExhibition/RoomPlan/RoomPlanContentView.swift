@@ -19,7 +19,7 @@ struct RoomPlanContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.charlestonGreen.ignoresSafeArea()
+                Color.appCanvasPrimary.ignoresSafeArea()
 
                 List {
                     ForEach(files, id: \.self) { file in
@@ -84,7 +84,7 @@ struct RoomPlanContentView: View {
 //                ToolbarItem(placement: .navigationBarTrailing) {
 //                    NavigationLink(destination: FileListView()) {
 //                        Image(systemName: "plus")
-//                            .foregroundStyle(Color.alabaster)
+//                            .foregroundStyle(Color.appTextPrimary)
 //                            .padding(.horizontal, 8)
 //                            .padding(.vertical, 3)
 //                            .background(Color.emerald)
@@ -95,16 +95,16 @@ struct RoomPlanContentView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: ScanNewRoomView()) {
                         Image(systemName: "plus")
-                            .foregroundStyle(Color.alabaster)
+                            .foregroundStyle(Color.appTextPrimary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.charlestonGreen)
+                            .background(Color.appCanvasPrimary)
                             .cornerRadius(8)
                     }
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton().foregroundStyle(Color.charlestonGreen)
+                    EditButton().foregroundStyle(Color.appCanvasPrimary)
                 }
             }
             .onAppear {

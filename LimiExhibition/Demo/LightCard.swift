@@ -26,14 +26,14 @@ struct LightCard: View {
                     .foregroundColor(.eton)
                 Text(lightName)
                     .font(.headline)
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                 Spacer()
 
                 Toggle(isOn: $isOn) {
                     Text(isOn ? "On" : "Off")
-                        .foregroundColor(isOn ? .green : .red)
+                        .foregroundColor(isOn ? .appSuccess : .appDanger)
                 }
-                .toggleStyle(SwitchToggleStyle(tint: .green))
+                .toggleStyle(SwitchToggleStyle(tint: .appSuccess))
                 .disabled(isAIEnabled)
                 .labelsHidden()
 

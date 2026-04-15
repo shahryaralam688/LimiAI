@@ -71,7 +71,7 @@ struct SaveScanView: View {
     @Environment(\.dismiss) private var dismissSheet
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 TextField("Enter file name", text: $captureController.fileName)
             }

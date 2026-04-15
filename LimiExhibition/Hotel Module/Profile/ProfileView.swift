@@ -9,7 +9,7 @@ struct ProfileView: View {
     @State private var isDarkMode = true
     @State private var showProfileEditView = false
     @State private var debugMessage: String = "Initializing..."
-    @State private var showCongigurator = false
+    @State private var showConfigurator = false
     @State private var showIFrameView = false
     @State private var navigateToLIMI = false
     @State private var showGetStartScreen = false
@@ -154,7 +154,7 @@ struct ProfileView: View {
                                 showNotifications = true
                             }
                             ProfileRow(icon: "star", title: "profile.configurator".localized) {
-                                showCongigurator = true
+                                showConfigurator = true
                             }
                             ProfileRow(icon: "RoomPlan", title: "profile.room_scan".localized) {
                                 showRoomPlanScreen = true
@@ -212,7 +212,7 @@ struct ProfileView: View {
         )
         .sheet(isPresented: $showImagePicker) { TheImagePicker(selectedImage: $selectedImage) }
         .sheet(isPresented: $showProfileEditView) { ProfileEditView() }
-        .sheet(isPresented: $showCongigurator) { LimiContentView() }
+        .sheet(isPresented: $showConfigurator) { LimiContentView() }
         .sheet(isPresented: $showWebSiteView) { WebViewScreen(showWebView: $showWebSiteView) }
         .sheet(isPresented: $showPrivacyPolicy) { PrivacyPolicyView() }
         .sheet(isPresented: $showNotifications) { NotificationView() }
@@ -225,7 +225,7 @@ struct ProfileView: View {
         .overlay(
             ZStack {
                 if showLoginToast {
-                    Color.black.opacity(0.5)
+                    Color.themeBlack.opacity(0.5)
                         .ignoresSafeArea()
                         .onTapGesture { showLoginToast = false }
 

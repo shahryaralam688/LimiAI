@@ -13,7 +13,7 @@ struct SkeuoBox: View {
         VStack(spacing: 12) {
             Text("Enter Your Email")
                 .font(.title2.bold())
-                .foregroundColor(.charlestonGreen)
+                .foregroundColor(.appTextInverse)
                 .shadow(color: .themeWhite.opacity(0.5), radius: 1, x: -1, y: -1)
                 .shadow(color: .themeBlack.opacity(0.2), radius: 1, x: 1, y: 1)
         }

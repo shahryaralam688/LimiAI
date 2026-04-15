@@ -40,11 +40,11 @@ struct WifiList: View {
                     }
                     Spacer()
                     Text("Add Device")
-                        .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                        .font(LimiTypography.largeTitle)
                         .multilineTextAlignment(.center)          // text-align: center
                         .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                         .kerning(-0.3)                            // letter-spacing: -1%
-                        .foregroundColor(Color.alabaster)
+                        .foregroundColor(Color.appTextPrimary)
                         .padding(.trailing, 20)
 
                     Spacer()
@@ -68,7 +68,7 @@ struct WifiList: View {
                         .resizable()                    // Make it resizable
                         .scaledToFit()                  // Keep aspect ratio
                         .frame(width: 60, height: 60) // Set desired size
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     
 
                 }
@@ -82,8 +82,8 @@ struct WifiList: View {
                     ForEach(Array(wifiList.enumerated()), id: \.offset) { index, ssid in
                         HStack(spacing: 12) {
                             Text(ssid)
-                                .font(.custom("Poppins-SemiBold", size: 24))
-                                .foregroundColor(.alabaster)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.appTextPrimary)
                                 .lineSpacing(0) // Adjust if needed for line-height
                                 .kerning(-0.5) // letter-spacing
                                 .multilineTextAlignment(.center)
@@ -94,7 +94,7 @@ struct WifiList: View {
                             
                             Spacer()
                             Image(systemName: "wifi")
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                             
                         }
                         .padding()
@@ -107,7 +107,7 @@ struct WifiList: View {
                     if wifiList.isEmpty {
                         HStack {
                             Text("No Wi‑Fi detected. Grant location permission or connect to a network.")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.appTextMuted)
                             Spacer()
                         }
                         .listRowBackground(Color.clear)

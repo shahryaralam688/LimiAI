@@ -112,7 +112,7 @@ struct ModulerView: View {
                 .padding(.vertical, 24)
             }
         }
-        .background(Color.themeBlack)
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
         .overlay {
 

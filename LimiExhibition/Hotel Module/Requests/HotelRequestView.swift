@@ -69,7 +69,7 @@ struct HotelRequestView: View {
             // Content
             contentView
         }
-        .background(Color.themeBlack)
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea(edges: .bottom)
         .sheet(item: $selectedItem) { item in
             RequestSummaryView(
@@ -255,7 +255,7 @@ private struct ActiveRequestCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
                     .background(
@@ -338,11 +338,11 @@ private struct HistoryRequestCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: "clock.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appTextMuted)
                     
                     Text(request.time)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.appTextMuted)
                 }
             }
             
@@ -380,14 +380,14 @@ private struct CancelledRequestCard: View {
                 .overlay(
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(.red)
+                        .foregroundColor(.appDanger)
                 )
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
                     .background(
@@ -404,7 +404,7 @@ private struct CancelledRequestCard: View {
                 
                 Text("Cancelled")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.red)
+                    .foregroundColor(.appDanger)
             }
             
             Spacer()

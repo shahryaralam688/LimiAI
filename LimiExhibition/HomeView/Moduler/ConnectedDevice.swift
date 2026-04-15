@@ -95,7 +95,7 @@ struct ConnectedDevicesView: View {
                 VStack{
                     HStack{
                         Text("Connected Space")
-                            .font(.custom("Poppins-Medium", size: 18))
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
                             .foregroundColor(.themeWhite)
                             .multilineTextAlignment(.center)
                             .lineSpacing(18 * 0.2)
@@ -114,14 +114,14 @@ struct ConnectedDevicesView: View {
                             VStack {
                                 VStack(spacing: 16) {
                                     Text("You haven’t added any devices yet")
-                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
                                         .foregroundColor(Color.appTextSecondary)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(16 * 0.4)
                                         .kerning(0)
                                     
                                     Text("Tap the button below to add devices")
-                                        .font(.custom("Poppins-Regular", size: 14))
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
                                         .foregroundColor(Color.appTextMuted)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(14 * 0.4)
@@ -187,7 +187,7 @@ struct ConnectedDevicesView: View {
             }
             
         }
-        .background(Color.themeBlack)
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
         .onAppear {
             UserDataManager.shared.refreshUserData()
@@ -386,21 +386,30 @@ struct ConnectedDevicesView: View {
     
 
     func sendDeviceToBackend(device: WifiDevice) {
-        
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("📡 [ConnectedDevice] sendDeviceToBackend STARTED")
+
         guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
-            print("⚠️ No token found. Cannot send device.")
+            print("⚠️ [ConnectedDevice] No token found. Cannot send device.")
             return
         }
 
-        guard let url = URL(string: APIConstants.deviceUser) else { return }
+        guard let url = URL(string: APIConstants.deviceUser) else {
+            print("❌ [ConnectedDevice] Invalid URL: \(APIConstants.deviceUser)")
+            return
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("\(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(token, forHTTPHeaderField: "Authorization")
+
+        print("🔗 [ConnectedDevice] URL: \(url.absoluteString)")
+        print("📋 [ConnectedDevice] Method: POST")
+        print("🔑 [ConnectedDevice] Authorization: \(String(token.prefix(30)))...")
+        print("📎 [ConnectedDevice] Content-Type: application/json")
 
         let body: [String: Any] = [
-            // Send the exact deviceId as advertised (Bonjour TXT), no case transformation
             "deviceId": device.chennalMac,
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
@@ -411,30 +420,34 @@ struct ConnectedDevicesView: View {
         ]
 
         do {
-            let data = try JSONSerialization.data(withJSONObject: body)
+            let data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
             request.httpBody = data
             if let json = String(data: data, encoding: .utf8) {
-                print("📤 sendDeviceToBackend payload: \(json)")
+                print("📤 [ConnectedDevice] Body:\n\(json)")
             }
+            print("📏 [ConnectedDevice] Body size: \(data.count) bytes")
         } catch {
-            print("❌ Failed to encode device body: \(error)")
+            print("❌ [ConnectedDevice] Failed to encode body: \(error)")
             return
         }
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ Request error:", error.localizedDescription)
+                print("❌ [ConnectedDevice] Network error: \(error.localizedDescription)")
                 return
             }
 
-            if let httpResponse = response as? HTTPURLResponse {
-                print("✅ HTTP Status:", httpResponse.statusCode)
+            if let http = response as? HTTPURLResponse {
+                print("📬 [ConnectedDevice] HTTP Status: \(http.statusCode)")
+                print("📬 [ConnectedDevice] Response Headers: \(http.allHeaderFields)")
             }
 
-            if let data = data,
-               let responseString = String(data: data, encoding: .utf8) {
-                print("📩 Response:", responseString)
+            if let data = data, let body = String(data: data, encoding: .utf8) {
+                print("📩 [ConnectedDevice] Response Body: \(body)")
+            } else {
+                print("📩 [ConnectedDevice] Response Body: (empty)")
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }.resume()
     }
 
@@ -489,7 +502,7 @@ struct WifiDeviceSpace: View {
                 Text(deviceName)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(10)
@@ -498,7 +511,7 @@ struct WifiDeviceSpace: View {
                 Text(channelSummary)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
 
                 Spacer()
                 Circle()

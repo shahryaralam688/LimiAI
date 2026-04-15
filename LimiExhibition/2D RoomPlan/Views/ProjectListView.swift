@@ -12,7 +12,7 @@ struct ProjectListView: View {
     @StateObject private var vm = ProjectListViewModel()
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(vm.projects) { project in
                     NavigationLink(project.name) {

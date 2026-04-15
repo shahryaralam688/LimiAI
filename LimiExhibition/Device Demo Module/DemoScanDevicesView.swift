@@ -530,7 +530,7 @@ struct DevicesButton: View {
             // Status indicator + icon
             VStack(spacing: 6) {
                 Circle()
-                    .fill(reachability == .online ? Color.emerald : Color.gray)
+                    .fill(reachability == .online ? Color.appBrandPrimary : Color.gray)
                     .frame(width: 12, height: 12)
                 VStack(spacing: 4) {
                     Image(systemName: deviceType == .bluetooth ? "lamp.table.fill" : "wifi")
@@ -545,7 +545,7 @@ struct DevicesButton: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(deviceName ?? "Unknown Device")
-                        .font(.custom("Poppins-Medium", size: 12))
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundColor(.themeWhite)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -555,23 +555,23 @@ struct DevicesButton: View {
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(searchDeviceUUID ?? "XTP-1245")
-                        .font(.custom("Poppins-Bold", size: 20))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.themeWhite)
                     if deviceType == .wifi, let ip = ipAddress {
                         Text("IP: \(ip)")
-                            .font(.custom("Poppins-Regular", size: 12))
-                            .foregroundColor(Color.blue.opacity(0.8))
+                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                            .foregroundColor(Color.orbGlow4.opacity(0.8))
                     }
                 }
                 Button(action: {
                     if let name = deviceName, let id = searchDeviceUUID { onConnect(name, id) }
                 }) {
                     Text(isConnected ?  "Connected" : (reachability == .online ?"Connect" : "Disconnected"))
-                        .font(.custom("Poppins-SemiBold", size: 16))
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(reachability == .online ? Color.alabaster : Color.charlestonGreen )
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(isConnected ? (reachability == .online ? Color.clear : Color.gray) : (reachability == .online ? Color.emerald : Color.gray))
+                        .background(isConnected ? (reachability == .online ? Color.clear : Color.gray) : (reachability == .online ? Color.appBrandPrimary : Color.gray))
                         .cornerRadius(8)
                 }
                 .disabled(reachability == .offline)
@@ -626,19 +626,19 @@ struct DemoScanDevicesView: View {
                     }
                     Spacer()
                     Text("Add Device")
-                        .font(.custom("Poppins-Bold", size: 30))
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .lineSpacing(8)
                         .kerning(-0.3)
-                        .foregroundColor(Color.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     Spacer(); Spacer()
                 }
                 .padding(.top)
                 .padding(.horizontal, 16)
-                Text("Scanning....")
-                    .font(.custom("Poppins-Medium", size: 20))
+                Text("Scanning...")
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
             }.padding(.bottom, 12)
             
             AnimatedSearchButton(iconName: "magnifyingglass")
@@ -646,7 +646,7 @@ struct DemoScanDevicesView: View {
             VStack{
                 HStack{
                     Text("Available Devices")
-                        .font(.custom("Poppins-Medium", size: 20))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                         .foregroundColor(Color.appTextSecondary)
                         .padding(.horizontal, 16)
                     Spacer()
@@ -741,8 +741,8 @@ struct DemoScanDevicesView: View {
                 if shouldShowContinue {
                     Button(action: { showLiginSkip = true }) {
                         Text("Continue")
-                            .font(.custom("Poppins-SemiBold", size: 16))
-                            .foregroundColor(Color.charlestonGreen)
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.appTextInverse)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background( Color.themeWhite)
@@ -805,7 +805,7 @@ struct DemoScanDevicesView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                             .scaleEffect(1.5)
                         Text("Connecting to device...")
-                            .font(.custom("Poppins-Medium", size: 16))
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
                             .foregroundColor(.themeWhite)
                     }
                 }

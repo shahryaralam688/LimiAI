@@ -36,7 +36,7 @@ struct AIHomeView: View {
     }
 
     private var background: some View {
-        Color.themeBlack
+        Color.appCanvasPrimary
     }
 
     private var statusBar: some View {
@@ -102,7 +102,7 @@ struct AIHomeView: View {
     private var voiceOrb: some View {
         ZStack {
             Circle()
-                .fill(Color.themeBlack)
+                .fill(Color.appCanvasPrimary)
                 .frame(width: 250, height: 250)
                 .shadow(color: Color.themeBlack.opacity(0.9), radius: 60, x: 0, y: 18)
                 .overlay(

@@ -86,10 +86,10 @@ struct SplashScreen: View {
                 }
 
                 VStack(spacing: 10) {
-                    Text("Limi")
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
-                        .tracking(-1)
+//                    Text("Limi")
+//                        .font(.system(size: 44, weight: .bold, design: .rounded))
+//                        .foregroundColor(.appTextPrimary)
+//                        .tracking(-1)
 
                     Text("The Operating System for Physical Space")
                         .font(.system(size: 15, weight: .medium))

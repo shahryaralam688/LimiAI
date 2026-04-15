@@ -18,7 +18,7 @@ struct AddDevicesView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Add your devices")
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .padding(.top, 20)
                 
                 Text("Select the method of adding the device")
@@ -147,7 +147,7 @@ struct ConnectionOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.charlestonGreen)
+                        .foregroundColor(.appTextInverse)
                     
                     Text(description)
                         .font(.system(size: 14))
@@ -159,7 +159,7 @@ struct ConnectionOptionCard: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
             }
             .padding()
             .background(Color.themeWhite)

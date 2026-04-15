@@ -14,7 +14,7 @@ struct LocationStorageView: View {
     
     var body: some View {
         ZStack {
-            Color.themeBlack.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
             
             VStack {
                 headerSection
@@ -135,13 +135,9 @@ struct LocationStorageView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [brandGreen, brandGreen.opacity(0.85)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                    LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
                 )
-                .cornerRadius(28)
+                .clipShape(Capsule(style: .continuous))
                 .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
             }
             .padding(.horizontal, 24)

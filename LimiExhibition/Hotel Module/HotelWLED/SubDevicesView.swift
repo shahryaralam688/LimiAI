@@ -59,7 +59,7 @@ struct SubDevicesView: View {
                 }
             }
         }
-        .background(Color.themeBlack.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
     
     

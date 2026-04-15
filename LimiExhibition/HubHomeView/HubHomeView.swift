@@ -40,7 +40,7 @@ struct HubHeaderView: View {
             Text(title)
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.charlestonGreen)
+                .foregroundColor(.appTextInverse)
             
             Spacer()
             
@@ -49,7 +49,7 @@ struct HubHeaderView: View {
             }) {
                 Image(systemName: "gearshape.fill")
                     .font(.title2)
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
             }
         }
         .padding()

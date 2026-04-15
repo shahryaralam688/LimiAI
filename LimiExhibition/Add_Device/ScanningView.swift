@@ -92,7 +92,7 @@ struct ScanningView: View {
                             .frame(width: 100, height: 100)
                         Text("\(Int(currentProgress))%")
                             .font(.system(size: 36, weight: .medium))
-                            .foregroundColor(Color.charlestonGreen)
+                            .foregroundColor(.appTextInverse)
                     }
                 }
                 .frame(height: 300)
@@ -139,7 +139,7 @@ struct ScanningView: View {
                 VStack(spacing: 16) {
                     Text("Discovered Devices")
                         .font(.headline)
-                        .foregroundColor(.charlestonGreen)
+                        .foregroundColor(.appTextInverse)
                     
                     ScrollView {
                         VStack(spacing: 8) {
@@ -153,7 +153,7 @@ struct ScanningView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color.alabaster.opacity(0.9))
                                     .cornerRadius(8)
-                                    .foregroundColor(.charlestonGreen)
+                                    .foregroundColor(.appTextInverse)
                                     .onTapGesture {
                                         isLoading = true
                                         print("⚠️ DEPRECATED: ScanningView flow is deprecated. Please use DemoScanDevicesView for proper WiFi provisioning.")

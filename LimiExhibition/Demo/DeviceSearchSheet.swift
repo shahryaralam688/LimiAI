@@ -35,22 +35,21 @@ struct DeviceSearchSheet: View {
                 .padding(.top, 10)
             
             Text("Add Device")
-                .font(.title2)
+                .font(LimiTypography.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.charlestonGreen)
+                .foregroundColor(.appTextInverse)
             
             if isSearching {
                 VStack(spacing: 15) {
                     ProgressView()
                         .scaleEffect(1.5)
                         .padding()
-                        .foregroundColor(.charlestonGreen)
+                        .foregroundColor(.appTextInverse)
 
                     
                     Text("Searching for devices...")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .foregroundColor(.charlestonGreen)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(.appTextInverse)
 
                 }
                 .frame(maxWidth: .infinity)
@@ -85,7 +84,7 @@ struct DeviceSearchSheet: View {
                                         .padding(.trailing, 5)
                                     
                                     Text(device)
-                                        .foregroundColor(.charlestonGreen)
+                                        .foregroundColor(.appTextInverse)
                                     
                                     Spacer()
                                     
@@ -114,14 +113,14 @@ struct DeviceSearchSheet: View {
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color.gray.opacity(0.2))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .cornerRadius(10)
             }
             .padding(.horizontal)
             .padding(.bottom, 20)
         }
         .padding(.horizontal)
-        .background(Color.alabaster)
+        .background(Color.appCanvasPrimary)
         .clipShape(
             .rect(
                 topLeadingRadius: 20,

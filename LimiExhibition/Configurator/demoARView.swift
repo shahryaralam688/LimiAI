@@ -28,37 +28,37 @@ struct DemoARView: View {
 //                            .tag(0)
 //                            .scaleEffect(currentPage == 0 ? 1.0 : 0.92)
 //                            .opacity(currentPage == 0 ? 1.0 : 0.85)
-//                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+//                            .animation(LimiMotion.quick, value: currentPage)
 //                        
 //                        ARCardView(title: "Living Room Light", downloadId: "68b982e1055416029b04a849", isOnline: true)
 //                            .tag(1)
 //                            .scaleEffect(currentPage == 1 ? 1.0 : 0.92)
 //                            .opacity(currentPage == 1 ? 1.0 : 0.85)
-//                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+//                            .animation(LimiMotion.quick, value: currentPage)
 //                        
 //                        ARCardView(title: "Bedroom Lamp", downloadId: "68a2ec211a23b5bf01c7f9e5", isOnline: true)
 //                            .tag(2)
 //                            .scaleEffect(currentPage == 2 ? 1.0 : 0.92)
 //                            .opacity(currentPage == 2 ? 1.0 : 0.85)
-//                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+//                            .animation(LimiMotion.quick, value: currentPage)
 //                    } else {
                         ARCardView(title: "My Device", downloadId: "mount1", isOnline: false)
                             .tag(0)
                             .scaleEffect(currentPage == 0 ? 1.0 : 0.92)
                             .opacity(currentPage == 0 ? 1.0 : 0.85)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+                            .animation(LimiMotion.quick, value: currentPage)
                         
                         ARCardView(title: "Living Room Light", downloadId: "mount2", isOnline: false)
                             .tag(1)
                             .scaleEffect(currentPage == 1 ? 1.0 : 0.92)
                             .opacity(currentPage == 1 ? 1.0 : 0.85)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+                            .animation(LimiMotion.quick, value: currentPage)
                         
                         ARCardView(title: "Bedroom Lamp", downloadId: "mount3", isOnline: false)
                             .tag(2)
                             .scaleEffect(currentPage == 2 ? 1.0 : 0.92)
                             .opacity(currentPage == 2 ? 1.0 : 0.85)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: currentPage)
+                            .animation(LimiMotion.quick, value: currentPage)
 //                    }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
@@ -85,12 +85,10 @@ struct DemoARView: View {
             Spacer()
         }
         .padding(.bottom, 32)
-        .background(Color.themeBlack)
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
     }
 }
-
-import SwiftUI
 
 struct ARCardView: View {
     var imageName: String = "Frame-2" // Replace with your image asset
@@ -138,12 +136,13 @@ struct ARCardView: View {
                 }) {
                     Text("Experience Now")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(Color.appTextInverse)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(Color.themeWhite)
-                        .cornerRadius(26)
+                        .background(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
+                        .clipShape(Capsule(style: .continuous))
                 }
+                .tapScale()
                 .disabled(isLoading)
             }
             .padding(.horizontal, 24)

@@ -266,7 +266,7 @@ private struct RandomNumberGeneratorWithSeed: RandomNumberGenerator {
 // MARK: - Preview
 #Preview {
     ZStack {
-        Color.themeBlack.ignoresSafeArea()
+        Color.appCanvasPrimary.ignoresSafeArea()
         GlowOrbView()
     }
 }

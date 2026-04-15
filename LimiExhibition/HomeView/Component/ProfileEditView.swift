@@ -27,7 +27,7 @@ struct ProfileEditView: View {
     @State private var welcomeTextOpacity: Double = 0.0
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 // Background
 //                Color.backgroundColor
@@ -71,7 +71,7 @@ struct ProfileEditView: View {
 //            .navigationTitle("Edit Profile").bold(true).foregroundColor(.alabaster)
             .navigationBarTitleDisplayMode(.inline)
             .background(
-                Color.themeBlack
+                Color.appCanvasPrimary
 //
 //                LinearGradient(
 //                                gradient: Gradient(colors: [
@@ -88,7 +88,7 @@ struct ProfileEditView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                     .font(.system(size: 16, weight: .medium))
                 }
                 
@@ -120,10 +120,10 @@ struct ProfileEditView: View {
                     dismiss()
                 }
             }
-            .foregroundColor(.charlestonGreen)
+            .foregroundColor(.appTextInverse)
         } message: {
             Text(alertMessage)
-                .foregroundColor(.charlestonGreen)
+                .foregroundColor(.appTextInverse)
         }
         .background(
             Color.clear
@@ -191,7 +191,7 @@ struct ProfileEditView: View {
                     Text("Change Photo")
                         .font(.system(size: 16, weight: .medium))
                 }
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
                 .background(
@@ -213,7 +213,7 @@ struct ProfileEditView: View {
             HStack {
                 Text("Username")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 
                 Spacer()
                 
@@ -226,14 +226,14 @@ struct ProfileEditView: View {
             
             HStack {
                 Image(systemName: "at")
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .font(.system(size: 16, weight: .medium))
                     .frame(width: 20)
                 
                 TextField("Enter your username", text: $username)
                     .focused($isTextFieldFocused)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
                     .submitLabel(.done)
@@ -282,7 +282,7 @@ struct ProfileEditView: View {
                 Text(isLoading ? "Updating Profile..." : "Update Profile")
                     .font(.system(size: 18, weight: .semibold))
             }
-            .foregroundColor(.alabaster)
+            .foregroundColor(.appTextPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(

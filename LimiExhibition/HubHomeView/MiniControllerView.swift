@@ -163,7 +163,7 @@ struct MiniControllerView: View {
                                     HStack {
                                         Text("CCT LED \(pwm)")
                                             .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                            .foregroundColor(.alabaster)
+                                            .foregroundColor(.appTextPrimary)
                                         
                                         Spacer()
                                         
@@ -207,7 +207,7 @@ struct MiniControllerView: View {
                                         HStack {
                                             Text("RGB LED \(lednumber)")
                                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                                .foregroundColor(.charlestonGreen)
+                                                .foregroundColor(.appTextInverse)
                                             
                                             Spacer()
                                             

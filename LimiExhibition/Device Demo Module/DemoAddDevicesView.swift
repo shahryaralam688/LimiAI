@@ -70,25 +70,26 @@ struct DemoAddDevicesView: View {
                         .padding(.horizontal, 16)
                         
                         Text("Add Device")
-                            .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                            .font(.system(size: 30, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                             .multilineTextAlignment(.center)          // text-align: center
                             .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                             .kerning(-0.3)                            // letter-spacing: -1%
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(Color.appTextPrimary)
                         Text("Add your device below:")
-                            .font(.custom("Poppins-Regular", size: 16)) // font-family + weight/style
+                            .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
                             .multilineTextAlignment(.center)             // text-align: center
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
                             .kerning(-0.048)                             // -0.3% of 16px = -0.048
                             .fixedSize(horizontal: false, vertical: true)
 
                     }
+                    .limiAppear(delay: 0.1)
                 )
             VStack{
                 HStack{
                     Text("My Spaces")
-                        .font(.custom("Poppins-Medium", size: 20))   // 500 weight = Medium
+                        .font(.system(size: 20, weight: .medium, design: .rounded))   // 500 weight = Medium
                         .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
                         .multilineTextAlignment(.center)             // aligns text centrally
                         .lineSpacing(0)                              // 100% line height = no extra spacing
@@ -98,14 +99,14 @@ struct DemoAddDevicesView: View {
                                 
                 VStack(spacing: 16){
                     Text("You haven’t added any devices yet")
-                        .font(.custom("Poppins-Medium", size: 16))   // 500 weight = Medium
+                        .font(.system(size: 16, weight: .medium, design: .rounded))   // 500 weight = Medium
                         .foregroundColor(Color.appTextSecondary)      // matches #C9C4BD
                         .multilineTextAlignment(.center)             // text-align: center
                         .lineSpacing(16 * 0.4)                       // 140% line height
                         .kerning(0)
                     
                     Text("Tap button below to add devices")
-                        .font(.custom("Poppins-Regular", size: 14)) // weight 400 = Regular
+                        .font(.system(size: 14, weight: .regular, design: .rounded)) // weight 400 = Regular
                         .foregroundColor(Color.appTextMuted)     // custom color
                         .multilineTextAlignment(.center)            // text-align: center
                         .lineSpacing(14 * 0.4)                      // line-height: 140% → +40% of font size
@@ -139,7 +140,7 @@ struct DemoAddDevicesView: View {
             .padding(.horizontal,16)
             Spacer()
             Text("Skip")
-                .font(.custom("Poppins-Medium", size: 16)) // font-family + style
+                .font(.system(size: 16, weight: .medium, design: .rounded)) // font-family + style
                 .foregroundColor(Color.appTextPrimary)    // background color in design is likely text color
                 .underline(true, color: Color.appTextPrimary) // underline as specified
                 .kerning(0)                               // letter-spacing: 0%

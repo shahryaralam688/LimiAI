@@ -96,7 +96,7 @@ struct NotificationToggleCard: View {
             Image(systemName: "bell")
                 .font(.system(size: 18, weight: .regular))
                 
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
                         .fill(Color.appSurfaceTertiary)
@@ -112,7 +112,7 @@ struct NotificationToggleCard: View {
                 .padding()
             Text(title)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
 
             Spacer()
 

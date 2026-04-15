@@ -183,7 +183,7 @@ struct PendantLampControlView: View {
 //                Text(title)
 //                    .font(.title)
 //                    .fontWeight(.bold)
-//                    .foregroundColor(.alabaster)
+//                    .foregroundColor(.appTextPrimary)
 //                    .padding(.top)
 //                    .shadow(color: .gray, radius: 6)
                 Spacer()
@@ -207,7 +207,7 @@ struct PendantLampControlView: View {
 //                    Text("\(Int(brightness))%")
 //                        .bold()
 //                        .font(.title2)
-//                        .foregroundColor(.alabaster)
+//                        .foregroundColor(.appTextPrimary)
 //                        .padding(.bottom, 5)
 
                     VerticalSlider(value: $brightness, isEnabled: isOn) { newValue in
@@ -227,9 +227,9 @@ struct PendantLampControlView: View {
             Spacer()
             VStack(spacing: 5 ) {
                 Text("Color")
-                    .font(.custom("Poppins-Medium", size: 20)) // font-family + size
+                    .font(.system(size: 20, weight: .semibold, design: .rounded)) // font-family + size
                     .fontWeight(.medium)                       // weight 500
-                    .foregroundColor(.alabaster)               // color
+                    .foregroundColor(.appTextPrimary)               // color
                     .kerning(-0.15)                            // letter-spacing
                     .lineSpacing(0)                            // no extra line spacing
                     .padding(.bottom,24)
@@ -259,9 +259,9 @@ struct PendantLampControlView: View {
 
                     HStack{
                         Text("Warm")
-                            .font(.custom("Poppins-Medium", size: 16)) // custom font + size
+                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
                             .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.alabaster)               // custom color
+                            .foregroundColor(.appTextPrimary)               // custom color
                             .lineSpacing(0)                            // no extra line spacing
                             .kerning(-0.15)                            // letter-spacing
 
@@ -270,9 +270,9 @@ struct PendantLampControlView: View {
                         Spacer()
                         
                         Text("Cool")
-                            .font(.custom("Poppins-Medium", size: 16)) // custom font + size
+                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
                             .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.alabaster)               // custom color
+                            .foregroundColor(.appTextPrimary)               // custom color
                             .lineSpacing(0)                            // no extra line spacing
                             .kerning(-0.15)                            // letter-spacing
 
@@ -708,9 +708,9 @@ struct PendantLampControlWifiView: View {
             Spacer()
             VStack(spacing: 5 ) {
                 Text("Color")
-                    .font(.custom("Poppins-Medium", size: 20)) // font-family + size
+                    .font(.system(size: 20, weight: .semibold, design: .rounded)) // font-family + size
                     .fontWeight(.medium)                       // weight 500
-                    .foregroundColor(.alabaster)               // color
+                    .foregroundColor(.appTextPrimary)               // color
                     .kerning(-0.15)                            // letter-spacing
                     .lineSpacing(0)                            // no extra line spacing
                     .padding(.bottom,24)
@@ -740,9 +740,9 @@ struct PendantLampControlWifiView: View {
 
                     HStack{
                         Text("Warm")
-                            .font(.custom("Poppins-Medium", size: 16)) // custom font + size
+                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
                             .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.alabaster)               // custom color
+                            .foregroundColor(.appTextPrimary)               // custom color
                             .lineSpacing(0)                            // no extra line spacing
                             .kerning(-0.15)                            // letter-spacing
 
@@ -751,9 +751,9 @@ struct PendantLampControlWifiView: View {
                         Spacer()
                         
                         Text("Cool")
-                            .font(.custom("Poppins-Medium", size: 16)) // custom font + size
+                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
                             .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.alabaster)               // custom color
+                            .foregroundColor(.appTextPrimary)               // custom color
                             .lineSpacing(0)                            // no extra line spacing
                             .kerning(-0.15)                            // letter-spacing
 

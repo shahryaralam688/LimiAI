@@ -26,35 +26,6 @@ private struct InstallerUserResponse: Decodable {
         let _id: String?
     }
 }
-struct ElegantGradientBackgroundView: View {
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.charlestonGreen,
-
-                    Color.alabaster  // Alabaster
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
-            // Soft blur overlay to add depth
-            VisualEffectBlurGet()
-        }
-        .ignoresSafeArea()
-    }
-}
-
-struct VisualEffectBlurGet: View {
-    var body: some View {
-        Color.charlestonGreen.opacity(0.1)
-            .blur(radius: 15)
-            .ignoresSafeArea()
-    }
-}
-
 struct GetStart: View {
     var onBack: (() -> Void)? = nil
 
@@ -87,8 +58,8 @@ struct GetStart: View {
                     // Bottom border blur in black
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color.themeBlack.opacity(1.0),
-                            Color.themeBlack.opacity(0.8)
+                        Color.appCanvasPrimary.opacity(1.0),
+                        Color.appCanvasPrimary.opacity(0.8)
                         ]),
                         startPoint: .bottom,
                         endPoint: .top
@@ -120,15 +91,15 @@ struct GetStart: View {
                         .padding(.horizontal, 16)
                         
                         Text("Select Your Type")
-                            .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                            .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                             .multilineTextAlignment(.center)          // text-align: center
                             .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                             .kerning(-0.3)                            // letter-spacing: -1%
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(.appTextPrimary)
                         Text("Choose your role below:")
-                            .font(.custom("Poppins-Regular", size: 16)) // font-family + weight/style
+                            .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
                             .multilineTextAlignment(.center)             // text-align: center
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
                             .kerning(-0.048)                             // -0.3% of 16px = -0.048
                             .fixedSize(horizontal: false, vertical: true)
@@ -552,11 +523,18 @@ struct GetStartedButton: View {
             }
             .font(.system(size: 17, weight: .semibold))
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .padding(.horizontal, 20)
-            .background(Color.appBrandPrimary)
-            .foregroundColor(.themeBlack)
-            .cornerRadius(12)
+            .frame(height: 52)
+            .foregroundColor(.white)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.orbGlow4, .orbGlow1],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            )
             .opacity(isVisible ? 1 : 0)
             .offset(y: isVisible ? 0 : 20)
             .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1), value: isVisible)
@@ -650,7 +628,7 @@ struct RoleCard: View {
                         .padding(.horizontal, 12)
                         .lineSpacing(0)                            // line-height: 100% → same as font size
                         .kerning(-0.1)                             // letter-spacing: -0.5% of 20px ≈ -0.1
-                        .foregroundColor(Color.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.top, 12)
                     Spacer()
 
@@ -693,13 +671,13 @@ struct RoleCard: View {
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isSelected ? Color.emerald : Color.appCanvasPrimary)
+                        .fill(isSelected ? Color.orbGlow4 : Color.appCanvasPrimary)
                         .scaleEffect(isSelected ? 1 : 0.95)
 
 
                     // Selection indicator
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.emerald, lineWidth:  2 )
+                        .stroke(Color.orbGlow4, lineWidth:  2 )
                         .scaleEffect(isSelected ? 1 : 0.95)
                         .animation(.spring(response: 0.3), value: isSelected)
                 }
@@ -736,8 +714,8 @@ struct SpaceSelectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Select Space Type")
-                .font(.custom("Poppins-Bold", size: 18))
-                .foregroundColor(.alabaster)
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
                 .padding(.leading, 4)
             
             HStack(spacing: 12) {
@@ -783,12 +761,12 @@ struct RadioButton: View {
                 // Radio circle
                 ZStack {
                     Circle()
-                        .stroke(Color.emerald, lineWidth: 2)
+                        .stroke(Color.orbGlow4, lineWidth: 2)
                         .frame(width: 20, height: 20)
                     
                     if isSelected {
                         Circle()
-                            .fill(Color.emerald)
+                            .fill(Color.orbGlow4)
                             .frame(width: 12, height: 12)
                             .scaleEffect(isSelected ? 1 : 0)
                             .animation(.spring(response: 0.3), value: isSelected)
@@ -796,17 +774,17 @@ struct RadioButton: View {
                 }
                 
                 Text(title)
-                    .font(.custom("Poppins-Medium", size: 16))
-                    .foregroundColor(.alabaster)
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.emerald.opacity(0.1) : Color.clear)
+                    .fill(isSelected ? Color.orbGlow4.opacity(0.1) : Color.clear)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? Color.emerald : Color.gray.opacity(0.3), lineWidth: 1)
+                            .stroke(isSelected ? Color.orbGlow4 : Color.appBorderPrimary, lineWidth: 1)
                     )
             )
         }

@@ -6323,6 +6323,7 @@
       }
     },
     "Continue with Apple" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23473,6 +23474,7 @@
       }
     },
     "Scanning...." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24454,6 +24456,7 @@
       }
     },
     "Send Link" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

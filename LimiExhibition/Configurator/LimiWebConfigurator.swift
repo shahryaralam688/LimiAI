@@ -300,7 +300,7 @@ struct LimiWebViewCon: UIViewRepresentable {
             })();
             """
             webView.evaluateJavaScript(script)
-            isLoading.wrappedValue = true
+            isLoading.wrappedValue = false
         }
         private func downloadUSDZUsingAPI(downloadId: String) {
             guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else {
@@ -386,7 +386,7 @@ struct LimiContentViewcCon: View {
     @State private var showNoLiDARAlert = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .topLeading) {
                 if let token = AuthManager.shared.getToken(),
                    let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
@@ -399,7 +399,7 @@ struct LimiContentViewcCon: View {
 
 
             }
-            .background(Color.charlestonGreen)
+            .background(Color.appCanvasPrimary)
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $navigateToARPortal) {
                 PortalWebView()

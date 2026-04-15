@@ -22,7 +22,6 @@ struct ARBottomBar: View {
             
             Text("Tap To Take A Picture ")
                 .foregroundColor(Color.themeWhite)
-                .foregroundColor(Color.themeBlack)
                 .padding(.bottom)
             // Model picker bar
            ARModelList()

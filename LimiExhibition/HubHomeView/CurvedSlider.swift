@@ -76,9 +76,9 @@ struct CurvedSlider: View {
                         if showPercentagePopup {
                             VStack(spacing: 4) {
                                 Text("Cold: \(coldPercentage())%")
-                                    .foregroundColor(.charlestonGreen)
+                                    .foregroundColor(.appTextInverse)
                                 Text("Warm: \(warmPercentage())%")
-                                    .foregroundColor(.charlestonGreen)
+                                    .foregroundColor(.appTextInverse)
                             }
                             .padding(8)
                             .background(Color.alabaster)

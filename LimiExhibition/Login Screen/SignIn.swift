@@ -14,6 +14,7 @@ struct SignInView: View {
     @State private var showHomeView = false
     @State private var showLoginView = false
     @State private var showPrivacyPolicy = false
+    @State private var appeared = false
     var body: some View {
         ZStack{
             Image("Sign in")
@@ -34,13 +35,13 @@ struct SignInView: View {
                     .padding(.bottom, 159)
                 
                 Text("Invisible by design, Intelligent by nature")
-                    .font(.custom("Poppins-Medium", size: 32))
+                    .font(.system(size: 32, weight: .medium, design: .rounded))
                     .foregroundColor(.themeWhite)
                     .multilineTextAlignment(.center)
                     .lineSpacing(9.6) // 130% of 32pt
 
                 Text("Login with the options below")
-                    .font(.custom("Poppins-Regular", size: 15))
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
                     .foregroundColor(Color.appTextQuiet)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)        // 120% of 15pt = 18pt → 18 - 15 = 3pt extraenvelope.front
@@ -62,14 +63,14 @@ struct SignInView: View {
                     .foregroundColor(.themeWhite)
                     .frame(maxWidth: .infinity, minHeight: 56)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
+                        RoundedRectangle(cornerRadius: LimiRadius.large)
+                            .stroke(Color.appBorderPrimary, lineWidth: 1)
                     )
                     
                 }
                 .background(Color.appSurfacePrimary)
-                .cornerRadius(22)
-                .frame(width: 343)              // same width you had
+                .cornerRadius(LimiRadius.large)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
                 
@@ -90,79 +91,81 @@ struct SignInView: View {
                                     .scaledToFit()
                                 Text("Continue with Google")
                                 
-                                    .font(.custom("Poppins-SemiBold", size: 18))
-                                    .foregroundColor(Color.alabaster)
+                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.appTextPrimary)
                             }
                             Spacer()
                         }
                         .padding(.horizontal, 20)
                         .frame(height: 56)
-                        .frame(width: 343)
+                        .frame(maxWidth: .infinity)
                         .background(Color.appSurfacePrimary)
-                        .cornerRadius(22)
+                        .cornerRadius(LimiRadius.large)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 22)
-                                .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
+                            RoundedRectangle(cornerRadius: LimiRadius.large)
+                                .stroke(Color.appBorderPrimary, lineWidth: 1)
                         )
                     }
                     
                 }
                 .background(Color.appSurfacePrimary)
-                .cornerRadius(22)
-                .frame(width: 343)              // same width you had
+                .cornerRadius(LimiRadius.large)
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
                 .padding(.top, 15)
                 
                 
-                Button(action: {
-                    authManager.signInWithApple { success in
-                        if success {
-                            DispatchQueue.main.async {
-                                showHomeView = true
-                            }
-                        }
-                    }
-
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "applelogo")
-                            .font(.system(size: 20, weight: .regular))
-                        
-                        Text("Continue with Apple")
-                            .font(.system(size: 16, weight: .semibold))
-                            .tracking(-0.3)
-                    }
-                    .foregroundColor(.themeWhite)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
-                    )
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 15)
+//                Button(action: {
+//                    authManager.signInWithApple { success in
+//                        if success {
+//                            DispatchQueue.main.async {
+//                                showHomeView = true
+//                            }
+//                        }
+//                    }
+//
+//                }) {
+//                    HStack(spacing: 8) {
+//                        Image(systemName: "applelogo")
+//                            .font(.system(size: 20, weight: .regular))
+//                        
+//                        Text("Continue with Apple")
+//                            .font(.system(size: 16, weight: .semibold))
+//                            .tracking(-0.3)
+//                    }
+//                    .foregroundColor(.themeWhite)
+//                    .frame(maxWidth: .infinity, minHeight: 56)
+//                    .overlay(
+//                        RoundedRectangle(cornerRadius: LimiRadius.large)
+//                            .stroke(Color.appBorderPrimary, lineWidth: 1)
+//                    )
+//                }
+//                .padding(.horizontal, 20)
+//                .padding(.top, 15)
                 
                
 
                 
                 
 
-                Text("Continue as a Guest")
-                    .font(.custom("Poppins-Medium", size: 16))
-                    .foregroundColor(.themeWhite)
-                    .kerning(0)
-                    .multilineTextAlignment(.center)
-                    .underline()
-                    .padding()
-                    .onTapGesture {
-                        createInstallerUser()
-//                        showHomeView = true
-                    }
+                Button {
+                    createInstallerUser()
+                } label: {
+                    Text("Continue as a Guest")
+                        .font(LimiTypography.body)
+                        .foregroundColor(.appTextPrimary)
+                        .kerning(0)
+                        .multilineTextAlignment(.center)
+                        .underline()
+                        .padding()
+                }
+                .buttonStyle(.plain)
+                .tapScale()
 
 
                 HStack(spacing: 0) {
                     Text("By continuing you are agreeing to our ")
-                        .font(.custom("Poppins-Regular", size: 12))
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
                         .foregroundColor(Color.appTextQuiet)
                         .kerning(-0.15)
                     
@@ -173,14 +176,14 @@ struct SignInView: View {
                         print("Terms tapped")
                     }) {
                         Text("Terms")
-                            .font(.custom("Poppins-Medium", size: 16))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(Color.appTextQuiet)
                             .underline(true, color: Color.appTextQuiet)
                             .kerning(-0.15)
                     }
                     
                     Text(" and ")
-                        .font(.custom("Poppins-Regular", size: 12))
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
                         .foregroundColor(Color.appTextQuiet)
                         .kerning(-0.15)
                     
@@ -190,7 +193,7 @@ struct SignInView: View {
                         showPrivacyPolicy = true
                     }) {
                         Text("Privacy Policy")
-                            .font(.custom("Poppins-Medium", size: 16))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(Color.appTextQuiet)
                             .underline(true, color: Color.appTextQuiet)
                             .kerning(-0.15)
@@ -204,7 +207,10 @@ struct SignInView: View {
 
             }
             .padding()
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 20)
         }
+        .onAppear { withAnimation(LimiMotion.gentle) { appeared = true } }
         .fullScreenCover(isPresented: $showHomeView) {
             //HomeView()
             OnboardingFlowView()

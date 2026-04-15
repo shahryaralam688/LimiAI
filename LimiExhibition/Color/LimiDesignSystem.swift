@@ -1,5 +1,107 @@
 import SwiftUI
 
+// MARK: - Design Tokens
+
+enum LimiRadius {
+    static let small: CGFloat = 12
+    static let medium: CGFloat = 16
+    static let large: CGFloat = 20
+    static let extraLarge: CGFloat = 24
+}
+
+enum LimiSpacing {
+    static let screenHorizontal: CGFloat = 20
+    static let screenTop: CGFloat = 56
+    static let sectionGap: CGFloat = 24
+    static let itemGap: CGFloat = 16
+    static let innerPadding: CGFloat = 14
+}
+
+enum LimiTypography {
+    static let largeTitle: Font = .system(size: 28, weight: .bold, design: .rounded)
+    static let title: Font = .system(size: 24, weight: .bold, design: .rounded)
+    static let title2: Font = .system(size: 22, weight: .semibold, design: .rounded)
+    static let title3: Font = .system(size: 20, weight: .semibold, design: .rounded)
+    static let headline: Font = .system(size: 17, weight: .semibold, design: .rounded)
+    static let body: Font = .system(size: 16, weight: .regular, design: .rounded)
+    static let callout: Font = .system(size: 15, weight: .medium, design: .rounded)
+    static let subheadline: Font = .system(size: 14, weight: .regular, design: .rounded)
+    static let footnote: Font = .system(size: 13, weight: .medium, design: .rounded)
+    static let caption: Font = .system(size: 12, weight: .medium, design: .rounded)
+    static let caption2: Font = .system(size: 11, weight: .medium, design: .rounded)
+}
+
+// MARK: - Motion Constants (Arc-inspired physics)
+
+enum LimiMotion {
+    static let quick = Animation.spring(response: 0.3, dampingFraction: 0.8)
+    static let smooth = Animation.spring(response: 0.5, dampingFraction: 0.8)
+    static let gentle = Animation.spring(response: 0.7, dampingFraction: 0.75)
+    static let breathe = Animation.easeInOut(duration: 3.5).repeatForever(autoreverses: true)
+    static let appear = Animation.easeOut(duration: 0.5)
+    static let stagger: (Int) -> Animation = { index in
+        .spring(response: 0.5, dampingFraction: 0.8).delay(Double(index) * 0.06)
+    }
+}
+
+// MARK: - Appear Animation Modifier
+
+struct LimiAppearModifier: ViewModifier {
+    let delay: Double
+    @State private var appeared = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 16)
+            .animation(LimiMotion.smooth.delay(delay), value: appeared)
+            .onAppear { appeared = true }
+    }
+}
+
+extension View {
+    func limiAppear(delay: Double = 0) -> some View {
+        modifier(LimiAppearModifier(delay: delay))
+    }
+}
+
+// MARK: - Shimmer Loading Modifier
+
+struct LimiShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = -1
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { geo in
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0),
+                            Color.white.opacity(0.06),
+                            Color.white.opacity(0)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: geo.size.width * 0.6)
+                    .offset(x: phase * geo.size.width)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false)) {
+                            phase = 1.5
+                        }
+                    }
+                }
+                .clipped()
+            )
+    }
+}
+
+extension View {
+    func limiShimmer() -> some View {
+        modifier(LimiShimmerModifier())
+    }
+}
+
 // MARK: - Glass Card Modifier
 
 struct GlassCardStyle: ViewModifier {
@@ -368,34 +470,85 @@ struct LimiIconButton: View {
 struct LimiPrimaryButton: View {
     let title: String
     var isEnabled: Bool = true
+    var isLoading: Bool = false
+    var height: CGFloat = 52
+    var action: () -> Void
+
+    private var effectiveEnabled: Bool { isEnabled && !isLoading }
+
+    var body: some View {
+        Button(action: {
+            guard effectiveEnabled else { return }
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+            action()
+        }) {
+            ZStack {
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+                    .opacity(isLoading ? 0 : 1)
+
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.9)
+                        .transition(.opacity)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .foregroundColor(effectiveEnabled ? .white : .appTextDisabled)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(
+                        effectiveEnabled
+                        ? AnyShapeStyle(LinearGradient(
+                            colors: [.orbGlow4, .orbGlow1],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                        : AnyShapeStyle(Color.white.opacity(0.06))
+                    )
+            )
+        }
+        .disabled(!effectiveEnabled)
+        .tapScale()
+        .animation(LimiMotion.quick, value: isLoading)
+    }
+}
+
+/// Danger CTA — full-width danger capsule for destructive actions
+struct LimiDangerButton: View {
+    let title: String
+    var isLoading: Bool = false
     var height: CGFloat = 52
     var action: () -> Void
 
     var body: some View {
         Button(action: {
-            guard isEnabled else { return }
-            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+            guard !isLoading else { return }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             action()
         }) {
-            Text(title)
-                .font(.system(size: 17, weight: .semibold))
-                .frame(maxWidth: .infinity)
-                .frame(height: height)
-                .foregroundColor(isEnabled ? .white : .appTextDisabled)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(
-                            isEnabled
-                            ? AnyShapeStyle(LinearGradient(
-                                colors: [.orbGlow4, .orbGlow1],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            : AnyShapeStyle(Color.white.opacity(0.06))
-                        )
-                )
+            ZStack {
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+                    .opacity(isLoading ? 0 : 1)
+
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(0.9)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .foregroundColor(.white)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color.appDanger)
+            )
         }
-        .disabled(!isEnabled)
+        .disabled(isLoading)
         .tapScale()
     }
 }
@@ -472,12 +625,38 @@ struct LimiScreenHeader: View {
         HStack(spacing: 14) {
             LimiBackButton(action: onBack)
             Text(title)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(LimiTypography.title)
                 .foregroundColor(.appTextPrimary)
             Spacer()
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 56)
+        .padding(.horizontal, LimiSpacing.screenHorizontal)
+        .padding(.top, LimiSpacing.screenTop)
         .padding(.bottom, 12)
+    }
+}
+
+// MARK: - Unified Text Field
+
+struct LimiTextField: View {
+    let placeholder: String
+    @Binding var text: String
+    var keyboardType: UIKeyboardType = .default
+    var isSecure: Bool = false
+
+    var body: some View {
+        Group {
+            if isSecure {
+                SecureField("", text: $text, prompt: Text(placeholder).foregroundColor(.appTextPlaceholder))
+            } else {
+                TextField("", text: $text, prompt: Text(placeholder).foregroundColor(.appTextPlaceholder))
+                    .keyboardType(keyboardType)
+            }
+        }
+        .textFieldStyle(.plain)
+        .font(LimiTypography.body)
+        .foregroundColor(.appTextPrimary)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+        .glassCard(cornerRadius: CGFloat(LimiRadius.medium), strokeOpacity: 0.1, fillOpacity: 0.08)
     }
 }

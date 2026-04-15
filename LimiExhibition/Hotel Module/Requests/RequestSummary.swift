@@ -19,7 +19,7 @@ struct RequestSummaryView: View {
                     
                     Text("Request Summary")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     
                     Spacer()
                     
@@ -48,7 +48,7 @@ struct RequestSummaryView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Request Name")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
@@ -72,7 +72,7 @@ struct RequestSummaryView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Text("Request Time")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
@@ -88,7 +88,7 @@ struct RequestSummaryView: View {
                         .foregroundColor(.themeWhite)
                     Text("Delivered by")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
@@ -104,7 +104,7 @@ struct RequestSummaryView: View {
                         .foregroundColor(.themeWhite)
                     Text("Summary")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
@@ -138,7 +138,7 @@ struct RequestSummaryView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
         }
-        .background(Color.themeBlack.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
 }
 

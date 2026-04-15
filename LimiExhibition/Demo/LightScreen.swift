@@ -24,7 +24,7 @@ struct LightScreen: View {
     var body: some View {
         VStack {
             ZStack {
-                LinearGradient(gradient: Gradient(colors: [Color.charlestonGreen.opacity(0.8), Color.alabaster.opacity(0.9)]),
+                LinearGradient(gradient: Gradient(colors: [Color.appCanvasPrimary.opacity(0.8), Color.appTextPrimary.opacity(0.9)]),
                                startPoint: .top,
                                endPoint: .bottom)
                 
@@ -66,7 +66,7 @@ struct LightScreen: View {
                             .fontWeight(.bold)
                             .padding()
                             .frame(width: 150, height: 60)
-                            .background(Color.emerald)
+                            .background(Color.orbGlow4)
                             .foregroundColor(.themeWhite)
                             .cornerRadius(10)
                     }

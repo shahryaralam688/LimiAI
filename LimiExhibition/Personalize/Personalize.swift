@@ -115,7 +115,7 @@ final class OnboardingViewModel: ObservableObject {
         let body: [String: Any] = [
             "userName": userName,
             "whereLimiUsed": whereLimiUsed as Any,
-            "puroseOfLimi": puroseOfLimi
+            "purposeOfLimi": puroseOfLimi
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
@@ -149,6 +149,7 @@ struct OnboardingFlowView: View {
     private let totalSteps: Int = 4
     @State private var showHomeView = false
     @State private var showDemoScanView = false
+    @State private var isCompleting = false
 
     var body: some View {
         NavigationStack {
@@ -157,7 +158,7 @@ struct OnboardingFlowView: View {
 
                 VStack(spacing: 0) {
                     if step <= 3 {
-                        OnboardingHeader(step: step, total: totalSteps)
+                        OnboardingHeader(step: $step, total: totalSteps)
                     }
 
                     Spacer().frame(height: 24)
@@ -167,32 +168,35 @@ struct OnboardingFlowView: View {
                         case 1:
                             NameStepView(
                                 name: $viewModel.name,
-                                onContinue: { withAnimation(.easeInOut(duration: 0.35)) { step += 1 } }
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
                             )
                         case 2:
                             UseCaseStepView(
                                 selectedUseCase: $viewModel.selectedUseCase,
-                                onContinue: { withAnimation(.easeInOut(duration: 0.35)) { step += 1 } }
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
                             )
                         case 3:
                             GoalsStepView(
                                 selectedGoals: $viewModel.selectedGoals,
-                                onContinue: { withAnimation(.easeInOut(duration: 0.35)) { step += 1 } }
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
                             )
                         default:
                             BluetoothStepView(
                                 onSkip: {
+                                    isCompleting = true
                                     viewModel.bluetoothAllowed = false
                                     viewModel.completeOnboarding()
                                     AuthManager.shared.isAuthenticated = true
                                     showHomeView = true
                                 },
                                 onAllow: {
+                                    isCompleting = true
                                     viewModel.bluetoothAllowed = true
                                     viewModel.completeOnboarding()
                                     AuthManager.shared.isAuthenticated = true
                                     showDemoScanView = true
-                                }
+                                },
+                                isLoading: isCompleting
                             )
                         }
                     }
@@ -216,12 +220,19 @@ struct OnboardingFlowView: View {
 // MARK: - Shared Header
 
 struct OnboardingHeader: View {
-    let step: Int
+    @Binding var step: Int
     let total: Int
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         HStack {
-            LimiBackButton {}
+            LimiBackButton {
+                if step > 1 {
+                    withAnimation(LimiMotion.smooth) { step -= 1 }
+                } else {
+                    dismiss()
+                }
+            }
 
             Spacer()
 
@@ -318,7 +329,7 @@ struct UseCaseStepView: View {
                     icon: option.icon,
                     isSelected: selectedUseCase == option
                 ) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(LimiMotion.quick) {
                         selectedUseCase = option
                     }
                 }
@@ -364,7 +375,7 @@ struct GoalsStepView: View {
                             icon: goal.icon,
                             isSelected: selectedGoals.contains(goal)
                         ) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            withAnimation(LimiMotion.quick) {
                                 if selectedGoals.contains(goal) {
                                     selectedGoals.remove(goal)
                                 } else {
@@ -392,6 +403,7 @@ struct GoalsStepView: View {
 struct BluetoothStepView: View {
     var onSkip: () -> Void
     var onAllow: () -> Void
+    var isLoading: Bool = false
     @State private var appeared = false
 
     var body: some View {
@@ -415,7 +427,7 @@ struct BluetoothStepView: View {
                 .foregroundColor(.appTextPrimary)
                 .offset(y: appeared ? 0 : 10)
                 .opacity(appeared ? 1 : 0)
-                .animation(.easeOut(duration: 0.5).delay(0.1), value: appeared)
+                .animation(LimiMotion.appear.delay(0.1), value: appeared)
 
             Text("Limi needs Bluetooth to discover nearby devices and bring your space to life.")
                 .foregroundColor(.appTextSecondary)
@@ -423,7 +435,7 @@ struct BluetoothStepView: View {
                 .lineSpacing(5)
                 .offset(y: appeared ? 0 : 10)
                 .opacity(appeared ? 1 : 0)
-                .animation(.easeOut(duration: 0.5).delay(0.2), value: appeared)
+                .animation(LimiMotion.appear.delay(0.2), value: appeared)
 
             Spacer()
 
@@ -438,12 +450,13 @@ struct BluetoothStepView: View {
             PrimaryButton(
                 title: "Allow",
                 isEnabled: true,
+                isLoading: isLoading,
                 action: onAllow
             )
         }
         .padding(.bottom, 32)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5)) {
+            withAnimation(LimiMotion.appear) {
                 appeared = true
             }
         }
@@ -458,10 +471,11 @@ typealias PrimaryButton = LimiPrimaryButtonWrapper
 struct LimiPrimaryButtonWrapper: View {
     let title: String
     var isEnabled: Bool = true
+    var isLoading: Bool = false
     let action: () -> Void
 
     var body: some View {
-        LimiPrimaryButton(title: title, isEnabled: isEnabled, action: action)
+        LimiPrimaryButton(title: title, isEnabled: isEnabled, isLoading: isLoading, action: action)
     }
 }
 

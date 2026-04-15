@@ -117,8 +117,8 @@ struct CCTLEDView: View {
                     VStack {
                         HStack{
                             Text("Select Color")
-                                .font(.custom("Poppins-Bold", size: 18))
-                                .foregroundColor(.alabaster)
+                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .foregroundColor(.appTextPrimary)
                                 .kerning(0.9)
                                 .lineSpacing(0)
                                 .lineLimit(1)
@@ -150,18 +150,18 @@ struct CCTLEDView: View {
 
                         HStack{
                             Text("Warm")
-                                .font(.custom("Poppins-Medium", size: 16))
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
                                 .fontWeight(.medium)
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .lineSpacing(0)
                                 .kerning(-0.15)
 
                             Spacer()
 
                             Text("Cool")
-                                .font(.custom("Poppins-Medium", size: 16))
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
                                 .fontWeight(.medium)
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .lineSpacing(0)
                                 .kerning(-0.15)
                         }
@@ -191,7 +191,7 @@ struct CCTLEDView: View {
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
-                    .font(.custom("Poppins-Medium", size: 14))
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
@@ -318,16 +318,16 @@ struct CCTLEDView: View {
         HStack{
             VStack(alignment: .leading, spacing: 4) {
                 Text("Power")
-                    .font(.custom("Poppins-Bold", size: 18))
-                    .foregroundColor(.alabaster)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
                     .kerning(0.9)
                     .lineSpacing(0)
                     .lineLimit(1)
                     .fixedSize()
 
                 Text("Turn OFF/ON")
-                    .foregroundColor(.alabaster)
-                    .font(.custom("Poppins-Regular", size: 15))
+                    .foregroundColor(.appTextPrimary)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
                     .kerning(0.75)
                     .lineSpacing(0)
                     .lineLimit(1)
@@ -409,8 +409,8 @@ struct CCTLEDView: View {
     private var rainbowColorBar: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Color")
-                .font(.custom("Poppins-Medium", size: 16))
-                .foregroundColor(.alabaster)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.appTextPrimary)
                 .lineSpacing(0)
                 .kerning(0)
                 .lineLimit(1)
@@ -480,8 +480,8 @@ struct CCTLEDView: View {
 
     private var brightnessTitle: some View {
         Text("Brightness")
-            .font(.custom("Poppins-Medium", size: 16))
-            .foregroundColor(.alabaster)
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .foregroundColor(.appTextPrimary)
             .lineSpacing(0)
             .kerning(0)
             .lineLimit(1)
@@ -616,7 +616,7 @@ struct CCTLEDView: View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Effects")
                 .font(.headline)
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
                 .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -640,13 +640,13 @@ struct CCTLEDView: View {
                             }
                             .frame(width: 80, height: 80)
                             .background(
-                                selectedEffect == effect.id ? Color.blue : Color.clear
+                                selectedEffect == effect.id ? Color.orbGlow4 : Color.clear
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(
                                         selectedEffect == effect.id ?
-                                        Color.blue : Color.alabaster.opacity(0.6),
+                                        Color.orbGlow4 : Color.appTextPrimary.opacity(0.6),
                                         lineWidth: 1
                                     )
                             )

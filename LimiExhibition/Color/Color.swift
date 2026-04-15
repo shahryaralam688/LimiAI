@@ -118,18 +118,18 @@ enum AppTheme {
         static let tan = Color(red: 0.85, green: 0.7, blue: 0.45)
         static let overlayTint = Color(hex: "00000066")
 
-        // Deep Space accent gradients
-        static let orbGlow1 = Color(hex: "7C3AED")
-        static let orbGlow2 = Color(hex: "4F46E5")
-        static let orbGlow3 = Color(hex: "06B6D4")
-        static let orbGlow4 = Color(hex: "8B5CF6")
+        // Deep Space accent gradients (Emerald)
+        static let orbGlow1 = Color(hex: "059669")
+        static let orbGlow2 = Color(hex: "047857")
+        static let orbGlow3 = Color(hex: "34D399")
+        static let orbGlow4 = Color(hex: "10B981")
         static let glassStroke = Color(hex: "FFFFFF").opacity(0.08)
         static let glassFill = Color(hex: "FFFFFF").opacity(0.04)
     }
 }
 
 enum AppThemeDefaults {
-    static let selectedColorHex = "7C3AED"
+    static let selectedColorHex = "059669"
 }
 
 extension Color {

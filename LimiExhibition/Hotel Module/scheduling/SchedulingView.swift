@@ -87,7 +87,7 @@ struct SchedulingView: View {
     
     var body: some View {
         ZStack {
-            Color.themeBlack.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
             
             VStack(spacing: 24) {
                 headerView
@@ -136,7 +136,7 @@ struct SchedulingView: View {
         HStack(spacing: 0) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                    withAnimation(LimiMotion.quick) {
                         selectedTab = tab
                     }
                 } label: {
@@ -242,7 +242,7 @@ private struct ScheduleCard: View {
                 HStack(spacing: 8) {
                     Text(schedule.type)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
@@ -256,7 +256,7 @@ private struct ScheduleCard: View {
                     if showCompletedBadge {
                         Text("Completed")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.green)
+                            .foregroundColor(.appSuccess)
                             .padding(.vertical, 2)
                             .padding(.horizontal, 8)
                             .background(

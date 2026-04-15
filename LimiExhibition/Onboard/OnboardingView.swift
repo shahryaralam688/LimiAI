@@ -72,7 +72,7 @@ struct OnboardingView: View {
                         index: 2,
                         image: "Onboarding_img_3",
                         title: "Spaces That Feel Alive",
-                        description: "LLIMI adapts lighting and ambience to your mood, time, and activity — from focus to relaxation, mornings to evenings.",
+                        description: "LIMI adapts lighting and ambience to your mood, time, and activity — from focus to relaxation, mornings to evenings.",
                         pageIndex: $currentPage,
                         totalPages: totalPages,
                         showDemoAddDevice: $showDemoAddDevice
@@ -105,7 +105,7 @@ struct OnboardingView: View {
 //                        hasCompletedOnboarding = true
 //                        showDemoAddDevice = true // ✅ showDemoAddDevice triggers on Skip
 //                    }
-//                    .foregroundColor(.themeWhite)
+//                    .foregroundColor(.appTextPrimary)
 //                    .padding(.top, 50)
 //                    .padding(.trailing, 20)
 //                    .opacity(skipButtonOpacity)
@@ -161,7 +161,7 @@ struct OnboardingPageView: View {
         GeometryReader { geo in
             ZStack {
                 // Background
-                Color.themeBlack.ignoresSafeArea()
+                Color.appCanvasPrimary.ignoresSafeArea()
 
                 // Image - preserved exactly as before
                 Image(image)
@@ -192,7 +192,8 @@ struct OnboardingPageView: View {
                             Text(title)
                                 .font(.system(size: 26, weight: .bold, design: .rounded))
                                 .multilineTextAlignment(.center)
-                                .foregroundColor(.themeWhite)
+                                .foregroundColor(.appTextPrimary)
+                                .limiAppear(delay: 0.2)
                                 .scaleEffect(titleScale)
                                 .opacity(titleOpacity)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0).delay(0.3), value: titleScale)
@@ -200,14 +201,14 @@ struct OnboardingPageView: View {
 
                             Text(description)
                                 .font(.system(size: 16, weight: .medium, design: .default))
-                                .foregroundColor(.themeWhite.opacity(0.7))
+                                .foregroundColor(.appTextSecondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
                                 .opacity(descriptionOpacity)
                                 .animation(.easeOut(duration: 0.6).delay(0.5), value: descriptionOpacity)
 
                             if pageIndex == totalPages - 1 {
-                                LimiPrimaryButton(title: "Get Started", height: 56) {
+                                LimiPrimaryButton(title: "Get Started") {
                                     hasCompletedOnboarding = true
                                     showDemoAddDevice = true
                                 }
@@ -311,7 +312,7 @@ struct CustomPageIndicator: View {
                 }
             }
         }
-        .animation(.spring(), value: currentPage)
+        .animation(LimiMotion.quick, value: currentPage)
     }
 }
 

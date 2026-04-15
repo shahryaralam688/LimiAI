@@ -8,8 +8,8 @@ import Foundation
 
 struct APIConstants {
     // MARK: - Base URL
-    static let baseURL = "https://ear-legitimate-warehouse-employ.trycloudflare.com/"
-    static let secondaryBaseURL = "https://ear-legitimate-warehouse-employ.trycloudflare.com/"
+    static let baseURL = "https://dev.api.limitless-lighting.co.uk/"
+    static let secondaryBaseURL = "https://dev.api.limitless-lighting.co.uk/"
     
     // Auth
     static let loginGoogle = baseURL + "client/google/login"

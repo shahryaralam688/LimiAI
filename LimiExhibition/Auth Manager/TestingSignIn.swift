@@ -13,7 +13,7 @@ struct TestingSignIn: View {
     var body: some View {
         ZStack {
             // Background
-            Color.themeBlack.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
             
             VStack(spacing: 40) {
                 if authManager.isSignedIn {
@@ -41,8 +41,7 @@ struct TestingSignIn: View {
                                 .foregroundColor(.themeWhite)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 56)
-                                .background(Color.red)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .background(Capsule(style: .continuous).fill(Color.appDanger))
                         }
                         .padding(.horizontal, 40)
                     }
@@ -68,16 +67,16 @@ struct TestingSignIn: View {
                                 // Google Icon
                                 Image(systemName: "globe")
                                     .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.themeBlack)
+                                    .foregroundColor(.appTextPrimary)
                                 
                                 Text("Sign in with Google")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.themeBlack)
+                                    .foregroundColor(.appTextPrimary)
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(Color.themeWhite)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .background(Capsule(style: .continuous).fill(Color.white.opacity(0.06)))
+                            .clipShape(Capsule(style: .continuous))
                             .shadow(color: .themeBlack.opacity(0.1), radius: 8, x: 0, y: 4)
                         }
                         .padding(.horizontal, 40)
@@ -99,7 +98,7 @@ struct GoogleIconView: View {
             // Simplified Google "G" icon using SF Symbols
             Image(systemName: "globe")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.blue)
+                .foregroundColor(.orbGlow4)
         }
     }
 }

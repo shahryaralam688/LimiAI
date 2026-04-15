@@ -56,17 +56,17 @@ struct TemporaryAddDeviceView: View {
                         VStack(spacing: 0) {
                             // Title
                             Text("Sign In")
-                                .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                                .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                                 .multilineTextAlignment(.center)          // text-align: center
                                 .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                                 .kerning(-0.3)                            // letter-spacing: -1%
-                                .foregroundColor(Color.alabaster)
+                                .foregroundColor(.appTextPrimary)
                             
                             // Subtitle
                             Text("Let's personalize your Lifestyle with Limi")
-                                .font(.custom("Poppins-Regular", size: 16)) // font-family + weight/style
+                                .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
                                 .multilineTextAlignment(.center)             // text-align: center
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
                                 .kerning(-0.048)                             // -0.3% of 16px = -0.048
                                 .fixedSize(horizontal: false, vertical: true)
@@ -77,8 +77,8 @@ struct TemporaryAddDeviceView: View {
                     // Email Label
                     HStack {
                         Text("Email Address")
-                            .font(.custom("Poppins-Bold", size: 20))
-                            .foregroundColor(Color.alabaster)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -90,17 +90,17 @@ struct TemporaryAddDeviceView: View {
 //                        Image(systemName: "message.fill")
                             .resizable()
                             .frame(width: 20, height: 20)
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(.appTextPrimary)
                         
                         ZStack(alignment: .leading) {
                             if email.isEmpty {
                                 Text("you@example.com")
-                                    .font(.custom("Poppins-Regular", size: 16))
-                                    .foregroundColor(.gray) // ← placeholder (suggestion) text color
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.appTextPlaceholder) // ← placeholder (suggestion) text color
                             }
                             TextField("", text: $email)
-                                .font(.custom("Poppins-Regular", size: 16))
-                                .foregroundColor(Color.alabaster)
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.appTextPrimary)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -117,7 +117,7 @@ struct TemporaryAddDeviceView: View {
                     .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.emerald, lineWidth: 2)
+                            .stroke(Color.orbGlow4, lineWidth: 2)
                     )
                     .cornerRadius(20)
                     .padding(.horizontal, 20)
@@ -135,8 +135,8 @@ struct TemporaryAddDeviceView: View {
                     }) {
                         HStack {
                             Text("Sign in")
-                                .font(.custom("Poppins-SemiBold", size: 18))
-                                .foregroundColor(isEmailValid ? Color.charlestonGreen : Color.charlestonGreen)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.appTextInverse)
                             
                             Spacer()
                             
@@ -148,7 +148,7 @@ struct TemporaryAddDeviceView: View {
                         .padding(.horizontal, 20)
                         .frame(height: 56)
                         .frame(width: 343)
-                        .background(isEmailValid ? Color.emerald : Color.emerald)
+                        .background(isEmailValid ? Color.orbGlow4 : Color.orbGlow4)
                         .cornerRadius(22)
                     }
                     .disabled(!isEmailValid)
@@ -324,7 +324,7 @@ import SwiftUI
 //                    
 //                    Text("Verification Code")
 //                        .font(.system(size: 28, weight: .bold, design: .rounded))
-//                        .foregroundColor(.alabaster)
+//                        .foregroundColor(.appTextPrimary)
 //                        .opacity(isAppearing ? 1.0 : 0.0)
 //                        .offset(y: isAppearing ? 0 : 20)
 //                    
@@ -387,7 +387,7 @@ import SwiftUI
 //                if let errorMessage = errorMessage {
 //                    Text(errorMessage)
 //                        .font(.system(size: 14, weight: .medium, design: .rounded))
-//                        .foregroundColor(.alabaster)
+//                        .foregroundColor(.appTextPrimary)
 //                        .padding(.horizontal)
 //                        .transition(.move(edge: .bottom).combined(with: .opacity))
 //                }
@@ -412,7 +412,7 @@ import SwiftUI
 //                        } else {
 //                            Text("Verify")
 //                                .font(.system(size: 18, weight: .bold, design: .rounded))
-//                                .foregroundColor(.alabaster)
+//                                .foregroundColor(.appTextPrimary)
 //                        }
 //                    }
 //                    .scaleEffect(isVerifying ? 0.95 : 1.0)
@@ -434,7 +434,7 @@ import SwiftUI
 //                    }) {
 //                        Text("Resend")
 //                            .font(.system(size: 14, weight: .bold, design: .rounded))
-//                            .foregroundColor(.alabaster)
+//                            .foregroundColor(.appTextPrimary)
 //                    }
 //                }
 //                .padding(.top, 5)

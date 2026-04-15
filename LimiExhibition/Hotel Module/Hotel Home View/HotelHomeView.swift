@@ -53,7 +53,7 @@ struct HotelHomeView: View {
                     isSidebarOpen: $isSidebarOpen
                 )
             }
-            .background(Color.themeBlack)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea()
             
 //            // Sidebar (highest priority) — pin to leading without affecting layout width
@@ -125,11 +125,11 @@ private struct HotelChip: View {
         HStack(spacing: 8) {
             Image(systemName: "mappin.and.ellipse")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color.alabaster)
+                .foregroundColor(.appTextPrimary)
             
             Text(displayText)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
             
@@ -485,7 +485,7 @@ struct HotelEnhancedSidebarView: View {
                     // Settings Title
                     Text("Settings")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 20)
                         .padding(.top, 60)
                         .padding(.bottom, 30)
@@ -708,11 +708,11 @@ struct HomeTabView: View {
                         
                         Spacer(minLength: 120)
                     }
-                    .background(Color.themeBlack)
+                    .background(Color.appCanvasPrimary)
                     .frame(maxWidth: .infinity)
                 }
             }
-            .background(Color.themeBlack)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .top)
         }
     }
@@ -752,7 +752,7 @@ struct RequestsTabView: View {
                 Spacer(minLength: 100)
             }
         }
-        .background(Color.themeBlack)
+        .background(Color.appCanvasPrimary)
     }
 }
 

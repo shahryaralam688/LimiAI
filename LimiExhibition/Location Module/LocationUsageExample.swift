@@ -19,7 +19,7 @@ struct LocationUsageExample: View {
                 if LocationHelper.isLocationAvailable() {
                     Text(LocationHelper.getLocationDisplayString())
                         .font(.body)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.orbGlow4)
                 } else {
                     Text("Location not available")
                         .font(.body)

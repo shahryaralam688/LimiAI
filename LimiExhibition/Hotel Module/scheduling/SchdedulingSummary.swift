@@ -31,7 +31,7 @@ struct SchedulingSummaryView: View {
                 .padding(.bottom, 34)
             }
         }
-        .background(Color.themeBlack.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
     
     // MARK: - Header
@@ -45,7 +45,7 @@ struct SchedulingSummaryView: View {
                 
                 Text("Schedule Summary")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 
                 Spacer()
                 
@@ -97,7 +97,7 @@ struct SchedulingSummaryView: View {
                 displayedComponents: [.hourAndMinute]
             )
             .labelsHidden()
-            .tint(Color.emerald)
+            .tint(Color.orbGlow4)
             .colorScheme(.dark)
             
             chipLabel(text: "Description")
@@ -128,7 +128,7 @@ struct SchedulingSummaryView: View {
                     .font(.system(size: 16, weight: .regular))
                     .foregroundColor(.themeWhite)
             }
-            .tint(Color.emerald)
+            .tint(Color.orbGlow4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -139,7 +139,7 @@ struct SchedulingSummaryView: View {
     // MARK: - Save Button
     
     private var saveButton: some View {
-        LimiPrimaryButton(title: "Save Changes", height: 56) {
+        LimiPrimaryButton(title: "Save Changes") {
             print("✅ Schedule updated: \(schedule.type) at \(schedule.time)")
             dismiss()
         }
@@ -150,7 +150,7 @@ struct SchedulingSummaryView: View {
     private func chipLabel(text: String) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium))
-            .foregroundColor(.alabaster)
+            .foregroundColor(.appTextPrimary)
             .padding(.vertical, 3)
             .padding(.horizontal, 10)
             .background(

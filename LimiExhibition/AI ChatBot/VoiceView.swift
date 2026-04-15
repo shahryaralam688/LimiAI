@@ -22,7 +22,7 @@ struct ChatMessage: Identifiable, Equatable {
 struct VoiceView: View {
     @Environment(\.dismiss) var dismiss
 
-    @StateObject private var client = WebRTCVoiceClient(backendBaseURL: URL(string: "https://ear-legitimate-warehouse-employ.trycloudflare.com/")!)
+    @StateObject private var client = WebRTCVoiceClient(backendBaseURL: URL(string: "https://dev.api.limitless-lighting.co.uk/")!)
     @StateObject private var networkMonitor = NetworkMonitor()
 
     @State private var conversationHistory: [ChatMessage] = []

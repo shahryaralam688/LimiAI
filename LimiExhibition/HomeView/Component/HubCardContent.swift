@@ -30,7 +30,7 @@ struct HubCardContent: View {
                 Text(bluetoothManager.connectedDeviceName ?? hub.name)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(10)

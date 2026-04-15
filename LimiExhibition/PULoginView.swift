@@ -20,112 +20,66 @@
         
         var body: some View {
             ZStack(alignment: .top) {
-                Color.charlestonGreen.edgesIgnoringSafeArea(.all)
-                
+                DeepSpaceBackground()
+
                 VStack(spacing: 0) {
-                    // Back button
+                    HStack {
+                        LimiBackButton { dismiss() }
+                        Spacer()
+                    }
+                    .padding(.horizontal, LimiSpacing.screenHorizontal)
+                    .padding(.top, LimiSpacing.screenTop)
 
-                    
-                    VStack {
-                        VStack {
-                            Image("logoSplash")
-                                .resizable()
-                                .frame(width: 120, height: 100)
-                                .padding(.bottom, 40)
-                                .offset(y: welcomeTextOffset)
-                                .opacity(welcomeTextOpacity)
-                                .onAppear {
-                                    withAnimation(.easeOut(duration: 0.8)) {
-                                        welcomeTextOffset = 0
-                                        welcomeTextOpacity = 1.0
-                                    }
-                                }
-                                .shadow(color: Color.alabaster.opacity(0.5), radius: 10, x: 0, y: 5)
-                            Text("Enter Your Email")
-                                .font(.title2)
-                                .bold()
-                                .foregroundColor(.charlestonGreen)
-                                .padding(.bottom, 10)
-                                .shadow(color: Color.alabaster.opacity(0.5), radius: 10, x: 0, y: 5)
-
-                            Text("Please check and enter your email before configuring the LED, and verify that you are a valid user.")
-                                .font(.subheadline)
-                                .foregroundColor(Color.charlestonGreen)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                        }
-                        .padding()
-                        
-                        VStack(spacing: 60) {
-                            TextField("Email Address", text: $email, prompt: Text("Email Address")
-                                .foregroundColor(.charlestonGreen.opacity(0.6)))
-                                .foregroundColor(Color.charlestonGreen)
-                                .padding()
-                                .background(Color.alabaster)
-                                .cornerRadius(10)
-                                .padding(.horizontal)
-                                .textInputAutocapitalization(.never)  // Prevents first letter capitalization
-                        }
-                        .padding(.bottom, 40)
-                        
-                        // Update the Button in body
-                        Button(action: {
-                            isLoading = true
-                            verifyEnmail()
-                        }) {
-                            ZStack {
-                                Text("Send Link")
-                                    .font(.headline)
-                                    .foregroundColor(.alabaster)
-                                    .opacity(isLoading ? 0 : 1)
-
-                                if isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .alabaster))
+                    VStack(spacing: LimiSpacing.sectionGap) {
+                        Image("logoSplash")
+                            .resizable()
+                            .frame(width: 120, height: 100)
+                            .padding(.bottom, 20)
+                            .offset(y: welcomeTextOffset)
+                            .opacity(welcomeTextOpacity)
+                            .onAppear {
+                                withAnimation(.easeOut(duration: 0.8)) {
+                                    welcomeTextOffset = 0
+                                    welcomeTextOpacity = 1.0
                                 }
                             }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.charlestonGreen)
-                            .cornerRadius(10)
+
+                        Text("Enter Your Email")
+                            .font(LimiTypography.title)
+                            .foregroundColor(.appTextPrimary)
+                            .padding(.bottom, 4)
+
+                        Text("Please check and enter your email before configuring the LED, and verify that you are a valid user.")
+                            .font(LimiTypography.subheadline)
+                            .foregroundColor(.appTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        LimiTextField(placeholder: "Email Address", text: $email, keyboardType: .emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .padding(.horizontal)
+                            .padding(.top, 20)
+
+                        LimiPrimaryButton(title: "Send Link", isEnabled: !isLoading) {
+                            isLoading = true
+                            verifyEnmail()
                         }
-                        .disabled(isLoading)
                         .padding(.horizontal)
-                        
+                        .overlay {
+                            if isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
+                            }
+                        }
                     }
                     .keyboardResponsive()
 
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(
-                    LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.charlestonGreen, // Eton
-
-                                        Color.alabaster  // Alabaster
-                                    ]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                    )
-                )
-                .padding(.bottom, 0)
-                .edgesIgnoringSafeArea(.all)
-                .shadow(color: Color.charlestonGreen.opacity(0.3), radius: 20)
-                
-                HStack {
-                    LimiBackButton { dismiss() }
-                    .padding(.leading)
                     Spacer()
                 }
-                .padding(.top, 10)
-                .padding(.horizontal)
-            
             }
-            
             .fullScreenCover(isPresented: $isEmailVerified) {
                 AddDeviceView()
             }
-            // Add this modifier to your ZStack in the body:
             .alert("Error", isPresented: $showErrorAlert) {
                 Button("OK", role: .cancel) { }
             } message: {

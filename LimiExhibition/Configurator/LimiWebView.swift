@@ -188,7 +188,7 @@ struct LimiContentView: View {
     @State private var showNoLiDARAlert = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .topLeading) {
                 if let token = AuthManager.shared.getToken(),
                    let url = URL(string: AppURLs.Web.configurator(token: token)) {
@@ -213,12 +213,12 @@ struct LimiContentView: View {
                         }
                     }) {
                         Image(systemName: "arkit")
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .font(.system(size: 20, weight: .bold))
                             .frame(width: 34, height: 34) // same fixed size
                             .background(
                                 Circle()
-                                    .fill(Color.charlestonGreen)
+                                    .fill(Color.appCanvasPrimary)
                             )
                     }
 
@@ -228,7 +228,7 @@ struct LimiContentView: View {
                 .padding(.horizontal, 24)
 
             }
-            .background(Color.charlestonGreen)
+            .background(Color.appCanvasPrimary)
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $navigateToARPortal) {
                 PortalWebView()

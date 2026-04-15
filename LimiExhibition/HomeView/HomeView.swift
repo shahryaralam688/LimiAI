@@ -604,7 +604,7 @@ struct HomeView: View {
                 .overlay(
                     // INNER SHADOW (inset shadow equivalent)
                     Circle()
-                        .stroke(Color.themeWhite.opacity(3), lineWidth: 3)
+                        .stroke(Color.themeWhite.opacity(0.3), lineWidth: 3)
                         .blur(radius: 10)
                         .offset(x: -6, y: -1)
                         .mask(
@@ -663,21 +663,30 @@ struct HomeView: View {
     }
 
     func sendDeviceToBackend(device: WifiDevice) {
-        
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("📡 [sendDeviceToBackend] STARTED")
+
         guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
-            print("⚠️ No token found. Cannot send device.")
+            print("⚠️ [sendDeviceToBackend] No token found. Cannot send device.")
             return
         }
 
-        guard let url = URL(string: APIConstants.deviceUser) else { return }
+        guard let url = URL(string: APIConstants.deviceUser) else {
+            print("❌ [sendDeviceToBackend] Invalid URL: \(APIConstants.deviceUser)")
+            return
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("\(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(token, forHTTPHeaderField: "Authorization")
+
+        print("🔗 [sendDeviceToBackend] URL: \(url.absoluteString)")
+        print("📋 [sendDeviceToBackend] Method: POST")
+        print("🔑 [sendDeviceToBackend] Authorization: \(String(token.prefix(30)))...")
+        print("📎 [sendDeviceToBackend] Content-Type: application/json")
 
         let body: [String: Any] = [
-            // Send the exact deviceId as advertised (Bonjour TXT), no case transformation
             "deviceId": device.chennalMac,
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
@@ -688,30 +697,34 @@ struct HomeView: View {
         ]
 
         do {
-            let data = try JSONSerialization.data(withJSONObject: body)
+            let data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
             request.httpBody = data
             if let json = String(data: data, encoding: .utf8) {
-                print("📤 sendDeviceToBackend payload: \(json)")
+                print("📤 [sendDeviceToBackend] Body:\n\(json)")
             }
+            print("📏 [sendDeviceToBackend] Body size: \(data.count) bytes")
         } catch {
-            print("❌ Failed to encode device body: \(error)")
+            print("❌ [sendDeviceToBackend] Failed to encode body: \(error)")
             return
         }
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ Request error:", error.localizedDescription)
+                print("❌ [sendDeviceToBackend] Network error: \(error.localizedDescription)")
                 return
             }
 
-            if let httpResponse = response as? HTTPURLResponse {
-                print("✅ HTTP Status:", httpResponse.statusCode)
+            if let http = response as? HTTPURLResponse {
+                print("📬 [sendDeviceToBackend] HTTP Status: \(http.statusCode)")
+                print("📬 [sendDeviceToBackend] Response Headers: \(http.allHeaderFields)")
             }
 
-            if let data = data,
-               let responseString = String(data: data, encoding: .utf8) {
-                print("📩 Response:", responseString)
+            if let data = data, let body = String(data: data, encoding: .utf8) {
+                print("📩 [sendDeviceToBackend] Response Body: \(body)")
+            } else {
+                print("📩 [sendDeviceToBackend] Response Body: (empty)")
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }.resume()
     }
 
@@ -783,20 +796,36 @@ final class DeviceAllocationService {
     private let endpoint = URL(string: APIConstants.deviceUser)!
 
     func allocateDevice(deviceId: String) {
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("📡 [DeviceAllocation] STARTED for deviceId: \(deviceId)")
+
+        guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
+            print("❌ [DeviceAllocation] No valid token. Cannot allocate device.")
+            return
+        }
+
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
 
-        // Headers
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(AuthManager.shared.getToken(), forHTTPHeaderField: "authorization")
+        request.setValue(token, forHTTPHeaderField: "Authorization")
 
-        // Body
+        print("🔗 [DeviceAllocation] URL: \(endpoint.absoluteString)")
+        print("📋 [DeviceAllocation] Method: POST")
+        print("🔑 [DeviceAllocation] Authorization: \(String(token.prefix(30)))...")
+        print("📎 [DeviceAllocation] Content-Type: application/json")
+
         let body: [String: String] = [
             "deviceId": deviceId
         ]
 
         do {
-            request.httpBody = try JSONEncoder().encode(body)
+            let encoded = try JSONEncoder().encode(body)
+            request.httpBody = encoded
+            if let json = String(data: encoded, encoding: .utf8) {
+                print("📤 [DeviceAllocation] Body: \(json)")
+            }
+            print("📏 [DeviceAllocation] Body size: \(encoded.count) bytes")
         } catch {
             print("❌ [DeviceAllocation] Failed to encode body: \(error)")
             return
@@ -804,17 +833,22 @@ final class DeviceAllocationService {
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ [DeviceAllocation] Request error: \(error.localizedDescription)")
+                print("❌ [DeviceAllocation] Network error: \(error.localizedDescription)")
                 return
             }
 
             if let http = response as? HTTPURLResponse {
-                print("ℹ️ [DeviceAllocation] HTTP Status: \(http.statusCode)")
+                print("📬 [DeviceAllocation] HTTP Status: \(http.statusCode)")
+                print("📬 [DeviceAllocation] Response Headers: \(http.allHeaderFields)")
             }
 
             guard let data = data else {
                 print("❌ [DeviceAllocation] Empty response data")
                 return
+            }
+
+            if let raw = String(data: data, encoding: .utf8) {
+                print("📩 [DeviceAllocation] Response Body: \(raw)")
             }
 
             do {
@@ -827,10 +861,8 @@ final class DeviceAllocationService {
                 }
             } catch {
                 print("❌ [DeviceAllocation] Failed to decode JSON: \(error)")
-                if let raw = String(data: data, encoding: .utf8) {
-                    print("   Raw response: \(raw)")
-                }
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }.resume()
     }
 }

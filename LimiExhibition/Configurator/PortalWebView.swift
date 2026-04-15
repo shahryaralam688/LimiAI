@@ -55,7 +55,7 @@ struct PortalWebView: View {
         .ignoresSafeArea(edges: [.top, .bottom])
         .onAppear {
             checkLightConfigs()
-            withAnimation(.easeOut(duration: 0.6)) { appeared = true }
+            withAnimation(LimiMotion.appear) { appeared = true }
         }
         .fullScreenCover(isPresented: $showCustomView) {
             CustomView(
@@ -107,7 +107,7 @@ struct PortalWebView: View {
         HStack(spacing: 4) {
             ForEach(TabType.allCases, id: \.self) { tab in
                 Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    withAnimation(LimiMotion.quick) {
                         selectedTab = tab
                     }
                 }) {
@@ -128,13 +128,13 @@ struct PortalWebView: View {
         .glassCard(cornerRadius: 16, strokeOpacity: 0.06, fillOpacity: 0.04)
         .padding(.horizontal, 20)
         .opacity(appeared ? 1 : 0)
-        .animation(.easeOut(duration: 0.5).delay(0.1), value: appeared)
+        .animation(LimiMotion.appear.delay(0.1), value: appeared)
     }
 
     // MARK: - Custom Tab Content
 
     private var customTabContent: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.appCanvasPrimary.ignoresSafeArea()
 
@@ -188,7 +188,7 @@ struct PortalWebView: View {
 
     private var loadingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.4)
+            Color.themeBlack.opacity(0.4)
                 .ignoresSafeArea()
             VStack(spacing: 14) {
                 ProgressView()

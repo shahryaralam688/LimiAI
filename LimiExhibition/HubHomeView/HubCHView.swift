@@ -28,7 +28,7 @@ struct HubCHView: View {
                 .padding()
             }
         }
-        .background(ElegantGradientBackgroundView())
+        .background(DeepSpaceBackground())
 
     }
 }

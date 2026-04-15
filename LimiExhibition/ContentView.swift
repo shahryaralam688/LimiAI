@@ -31,17 +31,17 @@ struct ContentView: View {
                 }
                 .tag(1)
         }
-        .accentColor(.charlestonGreen)
+        .accentColor(.orbGlow4)
         .onAppear {
             let appearance = UITabBarAppearance()
             appearance.configureWithOpaqueBackground()
             appearance.backgroundColor = UIColor.systemGray6
             
             appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.charlestonGreen.opacity(0.6))
-            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(Color.charlestonGreen)]
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appTextPrimary]
             
-            appearance.stackedLayoutAppearance.normal.iconColor = UIColor.gray
-            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
+            appearance.stackedLayoutAppearance.normal.iconColor = UIColor.appTextPrimary.withAlphaComponent(0.5)
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.appTextPrimary.withAlphaComponent(0.5)]
             
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -73,13 +73,13 @@ struct MainLEDView: View {
     
     var body: some View {
         ZStack {
-            ElegantGradientBackgroundView()
+            DeepSpaceBackground()
             
             VStack(spacing: 20) {
                 Text("Mini Controller Setting")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                     .shadow(color:.alabaster, radius: 5)
 
                 
@@ -162,14 +162,14 @@ struct TestingView: View {
                 VStack {
                     Text("No devices available")
                         .font(.headline)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     
                     Text("Please connect a device first")
                         .font(.subheadline)
-                        .foregroundColor(.alabaster.opacity(0.7))
+                        .foregroundColor(.appTextSecondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(ElegantGradientBackgroundView())
+                .background(DeepSpaceBackground())
             }
         }
     }
@@ -195,7 +195,7 @@ struct LEDToggleButton: View {
         }) {
             HStack {
                 Text(buttonLabel)
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .font(.headline)
                     .frame(width: 60, alignment: .leading)
                 
@@ -254,11 +254,11 @@ struct SendButton: View {
             }) {
                 Text("Save")
                     .font(.headline)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                     .padding()
                     .frame(width: 200)
                     .background(
-                        LinearGradient(gradient: Gradient(colors: [.gray, .charlestonGreen]), startPoint: .leading, endPoint: .trailing)
+                        LinearGradient(gradient: Gradient(colors: [.orbGlow4, .orbGlow1]), startPoint: .leading, endPoint: .trailing)
                     )
                     .cornerRadius(15)
                     .shadow(color: .alabaster, radius: 5)
@@ -318,7 +318,7 @@ struct PartHomeView: View {
                     
                 }) {
                     Text(hub.name)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.orbGlow4)
                         .padding()
                 }
             }

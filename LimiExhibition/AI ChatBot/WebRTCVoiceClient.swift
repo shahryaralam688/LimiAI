@@ -70,7 +70,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     // Configure this to your backend base URL (must be HTTPS in production)
     private let backendBaseURL: URL
     // Optional webhook to forward conversation events
-    private let webhookURL: URL? = URL(string: "https://ear-legitimate-warehouse-employ.trycloudflare.com/limi-ai/webhook")
+    private let webhookURL: URL? = URL(string: "https://dev.api.limitless-lighting.co.uk/limi-ai/webhook")
     // RTC
     private var factory: RTCPeerConnectionFactory!
     private var peerConnection: RTCPeerConnection?
@@ -119,6 +119,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             req.httpMethod = "POST"
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.setValue("application/json", forHTTPHeaderField: "Accept")
+            if let token = webhookTokenHeaderValue() {
+                req.setValue(token, forHTTPHeaderField: "Authorization")
+            }
             req.httpBody = data
             
             if let jsonString = String(data: data, encoding: .utf8) {
@@ -712,6 +715,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             req.httpMethod = "POST"
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.setValue("application/json", forHTTPHeaderField: "Accept")
+            if let token = webhookTokenHeaderValue() {
+                req.setValue(token, forHTTPHeaderField: "Authorization")
+            }
             req.httpBody = data
             
             // Log outgoing request
@@ -878,6 +884,18 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         workQueue.asyncAfter(deadline: .now() + delay, execute: work)
         
         postWebhook(event: "reconnect_scheduled", payload: ["attempt": reconnectAttempts, "delay": delay])
+    }
+
+    /// Webhook auth header token (raw token only, no `Bearer` prefix).
+    private func webhookTokenHeaderValue() -> String? {
+        guard let raw = AuthManager.shared.getToken()?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else {
+            return nil
+        }
+        if raw.lowercased().hasPrefix("bearer ") {
+            return String(raw.dropFirst(7)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return raw
     }
 }
 

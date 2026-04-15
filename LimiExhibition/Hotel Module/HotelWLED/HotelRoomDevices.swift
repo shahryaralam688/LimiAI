@@ -101,7 +101,7 @@ struct HotelRoomDevices: View {
         }
         .ignoresSafeArea()
 //        .padding(.top, 36)
-        .background(Color.themeBlack.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
 }
 
@@ -228,13 +228,13 @@ struct BLEDevicesView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 12) {
                 // Title
                 HStack {
                     Text("BLE Devices")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
 
                     Spacer()
 
@@ -292,7 +292,7 @@ struct BLEDevicesView: View {
                     .padding(6)
                 }
             }
-            .background(Color.themeBlack)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .bottom)
         }
         .sheet(isPresented: $showWLEDView) {
@@ -383,13 +383,13 @@ struct WiFiDevicesView: View {
     @State private var showWLEDViewScan = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 12) {
                 // Title
                 HStack {
                     Text("Wi-Fi Devices")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Button("WLED"){
                         showWLEDViewScan = true
@@ -431,7 +431,7 @@ struct WiFiDevicesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             }
-            .background(Color.themeBlack)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .bottom)
         }
         .sheet(isPresented: $showWLEDView) {
@@ -468,7 +468,7 @@ struct DeviceCard: View {
                         
                         Image(systemName: device.icon)
                             .font(.title2)
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                     }
                     Spacer()
                 }
@@ -479,7 +479,7 @@ struct DeviceCard: View {
                         .font(.custom("Lexend", size: 17))
                         .fontWeight(.semibold)
                         .kerning(0)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .lineLimit(nil)            // limit to 2 lines max
                         .frame(maxHeight: 44, alignment: .top) // fixed height for consistency
 
@@ -498,7 +498,7 @@ struct DeviceCard: View {
                     Text(isOn ? "On" : "Off")
                         .font(.custom("Inter", size: 16))
                         .fontWeight(.medium)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     
                     Spacer()
                     

@@ -19,7 +19,7 @@ struct ChannelSelectionView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 // Device info header
                 VStack(spacing: 8) {
@@ -63,17 +63,17 @@ struct ChannelSelectionView: View {
                                             .frame(width: 50, height: 50)
                                         
                                         Text("\(index + 1)")
-                                            .font(.custom("Poppins-SemiBold", size: 18))
+                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
                                             .foregroundColor(.themeWhite)
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Channel \(index + 1)")
-                                            .font(.custom("Poppins-Medium", size: 16))
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
                                             .foregroundColor(.themeWhite)
                                         
                                         Text(channelType == "CCT" ? "Warm/Cool White" : "RGB Color")
-                                            .font(.custom("Poppins-Regular", size: 12))
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
                                             .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     }
                                     
@@ -84,7 +84,7 @@ struct ChannelSelectionView: View {
                                         Image(systemName: channelType == "CCT" ? "lightbulb.fill" : "paintpalette.fill")
                                             .font(.system(size: 14))
                                         Text(channelType)
-                                            .font(.custom("Poppins-Medium", size: 12))
+                                            .font(.system(size: 12, weight: .medium, design: .rounded))
                                     }
                                     .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     .padding(.horizontal, 10)
@@ -153,7 +153,6 @@ struct ChannelSelectionView: View {
                 }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

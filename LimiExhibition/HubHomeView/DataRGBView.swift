@@ -165,7 +165,7 @@ struct DataRGBView: View {
                         Spacer()
                         Text("Select Color")
                             .font(.title2)
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .padding(.top)
                         Spacer()
 //                        Button(action: {
@@ -194,7 +194,7 @@ struct DataRGBView: View {
                             Text("Solid Color")
                                 .padding(8)
                                 .background(showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)
@@ -595,7 +595,7 @@ struct ColorPickerView: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 ColorPicker("Select Color", selection: $selectedColor)
                     .padding()
@@ -762,7 +762,7 @@ struct DataRGBWifiView: View {
                         Spacer()
                         Text("Select Color")
                             .font(.title2)
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .padding(.top)
                         Spacer()
 
@@ -778,7 +778,7 @@ struct DataRGBWifiView: View {
                             Text("Solid Color")
                                 .padding(8)
                                 .background(showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)

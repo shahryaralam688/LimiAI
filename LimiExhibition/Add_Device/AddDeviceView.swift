@@ -12,7 +12,7 @@ struct AddDeviceView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color.charlestonGreen.edgesIgnoringSafeArea(.all)
 
