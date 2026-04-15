@@ -26,14 +26,14 @@ struct LightCard: View {
                     .foregroundColor(.eton)
                 Text(lightName)
                     .font(.headline)
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                 Spacer()
 
                 Toggle(isOn: $isOn) {
                     Text(isOn ? "On" : "Off")
-                        .foregroundColor(isOn ? .green : .red)
+                        .foregroundColor(isOn ? .appSuccess : .appDanger)
                 }
-                .toggleStyle(SwitchToggleStyle(tint: .green))
+                .toggleStyle(SwitchToggleStyle(tint: .appSuccess))
                 .disabled(isAIEnabled)
                 .labelsHidden()
 
@@ -45,9 +45,9 @@ struct LightCard: View {
                 }
             }
             .padding()
-            .background(Color.white.opacity(brightness))
+            .background(Color.themeWhite.opacity(brightness))
             .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            .shadow(color: Color.themeBlack.opacity(0.1), radius: 5, x: 0, y: 2)
         }
         .onTapGesture {
             isNavigatingToPWM = true

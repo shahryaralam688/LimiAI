@@ -1,10 +1,3 @@
-//
-//  PortalWebView.swift
-//  Limi
-//
-//  Created by Mac Mini on 04/07/2025.
-//
-
 import SwiftUI
 import WebKit
 import UIKit
@@ -17,10 +10,11 @@ class LightConfigManager {
 }
 
 struct PortalWebView: View {
-    enum TabType {
-        case presets, custom
+    enum TabType: String, CaseIterable {
+        case presets = "Presets"
+        case custom = "Custom"
     }
-    
+
     @State private var selectedTab: TabType = .presets
     @State private var showCustomView = false
     @State private var lightType: String = "Placeholder"
@@ -29,230 +23,195 @@ struct PortalWebView: View {
     @State private var showWebViewContainer = false
     @State private var didCheckLightConfigs = false
     @State private var isOffline = false
-    @Environment(\.presentationMode) var presentationMode
-    @State private var showDemoARView = false
+    @State private var appeared = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
-            VStack {
-            // Header Section
-            ZStack {
-                Rectangle()
-                    .fill(Color(hex: "#2A2C33"))
-                    .cornerRadius(32)
-                    .frame(height: 124)
-                
-                HStack(alignment: .bottom, spacing: 16) {
-                    // Back Button
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    
-                    // Title and Subtitle
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("AR Experience")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
-                        
-                        Text("Login to experience more features")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color(hex: "#B6BAC2"))
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 36)
-            }
-                // Tab View
-                HStack(spacing: 0) {
-                    // Presets Tab
-                    Button(action: {
-                        selectedTab = .presets
-                    }) {
-                        Text("Presets")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedTab == .presets ? .white : Color(white: 0.7))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                Group {
-                                    if selectedTab == .presets {
-                                        Color(white: 0.16)
-                                    } else {
-                                        Color.clear
-                                    }
-                                }
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    }
-                    
-                    // Custom Tab
-                    Button(action: {
-                        selectedTab = .custom
-                    }) {
-                        Text("Custom")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedTab == .custom ? .white : Color(white: 0.7))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                Group {
-                                    if selectedTab == .custom {
-                                        Color(white: 0.16)
-                                    } else {
-                                        Color.clear
-                                    }
-                                }
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    }
-                }
-                .padding(4)
-                .background(Color(white: 0.09))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(Color(white: 0.18), lineWidth: 1)
-                )
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                
-                VStack {
+            DeepSpaceBackground(showParticles: false)
+
+            VStack(spacing: 0) {
+                header
+                tabPicker
+                    .padding(.top, 12)
+
+                // Content
+                Group {
                     if selectedTab == .presets {
                         DemoARView()
                             .ignoresSafeArea()
                     } else {
-                        NavigationView {
-                            ZStack(alignment: .topLeading) {
-                                VStack {
-                                    if isOffline {
-                                        ZStack {
-                                            RadialGradient(
-                                                gradient: Gradient(colors: [
-                                                    Color.black.opacity(0.95),
-                                                    Color.black.opacity(0.6),
-                                                    Color.black.opacity(0.0)
-                                                ]),
-                                                center: .center,
-                                                startRadius: 10,
-                                                endRadius: 260
-                                            )
-                                            .blur(radius: 12)
-
-                                            VStack(spacing: 24) {
-                                                HStack(spacing: 8) {
-                                                    Text("No Designs Yet")
-                                                        .font(.system(size: 22, weight: .semibold))
-                                                        .foregroundColor(.white)
-
-                                                    Image(systemName: "info.circle")
-                                                        .font(.system(size: 18, weight: .regular))
-                                                        .foregroundColor(Color.white.opacity(0.8))
-                                                }
-
-                                                Button(action: {
-                                                    // Open offline AR demo
-                                                    isOffline = false
-                                                    showWebViewContainer = true
-                                                }) {
-                                                    Text("Open Configurator")
-                                                        .font(.system(size: 16, weight: .semibold))
-                                                        .foregroundColor(.white)
-                                                        .padding(.horizontal, 40)
-                                                        .padding(.vertical, 14)
-                                                        .background(
-                                                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                                                .fill(Color.black.opacity(0.9))
-                                                        )
-                                                        .overlay(
-                                                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                                                        )
-                                                }
-                                            }
-                                            .padding(40)
-                                        }
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    } else if showWebViewContainer {
-                                        DemoARView()
-                                            .ignoresSafeArea()
-                                    
-                                    } else {
-                                        WebViewContainer(
-                                            showCustomView: $showCustomView,
-                                            lightType: $lightType,
-                                            downloadId: $downloadId,
-                                            isLoading: $isLoading,
-                                            isOffline: $isOffline
-                                        )
-                                        .navigationBarTitleDisplayMode(.inline)
-                                        .ignoresSafeArea()
-                                    }
-                                }
-
-                            }
-                        }
+                        customTabContent
                     }
                 }
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.25), value: selectedTab)
             }
 
-            // Blurred loading overlay
             if isLoading {
-                ZStack {
-                    VisualEffectBlur(blurStyle: .systemMaterial)
-                        .ignoresSafeArea()
-                    VStack(spacing: 12) {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .charlestonGreen))
-                        Text("Loading...")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea()
-                .zIndex(1)
+                loadingOverlay
             }
         }
-        .background(Color.black)
         .ignoresSafeArea(edges: [.top, .bottom])
         .onAppear {
             checkLightConfigs()
+            withAnimation(LimiMotion.appear) { appeared = true }
         }
         .fullScreenCover(isPresented: $showCustomView) {
             CustomView(
                 lightType: LightConfigManager.shared.lightType,
                 downloadId: LightConfigManager.shared.downloadId,
-                showCustomView: $showCustomView, card: Card(
-                                    imageName: ["chairFront", "chairSide", "chairBack"],
-                                    title: "Placeholder",
-                                    price: 49,
-                                    description: lightType,
-                                    objectName: downloadId,
-                                    size: "22 x 22 x 22",
-                                    color: "red"
-                                )
-                
-
+                showCustomView: $showCustomView,
+                card: Card(
+                    imageName: ["chairFront", "chairSide", "chairBack"],
+                    title: "Placeholder",
+                    price: 49,
+                    description: lightType,
+                    objectName: downloadId,
+                    size: "22 x 22 x 22",
+                    color: "red"
+                )
             )
             .ignoresSafeArea()
         }
+    }
 
+    // MARK: - Header
+
+    private var header: some View {
+        HStack(alignment: .bottom, spacing: 14) {
+            LimiBackButton { dismiss() }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("AR Experience")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
+                Text("Explore and customize in AR")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.appTextSecondary)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 60)
+        .padding(.bottom, 16)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : -10)
+        .animation(.easeOut(duration: 0.5), value: appeared)
+    }
+
+    // MARK: - Tab Picker
+
+    private var tabPicker: some View {
+        HStack(spacing: 4) {
+            ForEach(TabType.allCases, id: \.self) { tab in
+                Button(action: {
+                    withAnimation(LimiMotion.quick) {
+                        selectedTab = tab
+                    }
+                }) {
+                    Text(tab.rawValue)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(selectedTab == tab ? .appTextPrimary : .appTextMuted)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(selectedTab == tab ? Color.white.opacity(0.08) : Color.clear)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .glassCard(cornerRadius: 16, strokeOpacity: 0.06, fillOpacity: 0.04)
+        .padding(.horizontal, 20)
+        .opacity(appeared ? 1 : 0)
+        .animation(LimiMotion.appear.delay(0.1), value: appeared)
+    }
+
+    // MARK: - Custom Tab Content
+
+    private var customTabContent: some View {
+        NavigationStack {
+            ZStack {
+                Color.appCanvasPrimary.ignoresSafeArea()
+
+                if isOffline {
+                    offlineState
+                } else if showWebViewContainer {
+                    DemoARView()
+                        .ignoresSafeArea()
+                } else {
+                    WebViewContainer(
+                        showCustomView: $showCustomView,
+                        lightType: $lightType,
+                        downloadId: $downloadId,
+                        isLoading: $isLoading,
+                        isOffline: $isOffline
+                    )
+                    .navigationBarTitleDisplayMode(.inline)
+                    .ignoresSafeArea()
+                }
+            }
+        }
+    }
+
+    // MARK: - Offline State
+
+    private var offlineState: some View {
+        VStack(spacing: 20) {
+            Spacer()
+
+            Image(systemName: "cube.transparent")
+                .font(.system(size: 40, weight: .ultraLight))
+                .foregroundColor(.appTextMuted)
+
+            Text("No Designs Yet")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
+
+            LimiPrimaryButton(title: "Open Configurator", height: 48) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    isOffline = false
+                    showWebViewContainer = true
+                }
+            }
+            .padding(.horizontal, 40)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Loading Overlay
+
+    private var loadingOverlay: some View {
+        ZStack {
+            Color.themeBlack.opacity(0.4)
+                .ignoresSafeArea()
+            VStack(spacing: 14) {
+                ProgressView()
+                    .scaleEffect(1.3)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
+                Text("Loading model...")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.appTextSecondary)
+            }
+            .padding(30)
+            .glassCard(cornerRadius: 20, fillOpacity: 0.12)
+        }
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.25), value: isLoading)
+        .zIndex(10)
     }
 }
 
+// MARK: - API Check
+
 extension PortalWebView {
     private func checkLightConfigs() {
-        guard let url = URL(string: "https://dev.api1.limitless-lighting.co.uk/admin/products/users/light-configs/check") else { return }
+        guard let url = URL(string: APIConstants.lightConfigsCheck) else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -269,7 +228,6 @@ extension PortalWebView {
                     self.didCheckLightConfigs = true
                 }
             }
-
             guard error == nil, let data = data else { return }
             if let json = try? JSONSerialization.jsonObject(with: data, options: []),
                let arr = json as? [Any] {
@@ -278,6 +236,8 @@ extension PortalWebView {
         }.resume()
     }
 }
+
+// MARK: - Web View Container
 
 struct WebViewContainer: UIViewRepresentable {
     @Binding var showCustomView: Bool
@@ -319,7 +279,7 @@ struct WebViewContainer: UIViewRepresentable {
                     window.webkit.messageHandlers.buttonClicked.postMessage('openCustomView');
                 });
             }
-            const buttons = document.querySelectorAll('.portal-button, [data-action=\"openCustomView\"]');
+            const buttons = document.querySelectorAll('.portal-button, [data-action="openCustomView"]');
             buttons.forEach(btn => {
                 btn.addEventListener('click', function(event) {
                     event.preventDefault();
@@ -337,27 +297,22 @@ struct WebViewContainer: UIViewRepresentable {
         setTimeout(handleButtonClick, 3000);
         """
         userContentController.addUserScript(WKUserScript(source: buttonHandlerScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
-
         userContentController.add(context.coordinator, name: "buttonClicked")
         configuration.userContentController = userContentController
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
-
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         if let token = AuthManager.shared.getToken(),
-           let url = URL(string: "https://limi-configurator-ios.vercel.app/ar_view?token=\(token)&inApp=1") {
-            
+           let url = URL(string: AppURLs.Web.arPortal(token: token)) {
             webView.load(URLRequest(url: url))
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         let parent: WebViewContainer
@@ -377,82 +332,53 @@ struct WebViewContainer: UIViewRepresentable {
         }
 
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            if message.name == "buttonClicked" {
-                if let spanID = message.body as? String {
-                    print("🟢 Span ID: \(spanID)")
-                    fetchLightConfig(for: spanID)
-                }
+            if message.name == "buttonClicked", let spanID = message.body as? String {
+                fetchLightConfig(for: spanID)
             }
         }
 
         private func fetchLightConfig(for spanID: String) {
-            let urlString = APIConstants.lightConfigs + "\(spanID)?filter=true"
-            guard let url = URL(string: urlString) else { return }
-
+            guard let url = URL(string: APIConstants.lightConfig(spanID)) else { return }
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
 
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let data = data,
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    let extractedLightType = json["light_type"] as? String ?? "Unknown"
-                    let extractedDownloadId = json["download_Id"] as? String ?? ""
+            URLSession.shared.dataTask(with: request) { data, _, _ in
+                guard let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
 
-                    LightConfigManager.shared.lightType = extractedLightType
-                    LightConfigManager.shared.downloadId = extractedDownloadId
-                    
-                    print("this is the ID:\(extractedLightType)")
+                let extractedLightType = json["light_type"] as? String ?? "Unknown"
+                let extractedDownloadId = json["download_Id"] as? String ?? ""
 
-                    DispatchQueue.main.async {
-                        self.lightType.wrappedValue = extractedLightType
-                        self.downloadId.wrappedValue = extractedDownloadId
-                    }
+                LightConfigManager.shared.lightType = extractedLightType
+                LightConfigManager.shared.downloadId = extractedDownloadId
 
-                    if !extractedDownloadId.isEmpty {
-                        self.downloadUSDZUsingAPI(downloadId: extractedDownloadId)
-                    }
+                DispatchQueue.main.async {
+                    self.lightType.wrappedValue = extractedLightType
+                    self.downloadId.wrappedValue = extractedDownloadId
                 }
-            }
-            task.resume()
+
+                if !extractedDownloadId.isEmpty {
+                    self.downloadUSDZUsingAPI(downloadId: extractedDownloadId)
+                }
+            }.resume()
         }
 
         private func downloadUSDZUsingAPI(downloadId: String) {
-            guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/3d-models/web-configurator/download/\(downloadId)") else {
-                print("❌ Invalid download URL")
-                return
-            }
+            guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else { return }
 
-            DispatchQueue.main.async {
-                self.isLoading.wrappedValue = true
-            }
+            DispatchQueue.main.async { self.isLoading.wrappedValue = true }
 
             let fileManager = FileManager.default
-
-            // Get custom app document directory (persistent storage)
             let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let configuratorFolderURL = documentsURL.appendingPathComponent("Configurator")
 
-            // Ensure folder exists
             if !fileManager.fileExists(atPath: configuratorFolderURL.path) {
-                do {
-                    try fileManager.createDirectory(at: configuratorFolderURL, withIntermediateDirectories: true)
-                    print("✅ Configurator folder created at: \(configuratorFolderURL.path)")
-                } catch {
-                    print("❌ Failed to create folder: \(error)")
-                    DispatchQueue.main.async {
-                        self.isLoading.wrappedValue = false
-                    }
-                    return
-                }
+                try? fileManager.createDirectory(at: configuratorFolderURL, withIntermediateDirectories: true)
             }
 
-            // File path for this model
             let fileURL = configuratorFolderURL.appendingPathComponent("\(downloadId).usdz")
 
-            // Check if file already exists
             if fileManager.fileExists(atPath: fileURL.path) {
-                print("✅ Model already exists at: \(fileURL.path), skipping download")
-
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     self.isLoading.wrappedValue = false
                     self.showCustomView.wrappedValue = true
@@ -460,53 +386,29 @@ struct WebViewContainer: UIViewRepresentable {
                 return
             }
 
-            // Proceed to download since file doesn't exist
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    print("❌ Download error: \(error.localizedDescription)")
-                    DispatchQueue.main.async {
-                        self.isLoading.wrappedValue = false
-                    }
+            URLSession.shared.dataTask(with: request) { data, _, error in
+                guard error == nil, let data = data else {
+                    DispatchQueue.main.async { self.isLoading.wrappedValue = false }
                     return
                 }
-
-                guard let data = data else {
-                    print("❌ No data in response")
-                    DispatchQueue.main.async {
-                        self.isLoading.wrappedValue = false
-                    }
-                    return
-                }
-
                 do {
                     try data.write(to: fileURL)
-                    print("✅ Model saved at: \(fileURL.path)")
-
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         self.isLoading.wrappedValue = false
                         self.showCustomView.wrappedValue = true
                     }
-
                 } catch {
-                    print("❌ Save error: \(error)")
-                    DispatchQueue.main.async {
-                        self.isLoading.wrappedValue = false
-                    }
+                    DispatchQueue.main.async { self.isLoading.wrappedValue = false }
                 }
-            }
-
-            task.resume()
+            }.resume()
         }
 
-
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            DispatchQueue.main.async {
-                self.isOffline.wrappedValue = false
-            }
+            DispatchQueue.main.async { self.isOffline.wrappedValue = false }
             let script = """
             function setupButtonListeners() {
                 const buttons = document.querySelectorAll('button');
@@ -533,14 +435,14 @@ struct WebViewContainer: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            handleLoadError(error)
+            handleLoadError()
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            handleLoadError(error)
+            handleLoadError()
         }
 
-        private func handleLoadError(_ error: Error) {
+        private func handleLoadError() {
             DispatchQueue.main.async {
                 self.isOffline.wrappedValue = true
                 self.isLoading.wrappedValue = false
@@ -549,48 +451,28 @@ struct WebViewContainer: UIViewRepresentable {
     }
 }
 
-import SwiftUI
+// MARK: - Custom AR View
 
 struct CustomView: View {
     let lightType: String
     let downloadId: String
     @Binding var showCustomView: Bool
     let card: Card
+
     var body: some View {
-        ZStack {
-            // Your AR View
-            ARContainerWithOverlay(card: Card(
-                imageName: ["chairFront", "chairSide", "chairBack"],
-                title: "Placeholder",
-                price: 49,
-                description: lightType,
-                objectName: downloadId,
-                size: "22 x 22 x 22",
-                color: "red"
-            ))
-            .onAppear {
-                print("🟢 CustomView appeared with downloadId: \(downloadId)")
-                print("🟢 CustomView appeared with lightType: \(lightType)")
-            }
-
-//            VStack {
-//                Spacer()
-//
-//                // Bottom Overlay
-//                ARModelList()
-//                    .padding(.bottom, 20)
-//            }
-        }
+        ARContainerWithOverlay(card: Card(
+            imageName: ["chairFront", "chairSide", "chairBack"],
+            title: "Placeholder",
+            price: 49,
+            description: lightType,
+            objectName: downloadId,
+            size: "22 x 22 x 22",
+            color: "red"
+        ))
         .frame(maxWidth: .infinity)
-
     }
 }
 
-
-
-
-struct PortalWebView_Previews: PreviewProvider {
-    static var previews: some View {
-        PortalWebView()
-    }
+#Preview {
+    PortalWebView()
 }

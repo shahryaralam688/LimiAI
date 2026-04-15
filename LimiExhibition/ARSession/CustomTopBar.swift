@@ -51,7 +51,7 @@ struct CustomTopBar: View {
                         .font(.footnote)
                         .frame(width: 70, height: 30)
                         .padding(7)
-                        .background(isARMode ? .white : Color.clear)
+                        .background(isARMode ? .themeWhite : Color.clear)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .foregroundStyle(isARMode ? .blue : .primary)
@@ -67,7 +67,7 @@ struct CustomTopBar: View {
                         .frame(width: 55, height: 30)
                         .padding(.horizontal, 10)
                         .padding(7)
-                        .background(!isARMode ? Color.white : Color.clear)
+                        .background(!isARMode ? Color.themeWhite : Color.clear)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     
                 }

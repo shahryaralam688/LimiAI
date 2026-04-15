@@ -137,7 +137,7 @@
 //                
 //                // Transparent alabaster material for borders only
 //                var borderMaterial = UnlitMaterial()
-//                borderMaterial.color = .init(tint: UIColor(named: "alabaster")?.withAlphaComponent(0.7) ?? .white)
+//                borderMaterial.color = .init(tint: UIColor(named: "alabaster")?.withAlphaComponent(0.7) ?? .themeWhite)
 //
 //                // Square border - 4 thin lines forming outline
 //                let lineThickness: Float = 0.004
@@ -402,16 +402,16 @@
 //                        ZStack {
 //                            // Platform/surface
 //                            RoundedRectangle(cornerRadius: 8)
-//                                .stroke(Color.white, lineWidth: 2)
+//                                .stroke(Color.themeWhite, lineWidth: 2)
 //                                .frame(width: 120, height: 8)
 //                            
 //                            // Phone with up/down animation
 //                            RoundedRectangle(cornerRadius: 8)
-//                                .fill(Color.white)
+//                                .fill(Color.themeWhite)
 //                                .frame(width: 40, height: 70)
 //                                .overlay(
 //                                    RoundedRectangle(cornerRadius: 6)
-//                                        .fill(Color.black)
+//                                        .fill(Color.themeBlack)
 //                                        .frame(width: 32, height: 55)
 //                                )
 //                                .offset(y: phoneOffsetUp ? -30 : -5) // animate vertically above platform
@@ -424,14 +424,14 @@
 //                        
 //                        Text(instructionText)
 //                            .font(.headline)
-//                            .foregroundColor(.white)
+//                            .foregroundColor(.themeWhite)
 //                            .multilineTextAlignment(.center)
 //                    }
 //                    .padding(.horizontal, 40)
 //                    .padding(.vertical, 30)
 //                    .background(
 //                        RoundedRectangle(cornerRadius: 16)
-//                            .fill(Color.black.opacity(0.7))
+//                            .fill(Color.themeBlack.opacity(0.7))
 //                    )
 //                    .onAppear {
 //                        // Kick off the vertical animation loop
@@ -447,12 +447,12 @@
 //                    Text("Tap")
 //                        .font(.title2)
 //                        .fontWeight(.semibold)
-//                        .foregroundColor(.white)
+//                        .foregroundColor(.themeWhite)
 //                        .padding(.horizontal, 20)
 //                        .padding(.vertical, 10)
 //                        .background(
 //                            Capsule()
-//                                .fill(Color.black.opacity(0.7))
+//                                .fill(Color.themeBlack.opacity(0.7))
 //                        )
 //                        .padding(.top, 100)
 //                    
@@ -493,9 +493,9 @@
 //                    Button(action: { dismiss() }) {
 //                        HStack(spacing: 6) {
 //                            Image(systemName: "chevron.left")
-//                                .foregroundColor(.white)
+//                                .foregroundColor(.themeWhite)
 //                            Text("Back")
-//                                .foregroundColor(.white)
+//                                .foregroundColor(.themeWhite)
 //                                .font(.headline)
 //                        }
 //                        .padding(10)

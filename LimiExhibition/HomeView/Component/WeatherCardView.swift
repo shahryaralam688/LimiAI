@@ -15,174 +15,112 @@ struct WeatherCardView: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.01, green: 0.07, blue: 0.12)
-                .ignoresSafeArea()
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "2E5BFF"), Color(hex: "56A0F5"), Color(hex: "87CEEB")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                )
 
-            GeometryReader { geometry in
-                ZStack {
-                    RoundedRectangle(cornerRadius: 40, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color(red: 0.0, green: 0.44, blue: 0.6),
-                                    Color(red: 0.01, green: 0.06, blue: 0.11)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+            HStack(alignment: .center) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 12))
+                        Text("\(city), \(country)")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .foregroundColor(.white.opacity(0.8))
 
-                    HStack(alignment: .center) {
-                        // Left content column
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Day + degree dot row
-                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text(day)
-                                    .font(.system(size: 26, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
+                    HStack(alignment: .top, spacing: 0) {
+                        Text("\(temperature)")
+                            .font(.system(size: 68, weight: .thin, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("°")
+                            .font(.system(size: 32, weight: .thin))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.top, 6)
+                    }
 
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 8, height: 8)
-                            }
+                    HStack(spacing: 16) {
+                        Label("\(windSpeedKmh) km/h", systemImage: "wind")
+                        Label("\(humidityPercent)%", systemImage: "humidity.fill")
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white.opacity(0.7))
 
-                            // Temperature + wind/humidity
-                            HStack(alignment: .center, spacing: 16) {
-                                HStack(alignment: .top, spacing: 0) {
-                                    Text("\(temperature)")
-                                        .font(.system(size: 140, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .fixedSize()
-
-                                    Text("°")
-                                        .font(.system(size: 72, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .padding(.top, 12)
-                                }
-                                .layoutPriority(1)
-
-                                VStack(alignment: .leading, spacing: 8) {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "wind")
-                                            .foregroundColor(.white)
-                                            .font(.system(size: 18, weight: .medium))
-
-                                        Text("\(windSpeedKmh) km/h")
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white)
-                                    }
-
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "humidity")
-                                            .foregroundColor(.white)
-                                            .font(.system(size: 18, weight: .medium))
-
-                                        Text("\(humidityPercent)%")
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.white)
-                                    }
-                                }
-                                .padding(.top, 20)
-                            }
-
-                            // Last updated + High/Low
-                            HStack(alignment: .top) {
-                                Text("Last updated \(lastUpdated)")
-                                    .font(.system(size: 14, weight: .regular, design: .rounded))
-                                    .foregroundColor(Color(red: 0.63, green: 0.72, blue: 0.8))
-
-                                Spacer(minLength: 24)
-
-                                VStack(alignment: .trailing, spacing: 4) {
-                                    Text("H \(high)°")
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white)
-
-                                    Text("L \(low)°")
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white)
-                                }
-                            }
-
-                            // Location row
-                            HStack(spacing: 8) {
-                                ZStack {
-                                    Circle()
-                                        .stroke(Color.white.opacity(0.9), lineWidth: 1.5)
-                                        .frame(width: 26, height: 26)
-
-                                    Image(systemName: "mappin.and.ellipse")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.white)
-                                }
-
-                                Text("\(country), \(city)")
-                                    .font(.system(size: 16, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.top, 4)
-                        }
-                        .padding(24)
-
-                        Spacer(minLength: 16)
-
-                        // Right icon column
-                        VStack {
-                            Spacer()
-
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white.opacity(0.15))
-                                    .frame(width: min(geometry.size.width * 0.33, 180),
-                                           height: min(geometry.size.width * 0.33, 180))
-
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-
-                                    Circle()
-                                        .fill(Color(red: 0.0, green: 0.44, blue: 0.6))
-                                        .offset(x: 28)
-                                }
-                                .frame(width: min(geometry.size.width * 0.26, 150),
-                                       height: min(geometry.size.width * 0.26, 150))
-                            }
-
-                            Spacer()
-
-                            Text(condition)
-                                .font(.system(size: 18, weight: .medium, design: .rounded))
-                                .foregroundColor(Color(red: 0.63, green: 0.72, blue: 0.8))
-                                .padding(.bottom, 16)
-                        }
-                        .padding(.trailing, 24)
+                    HStack {
+                        Text("H:\(high)° L:\(low)°")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.6))
+                        Spacer()
+                        Text(lastUpdated)
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.5))
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 227)
+                .padding(20)
+
+                Spacer()
+
+                VStack {
+                    Image(systemName: conditionIcon)
+                        .font(.system(size: 44, weight: .light))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.yellow, .orange.opacity(0.7)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .shadow(color: .yellow.opacity(0.3), radius: 12, y: 4)
+
+                    Text(condition)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.top, 8)
+                }
+                .padding(.trailing, 24)
             }
         }
+        .frame(height: 220)
+        .shadow(color: Color(hex: "2E5BFF").opacity(0.25), radius: 20, y: 10)
     }
 
-
+    private var conditionIcon: String {
+        switch condition.lowercased() {
+        case "clear": return "sun.max.fill"
+        case "clouds": return "cloud.fill"
+        case "rain", "drizzle": return "cloud.rain.fill"
+        case "thunderstorm": return "cloud.bolt.fill"
+        case "snow": return "snowflake"
+        case "mist", "fog", "haze": return "cloud.fog.fill"
+        default: return "cloud.sun.fill"
+        }
+    }
 }
 
-struct WeatherCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        WeatherCardView(
-            day: "Sunday",
-            temperature: 26,
-            temperatureUnit: "C",
-            windSpeedKmh: 28,
-            humidityPercent: 42,
-            lastUpdated: "11:45",
-            country: "USA",
-            city: "New York",
-            high: 30,
-            low: 20,
-            condition: "Clear"
-        )
-        .previewLayout(.sizeThatFits)
-        .preferredColorScheme(.dark)
-    }
+#Preview {
+    WeatherCardView(
+        day: "Sunday",
+        temperature: 26,
+        temperatureUnit: "C",
+        windSpeedKmh: 28,
+        humidityPercent: 42,
+        lastUpdated: "11:45",
+        country: "USA",
+        city: "New York",
+        high: 30,
+        low: 20,
+        condition: "Clear"
+    )
+    .padding()
+    .background(Color.appCanvasPrimary)
+    .preferredColorScheme(.dark)
 }

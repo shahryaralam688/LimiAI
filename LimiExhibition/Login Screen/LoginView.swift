@@ -17,6 +17,7 @@ struct LoginView: View {
     @State private var showHomeView: Bool = false
     // Keyboard handling
     @FocusState private var isEmailFieldFocused: Bool
+    @State private var appeared = false
     
     // Email validation
     private var isEmailValid: Bool {
@@ -28,7 +29,7 @@ struct LoginView: View {
     var body: some View {
         ZStack {
             // Background color
-            Color(hex: "#111214")
+            Color.appCanvasPrimary
                 .ignoresSafeArea(.all)
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -48,8 +49,8 @@ struct LoginView: View {
                         // Bottom gradient overlay
                         LinearGradient(
                             gradient: Gradient(colors: [
-                                Color(hex: "#111214"),
-                                Color(hex: "#111214")
+                                Color.appCanvasPrimary,
+                                Color.appCanvasPrimary
                             ]),
                             startPoint: .bottom,
                             endPoint: .top
@@ -64,17 +65,17 @@ struct LoginView: View {
                         VStack(spacing: 0) {
                             // Title
                             Text("Sign In")
-                                .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                                .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                                 .multilineTextAlignment(.center)          // text-align: center
                                 .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                                 .kerning(-0.3)                            // letter-spacing: -1%
-                                .foregroundColor(Color.alabaster)
+                                .foregroundColor(.appTextPrimary)
                             
                             // Subtitle
                             Text("Please Sign in to secure your data and for personalization")
-                                .font(.custom("Poppins-Regular", size: 16)) // font-family + weight/style
+                                .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
                                 .multilineTextAlignment(.center)             // text-align: center
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                                 .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
                                 .kerning(-0.048)                             // -0.3% of 16px = -0.048
                                 .fixedSize(horizontal: false, vertical: true)
@@ -85,8 +86,8 @@ struct LoginView: View {
                     // Email Label
                     HStack {
                         Text("Email Address")
-                            .font(.custom("Poppins-Bold", size: 20))
-                            .foregroundColor(Color.alabaster)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -98,18 +99,18 @@ struct LoginView: View {
 //                        Image(systemName: "message.fill")
                             .resizable()
                             .frame(width: 20, height: 20)
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(.appTextPrimary)
                         
                         ZStack(alignment: .leading) {
                             if email.isEmpty {
                                 Text("you@example.com")
-                                    .font(.custom("Poppins-Regular", size: 16))
-                                    .foregroundColor(.alabaster) // ← placeholder (suggestion) text color
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.appTextPrimary) // ← placeholder (suggestion) text color
                                     
                             }
                             TextField("", text: $email)
-                                .font(.custom("Poppins-Regular", size: 16))
-                                .foregroundColor(Color.alabaster)
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.appTextPrimary)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
@@ -122,11 +123,11 @@ struct LoginView: View {
                     }
                     .padding(.horizontal, 20)
                     .frame(height: 56)
-                    .frame(width: 343)
-                    .background(Color(hex: "#111214"))
+                    .frame(maxWidth: .infinity)
+                    .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.emerald, lineWidth: 2)
+                            .stroke(Color.appBrandPrimary, lineWidth: 2)
                     )
                     .cornerRadius(20)
                     .padding(.horizontal, 20)
@@ -148,27 +149,27 @@ struct LoginView: View {
                                     // Built-in spinner
                                     ProgressView()
                                         .progressViewStyle(.circular)
-                                        .tint(Color.charlestonGreen)   // iOS 15+
+                                        .tint(.appTextPrimary)   // iOS 15+
                                         .scaleEffect(1.0)
                                 } else {
                                     HStack(spacing: 8) {
                                         Text("Sign in")
-                                            .font(.custom("Poppins-SemiBold", size: 18))
-                                            .foregroundColor(Color.charlestonGreen)
+                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.appTextInverse)
                                         Image("Monotone arrow right")
                                             .resizable()
                                             .frame(width: 20, height: 20)
-                                            .foregroundColor(Color(hex: "#0B0E0C"))
+                                            .foregroundColor(Color.appCanvasTertiary)
                                     }
                                 }
                                 Spacer()
                             }
                             .padding(.horizontal, 20)
                             .frame(height: 56)
-                            .frame(width: 343)
-                            .background(Color.emerald)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.appBrandPrimary)
                             .cornerRadius(22)
-                            .animation(.default, value: isSigningIn)
+                            .animation(LimiMotion.quick, value: isSigningIn)
                         }
                     }
                     .disabled(!isEmailValid || isSigningIn)   // <-- stays disabled while loading
@@ -207,9 +208,9 @@ struct LoginView: View {
                             }
                         }
                     )
-                    .signInWithAppleButtonStyle(.white) // or .white
+                    .signInWithAppleButtonStyle(.white) // or .themeWhite
                     .frame(height: 56)
-                    .frame(width: 343)
+                    .frame(maxWidth: .infinity)
                     .cornerRadius(22)
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
@@ -233,15 +234,15 @@ struct LoginView: View {
                                         .scaledToFit()
                                     Text("Continue with Google")
                                     
-                                        .font(.custom("Poppins-SemiBold", size: 18))
-                                        .foregroundColor(Color.alabaster)
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.appTextPrimary)
                                 }
                                 Spacer()
                             }
                             .padding(.horizontal, 20)
                             .frame(height: 56)
-                            .frame(width: 343)
-                            .background(Color(hex: "#5F5F5F"))
+                            .frame(maxWidth: .infinity)
+                            .background(Color.appBorderPrimary)
                             .cornerRadius(22)
                         }
                     }
@@ -250,6 +251,9 @@ struct LoginView: View {
 
                     Spacer(minLength: 100)
                 }
+                .opacity(appeared ? 1 : 0)
+                .animation(LimiMotion.gentle, value: appeared)
+                .onAppear { appeared = true }
             }
             .scrollDismissesKeyboard(.interactively)
             
@@ -257,17 +261,7 @@ struct LoginView: View {
             VStack {
                 HStack {
                     // Back Button
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .frame(width: 18, height: 18)
-                            .foregroundColor(.white)
-                            .frame(width: 48, height: 48)
-                            .background(Color(hex: "#24262B"))
-                            .cornerRadius(16)
-                    }
+                    LimiBackButton { dismiss() }
                     
                     Spacer()
                     
@@ -357,7 +351,7 @@ import SwiftUI
 
 struct OTPVerificationView: View {
     var email: String
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
 //    @State private var showAddDevices = false
     @EnvironmentObject var authManager: AuthManager
@@ -381,7 +375,7 @@ struct OTPVerificationView: View {
         ZStack {
             // Background gradient
             LinearGradient(
-                gradient: Gradient(colors: [Color.charlestonGreen.opacity(0.7), Color.alabaster]),
+                gradient: Gradient(colors: [Color.appCanvasPrimary, Color.appSurfacePrimary]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -390,13 +384,13 @@ struct OTPVerificationView: View {
             // Animated background shapes
             ZStack {
                 Circle()
-                    .fill(Color.charlestonGreen.opacity(0.1))
+                    .fill(Color.appCanvasPrimary.opacity(0.1))
                     .frame(width: 200, height: 200)
                     .offset(x: -150, y: -250)
                     .scaleEffect(isAppearing ? 1.0 : 0.8)
                 
                 Circle()
-                    .fill(Color.charlestonGreen.opacity(0.1))
+                    .fill(Color.appCanvasPrimary.opacity(0.1))
                     .frame(width: 300, height: 300)
                     .offset(x: 150, y: 350)
                     .scaleEffect(isAppearing ? 1.0 : 0.8)
@@ -408,25 +402,25 @@ struct OTPVerificationView: View {
                 VStack(spacing: 15) {
                     Image(systemName: "lock.shield.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(.black)
+                        .foregroundColor(.themeBlack)
                         .padding()
                         .background(
                             Circle()
-                                .fill(Color.alabaster)
-                                .shadow(color: Color.charlestonGreen.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .fill(Color.appSurfacePrimary)
+                                .shadow(color: Color.appCanvasPrimary.opacity(0.1), radius: 10, x: 0, y: 5)
                         )
                         .scaleEffect(isAppearing ? 1.0 : 0.8)
                         .opacity(isAppearing ? 1.0 : 0.5)
                     
                     Text("Verification Code")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .opacity(isAppearing ? 1.0 : 0.0)
                         .offset(y: isAppearing ? 0 : 20)
                     
                     Text("Please enter the 6-digit code sent to\n\(email)")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.alabaster.opacity(0.8))
+                        .foregroundColor(.appTextSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                         .opacity(isAppearing ? 1.0 : 0.0)
@@ -447,7 +441,7 @@ struct OTPVerificationView: View {
                 }
                 .padding(.horizontal)
                 .modifier(ShakeEffect(animatableData: shakeError ? 1 : 0))
-                .animation(.default, value: shakeError)
+                .animation(LimiMotion.quick, value: shakeError)
                 
                 // Hidden TextField for keyboard input
                 TextField("", text: $enteredOTP)
@@ -483,7 +477,7 @@ struct OTPVerificationView: View {
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appDanger)
                         .padding(.horizontal)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
@@ -492,14 +486,8 @@ struct OTPVerificationView: View {
                 Button(action: verifyOTP) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [Color.emerald, Color.emerald.opacity(0.8)]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .shadow(color: Color.charlestonGreen.opacity(0.5), radius: 10, x: 0, y: 5)
+                            .fill(Color.appBrandPrimary)
+                            .shadow(color: Color.appCanvasPrimary.opacity(0.5), radius: 10, x: 0, y: 5)
                             .frame(height: 56)
                         
                         if isLoading {
@@ -508,7 +496,7 @@ struct OTPVerificationView: View {
                         } else {
                             Text("Verify")
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.alabaster)
+                                .foregroundColor(.appTextPrimary)
                         }
                     }
                     .scaleEffect(isVerifying ? 0.95 : 1.0)
@@ -522,7 +510,7 @@ struct OTPVerificationView: View {
                 HStack(spacing: 5) {
                     Text("Didn't receive the code?")
                         .font(.system(size: 14, design: .rounded))
-                        .foregroundColor(.alabaster.opacity(0.8))
+                        .foregroundColor(.appTextSecondary)
                     
                     Button(action: {
                         // Call the generateOTP function again
@@ -530,7 +518,7 @@ struct OTPVerificationView: View {
                     }) {
                         Text("Resend")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                     }
                 }
                 .padding(.top, 5)
@@ -541,8 +529,8 @@ struct OTPVerificationView: View {
             .padding(.vertical, 40)
             .background(
                 RoundedRectangle(cornerRadius: 30)
-                    .fill(Color.black.opacity(0.95))
-                    .shadow(color: Color.alabaster.opacity(0.1), radius: 20, x: 0, y: 10)
+                    .fill(Color.appCanvasPrimary.opacity(0.95))
+                    .shadow(color: Color.appSurfacePrimary.opacity(0.1), radius: 20, x: 0, y: 10)
             )
             .padding(.horizontal, 50)
             .scaleEffect(isAppearing ? 1.0 : 0.9)
@@ -622,7 +610,7 @@ struct OTPVerificationView: View {
                             }
                             // Dismiss the OTP sheet shortly after triggering navigation
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                self.presentationMode.wrappedValue.dismiss()
+                                self.dismiss()
                             }
                         } else {
                             errorMessage = jsonResponse["error_message"] as? String ?? "Invalid OTP"
@@ -717,18 +705,18 @@ struct OTPDigitBox: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isActive ? Color.charlestonGreen : Color.charlestonGreen.opacity(0.3), lineWidth: 2)
+                .stroke(isActive ? Color.appBorderPrimary : Color.appBorderPrimary.opacity(0.3), lineWidth: 2)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.alabaster.opacity(0.8))
+                        .fill(Color.white.opacity(0.06))
                 )
                 .frame(width: 45, height: 55)
-                .shadow(color: isActive ? Color.charlestonGreen.opacity(0.3) : Color.clear, radius: 5, x: 0, y: 2)
+                .shadow(color: isActive ? Color.appCanvasPrimary.opacity(0.3) : Color.clear, radius: 5, x: 0, y: 2)
             
             if !digit.isEmpty {
                 Text(digit)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .transition(.scale.combined(with: .opacity))
             }
         }
@@ -745,7 +733,7 @@ struct LottieLoadingView: View {
         ZStack {
             ForEach(0..<3) { index in
                 Circle()
-                    .fill(Color.alabaster)
+                    .fill(Color.appSurfacePrimary)
                     .frame(width: 8, height: 8)
                     .offset(y: isAnimating ? -10 : 0)
                     .opacity(isAnimating ? 1.0 : 0.5)
@@ -760,7 +748,7 @@ struct LottieLoadingView: View {
             
             ForEach(0..<3) { index in
                 Circle()
-                    .fill(Color.alabaster)
+                    .fill(Color.appSurfacePrimary)
                     .frame(width: 8, height: 8)
                     .offset(y: isAnimating ? -10 : 0)
                     .opacity(isAnimating ? 1.0 : 0.5)
@@ -851,7 +839,7 @@ struct LoginSkipView: View {
     var body: some View {
         ZStack {
             // Background color
-            Color(hex: "#111214")
+            Color.appCanvasPrimary
                 .ignoresSafeArea(.all)
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -861,17 +849,7 @@ struct LoginSkipView: View {
                 VStack(spacing: 0) {
                     HStack {
                         // Back Button
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image("Solid arrow right sm")
-                                .resizable()
-                                .frame(width: 18, height: 18)
-                                .foregroundColor(.white)
-                                .frame(width: 48, height: 48)
-                                .background(Color(hex: "#24262B"))
-                                .cornerRadius(16)
-                        }
+                        LimiBackButton { dismiss() }
                         
                         Spacer()
                         
@@ -881,11 +859,11 @@ struct LoginSkipView: View {
     //                        .aspectRatio(contentMode: .fit)
     //                        .frame(width: 200, height: 40)
                         Text("Sign In")
-                            .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                            .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                             .multilineTextAlignment(.center)          // text-align: center
                             .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                             .kerning(-0.3)                            // letter-spacing: -1%
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(.appTextPrimary)
                         
                         Spacer()
                         
@@ -906,8 +884,8 @@ struct LoginSkipView: View {
 //                        // Bottom gradient overlay
 //                        LinearGradient(
 //                            gradient: Gradient(colors: [
-//                                Color(hex: "#111214"),
-//                                Color(hex: "#111214")
+//                                Color.appCanvasPrimary,
+//                                Color.appCanvasPrimary
 //                            ]),
 //                            startPoint: .bottom,
 //                            endPoint: .top
@@ -923,17 +901,17 @@ struct LoginSkipView: View {
 //                        VStack(spacing: 0) {
 //                            // Title
 //                            Text("Sign In")
-//                                .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+//                                .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
 //                                .multilineTextAlignment(.center)          // text-align: center
 //                                .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
 //                                .kerning(-0.3)                            // letter-spacing: -1%
-//                                .foregroundColor(Color.alabaster)
+//                                .foregroundColor(.appTextPrimary)
 //                            
 //                            // Subtitle
 //                            Text("Please Sign in to secure your data and for personalization")
-//                                .font(.custom("Poppins-Regular", size: 16)) // font-family + weight/style
+//                                .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
 //                                .multilineTextAlignment(.center)             // text-align: center
-//                                .foregroundColor(.alabaster)
+//                                .foregroundColor(.appTextPrimary)
 //                                .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
 //                                .kerning(-0.048)                             // -0.3% of 16px = -0.048
 //                                .fixedSize(horizontal: false, vertical: true)
@@ -946,8 +924,8 @@ struct LoginSkipView: View {
                     // Email Label
                     HStack {
                         Text("Email Address")
-                            .font(.custom("Poppins-Bold", size: 20))
-                            .foregroundColor(Color.alabaster)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -960,22 +938,22 @@ struct LoginSkipView: View {
 //                        Image(systemName: "message.fill")
                             .resizable()
                             .frame(width: 20, height: 20)
-                            .foregroundColor(Color.alabaster)
+                            .foregroundColor(.appTextPrimary)
                         
                         ZStack(alignment: .leading) {
                             // Placeholder
                             if email.isEmpty {
                                 Text(verbatim: "you@example.com")
-                                    .font(.custom("Poppins-Regular", size: 16))
-                                    .foregroundColor(.gray)
+                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .foregroundColor(.appTextMuted)
                                     .padding(.leading, 4)
                                     .allowsHitTesting(false)
                             }
                             
                             // Actual TextField
                             TextField("", text: $email)
-                                .font(.custom("Poppins-Regular", size: 16))
-                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .foregroundColor(.themeWhite)
                                 .padding(4) // same padding as placeholder
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
@@ -989,18 +967,18 @@ struct LoginSkipView: View {
                     }
                     .padding(.horizontal, 20)
                     .frame(height: 56)
-                    .frame(width: 343)
-                    .background(Color(hex: "#111214"))
+                    .frame(maxWidth: .infinity)
+                    .background(Color.appCanvasPrimary)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white, lineWidth: 2)
+                            .stroke(Color.themeWhite, lineWidth: 2)
                     )
                     .cornerRadius(20)
                     .padding(.horizontal, 20)        
 //                    Text("Continue as a Guest")
-//                        .font(.custom("Poppins-Medium", size: 16)) // font-family + style
-//                        .foregroundColor(Color(hex: "#F2EBE3"))    // background color in design is likely text color
-//                        .underline(true, color: Color(hex: "#F2EBE3")) // underline as specified
+//                        .font(.system(size: 16, weight: .medium, design: .rounded)) // font-family + style
+//                        .foregroundColor(Color.appTextPrimary)    // background color in design is likely text color
+//                        .underline(true, color: Color.appTextPrimary) // underline as specified
 //                        .kerning(0)                               // letter-spacing: 0%
 //                        .lineSpacing(0)                            // line-height: 100%
 //                        .padding(.top, 14)
@@ -1024,22 +1002,22 @@ struct LoginSkipView: View {
                             Spacer()
 
                             Text("Sign in")
-                                .font(.custom("Poppins-SemiBold", size: 18))
-                                .foregroundColor(isEmailValid ? Color.charlestonGreen : Color.charlestonGreen)
+                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .foregroundColor(.appTextInverse)
                             Image("Monotone arrow right")
                                 .resizable()
                                 .frame(width: 20, height: 20)
-                                .foregroundColor(isEmailValid ? Color(hex: "#0B0E0C") : Color(hex: "#00000066"))
+                                .foregroundColor(isEmailValid ? Color.appCanvasTertiary : Color.appOverlayTint)
                             Spacer()
                         }
                         .padding(.horizontal, 20)
                         .frame(height: 56)
-                        .frame(width: 343)
-                        .background(isEmailValid ? Color.emerald : Color.white)
+                        .frame(maxWidth: .infinity)
+                        .background(isEmailValid ? Color.appBrandPrimary : Color.themeWhite)
                         .cornerRadius(22)
                         .overlay(
                             RoundedRectangle(cornerRadius: 22)
-                                .stroke(Color(hex: "#5F5F5F"), lineWidth: 2) // ← 1-point border
+                                .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
                         )
 
 
@@ -1055,7 +1033,7 @@ struct LoginSkipView: View {
 //                        // Center "Or" text
 //                        Text("Or")
 //                            .font(.system(size: 16))
-//                            .foregroundColor(.gray)
+//                            .foregroundColor(.appTextMuted)
 //                            .padding(.horizontal, 8)
 //
 //                        // Right line
@@ -1086,16 +1064,16 @@ struct LoginSkipView: View {
 //                                .font(.system(size: 16, weight: .semibold))
 //                                .tracking(-0.3)
 //                        }
-//                        .foregroundColor(.white)
+//                        .foregroundColor(.themeWhite)
 //                        .frame(maxWidth: .infinity, minHeight: 56)
 //                        .overlay(
 //                            RoundedRectangle(cornerRadius: 22)
-//                                .stroke(Color(hex: "#5F5F5F"), lineWidth: 4) // ← 1-point border
+//                                .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
 //                        )
 //                    }
-//                    .background(Color(hex: "#24262B"))
+//                    .background(Color.appSurfacePrimary)
 //                    .cornerRadius(22)
-//                    .frame(width: 343)              // same width you had
+//                    .frame(maxWidth: .infinity)              // same width you had
 //                    .padding(.horizontal, 20)
 //                    .padding(.top, 15)
 //                    
@@ -1117,19 +1095,19 @@ struct LoginSkipView: View {
 //                                        .scaledToFit()
 //                                    Text("Continue with Google")
 //                                    
-//                                        .font(.custom("Poppins-SemiBold", size: 18))
-//                                        .foregroundColor(Color.alabaster)
+//                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+//                                        .foregroundColor(.appTextPrimary)
 //                                }
 //                                Spacer()
 //                            }
 //                            .padding(.horizontal, 20)
 //                            .frame(height: 56)
-//                            .frame(width: 343)
-//                            .background(Color(hex: "#24262B"))
+//                            .frame(maxWidth: .infinity)
+//                            .background(Color.appSurfacePrimary)
 //                            .cornerRadius(22)
 //                            .overlay(
 //                                RoundedRectangle(cornerRadius: 22)
-//                                    .stroke(Color(hex: "#5F5F5F"), lineWidth: 2) // ← 1-point border
+//                                    .stroke(Color.appBorderPrimary, lineWidth: 2) // ← 1-point border
 //                            )
 //                        }
 //                    }
@@ -1362,7 +1340,7 @@ import AuthenticationServices
 //            }, onCompletion: { result in
 //                authManager.handleAppleSignIn(result: result)
 //            })
-//            .signInWithAppleButtonStyle(.black)
+//            .signInWithAppleButtonStyle(.themeBlack)
 //            .frame(width: 280, height: 50)
 //            .cornerRadius(10)
 //            .padding()

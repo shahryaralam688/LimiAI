@@ -1064,22 +1064,22 @@ struct HubFoundPopupView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.35)
+            Color.themeBlack.opacity(0.35)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 14) {
                 Text(title)
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
                 VStack(spacing: 6) {
                     Text(deviceName)
                         .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     Text(deviceId)
                         .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.themeWhite.opacity(0.8))
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
@@ -1089,8 +1089,8 @@ struct HubFoundPopupView: View {
                         Text("Dismiss")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .background(Color.white.opacity(0.12))
-                            .foregroundColor(.white)
+                            .background(Color.themeWhite.opacity(0.12))
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(10)
                     }
 
@@ -1103,7 +1103,7 @@ struct HubFoundPopupView: View {
                                 startPoint: .leading,
                                 endPoint: .trailing
                             ))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(10)
                     }
                 }
@@ -1114,12 +1114,12 @@ struct HubFoundPopupView: View {
                     .fill(.ultraThinMaterial)
                     .background(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(Color.black.opacity(0.35))
+                            .fill(Color.themeBlack.opacity(0.35))
                     )
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
+                    .strokeBorder(Color.themeWhite.opacity(0.15), lineWidth: 1)
             )
             .padding(.horizontal, 28)
             .transition(.scale.combined(with: .opacity))

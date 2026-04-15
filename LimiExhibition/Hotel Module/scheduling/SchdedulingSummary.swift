@@ -31,7 +31,7 @@ struct SchedulingSummaryView: View {
                 .padding(.bottom, 34)
             }
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
     
     // MARK: - Header
@@ -39,20 +39,13 @@ struct SchedulingSummaryView: View {
     private var header: some View {
         VStack(spacing: 0) {
             HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.alabaster)
-                        .font(.system(size: 18, weight: .medium))
-                        .frame(width: 44, height: 44)
-                        .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+                LimiBackButton { dismiss() }
                 
                 Spacer()
                 
                 Text("Schedule Summary")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 
                 Spacer()
                 
@@ -64,7 +57,7 @@ struct SchedulingSummaryView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
-        .background(Color(hex: "#393C43"))
+        .background(Color.appSurfaceTertiary)
         .clipShape(
             .rect(
                 topLeadingRadius: 0,
@@ -84,12 +77,12 @@ struct SchedulingSummaryView: View {
             
             TextField("e.g. Morning Routine", text: $schedule.type)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
                 .padding(.vertical, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
@@ -104,7 +97,7 @@ struct SchedulingSummaryView: View {
                 displayedComponents: [.hourAndMinute]
             )
             .labelsHidden()
-            .tint(Color.emerald)
+            .tint(Color.orbGlow4)
             .colorScheme(.dark)
             
             chipLabel(text: "Description")
@@ -115,13 +108,13 @@ struct SchedulingSummaryView: View {
                 axis: .vertical
             )
             .font(.system(size: 16, weight: .regular))
-            .foregroundColor(.white)
+            .foregroundColor(.themeWhite)
             .lineLimit(3)
             .padding(.vertical, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
@@ -133,32 +126,22 @@ struct SchedulingSummaryView: View {
             Toggle(isOn: $schedule.isCompleted) {
                 Text(schedule.isCompleted ? "Marked as completed" : "This routine will run as scheduled")
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             }
-            .tint(Color.emerald)
+            .tint(Color.orbGlow4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
     // MARK: - Save Button
     
     private var saveButton: some View {
-        Button {
-            // Changes are already bound to `schedule`.
-            // Here you could trigger persistence if needed.
+        LimiPrimaryButton(title: "Save Changes") {
             print("✅ Schedule updated: \(schedule.type) at \(schedule.time)")
             dismiss()
-        } label: {
-            Text("Save Changes")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Color.emerald)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
     
@@ -167,14 +150,14 @@ struct SchedulingSummaryView: View {
     private func chipLabel(text: String) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .medium))
-            .foregroundColor(.alabaster)
+            .foregroundColor(.appTextPrimary)
             .padding(.vertical, 3)
             .padding(.horizontal, 10)
             .background(
                 Capsule()
-                    .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                    .stroke(Color.appBrandAccent, lineWidth: 0.8)
                     .background(
-                        Capsule().fill(Color(hex: "#393C43"))
+                        Capsule().fill(Color.appSurfaceTertiary)
                     )
             )
     }

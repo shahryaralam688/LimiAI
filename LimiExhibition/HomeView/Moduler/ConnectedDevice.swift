@@ -29,7 +29,7 @@ struct ConnectedDevicesView: View {
     @State private var selectedDeviceName: String = ""
     @State private var selectedDeviceId: String = ""
     @State private var selectedWifiSSID: [String] = []
-    @Environment(\.presentationMode) var presentationMode
+    
 
     @State private var showHomeView: Bool = false
     @State private var showNoPendantAlert: Bool = false
@@ -57,32 +57,23 @@ struct ConnectedDevicesView: View {
                 //
                 ZStack {
                     Rectangle()
-                        .fill(Color(hex: "#2A2C33"))
+                        .fill(Color.appSurfaceSecondary)
                         .cornerRadius(32)
                         .frame(height: 124)
                     
                     HStack(alignment: .bottom, spacing: 16) {
                         // Back Button
-                        Button(action: {
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            Image("Solid arrow right sm")
-                                .foregroundColor(.alabaster)
-                                .font(.system(size: 18, weight: .medium))
-                                .frame(width: 44, height: 44)
-                                .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
+                        LimiBackButton { dismiss() }
                         
                         // Title and Subtitle
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Devices")
                                 .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.themeWhite)
                             
                             Text("Control Your Device In Your space")
                                 .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(Color(hex: "#B6BAC2"))
+                                .foregroundColor(Color.appTextTertiary)
                         }
                         
                         Spacer()
@@ -95,7 +86,7 @@ struct ConnectedDevicesView: View {
             .frame(height: 124)
             .background(
                 RoundedRectangle(cornerRadius: 40)
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
             )
             .padding(.horizontal, 0)
             
@@ -104,8 +95,8 @@ struct ConnectedDevicesView: View {
                 VStack{
                     HStack{
                         Text("Connected Space")
-                            .font(.custom("Poppins-Medium", size: 18))
-                            .foregroundColor(.white)
+                            .font(.system(size: 18, weight: .medium, design: .rounded))
+                            .foregroundColor(.themeWhite)
                             .multilineTextAlignment(.center)
                             .lineSpacing(18 * 0.2)
                             .tracking(-0.15 / 18)
@@ -123,43 +114,28 @@ struct ConnectedDevicesView: View {
                             VStack {
                                 VStack(spacing: 16) {
                                     Text("You haven’t added any devices yet")
-                                        .font(.custom("Poppins-Medium", size: 16))
-                                        .foregroundColor(Color(hex: "#C9C4BD"))
+                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .foregroundColor(Color.appTextSecondary)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(16 * 0.4)
                                         .kerning(0)
                                     
                                     Text("Tap the button below to add devices")
-                                        .font(.custom("Poppins-Regular", size: 14))
-                                        .foregroundColor(Color(hex: "#A19D98"))
+                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .foregroundColor(Color.appTextMuted)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(14 * 0.4)
                                         .kerning(0)
                                     
-                                    Button(action: {
+                                    LimiPrimaryButton(title: "Add Your First Device") {
                                         isShowingDevice = true
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "plus")
-                                                .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.black)
-                                            Text("Add Your First Device")
-                                                .font(.custom("Poppins-Medium", size: 14))
-                                                .foregroundColor(Color.black)
-                                        }
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .padding(.vertical, 14)
-                                        .padding(.horizontal, 20)
-                                        .background(Color.white)
-                                        .foregroundColor(.black)
-                                        .cornerRadius(12)
                                     }
                                 }
                                 .frame(height: 304)
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     LinearGradient(
-                                        gradient: Gradient(colors: [Color(hex: "#24262B"), Color(hex: "#24262B")]),
+                                        gradient: Gradient(colors: [Color.appSurfacePrimary, Color.appSurfacePrimary]),
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
@@ -167,7 +143,7 @@ struct ConnectedDevicesView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
-                                        .foregroundColor(Color(hex: "#787572"))
+                                        .foregroundColor(Color.appBorderSecondary)
                                 )
                                 .cornerRadius(8)
                                 .opacity(1)
@@ -211,7 +187,7 @@ struct ConnectedDevicesView: View {
             }
             
         }
-        .background(Color.black)
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
         .onAppear {
             UserDataManager.shared.refreshUserData()
@@ -236,10 +212,9 @@ struct ConnectedDevicesView: View {
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
             let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
             
-            // Only keep allowed device names
             let filtered = newDevices.filter { dev in
                 let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                return normalizedAllowed.contains(n)
+                return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
             }
             
             // UUIDs seen in this tick
@@ -355,8 +330,8 @@ struct ConnectedDevicesView: View {
         var mac = dev.uuid
         if let txt = dev.txtRecord {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
-            // Parse channelPosition as comma-separated CCT/RGB values
-            if let p = txt["channelPosition"] {
+            // Parse channelTypes from TXT (firmware sends as 'channelTypes')
+            if let p = txt["channelTypes"] {
                 let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
                 if !types.isEmpty {
                     channelTypes = types
@@ -378,10 +353,10 @@ struct ConnectedDevicesView: View {
     private func updateWifiDevices(with newDevices: [BLEDevice]) {
         let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
         
-        // Filter only allowed device names
+        // Filter only allowed device names or limi1ch- prefix
         let filtered = newDevices.filter { dev in
             let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            return normalizedAllowed.contains(n)
+            return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
         }
         
         // Track current UUIDs
@@ -411,21 +386,30 @@ struct ConnectedDevicesView: View {
     
 
     func sendDeviceToBackend(device: WifiDevice) {
-        
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("📡 [ConnectedDevice] sendDeviceToBackend STARTED")
+
         guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
-            print("⚠️ No token found. Cannot send device.")
+            print("⚠️ [ConnectedDevice] No token found. Cannot send device.")
             return
         }
 
-        guard let url = URL(string: APIConstants.deviceUser) else { return }
+        guard let url = URL(string: APIConstants.deviceUser) else {
+            print("❌ [ConnectedDevice] Invalid URL: \(APIConstants.deviceUser)")
+            return
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("\(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(token, forHTTPHeaderField: "Authorization")
+
+        print("🔗 [ConnectedDevice] URL: \(url.absoluteString)")
+        print("📋 [ConnectedDevice] Method: POST")
+        print("🔑 [ConnectedDevice] Authorization: \(String(token.prefix(30)))...")
+        print("📎 [ConnectedDevice] Content-Type: application/json")
 
         let body: [String: Any] = [
-            // Send the exact deviceId as advertised (Bonjour TXT), no case transformation
             "deviceId": device.chennalMac,
             "metadata":["uuid": device.uuid,
             "chennalMac": device.chennalMac,
@@ -436,30 +420,34 @@ struct ConnectedDevicesView: View {
         ]
 
         do {
-            let data = try JSONSerialization.data(withJSONObject: body)
+            let data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
             request.httpBody = data
             if let json = String(data: data, encoding: .utf8) {
-                print("📤 sendDeviceToBackend payload: \(json)")
+                print("📤 [ConnectedDevice] Body:\n\(json)")
             }
+            print("📏 [ConnectedDevice] Body size: \(data.count) bytes")
         } catch {
-            print("❌ Failed to encode device body: \(error)")
+            print("❌ [ConnectedDevice] Failed to encode body: \(error)")
             return
         }
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("❌ Request error:", error.localizedDescription)
+                print("❌ [ConnectedDevice] Network error: \(error.localizedDescription)")
                 return
             }
 
-            if let httpResponse = response as? HTTPURLResponse {
-                print("✅ HTTP Status:", httpResponse.statusCode)
+            if let http = response as? HTTPURLResponse {
+                print("📬 [ConnectedDevice] HTTP Status: \(http.statusCode)")
+                print("📬 [ConnectedDevice] Response Headers: \(http.allHeaderFields)")
             }
 
-            if let data = data,
-               let responseString = String(data: data, encoding: .utf8) {
-                print("📩 Response:", responseString)
+            if let data = data, let body = String(data: data, encoding: .utf8) {
+                print("📩 [ConnectedDevice] Response Body: \(body)")
+            } else {
+                print("📩 [ConnectedDevice] Response Body: (empty)")
             }
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }.resume()
     }
 
@@ -469,6 +457,12 @@ struct WifiDeviceSpace: View {
     @StateObject private var socket = LightControllingSocket.shared
     @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
     private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB","8 CH-HUB", "16 CH-HUB", "Mini Controller","LIMI Device"]
+    
+    private func isAllowedDeviceName(_ name: String) -> Bool {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
+        return normalizedAllowed.contains(normalized) || normalized.hasPrefix("limi1ch-")
+    }
 
     let chennalMac: String
     let chennalCount : Int
@@ -499,7 +493,7 @@ struct WifiDeviceSpace: View {
             HStack {
                 Image(systemName: "house.fill")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 Spacer()
             }
             .padding(10)
@@ -508,7 +502,7 @@ struct WifiDeviceSpace: View {
                 Text(deviceName)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(10)
@@ -517,7 +511,7 @@ struct WifiDeviceSpace: View {
                 Text(channelSummary)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
 
                 Spacer()
                 Circle()
@@ -531,9 +525,9 @@ struct WifiDeviceSpace: View {
             .padding(.horizontal, 10)
         }
         .frame(height: 165.5)
-        .background(Color(hex: "#24262B"))
+        .background(Color.appSurfacePrimary)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.themeBlack.opacity(0.1), radius: 5, x: 0, y: 2)
         .opacity(isOnline ? 1.0 : 0.7)
         .onAppear { logResolvedDevice() }
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { _ in
@@ -542,7 +536,7 @@ struct WifiDeviceSpace: View {
     }
 
     private func logResolvedDevice() {
-        guard allowedNames.contains(deviceName) else { return }
+        guard isAllowedDeviceName(deviceName) else { return }
         if let dev = bonjourBrowser.discoveredWiFiDevices.first(where: { $0.name == deviceName }) {
             print("Resolved Bonjour service: \(dev.name)")
             let ip = dev.ipAddress ?? "unknown"

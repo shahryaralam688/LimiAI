@@ -14,7 +14,7 @@ struct SplashAnimationScreen: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
             
             // All vectors stacked on top of each other to form the full logo
             ZStack {

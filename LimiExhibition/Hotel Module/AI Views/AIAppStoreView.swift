@@ -2,91 +2,82 @@ import SwiftUI
 
 struct AIAppStoreView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var perplexityConnected = true
-    @State private var claudeConnected = true
-    @State private var geminiConnected = false
-    
+    @State private var voiceEnabled = true
+    @State private var controlEnabled = true
+    @State private var contextEnabled = false
+    @State private var appeared = false
+
     var body: some View {
-        VStack(spacing: 0) {
-            // App Bar
-            AIAppBar(title: "AI App Store") {
-                dismiss()
-            }
-            .padding(.top, 24)
-                .padding(.bottom, 38)
-                .background(
-                    RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
-                        .clipShape(
-                            .rect(
-                                topLeadingRadius: 0,
-                                bottomLeadingRadius: 40,
-                                bottomTrailingRadius: 40,
-                                topTrailingRadius: 0
-                            )
-                        )
-                )
-            
-            // Content
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: AIDesignTokens.spacingLG) {
-                    // Featured Models Header
-                    HStack {
-                        Text("Featured Models")
-                            .font(AIDesignTokens.h2Font)
-                            .foregroundColor(AIDesignTokens.textPrimary)
-                        Spacer()
-                    }
-                    .padding(.horizontal, AIDesignTokens.spacingLG)
-                    
-                    // Model Cards
-                    VStack(spacing: AIDesignTokens.spacingLG) {
-                        // Perplexity Card
-                        ModelCard(
-                            iconName: "VoiceAi",
-                            title: "Perplexity",
-                            tags: ["Voice AI"],
-                            connectionStatus: "Connected",
-                            tokenCount: "1k Tokens left",
-                            isConnected: perplexityConnected
-                        ) {
-                            perplexityConnected.toggle()
-                        }
-                        
-                        // Claude Card
-                        ModelCard(
-                            iconName: "Claude",
-                            title: "Claude",
-                            tags: ["Control AI"],
-                            connectionStatus: "Connected",
-                            tokenCount: "1k Tokens left",
-                            isConnected: claudeConnected
-                        ) {
-                            claudeConnected.toggle()
-                        }
-                        
-                        // Gemini Card
-                        ModelCard(
-                            iconName: "Gemini",
-                            title: "Gemini",
-                            tags: ["Search AI"],
-                            connectionStatus: "Available",
-                            tokenCount: "1k Tokens left",
-                            isConnected: geminiConnected
-                        ) {
-                            geminiConnected.toggle()
-                        }
-                    }
-                    .padding(.horizontal, AIDesignTokens.spacingLG)
-                    
-                    // Bottom spacing
-                    Spacer(minLength: 40)
+        ZStack {
+            DeepSpaceBackground(showParticles: false)
+
+            VStack(spacing: 0) {
+                AIAppBar(title: "Limi intelligence") {
+                    dismiss()
                 }
-                .padding(.top, AIDesignTokens.spacingLG)
+                .padding(.top, 8)
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        LimiSectionHeader(title: "Capabilities")
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 14) {
+                            ModelCard(
+                                iconName: "VoiceAi",
+                                title: "Voice",
+                                tags: ["Limi"],
+                                connectionStatus: voiceEnabled ? "Active" : "Off",
+                                tokenCount: "Included",
+                                isConnected: voiceEnabled
+                            ) {
+                                voiceEnabled.toggle()
+                            }
+                            .offset(y: appeared ? 0 : 30)
+                            .opacity(appeared ? 1 : 0)
+
+                            ModelCard(
+                                iconName: "ic_outline-assistant",
+                                title: "Space control",
+                                tags: ["Limi"],
+                                connectionStatus: controlEnabled ? "Active" : "Off",
+                                tokenCount: "Included",
+                                isConnected: controlEnabled
+                            ) {
+                                controlEnabled.toggle()
+                            }
+                            .offset(y: appeared ? 0 : 30)
+                            .opacity(appeared ? 1 : 0)
+                            .animation(.easeOut(duration: 0.5).delay(0.1), value: appeared)
+
+                            ModelCard(
+                                iconName: "humbleicons_ai",
+                                title: "Context",
+                                tags: ["Limi"],
+                                connectionStatus: contextEnabled ? "Active" : "Available",
+                                tokenCount: "Included",
+                                isConnected: contextEnabled
+                            ) {
+                                contextEnabled.toggle()
+                            }
+                            .offset(y: appeared ? 0 : 30)
+                            .opacity(appeared ? 1 : 0)
+                            .animation(.easeOut(duration: 0.5).delay(0.2), value: appeared)
+                        }
+                        .padding(.horizontal, 20)
+
+                        Spacer(minLength: 40)
+                    }
+                    .padding(.top, 12)
+                }
             }
         }
-        .background(AIDesignTokens.bgBase)
         .ignoresSafeArea(.container, edges: .bottom)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.5)) {
+                appeared = true
+            }
+        }
     }
 }
 

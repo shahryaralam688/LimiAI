@@ -1,321 +1,345 @@
 import SwiftUI
 import CoreLocation
 
-// MARK: - Weather Widget
-
 struct WeatherWidgetView: View {
-    // Colors using existing Color.swift definitions and hex colors
-    private let bgDark      = Color(hex: "#1F2126")   // card background
-    private let bgDarker    = Color(hex: "#17181D")   // lower card
-    private let chipDark    = Color(hex: "#2A2C33")   // "Today" chip
-    private let dividerGray = Color.white.opacity(0.12)
-    private let textPrimary = Color.alabaster
-    private let textMuted   = Color.alabaster.opacity(0.6)
-    private let accentSun   = Color.yellow
-    private let accentCloud = Color(hex: "#19C6D7")
-    private let shadowGlow1 = Color.yellow.opacity(0.45)
-    private let shadowGlow2 = Color(hex: "#6FE8F0").opacity(0.45)
+    @StateObject private var vm = WeatherViewModel()
+    @Binding var isExpanded: Bool
 
-    // Runtime weather state
-    @StateObject private var locationManager = LocationManager()
-    @State private var weatherData: WeatherData?
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    init(isExpanded: Binding<Bool> = .constant(true)) {
+        self._isExpanded = isExpanded
+    }
 
     var body: some View {
-        ZStack {
+        VStack(spacing: 0) {
+            if vm.isLoading && vm.weatherData == nil {
+                loadingState
+            } else if let error = vm.errorMessage, vm.weatherData == nil {
+                errorState(error)
+            } else {
+                weatherContent
+            }
+        }
+        .onAppear { vm.startFetching() }
+    }
 
-            VStack(spacing: 0) {
-                // TOP: main card
-                ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(bgDark)
-                        .overlay(
-                            // subtle top-to-bottom tint
-                            LinearGradient(colors: [Color.white.opacity(0.05), .clear],
-                                           startPoint: .top, endPoint: .bottom)
-                                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                        )
-                    // "Today" chip
-                    HStack{
-                        
-                        Spacer()
-                        
-                        Text("Today")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(textPrimary.opacity(0.9))
-                            .frame(width: 131.78, height: 25.53) // Figma width & height
-                            .background(
-                                Rectangle()
-                                    .fill(Color(hex: "#191B1E"))
-                                    .clipShape(
-                                        RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
-                                    )
-                                
-                            )
-                        
-                        Spacer()
-                        
+    // MARK: - Content
+
+    private var weatherContent: some View {
+        VStack(spacing: isExpanded ? 12 : 0) {
+            mainCard
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        isExpanded.toggle()
                     }
-
-
-
-                    HStack(alignment: .center) {
-//                        // Weather icon
-//                        WeatherIcon(sun: accentSun, cloud: accentCloud)
-//                            .frame(width: 92, height: 92)
-//                            .padding(.leading, 18)
-                        ZStack {
-                            // Glowing sun background
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        gradient: Gradient(colors: [
-                                            Color(hex: "#FFEB85").opacity(0.2),  // lighter at edges
-                                            Color(hex: "#FFEB85").opacity(0.1),  // warmer mid tone
-                                            Color(hex: "#FFEB85").opacity(0.2)   // darker in center
-                                        ]),
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 120
-                                    )
-                                )
-                                .frame(width: 140, height: 140)
-                                .blur(radius: 15) // soft glow effect
-                                .opacity(0.9)
-                                .offset(x : 7, y: -28) // slight upward positioning behind image
-
-                            // Weather icon (in front)
-                            Image("weather")
-                                .resizable()
-                                .frame(width: 150, height: 100)
-
-                        }
-
-                            
-
-
-                        // Temperature block
-                        VStack(alignment: .trailing, spacing: 10) {
-                            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                                // Current temperature (runtime)
-                                Text("\(weatherData?.temperatureCelsius ?? 28)")
-                                    .font(.custom("Poppins-SemiBold", size: 66)) // Closest match to 65.89px
-                                    .foregroundColor(textPrimary)
-                                    .lineSpacing(0) // to simulate line-height: 100%
-                                    .multilineTextAlignment(.center)
-
-                                // Secondary value: feels-like temperature
-                                HStack(spacing: 2) {
-                                    Text("/").foregroundColor(textPrimary)
-                                    Text("\(weatherData?.feelsLikeCelsius ?? 13)°")
-                                        .foregroundColor(textPrimary.opacity(0.85))
-                                }
-                                .font(.system(size: 28, weight: .semibold, design: .rounded))
-                            }
-                            Rectangle()
-                                .fill(dividerGray)
-                                .frame(height: 1)
-                            // Condition description (runtime)
-                            Text(weatherData?.conditionDescription ?? "Sunny with cold")
-                                .font(.custom("Poppins-Regular", size: 14.8)) // exact match
-                                .foregroundColor(textMuted)
-                                .lineSpacing(0) // for line-height: 100%
-                                .frame(maxWidth: .infinity)
-                        }
-                        .padding(.trailing, 20)
-                    }
-                    .padding(.top, 20) // space below the "Today" chip
-                    .padding(.bottom, 2)
-
-                    // bottom divider inside top card
-                    VStack {
-                        Spacer()
-                        Rectangle()
-                            .fill(dividerGray)
-                            .frame(height: 1)
-                    }
-                    .padding(.horizontal, 0)
-                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                 }
+
+            if isExpanded {
+                hourlyStrip
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+
+                detailsGrid
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .padding(.horizontal, 16)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isExpanded)
+    }
+
+    // MARK: - Main Card
+
+    private var mainCard: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: vm.gradientColors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28.83)
-                        .stroke(Color.white, lineWidth: 1)
-                        .clipShape(
-                            RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
+                    RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.12), Color.clear, Color.black.opacity(0.08)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                         )
                 )
-                .frame(height: 170)
-                .zIndex(1)
-                // BOTTOM: details row card (attached look)
-//                HStack(spacing: 0) {
-//                    StatItem(
-//                        title: "Sensible",
-//                        value: weatherData != nil ? "\(weatherData!.feelsLikeCelsius)°" : "25°"
-//                    )
-//                    Divider().background(dividerGray)
-//                        .offset(y: -15)
-//
-//                    StatItem(
-//                        title: "Humidity",
-//                        value: weatherData != nil ? "\(weatherData!.humidity)%" : "63%"
-//                    )
-//                    Divider().background(dividerGray)
-//                        .offset(y: -15)
-//
-//                    StatItem(
-//                        title: "Pressure",
-//                        value: weatherData != nil ? "\(weatherData!.pressure) hPA" : "1009 hPA"
-//                    )
-//                }
-//                .offset()
-//                .frame(height: 82)
-//                .frame(width: 283)
-//                .background(
-//                    Rectangle()
-//                        .fill(Color(hex: "#191B1E"))
-//                        .clipShape(
-//                            RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
-//                        )
-//                        .offset(y: -15)
-//
-//                )
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 28.83)
-//                        .stroke(Color.white, lineWidth: 1)
-//                        .clipShape(
-//                            RoundedCorner(radius: 28.83, corners: [.bottomLeft, .bottomRight])
-//                        )
-//                        .offset(y: -15)
-//                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                )
 
+            if isExpanded {
+                expandedCardContent
+            } else {
+                compactCardContent
             }
+        }
+        .frame(height: isExpanded ? 200 : 80)
+        .shadow(color: vm.gradientColors.first?.opacity(0.25) ?? .clear, radius: isExpanded ? 20 : 10, y: isExpanded ? 10 : 4)
+    }
+
+    // MARK: - Expanded Card
+
+    private var expandedCardContent: some View {
+        VStack(spacing: 8) {
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(vm.cityName.isEmpty ? "Locating..." : vm.cityName)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .foregroundColor(.white.opacity(0.9))
+
+                Spacer()
+
+                HStack(spacing: 12) {
+                    Button(action: { vm.refresh() }) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    Image(systemName: "chevron.up")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.4))
+                }
+            }
+
+            Spacer().frame(height: 2)
+
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .top, spacing: 0) {
+                        Text("\(vm.temperature)")
+                            .font(.system(size: 72, weight: .thin, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("°")
+                            .font(.system(size: 36, weight: .thin, design: .rounded))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.top, 8)
+                    }
+                    Text(vm.conditionDescription)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.85))
+                }
+
+                Spacer()
+
+                Image(systemName: vm.sfSymbol)
+                    .font(.system(size: 52, weight: .light))
+                    .foregroundStyle(iconGradient)
+                    .shadow(color: iconShadow, radius: 12, y: 4)
+                    .padding(.top, 8)
+            }
+
+            HStack {
+                Text("Feels like \(vm.feelsLike)°")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+                Spacer()
+                Text(vm.day)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+        }
+        .padding(20)
+    }
+
+    // MARK: - Compact Card (minimized)
+
+    private var compactCardContent: some View {
+        HStack(spacing: 14) {
+            Image(systemName: vm.sfSymbol)
+                .font(.system(size: 28, weight: .light))
+                .foregroundStyle(iconGradient)
+                .shadow(color: iconShadow, radius: 6, y: 2)
+                .frame(width: 40)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(vm.cityName.isEmpty ? "Locating..." : vm.cityName)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.9))
+                Text(vm.conditionDescription)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+
+            Spacer()
+
+            HStack(alignment: .top, spacing: 0) {
+                Text("\(vm.temperature)")
+                    .font(.system(size: 34, weight: .thin, design: .rounded))
+                    .foregroundColor(.white)
+                Text("°")
+                    .font(.system(size: 18, weight: .thin))
+                    .foregroundColor(.white.opacity(0.7))
+                    .padding(.top, 4)
+            }
+
+            Image(systemName: "chevron.down")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white.opacity(0.4))
+        }
+        .padding(.horizontal, 20)
+    }
+
+    // MARK: - Hourly Strip
+
+    private var hourlyStrip: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(vm.hourlyForecast) { item in
+                    VStack(spacing: 8) {
+                        Text(item.hour)
+                            .font(.system(size: 11, weight: item.isNow ? .bold : .medium))
+                            .foregroundColor(item.isNow ? .orbGlow4 : .appTextSecondary)
+
+                        Image(systemName: item.icon)
+                            .font(.system(size: 16))
+                            .foregroundStyle(
+                                item.isNow
+                                ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow3], startPoint: .top, endPoint: .bottom))
+                                : AnyShapeStyle(Color.appTextMuted)
+                            )
+                            .frame(height: 20)
+
+                        Text("\(item.temp)°")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
+                    }
+                    .frame(width: 48)
+                    .padding(.vertical, 10)
+                    .glassCard(
+                        cornerRadius: 14,
+                        strokeOpacity: item.isNow ? 0.15 : 0.04,
+                        fillOpacity: item.isNow ? 0.08 : 0.03
+                    )
+                }
+            }
+            .padding(.horizontal, 4)
+        }
+    }
+
+    // MARK: - Details Grid
+
+    private var detailsGrid: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible(), spacing: 10),
+            GridItem(.flexible(), spacing: 10)
+        ], spacing: 10) {
+            WeatherDetailCell(icon: "humidity.fill", title: "Humidity", value: "\(vm.humidity)%")
+            WeatherDetailCell(icon: "wind", title: "Wind", value: "\(vm.windSpeed) km/h")
+            WeatherDetailCell(icon: "gauge.medium", title: "Pressure", value: "\(vm.pressure) hPa")
+            WeatherDetailCell(icon: "eye.fill", title: "Visibility", value: vm.visibility)
+        }
+    }
+
+    // MARK: - Loading & Error
+
+    private var loadingState: some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Color.white.opacity(0.04))
+            .frame(height: 80)
+            .overlay(
+                HStack(spacing: 12) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
+                    Text("Loading weather...")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.appTextMuted)
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+            )
             .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-        }
-        .background(Color.clear)
-        .onAppear {
-            // Start location updates so we can fetch weather
-            locationManager.ensurePermissionAndStart()
-        }
-        .onChange(of: locationManager.currentLocation) { _, newValue in
-            if let location = newValue {
-                fetchWeather(for: location)
-            }
-        }
+    }
+
+    private func errorState(_ message: String) -> some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Color.white.opacity(0.04))
+            .frame(height: 80)
+            .overlay(
+                HStack(spacing: 12) {
+                    Image(systemName: "cloud.slash.fill")
+                        .font(.system(size: 20, weight: .light))
+                        .foregroundColor(.appTextMuted)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Weather unavailable")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.appTextPrimary)
+                        Text(message)
+                            .font(.system(size: 11))
+                            .foregroundColor(.appTextMuted)
+                            .lineLimit(1)
+                    }
+                    Spacer()
+                    Button("Retry") { vm.refresh() }
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
+                }
+                .padding(.horizontal, 20)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
+            )
+            .padding(.horizontal, 16)
+    }
+
+    // MARK: - Helpers
+
+    private var iconGradient: some ShapeStyle {
+        LinearGradient(
+            colors: vm.isDaytime
+                ? [.yellow, .orange.opacity(0.8)]
+                : [.white, .white.opacity(0.6)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var iconShadow: Color {
+        vm.isDaytime ? .yellow.opacity(0.4) : .white.opacity(0.15)
     }
 }
 
+// MARK: - Detail Cell
 
-
-// MARK: - Pieces
-
-private struct StatItem: View {
+private struct WeatherDetailCell: View {
+    let icon: String
     let title: String
     let value: String
-    var body: some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.custom("Poppins-Regular", size: 14.83)) // Figma font & size
-                .multilineTextAlignment(.center)               // text-align: center
-                .foregroundColor(Color.alabaster.opacity(0.7)) // color with opacity
-                .lineSpacing(0)                                // line-height: 100%
-                
-            Text(title)
-                .font(.custom("Poppins-Regular", size: 14.83)) // Figma font & size
-                .multilineTextAlignment(.center)               // text-align: center
-                .foregroundColor(Color.alabaster.opacity(0.7)) // color with opacity
-                .lineSpacing(0)                                // line-height: 100%
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .contentShape(Rectangle())
-    }
-}
-
-/// Simple sun + clouds vector built in SwiftUI to avoid assets.
-private struct WeatherIcon: View {
-    let sun: Color
-    let cloud: Color
 
     var body: some View {
-        ZStack {
-            // Sun
-            Circle()
-                .fill(sun)
-                .frame(width: 46, height: 46)
-                .offset(x: 6, y: -6)
-                .overlay(
-                    // sun rays
-                    ZStack {
-                        ForEach(0..<8, id: \.self) { i in
-                            Capsule()
-                                .fill(sun.opacity(0.9))
-                                .frame(width: 18, height: 4)
-                                .offset(x: 34)
-                                .rotationEffect(.degrees(Double(i) * 45))
-                        }
-                    }
-                    .opacity(0.9)
-                )
-
-            // Back cloud (darker)
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(cloud.opacity(0.55))
-                .frame(width: 88, height: 52)
-                .offset(x: 12, y: 16)
-
-            // Front cloud
-            HStack(spacing: -10) {
-                Circle().fill(cloud).frame(width: 48, height: 48)
-                Circle().fill(cloud).frame(width: 40, height: 40).offset(y: 4)
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(cloud)
-                    .frame(width: 70, height: 40)
-                    .offset(y: 6)
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(.orbGlow3)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.appTextMuted)
+                    .textCase(.uppercase)
+                Text(value)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
             }
-            .offset(x: -8, y: 18)
+            Spacer()
         }
-        .compositingGroup()
+        .padding(14)
+        .glassCard(cornerRadius: 14, fillOpacity: 0.04)
     }
 }
 
-
-// MARK: - Preview
-
-struct WeatherWidgetView_Previews: PreviewProvider {
-    static var previews: some View {
-        WeatherWidgetView()
-//            .previewLayout(.sizeThatFits)
-//            .padding()
-            .background(Color.black) // show outer glow nicely
-            .preferredColorScheme(.dark)
-    }
-}
-
-// MARK: - Weather Fetching
-
-private extension WeatherWidgetView {
-    func fetchWeather(for location: CLLocation) {
-        isLoading = true
-        errorMessage = nil
-
-        Task {
-            do {
-                let weather = try await WeatherService.shared.fetchWeather(
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude
-                )
-
-                await MainActor.run {
-                    self.weatherData = weather
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                }
-            }
-        }
-    }
+#Preview {
+    WeatherWidgetView(isExpanded: .constant(true))
+        .background(Color.appCanvasPrimary)
+        .preferredColorScheme(.dark)
 }

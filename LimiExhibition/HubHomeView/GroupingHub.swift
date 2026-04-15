@@ -6,7 +6,7 @@ struct GroupingView: View {
     @Binding var showGrouping: Bool
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 List {
                     ForEach(bluetoothManager.storedHubs.prefix(5)) { hub in
@@ -35,7 +35,7 @@ struct GroupingView: View {
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .cornerRadius(8)
                 }
                 .padding()

@@ -157,8 +157,8 @@ struct ARViewContainer: UIViewRepresentable {
             let image = renderer.image { ctx in
                 let center = CGPoint(x: size / 2.0, y: size / 2.0)
                 let colors = [
-                    UIColor.black.withAlphaComponent(0.45).cgColor,
-                    UIColor.black.withAlphaComponent(0.0).cgColor
+                    UIColor.appBlack.withAlphaComponent(0.45).cgColor,
+                    UIColor.appBlack.withAlphaComponent(0.0).cgColor
                 ] as CFArray
                 let locations: [CGFloat] = [0.0, 1.0]
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
@@ -369,7 +369,7 @@ struct ARViewContainer: UIViewRepresentable {
                 
                 // Transparent alabaster material for borders only
                 var borderMaterial = UnlitMaterial()
-                borderMaterial.color = .init(tint: UIColor(named: "alabaster")?.withAlphaComponent(0.7) ?? .white)
+                borderMaterial.color = .init(tint: UIColor(named: "alabaster")?.withAlphaComponent(0.7) ?? .appWhite)
 
                 // Square border - 4 thin lines forming outline
                 let lineThickness: Float = 0.004
@@ -575,11 +575,11 @@ struct ARViewContainer: UIViewRepresentable {
             let shadowMaterial: RealityKit.Material = {
                 if let tex = makeShadowBlobTextureIfNeeded() {
                     var unlit = UnlitMaterial()
-                    unlit.color = .init(tint: UIColor.black.withAlphaComponent(baseAlpha), texture: .init(tex))
+                    unlit.color = .init(tint: UIColor.appBlack.withAlphaComponent(baseAlpha), texture: .init(tex))
                     return unlit
                 } else {
-                    let baseColor = UIColor.black.withAlphaComponent(0.35)
-                    var simple = SimpleMaterial(color: .black, isMetallic: false)
+                    let baseColor = UIColor.appBlack.withAlphaComponent(0.35)
+                    var simple = SimpleMaterial(color: .appBlack, isMetallic: false)
                     simple.roughness = 1.0
                     simple.color = .init(tint: baseColor)
                     return simple
@@ -872,7 +872,7 @@ struct ARViewContainer: UIViewRepresentable {
 
             var light = DirectionalLightComponent()
             light.intensity = smoothedDirectionalIntensity
-            light.color = .white
+            light.color = .appWhite
 
             lightEntity.components.set(light)
 
@@ -1006,7 +1006,7 @@ struct ARInstructionOverlay: View {
 
                         Text(instructionText)
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .multilineTextAlignment(.center)
                             .padding(.top)
                     }
@@ -1026,12 +1026,12 @@ struct ARInstructionOverlay: View {
                     Text("Tap")
                         .font(.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
                         .background(
                             Capsule()
-                                .fill(Color.black.opacity(0.7))
+                                .fill(Color.themeBlack.opacity(0.7))
                         )
                         .padding(.top, 100)
                     

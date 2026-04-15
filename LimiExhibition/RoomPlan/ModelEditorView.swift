@@ -15,7 +15,7 @@ struct TappableSceneView: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
         scnView.scene = scene
-        scnView.backgroundColor = .black
+        scnView.backgroundColor = .appBlack
         
         // Create and position the interior camera
         let cameraNode = SCNNode()
@@ -44,7 +44,7 @@ struct TappableSceneView: UIViewRepresentable {
         lightNode.light = SCNLight()
         lightNode.light?.type = .omni
         lightNode.light?.intensity = 2000
-        lightNode.light?.color = UIColor.white
+        lightNode.light?.color = UIColor.appWhite
         lightNode.position = SCNVector3(x: 0, y: 3, z: 0)
         scene.rootNode.addChildNode(lightNode)
 
@@ -199,10 +199,10 @@ struct ModelEditorView: View {
     // Predefined colors for walls
     let wallColors: [Color] = [
         .red, .orange, .yellow, .green, .blue, .purple, .pink,
-        Color(red: 0.7, green: 0.3, blue: 0.2), // Brick red
-        Color(red: 0.85, green: 0.7, blue: 0.45), // Tan
-        Color(red: 0.5, green: 0.5, blue: 0.5), // Gray
-        Color(red: 0.95, green: 0.95, blue: 0.95), // Off-white
+        Color.appBrick, // Brick red
+        Color.appTan, // Tan
+        Color.appNeutralGray, // Gray
+        Color.appNeutralMid, // Off-white
     ]
 
     var body: some View {
@@ -219,14 +219,14 @@ struct ModelEditorView: View {
                 Text("Loading 3D interior view…")
                     .italic()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black)
-                    .foregroundColor(.white)
+                    .background(Color.themeBlack)
+                    .foregroundColor(.themeWhite)
             }
 
             // Controls
             VStack(spacing: 12) {
                 Button("Reset") { NotificationCenter.default.post(name: .resetCameraManual, object: nil) }
-                    .padding(8).background(Color.white.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
                 VStack(spacing: 4) {
                     Button("↑") { move(.forward) }
                     HStack(spacing: 16) {
@@ -235,11 +235,11 @@ struct ModelEditorView: View {
                     }
                     Button("↓") { move(.backward) }
                 }
-                .padding(8).background(Color.white.opacity(0.7)).cornerRadius(8)
+                .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
                 
                 // Color selection
                 Button("Colors") { showColorPicker.toggle() }
-                    .padding(8).background(Color.white.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
                 
                 if showColorPicker {
                     VStack(alignment: .leading, spacing: 8) {
@@ -254,7 +254,7 @@ struct ModelEditorView: View {
                                     .frame(width: 30, height: 30)
                                     .overlay(
                                         Circle()
-                                            .stroke(color == selectedColor ? Color.white : Color.clear, lineWidth: 2)
+                                            .stroke(color == selectedColor ? Color.themeWhite : Color.clear, lineWidth: 2)
                                     )
                                     .onTapGesture {
                                         selectedColor = color
@@ -278,7 +278,7 @@ struct ModelEditorView: View {
                             }
                             .padding(8)
                             .background(Color.blue.opacity(0.7))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(8)
                             
                             Button("Apply Brick to Walls") {
@@ -286,7 +286,7 @@ struct ModelEditorView: View {
                             }
                             .padding(8)
                             .background(Color.orange.opacity(0.7))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(8)
                         }
                         .padding(.horizontal, 8)
@@ -298,7 +298,7 @@ struct ModelEditorView: View {
                             }
                             .padding(8)
                             .background(Color.green.opacity(0.7))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(8)
                             
                             Button("Remove Overlays") {
@@ -306,19 +306,19 @@ struct ModelEditorView: View {
                             }
                             .padding(8)
                             .background(Color.red.opacity(0.7))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .cornerRadius(8)
                         }
                         .padding(.horizontal, 8)
                     }
                     .padding(8)
-                    .background(Color.black.opacity(0.7))
+                    .background(Color.themeBlack.opacity(0.7))
                     .cornerRadius(8)
                 }
                 
                 // Debug button
                 Button("Debug") { showDebug.toggle() }
-                    .padding(8).background(Color.white.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
             }
             .padding()
             
@@ -332,8 +332,8 @@ struct ModelEditorView: View {
                         .lineLimit(10)
                 }
                 .padding()
-                .background(Color.black.opacity(0.7))
-                .foregroundColor(.white)
+                .background(Color.themeBlack.opacity(0.7))
+                .foregroundColor(.themeWhite)
                 .cornerRadius(8)
                 .frame(maxWidth: 300)
                 .position(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height - 150)

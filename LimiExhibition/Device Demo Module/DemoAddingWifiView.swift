@@ -27,31 +27,20 @@ struct DemoAddingWifiView: View {
 
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    Button {
+                    LimiBackButton {
                         if let onBack {
                             onBack()
                         } else {
                             dismiss()
                         }
-                    } label: {
-                        Image("Solid arrow right sm")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .padding(12) // space inside the circle
-                            .background(
-                                Rectangle()
-                                    .fill(Color(hex: "#24262B")) // gray background
-                                    .cornerRadius(16)
-                            )
                     }
                     Spacer()
                     Text("Add Device")
-                        .font(.custom("Poppins-Bold", size: 30)) // font-family: Poppins; weight: 700 (Bold)
+                        .font(.system(size: 30, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
                         .multilineTextAlignment(.center)          // text-align: center
                         .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                         .kerning(-0.3)                            // letter-spacing: -1%
-                        .foregroundColor(Color.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Spacer()
 
@@ -67,8 +56,8 @@ struct DemoAddingWifiView: View {
             VStack(spacing: 16){
                 HStack{
                     Text("Wifi Password")
-                        .font(.custom("Poppins-Medium", size: 20))   // 500 weight = Medium
-                        .foregroundColor(Color.white)      // matches #C9C4BD
+                        .font(.system(size: 20, weight: .medium, design: .rounded))   // 500 weight = Medium
+                        .foregroundColor(.appTextPrimary)      // matches #C9C4BD
                         .multilineTextAlignment(.center)             // aligns text centrally
                         .lineSpacing(0)                              // 100% line height = no extra spacing
                         .kerning(0)// letter-spacing: 0px
@@ -79,8 +68,8 @@ struct DemoAddingWifiView: View {
                 HStack{
                     ZStack(alignment: .leading) {
                         Text(wifiSSID)
-                            .font(.custom("Poppins-Medium", size: 25))
-                            .foregroundColor(Color(hex: "#fff")) // ✅ Placeholder color
+                            .font(.system(size: 25, weight: .medium, design: .rounded))
+                            .foregroundColor(.appTextPrimary) // ✅ Placeholder color
                             .kerning(-0.048)
 
                     }
@@ -93,14 +82,14 @@ struct DemoAddingWifiView: View {
                     ZStack(alignment: .leading) {
                         if wifiPassword.isEmpty {
                             Text("Enter your Wi-Fi password")
-                                .font(.custom("Poppins-Medium", size: 16))
-                                .foregroundColor(Color(hex: "#AAAAAA")) // ✅ Placeholder color
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundColor(Color.appTextPlaceholder) // ✅ Placeholder color
                                 .kerning(-0.048)
                         }
                         
                         TextField("", text: $wifiPassword)
-                            .font(.custom("Poppins-Medium", size: 16))
-                            .foregroundColor(Color(hex: "#E0E0E0")) // Active text color (slightly brighter)
+                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                            .foregroundColor(Color.appTextSoft) // Active text color (slightly brighter)
                             .kerning(-0.048)
                             .lineSpacing(0)
                             .textInputAutocapitalization(.never)
@@ -111,13 +100,13 @@ struct DemoAddingWifiView: View {
 
                     Spacer()
                     Image(systemName: "eye")
-                        .foregroundColor(Color.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 16)
 
                 }
                 .background(
                     Rectangle()
-                        .fill(Color(hex: "#24262B")) // gray background
+                        .fill(Color.appSurfacePrimary) // gray background
                         .cornerRadius(20)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
@@ -129,15 +118,15 @@ struct DemoAddingWifiView: View {
                             
                 VStack{
                     Text("Connect Your Device to Wi-Fi")
-                        .font(.custom("Poppins-SemiBold", size: 20))  // 600 weight = SemiBold
-                        .foregroundColor(Color(hex: "#C9C4BD"))        // matches background color spec
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))  // 600 weight = SemiBold
+                        .foregroundColor(Color.appTextSecondary)        // matches background color spec
                         .multilineTextAlignment(.center)               // text-align: center
                         .lineSpacing(20 * 0.4)                         // line-height: 140%
                         .kerning(0)                                    // letter-spacing: 0%
 
                     Text("Enter your Wi-Fi password to link your device securely. This allows Limi to stay connected, sync with your other devices, and respond instantly — all within your private network.")
-                        .font(.custom("Poppins-Regular", size: 14)) // font-family + weight + size
-                        .foregroundColor(Color(hex: "#A19D98"))     // text color
+                        .font(.system(size: 14, weight: .regular, design: .rounded)) // font-family + weight + size
+                        .foregroundColor(Color.appTextMuted)     // text color
                         .multilineTextAlignment(.center)            // text-align: center
                         .lineSpacing(4)                             // for line-height: 140%
                         .padding(.horizontal)
@@ -145,7 +134,7 @@ struct DemoAddingWifiView: View {
                 }
                 .background(
                     Rectangle()
-                    .fill(Color(hex: "#24262B")) // gray background
+                    .fill(Color.appSurfacePrimary) // gray background
                     .cornerRadius(20)
                     .frame(height: 148)
                 )
@@ -157,7 +146,7 @@ struct DemoAddingWifiView: View {
             }
             Spacer()
             // Add devices Button
-            Button(action: {
+            LimiPrimaryButton(title: isProvisioning ? "Connecting…" : (ble.isConnected ? "Connected" : "Add Your First Device")) {
                 guard !wifiSSID.isEmpty else { resultStatus = "error"; resultMessage = "SSID is required"; return }
                 isProvisioning = true
                 resultMessage = ""
@@ -171,37 +160,16 @@ struct DemoAddingWifiView: View {
                 }
 
                 showWifiConected = true
-            }) {
-                HStack {
-                    Spacer()
-                    
-                    Text(isProvisioning ? "Connecting…" : (ble.isConnected ? "Connected" : "Add Your First Device"))
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
-                        .lineSpacing(0) // line-height: 100% (no extra spacing)
-                        .kerning(0)     // letter-spacing: 0%
-                    Image("Monotone arrow right")
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
-                        .lineSpacing(0) // line-height: 100% (no extra spacing)
-                        .kerning(0)     // letter-spacing: 0%
-                    Spacer()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .padding(.vertical, 14)
-                .padding(.horizontal, 20)
-                .background(Color.white)
-                .foregroundColor(.black)
-                .cornerRadius(19)
-
             }
             .disabled(isProvisioning)
+            .animation(LimiMotion.quick, value: isProvisioning)
+            .animation(LimiMotion.quick, value: ble.isConnected)
             .padding(.horizontal, 16)
             .padding(.bottom, 12)
 
             if !resultMessage.isEmpty {
                 Text(resultMessage)
-                    .font(.custom("Poppins-Medium", size: 14))
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(resultStatus == "success" ? .green : (resultStatus == "warning" ? .yellow : .red))
                     .padding(.horizontal, 16)
                     .padding(.bottom, 15)
@@ -210,7 +178,7 @@ struct DemoAddingWifiView: View {
 //            .padding(.horizontal, 16)
             
         }
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
         .fullScreenCover(isPresented: $showWifiConected) {
             DemoConnectedWifiView(deviceName: deviceName ?? "")
         }

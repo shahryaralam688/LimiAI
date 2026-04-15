@@ -15,7 +15,7 @@ import Network
 /// Manager class for handling all WLED REST/JSON API communications
 @MainActor
 class WLEDAPIManager: ObservableObject {
-    private let baseURL = "http://wled-01.local"
+    private let baseURL = AppURLs.WLED.localHost
     
     // MARK: - Data Models
     
@@ -395,31 +395,6 @@ extension Color {
         )
     }
     
-    static func fromHex(_ hex: String) -> Color {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (1, 1, 1, 0)
-        }
-        
-        return Color(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-        
-    }
 }
 struct WLEDView: View {
     @StateObject private var apiManager = WLEDAPIManager()
@@ -435,8 +410,8 @@ struct WLEDView: View {
     @AppStorage("lampRGB") private var isOn: Bool = false
     @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = "#50C878" // Default emerald hex
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? "#50C878")
+    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
+    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
     @State private var patternSpeed: Double = 50      // 0-100 UI
     @State private var patternIntensity: Double = 50  // 0-100 UI
     @State private var hasSelectedPattern: Bool = false
@@ -467,7 +442,7 @@ struct WLEDView: View {
                                         .clipped()
                                 } else {
                                     if let token = AuthManager.shared.getToken(),
-                                       let url = URL(string: "https://limi-configurator-ios-version-2.vercel.app/configurator?token=\(token)") {
+                                       let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
                                         LimiWebViewCon(url: url, macAddress: chennalMac)
                                             .frame(height: 450)
                                             .cornerRadius(16)
@@ -489,9 +464,9 @@ struct WLEDView: View {
                                 }) {
                                     Image(systemName: "gearshape.fill")
                                         .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(.alabaster)
+                                        .foregroundColor(.appTextPrimary)
                                         .frame(width: 36, height: 36)
-                                        .background((selectedTopTab == 1 ? Color.emerald : Color.gray.opacity(0.4)))
+                                        .background((selectedTopTab == 1 ? Color.orbGlow4 : Color.gray.opacity(0.4)))
                                         .clipShape(Circle())
                                 }
                                 
@@ -512,8 +487,8 @@ struct WLEDView: View {
                     VStack {
                         HStack{
                             Text("Select Color")
-                                .font(.custom("Poppins-Bold", size: 18)) // Bold weight
-                                .foregroundColor(.alabaster)
+                                .font(.system(size: 18, weight: .bold, design: .rounded)) // Bold weight
+                                .foregroundColor(.appTextPrimary)
                                 .kerning(0.9)        // 5% of 18px ≈ 0.9 pts
                                 .lineSpacing(0)      // line-height = 100%
                                 .lineLimit(1)        // prevent wrapping
@@ -531,8 +506,8 @@ struct WLEDView: View {
                             }) {
                                 Text("Solid Color")
                                     .padding(8)
-                                    .background(showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                    .foregroundColor(.alabaster)
+                                    .background(showSolidColor ? Color.orbGlow4 : Color.eton.opacity(0.4))
+                                    .foregroundColor(.appTextPrimary)
                                     .cornerRadius(8)
                             }
                             .disabled(!isOn)
@@ -543,8 +518,8 @@ struct WLEDView: View {
                             }) {
                                 Text("Rainbow Color")
                                     .padding(8)
-                                    .background(!showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                    .foregroundColor(.white)
+                                    .background(!showSolidColor ? Color.orbGlow4 : Color.eton.opacity(0.4))
+                                    .foregroundColor(.themeWhite)
                                     .cornerRadius(8)
                             }
                             .disabled(!isOn)
@@ -591,7 +566,7 @@ struct WLEDView: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color(hex: "#24262B"))
+                            .fill(Color.appSurfacePrimary)
                     )
                     .padding(.bottom, 20)
                     
@@ -609,16 +584,16 @@ struct WLEDView: View {
                 Spacer(minLength: 30)
             }.padding()
         }
-        .background(Color.fromHex( "#111214"))
+        .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
-                    .font(.custom("Poppins-Medium", size: 14))
-                    .foregroundColor(.white)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.black.opacity(0.8))
+                    .background(Color.themeBlack.opacity(0.8))
                     .cornerRadius(12)
                     .padding(.top, 12)
                     .transition(.opacity)
@@ -750,16 +725,16 @@ struct WLEDView: View {
         HStack{
             VStack(alignment: .leading, spacing: 4) {
                 Text("Power")
-                    .font(.custom("Poppins-Bold", size: 18)) // Bold weight
-                    .foregroundColor(.alabaster)
+                    .font(.system(size: 18, weight: .bold, design: .rounded)) // Bold weight
+                    .foregroundColor(.appTextPrimary)
                     .kerning(0.9)        // 5% of 18px ≈ 0.9 pts
                     .lineSpacing(0)      // line-height = 100%
                     .lineLimit(1)        // prevent wrapping
                     .fixedSize()         // keeps alignment tight
 
                 Text("Turn OFF/ON")
-                    .foregroundColor(.alabaster)
-                    .font(.custom("Poppins-Regular", size: 15)) // Regular weight
+                    .foregroundColor(.appTextPrimary)
+                    .font(.system(size: 15, weight: .regular, design: .rounded)) // Regular weight
                     .kerning(0.75)     // 5% of 15px = 0.75
                     .lineSpacing(0)    // line-height = 100%
                     .lineLimit(1)
@@ -782,13 +757,13 @@ struct WLEDView: View {
                     ZStack {
                         // Background circle
                         Rectangle()
-                            .fill(isOn ? Color.emerald : Color.gray.opacity(0.3))
+                            .fill(isOn ? Color.orbGlow4 : Color.gray.opacity(0.3))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
                         
                         // Inner dot
                         Circle()
-                            .fill(Color.black)
+                            .fill(Color.themeBlack)
                             .frame(width: 20, height: 20)
                             .offset(x: isOn ? 12 : -12, y: 0)
                             .animation(.easeInOut(duration: 0.2), value: isOn)
@@ -800,26 +775,26 @@ struct WLEDView: View {
             }
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Pattern Controls (Speed & Intensity)
     private var patternControls: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Pattern Controls")
-                .font(.custom("Poppins-Medium", size: 16))
-                .foregroundColor(.alabaster)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.appTextPrimary)
 
             // Speed Slider
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Speed")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.alabaster)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Text("\(Int(patternSpeed))%")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.alabaster)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                 }
 
                 Slider(value: $patternSpeed, in: 0...100)
@@ -835,12 +810,12 @@ struct WLEDView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Intensity")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.alabaster)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Text("\(Int(patternIntensity))%")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.alabaster)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                 }
 
                 Slider(value: $patternIntensity, in: 0...100)
@@ -853,7 +828,7 @@ struct WLEDView: View {
             }
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func sendCurrentPattern(patternId: Int) {
@@ -925,8 +900,8 @@ struct WLEDView: View {
     private var rainbowColorBar: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Color")
-                .font(.custom("Poppins-Medium", size: 16))
-                .foregroundColor(.alabaster)
+                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .foregroundColor(.appTextPrimary)
                 .lineSpacing(0)
                 .kerning(0)
                 .lineLimit(1)
@@ -958,7 +933,7 @@ struct WLEDView: View {
                         .frame(width: 30, height: 30)
                         .overlay(
                             Circle()
-                                .stroke(Color.white, lineWidth: 3)
+                                .stroke(Color.themeWhite, lineWidth: 3)
                                 .shadow(radius: 2)
                         )
                         .offset(x: selectedHue * (geometry.size.width - 30))
@@ -988,7 +963,7 @@ struct WLEDView: View {
             .frame(height: 40)
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
     
     private var brightnessBar: some View {
@@ -998,13 +973,13 @@ struct WLEDView: View {
         }
         
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
     
     private var brightnessTitle: some View {
         Text("Brightness")
-            .font(.custom("Poppins-Medium", size: 16))
-            .foregroundColor(.alabaster)
+            .font(.system(size: 16, weight: .medium, design: .rounded))
+            .foregroundColor(.appTextPrimary)
             .lineSpacing(0)
             .kerning(0)
             .lineLimit(1)
@@ -1026,23 +1001,23 @@ struct WLEDView: View {
     
     private var leftCircle: some View {
         Circle()
-            .fill(Color(hex: "#24262B"))
+            .fill(Color.appSurfacePrimary)
             .frame(width: 46, height: 46)
             .overlay(
                 Text("0%")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             )
     }
     
     private var rightCircle: some View {
         Circle()
-            .fill(Color(hex: "#24262B"))
+            .fill(Color.appSurfacePrimary)
             .frame(width: 46, height: 46)
             .overlay(
                 Text("\(Int(brightness))%")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
             )
     }
     
@@ -1062,7 +1037,7 @@ struct WLEDView: View {
         Capsule()
             .fill(
                 LinearGradient(
-                    colors: [Color.fromHex("#444444"), Color.fromHex("#999999")],
+                    colors: [Color.appSliderDark, Color.appSliderMid],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
@@ -1074,7 +1049,7 @@ struct WLEDView: View {
         HStack {
             ForEach(0..<10) { index in
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 4, height: 4)
                 if index < 9 {
                     Spacer()
@@ -1086,15 +1061,15 @@ struct WLEDView: View {
     
     private func sliderThumb(geometry: GeometryProxy) -> some View {
         Circle()
-            .fill(Color.fromHex("#DDDDDD"))
+            .fill(Color.appSliderLight)
             .frame(width: 28, height: 28)
             .overlay(
                 Circle()
-                    .stroke(Color.black, lineWidth: 1)
+                    .stroke(Color.themeBlack, lineWidth: 1)
             )
             .overlay(
                 Circle()
-                    .fill(Color.fromHex("#202020"))
+                    .fill(Color.appSliderThumb)
                     .frame(width: 8, height: 8)
 
                 
@@ -1123,14 +1098,14 @@ struct WLEDView: View {
     }
     
     private var sliderBackground: some View {
-        Color.black.opacity(0.3)
+        Color.themeBlack.opacity(0.3)
             .cornerRadius(70)
     }
     
     private var sliderBorder: some View {
         RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.black.opacity(0.68), lineWidth: 2)
-            .shadow(color: Color.black.opacity(0.68), radius: 4, x: 0, y: 1)
+            .stroke(Color.themeBlack.opacity(0.68), lineWidth: 2)
+            .shadow(color: Color.themeBlack.opacity(0.68), radius: 4, x: 0, y: 1)
             .clipShape(RoundedRectangle(cornerRadius: 70))
     }
     
@@ -1173,7 +1148,7 @@ struct WLEDView: View {
         return VStack(alignment: .leading, spacing: 15) {
             Text("Effects")
                 .font(.headline)
-                .foregroundColor(.alabaster)
+                .foregroundColor(.appTextPrimary)
                 .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -1190,11 +1165,11 @@ struct WLEDView: View {
                                 // Effect icon based on name
                                 Image(systemName: effectIcon(for: effect.name))
                                     .font(.title2)
-                                    .foregroundColor(selectedEffect == effect.id ? .white : .primary)
+                                    .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                 
                                 Text(effect.name)
                                     .font(.caption)
-                                    .foregroundColor(selectedEffect == effect.id ? .white : .primary)
+                                    .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
                             }
@@ -1207,7 +1182,7 @@ struct WLEDView: View {
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(
                                         selectedEffect == effect.id ? 
-                                        Color.blue : Color.alabaster.opacity(0.6), 
+                                        Color.orbGlow4 : Color.alabaster.opacity(0.6), 
                                         lineWidth: 1
                                     )
                             )
@@ -1220,7 +1195,7 @@ struct WLEDView: View {
             }
         }
         .padding()
-        .background(Color(hex: "#24262B"), in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
     
     // Helper function to get appropriate SF Symbol for effect names

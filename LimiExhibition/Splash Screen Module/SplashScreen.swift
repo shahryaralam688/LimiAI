@@ -12,11 +12,8 @@ struct SplashScreen: View {
     @State private var logoOpacity = 0.0
     @State private var taglineOffset: CGFloat = 20
     @State private var taglineOpacity = 0.0
-    @State private var hardwareScale = 0.9
-    @State private var hardwareOpacity = 0.0
     @State private var pulsePhase = 0.0
-
-    private let brandGreen = Color(hex: "#76E094")
+    @State private var orbBreathe = false
 
     var body: some View {
         Group {
@@ -51,66 +48,80 @@ struct SplashScreen: View {
 
     private var splashContent: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
 
-            // Hardware imagery layer - uncomment and replace "hardwareDevice" with your asset
-            // Image("hardwareDevice")
-            //     .resizable()
-            //     .scaledToFit()
-            //     .frame(width: 280)
-            //     .opacity(hardwareOpacity)
-            //     .scaleEffect(hardwareScale)
-            //     .blur(radius: hardwareOpacity < 0.5 ? 2 : 0)
+            // Subtle ambient glow
+            RadialGradient(
+                colors: [
+                    Color.orbGlow2.opacity(0.08),
+                    Color.clear
+                ],
+                center: .center,
+                startRadius: 50,
+                endRadius: 350
+            )
+            .ignoresSafeArea()
+            .scaleEffect(orbBreathe ? 1.1 : 0.9)
 
-            VStack(spacing: 24) {
+            VStack(spacing: 28) {
                 Spacer()
 
-                Image("logoSplash")
-                    .resizable()
-                    .renderingMode(.template)
-                    .foregroundColor(brandGreen)
-                    .frame(width: 120, height: 100)
-                    .scaleEffect(logoScale)
-                    .opacity(logoOpacity)
-                    .shadow(color: brandGreen.opacity(0.3), radius: 30, x: 0, y: 0)
+                // Logo with glow
+                ZStack {
+                    Image("logoSplash")
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundColor(.orbGlow4)
+                        .frame(width: 100, height: 84)
+                        .blur(radius: 20)
+                        .opacity(logoOpacity * 0.4)
 
-                VStack(spacing: 8) {
-                    Text("Limi")
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                    Image("logoSplash")
+                        .resizable()
+                        .renderingMode(.template)
+                        .foregroundColor(.appBrandSecondary)
+                        .frame(width: 100, height: 84)
+                        .scaleEffect(logoScale)
+                        .opacity(logoOpacity)
+                }
+
+                VStack(spacing: 10) {
+//                    Text("Limi")
+//                        .font(.system(size: 44, weight: .bold, design: .rounded))
+//                        .foregroundColor(.appTextPrimary)
+//                        .tracking(-1)
 
                     Text("The Operating System for Physical Space")
-                        .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundColor(brandGreen.opacity(0.8))
-                        .tracking(0.5)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.appTextSecondary)
+                        .tracking(0.3)
                 }
                 .offset(y: taglineOffset)
                 .opacity(taglineOpacity)
 
                 Spacer()
 
-                // Modern minimalist loader - glowing pulse effect
+                // Loader — orbiting dot
                 ZStack {
                     Circle()
-                        .stroke(brandGreen.opacity(0.15), lineWidth: 1)
-                        .frame(width: 60, height: 60)
-                        .scaleEffect(1.0 + pulsePhase * 0.3)
-                        .opacity(1.0 - pulsePhase)
+                        .stroke(Color.orbGlow4.opacity(0.1), lineWidth: 1)
+                        .frame(width: 44, height: 44)
 
                     Circle()
-                        .stroke(brandGreen.opacity(0.3), lineWidth: 1)
-                        .frame(width: 50, height: 50)
-                        .scaleEffect(1.0 + pulsePhase * 0.2)
-                        .opacity(0.8 - pulsePhase * 0.5)
+                        .fill(Color.orbGlow4)
+                        .frame(width: 6, height: 6)
+                        .offset(x: 22)
+                        .rotationEffect(.degrees(pulsePhase * 360))
 
                     Circle()
-                        .trim(from: 0, to: 0.75)
-                        .stroke(brandGreen, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                        .frame(width: 40, height: 40)
-                        .rotationEffect(Angle(degrees: 360 * pulsePhase))
-                        .shadow(color: brandGreen, radius: 8, x: 0, y: 0)
+                        .fill(Color.orbGlow4.opacity(0.3))
+                        .frame(width: 6, height: 6)
+                        .offset(x: 22)
+                        .rotationEffect(.degrees(pulsePhase * 360))
+                        .blur(radius: 4)
                 }
-                .frame(height: 100)
+                .frame(height: 80)
+                .padding(.bottom, 40)
             }
             .ignoresSafeArea()
         }
@@ -120,26 +131,21 @@ struct SplashScreen: View {
     }
 
     private func startAnimations() {
-        withAnimation(.easeOut(duration: 1.2)) {
-            hardwareOpacity = 0.15
-            hardwareScale = 1.0
-        }
-
-        withAnimation(.easeOut(duration: 0.8).delay(0.2)) {
+        withAnimation(.easeOut(duration: 0.9).delay(0.1)) {
             logoOpacity = 1.0
             logoScale = 1.0
         }
-
-        withAnimation(.easeOut(duration: 0.6).delay(0.6)) {
+        withAnimation(.easeOut(duration: 0.6).delay(0.4)) {
             taglineOpacity = 1.0
             taglineOffset = 0
         }
-
-        withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+        withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
             pulsePhase = 1.0
         }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
+            orbBreathe = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
             withAnimation(.easeInOut(duration: 0.8)) {
                 isActive = true
             }

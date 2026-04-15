@@ -19,7 +19,7 @@ struct LocationUsageExample: View {
                 if LocationHelper.isLocationAvailable() {
                     Text(LocationHelper.getLocationDisplayString())
                         .font(.body)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.orbGlow4)
                 } else {
                     Text("Location not available")
                         .font(.body)
@@ -44,7 +44,7 @@ struct LocationUsageExample: View {
                     }
                     .padding()
                     .background(Color.blue)
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .cornerRadius(8)
                 } else {
                     Text("Need location for weather data")

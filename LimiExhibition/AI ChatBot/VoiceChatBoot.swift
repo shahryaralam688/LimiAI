@@ -16,7 +16,7 @@ struct VoiceChatBot: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.themeBlack.ignoresSafeArea()
             
             VStack(spacing: 40) {
                 Button(action: {
@@ -25,7 +25,7 @@ struct VoiceChatBot: View {
                 }) {
                     Text("Grant Google Permissions")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                         .background(Color.blue)
@@ -41,12 +41,7 @@ struct VoiceChatBot: View {
                         guard !isRequestingGooglePermissions else { return }
                         print("[PrivacyPolicyView] Starting Google permissions request...")
                         isRequestingGooglePermissions = true
-                        let scopes = [
-                            "https://www.googleapis.com/auth/calendar",
-                            "https://www.googleapis.com/auth/gmail.send",
-                            "https://www.googleapis.com/auth/gmail.readonly",
-                            "https://www.googleapis.com/auth/contacts.readonly"
-                        ]
+                        let scopes = AppURLs.External.googleScopes
                         print("[PrivacyPolicyView] Requesting Google permissions with scopes: \(scopes)")
                         googleAuthManager.requestGooglePermissions(scopes: scopes) { success in
                             print("[PrivacyPolicyView] Google permissions request completed. Success = \(success)")
@@ -71,7 +66,7 @@ struct VoiceChatBot: View {
                     
                     Text("Processing...")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 } else {
                     FirstOrbView(
                         hue: 0.3,
@@ -83,7 +78,7 @@ struct VoiceChatBot: View {
                     
                     Text(audioManager.isRecording ? "Recording..." : "Tap to speak")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 
                 Button(action: {
@@ -101,7 +96,7 @@ struct VoiceChatBot: View {
                         
                         Image(systemName: audioManager.isRecording ? "stop.fill" : "mic.fill")
                             .font(.system(size: 32))
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                     }
                 }
                 .disabled(audioManager.isProcessing)
@@ -118,7 +113,7 @@ struct VoiceChatBot: View {
                     ScrollView {
                         Text(response)
                             .font(.body)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .padding()
                     }
                     .frame(maxHeight: 200)
@@ -137,7 +132,7 @@ class AudioManager: NSObject, ObservableObject {
     
     private var audioRecorder: AVAudioRecorder?
     private var audioSession: AVAudioSession = AVAudioSession.sharedInstance()
-    private let apiURL = "https://dev.api.limitless-lighting.co.uk/limi-ai/transcribe-audio"
+    private let apiURL = APIConstants.transcribeAudio
     private let speechSynthesizer = AVSpeechSynthesizer()
     
     override init() {

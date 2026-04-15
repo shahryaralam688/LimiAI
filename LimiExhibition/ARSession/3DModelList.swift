@@ -115,7 +115,7 @@ struct ARModelList: View {
                                                 }
                                             }
                                             .padding(.horizontal, 2)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.themeWhite)
                                             .padding(4)
                                             .background(stateManager.selectedModelId == item.id ? Color.gray.opacity(0.5) : Color.clear)
                                             .cornerRadius(6)
@@ -127,7 +127,7 @@ struct ARModelList: View {
                                                 .padding(4)
                                                 .background(
                                                     RoundedRectangle(cornerRadius: 8)
-                                                        .stroke(stateManager.selectedModelId == item.id ? Color.white : Color.clear, lineWidth: 2)
+                                                        .stroke(stateManager.selectedModelId == item.id ? Color.themeWhite : Color.clear, lineWidth: 2)
                                                 )
                                         }
                                         .frame(width: UIScreen.main.bounds.width / 3.5)
@@ -157,21 +157,21 @@ struct ARModelList: View {
                 .frame(height: 100)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color.black.opacity(0.9))
+                        .fill(Color.themeBlack.opacity(0.9))
                 )
                 .padding(.horizontal, 0)
                 
             } else if isLoading {
                 HStack {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                     Text("Loading models...")
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .font(.subheadline)
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 100)
-                .background(Color.black.opacity(0.9))
+                .background(Color.themeBlack.opacity(0.9))
             }
         }
         .padding(.horizontal, 0)
@@ -235,7 +235,7 @@ struct ARModelList: View {
     func fetchLightConfigs() {
         isLoading = true
         
-        guard let url = URL(string: "https://dev.api1.limitless-lighting.co.uk/admin/products/users/light-configs/check") else {
+        guard let url = URL(string: APIConstants.lightConfigsCheck) else {
             print("Invalid URL")
             handleFetchFailure()
             return
@@ -366,7 +366,7 @@ struct ARModelList: View {
                 return
             }
 
-            guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/client/3d-models/web-configurator/download/\(downloadId)") else {
+            guard let url = URL(string: APIConstants.webConfiguratorDownload(downloadId)) else {
                 print("❌ Invalid download URL")
                 return
             }

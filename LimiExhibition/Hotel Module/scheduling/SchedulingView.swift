@@ -87,7 +87,7 @@ struct SchedulingView: View {
     
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.appCanvasPrimary.ignoresSafeArea()
             
             VStack(spacing: 24) {
                 headerView
@@ -106,7 +106,7 @@ struct SchedulingView: View {
             HStack {
                 Text("My Routines")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -118,7 +118,7 @@ struct SchedulingView: View {
         .padding(.bottom, 38)
         .background(
             RoundedRectangle(cornerRadius: 0)
-                .fill(Color(hex: "#393C43"))
+                .fill(Color.appSurfaceTertiary)
                 .clipShape(
                     .rect(
                         topLeadingRadius: 0,
@@ -136,7 +136,7 @@ struct SchedulingView: View {
         HStack(spacing: 0) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                    withAnimation(LimiMotion.quick) {
                         selectedTab = tab
                     }
                 } label: {
@@ -144,10 +144,10 @@ struct SchedulingView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .foregroundColor(selectedTab == tab ? .white : Color(hex: "#676C75"))
+                        .foregroundColor(selectedTab == tab ? .themeWhite : Color.appSurfaceChip)
                         .background(
                             RoundedRectangle(cornerRadius: 14)
-                                .fill(selectedTab == tab ? Color(hex: "#676C75") : Color.clear)
+                                .fill(selectedTab == tab ? Color.appSurfaceChip : Color.clear)
                         )
                 }
             }
@@ -155,7 +155,7 @@ struct SchedulingView: View {
         .padding(4)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
         .padding(.horizontal, 24)
     }
@@ -206,7 +206,7 @@ struct SchedulingView: View {
         VStack(spacing: 8) {
             Text(text)
                 .font(.system(size: 14, weight: .regular))
-                .foregroundColor(Color(hex: "#676C75"))
+                .foregroundColor(Color.appSurfaceChip)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 40)
@@ -227,14 +227,14 @@ private struct ScheduleCard: View {
         HStack(spacing: 16) {
             // Thumbnail / Icon
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
                 .frame(width: 80, height: 80)
                 .overlay(
                     Image(schedule.iconName)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 )
             
             // Text content
@@ -242,37 +242,37 @@ private struct ScheduleCard: View {
                 HStack(spacing: 8) {
                     Text(schedule.type)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
                         .background(
                             Capsule()
-                                .stroke(Color(hex: "#00FF8C"), lineWidth: 0.8)
+                                .stroke(Color.appBrandAccent, lineWidth: 0.8)
                                 .background(
-                                    Capsule().fill(Color(hex: "#393C43"))
+                                    Capsule().fill(Color.appSurfaceTertiary)
                                 )
                         )
                     
                     if showCompletedBadge {
                         Text("Completed")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.green)
+                            .foregroundColor(.appSuccess)
                             .padding(.vertical, 2)
                             .padding(.horizontal, 8)
                             .background(
                                 Capsule()
-                                    .fill(Color.black.opacity(0.4))
+                                    .fill(Color.themeBlack.opacity(0.4))
                             )
                     }
                 }
                 
                 Text(timeString)
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 
                 Text(schedule.notes)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.themeWhite.opacity(0.8))
                     .lineLimit(2)
             }
             
@@ -281,7 +281,7 @@ private struct ScheduleCard: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+                .fill(Color.appInputFill)
         )
     }
 }

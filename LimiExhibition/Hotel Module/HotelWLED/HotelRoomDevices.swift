@@ -36,7 +36,7 @@ struct HotelRoomDevices: View {
                         Text("BLE Devices")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(selectedTab == 0 ? .emerald : .white.opacity(0.6))
+                    .foregroundColor(selectedTab == 0 ? .emerald : .themeWhite.opacity(0.6))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -62,7 +62,7 @@ struct HotelRoomDevices: View {
                         Text("Wi-Fi Devices")
                             .font(.system(size: 16, weight: .medium))
                     }
-                    .foregroundColor(selectedTab == 1 ? .emerald : .white.opacity(0.6))
+                    .foregroundColor(selectedTab == 1 ? .emerald : .themeWhite.opacity(0.6))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
@@ -79,10 +79,10 @@ struct HotelRoomDevices: View {
                 .buttonStyle(PlainButtonStyle())
             }
             .padding(.top, 56 )
-            .background(Color(hex: "#393C43"))
+            .background(Color.appSurfaceTertiary)
             .overlay(
                 Rectangle()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.themeWhite.opacity(0.1))
                     .frame(height: 1),
                 alignment: .bottom
             )
@@ -101,7 +101,7 @@ struct HotelRoomDevices: View {
         }
         .ignoresSafeArea()
 //        .padding(.top, 36)
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
 }
 
@@ -228,23 +228,23 @@ struct BLEDevicesView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 12) {
                 // Title
                 HStack {
                     Text("BLE Devices")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
 
                     Spacer()
 
                     Button("WLED") {
                         showWLEDViewScan = true
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .clipShape(Capsule())
                 }
                 .padding(.horizontal, 16)
@@ -256,12 +256,12 @@ struct BLEDevicesView: View {
                     VStack(spacing: 10) {
                         Image(systemName: "bolt.horizontal.circle")
                             .font(.system(size: 52))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.themeWhite.opacity(0.6))
                         Text(bluetoothManager.isBluetoothOn
                              ? "No devices connected through Bluetooth"
                              : "Bluetooth is Off")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.85))
+                            .foregroundColor(.themeWhite.opacity(0.85))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -292,7 +292,7 @@ struct BLEDevicesView: View {
                     .padding(6)
                 }
             }
-            .background(Color.black)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .bottom)
         }
         .sheet(isPresented: $showWLEDView) {
@@ -383,21 +383,21 @@ struct WiFiDevicesView: View {
     @State private var showWLEDViewScan = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 12) {
                 // Title
                 HStack {
                     Text("Wi-Fi Devices")
                         .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Button("WLED"){
                         showWLEDViewScan = true
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#393C43"))
+                    .background(Color.appSurfaceTertiary)
                     .clipShape(Capsule())
                 }
                 .padding(.horizontal, 16)
@@ -431,7 +431,7 @@ struct WiFiDevicesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             }
-            .background(Color.black)
+            .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .bottom)
         }
         .sheet(isPresented: $showWLEDView) {
@@ -468,7 +468,7 @@ struct DeviceCard: View {
                         
                         Image(systemName: device.icon)
                             .font(.title2)
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                     }
                     Spacer()
                 }
@@ -479,7 +479,7 @@ struct DeviceCard: View {
                         .font(.custom("Lexend", size: 17))
                         .fontWeight(.semibold)
                         .kerning(0)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                         .lineLimit(nil)            // limit to 2 lines max
                         .frame(maxHeight: 44, alignment: .top) // fixed height for consistency
 
@@ -498,7 +498,7 @@ struct DeviceCard: View {
                     Text(isOn ? "On" : "Off")
                         .font(.custom("Inter", size: 16))
                         .fontWeight(.medium)
-                        .foregroundColor(.alabaster)
+                        .foregroundColor(.appTextPrimary)
                     
                     Spacer()
                     
@@ -510,7 +510,7 @@ struct DeviceCard: View {
                         ZStack {
                             // Background
                             Rectangle()
-                                .fill(isOn ? Color.emerald : Color(hex: "292929"))
+                                .fill(isOn ? Color.emerald : Color.appCanvasHotel)
                                 .frame(width: 50, height: 26)
                                 .cornerRadius(100)
                             
@@ -531,7 +531,7 @@ struct DeviceCard: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
             )
             .frame(width:163.5, height: 207)
         }

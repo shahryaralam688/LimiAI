@@ -44,8 +44,15 @@ struct AppleLoginView: View {
             print("Email: \(email ?? "nil")")
             print("Name: \(fullName?.givenName ?? "") \(fullName?.familyName ?? "")")
 
-            // Send Apple credentials to backend and save app token
-            sendAppleLoginToBackend(userIdentifier: userIdentifier, identityToken: identityToken)
+            guard let jwt = identityToken else {
+                print("[AppleAuth] Missing identity token")
+                return
+            }
+            AppleLoginAPI.exchange(identityToken: jwt, appleUserId: userIdentifier) { result in
+                if case .failure(let err) = result {
+                    print("[AppleAuth] Exchange failed: \(err.localizedDescription)")
+                }
+            }
         }
         
     }
@@ -87,71 +94,6 @@ class LoginViewController: UIViewController {
     }
 }
 
-// MARK: - Backend Integration for Apple Sign-In
-
-fileprivate func sendAppleLoginToBackend(userIdentifier: String, identityToken: String?) {
-    guard let url = URL(string: APIConstants.loginGoogle) else {
-        print("[AppleAuth] Invalid loginGoogle URL")
-        return
-    }
-
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    var body: [String: Any] = [
-        "id_token": userIdentifier
-    ]
-    if let identityToken = identityToken {
-        body["apple_identity_token"] = identityToken
-    }
-
-    do {
-        let data = try JSONSerialization.data(withJSONObject: body, options: [])
-        request.httpBody = data
-        if let jsonString = String(data: data, encoding: .utf8) {
-            print("[AppleAuth] 📤 Request payload: \(jsonString)")
-        }
-    } catch {
-        print("[AppleAuth] Failed to encode Apple login body: \(error)")
-        return
-    }
-
-    URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("[AppleAuth] Request error: \(error.localizedDescription)")
-            return
-        }
-
-        if let http = response as? HTTPURLResponse {
-            print("[AppleAuth] HTTP status: \(http.statusCode)")
-        }
-
-        guard let data = data else {
-            print("[AppleAuth] No data returned from backend")
-            return
-        }
-
-        if let raw = String(data: data, encoding: .utf8) {
-            print("[AppleAuth] 📩 Raw response: \(raw)")
-        }
-
-        // Parse JSON to extract app token, following same pattern as AuthManager usage
-        do {
-            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-               let dataField = json["data"] as? [String: Any],
-               let token = dataField["token"] as? String {
-                print("[AppleAuth] Extracted app token: \(token)")
-                AuthManager.shared.saveToken(token)
-            } else {
-                print("[AppleAuth] Token not found in response JSON")
-            }
-        } catch {
-            print("[AppleAuth] JSON parsing error: \(error)")
-        }
-    }.resume()
-}
-
 extension LoginViewController: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController,
                                  didCompleteWithAuthorization authorization: ASAuthorization) {
@@ -169,8 +111,11 @@ extension LoginViewController: ASAuthorizationControllerDelegate {
             if let tokenData = identityToken,
                let tokenString = String(data: tokenData, encoding: .utf8) {
                 print("identityToken: \(tokenString)")
-                // Send Apple credentials to backend and save app token
-                sendAppleLoginToBackend(userIdentifier: userIdentifier, identityToken: tokenString)
+                AppleLoginAPI.exchange(identityToken: tokenString, appleUserId: userIdentifier) { result in
+                    if case .failure(let err) = result {
+                        print("[AppleAuth] Exchange failed: \(err.localizedDescription)")
+                    }
+                }
             }
         }
     }

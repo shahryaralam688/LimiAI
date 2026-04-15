@@ -36,30 +36,30 @@ struct AIHomeView: View {
     }
 
     private var background: some View {
-        Color(.black)
+        Color.appCanvasPrimary
     }
 
     private var statusBar: some View {
         HStack {
             Text("9:41")
                 .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
 
             Spacer()
 
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 4, height: 4)
                 RoundedRectangle(cornerRadius: 1.5)
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 14, height: 4)
                 RoundedRectangle(cornerRadius: 2)
-                    .stroke(Color.white, lineWidth: 1)
+                    .stroke(Color.themeWhite, lineWidth: 1)
                     .frame(width: 22, height: 10)
                     .overlay(
                         Rectangle()
-                            .fill(Color.white)
+                            .fill(Color.themeWhite)
                             .frame(width: 18, height: 6)
                     )
             }
@@ -82,16 +82,16 @@ struct AIHomeView: View {
             Spacer()
 
             ZStack {
-                Color(hex: "#171717").cornerRadius(20)
+                Color.appCanvasElevated.cornerRadius(20)
                 Image("bottom_profile_view")
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 22, height: 22)
-                    .foregroundColor(Color(hex: "#FFFFFF"))
+                    .foregroundColor(Color.themeWhite)
 
                 Circle()
-                    .stroke(Color(hex: "#FFFFFF"), lineWidth: 1.4)
+                    .stroke(Color.themeWhite, lineWidth: 1.4)
                     .frame(width: 44, height: 44)
             }
             .frame(width: 48, height: 48)
@@ -102,29 +102,29 @@ struct AIHomeView: View {
     private var voiceOrb: some View {
         ZStack {
             Circle()
-                .fill(Color.black)
+                .fill(Color.appCanvasPrimary)
                 .frame(width: 250, height: 250)
-                .shadow(color: Color.black.opacity(0.9), radius: 60, x: 0, y: 18)
+                .shadow(color: Color.themeBlack.opacity(0.9), radius: 60, x: 0, y: 18)
                 .overlay(
                     // INNER SHADOW (inset shadow equivalent)
                     Circle()
-                        .stroke(Color(hex: "#484848").opacity(0.94), lineWidth: 3)
+                        .stroke(Color.appSurfaceStroke.opacity(0.94), lineWidth: 3)
                         .blur(radius: 10)
                         .offset(x: -6, y: -1)
                         .mask(
                             Circle()
-                                .fill(Color.black)
+                                .fill(Color.themeBlack)
                         )
                 )
 
             VStack(spacing: 12) {
                 Text("Hey, Limi is here!")
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
                 Text("Tap to chat")
                     .font(.system(size: 15))
-                    .foregroundColor(Color.white.opacity(0.65))
+                    .foregroundColor(Color.themeWhite.opacity(0.65))
 
                 Image("Vector-2")
                     .scaledToFit()
@@ -140,12 +140,12 @@ struct AIHomeView: View {
             VStack(spacing: 8) {
                 Text("Welcome to Limi")
                     .font(.system(size: 24, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
 
                 Text("Tap button below to add Modules")
                     .font(.system(size: 15, weight: .regular))
                     .multilineTextAlignment(.center)
-                    .foregroundColor(Color.white.opacity(0.65))
+                    .foregroundColor(Color.themeWhite.opacity(0.65))
             }
             .padding(.top, 32)
 
@@ -158,12 +158,12 @@ struct AIHomeView: View {
                     Text("Add Modules")
                         .font(.system(size: 17, weight: .semibold))
                 }
-                .foregroundColor(Color.fromHex("#052010"))
+                .foregroundColor(Color.appSuccessDeep)
                 .frame(maxWidth: .infinity)
                 .frame(height: 60)
-                .background(Color.fromHex("#51D18E"))
+                .background(Color.appBrandTertiary)
                 .cornerRadius(30)
-                .shadow(color: Color.black.opacity(0.35), radius: 18, x: 0, y: 8)
+                .shadow(color: Color.themeBlack.opacity(0.35), radius: 18, x: 0, y: 8)
             }
             .padding(.horizontal, 48)
 
@@ -171,12 +171,12 @@ struct AIHomeView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 262)
-        .background(Color.fromHex("#101217"))
+        .background(Color.appCanvasSecondary)
         .cornerRadius(24)
         .overlay(
             RoundedRectangle(cornerRadius: 24)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 6]))
-                .foregroundColor(Color.white.opacity(0.12))
+                .foregroundColor(Color.themeWhite.opacity(0.12))
         )
     }
 }
@@ -194,7 +194,7 @@ private struct EqualizerView: View {
                     let heightFactor = heights[index]
 
                     RoundedRectangle(cornerRadius: barWidth)
-                        .fill(Color.fromHex("#51D18E"))
+                        .fill(Color.appBrandTertiary)
                         .frame(width: barWidth, height: geometry.size.height * heightFactor)
                         .frame(maxHeight: .infinity, alignment: .center)
                 }

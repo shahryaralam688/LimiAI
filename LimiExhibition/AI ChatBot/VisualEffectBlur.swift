@@ -1,1 +1,13 @@
-////  VisualEffectBlur.swift//  Limi////  Created by Mac Mini on 21/08/2025.//import SwiftUIstruct VisualEffectBlur: UIViewRepresentable {    var blurStyle: UIBlurEffect.Style        func makeUIView(context: Context) -> UIVisualEffectView {        let view = UIVisualEffectView(effect: UIBlurEffect(style: blurStyle))        return view    }        func updateUIView(_ uiView: UIVisualEffectView, context: Context) {        uiView.effect = UIBlurEffect(style: blurStyle)    }}
+import SwiftUI
+
+struct VisualEffectBlur: UIViewRepresentable {
+    var blurStyle: UIBlurEffect.Style
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        UIVisualEffectView(effect: UIBlurEffect(style: blurStyle))
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+        uiView.effect = UIBlurEffect(style: blurStyle)
+    }
+}

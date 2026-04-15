@@ -10,29 +10,34 @@ import SwiftUI
 struct ChannelSelectionView: View {
     let device: WifiDevice
     @Environment(\.dismiss) private var dismiss
-    @State private var selectedChannelIndex: Int? = nil
-    @State private var showChannelControl: Bool = false
+    @State private var selectedChannel: ChannelInfo? = nil
+    
+    struct ChannelInfo: Identifiable {
+        let id: Int
+        let type: String
+        let position: Int
+    }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 // Device info header
                 VStack(spacing: 8) {
-                    Text(device.deviceName)
-                        .font(.custom("Poppins-SemiBold", size: 20))
-                        .foregroundColor(.white)
+                    Text("Channel " + String(device.chennalCount))
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
                     
                     Text("Select a channel to control")
-                        .font(.custom("Poppins-Regular", size: 14))
-                        .foregroundColor(.white.opacity(0.7))
+                        .font(.system(size: 14))
+                        .foregroundColor(.appTextSecondary)
                     
                     HStack(spacing: 4) {
                         Text("Device ID:")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.themeWhite.opacity(0.5))
                         Text(device.chennalMac)
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.themeWhite.opacity(0.7))
                     }
                 }
                 .padding(.top, 20)
@@ -44,29 +49,32 @@ struct ChannelSelectionView: View {
                         ForEach(0..<device.channelTypes.count, id: \.self) { index in
                             let channelType = device.channelTypes[index]
                             Button(action: {
-                                selectedChannelIndex = index
-                                showChannelControl = true
+                                selectedChannel = ChannelInfo(
+                                    id: index,
+                                    type: channelType,
+                                    position: index + 1
+                                )
                             }) {
                                 HStack(spacing: 16) {
                                     // Channel number indicator
                                     ZStack {
                                         Circle()
-                                            .fill(channelType == "CCT" ? Color.orange.opacity(0.3) : Color.purple.opacity(0.3))
+                                            .fill(channelType == "CCT" ? Color.appOrange.opacity(0.3) : Color.appPurple.opacity(0.3))
                                             .frame(width: 50, height: 50)
                                         
                                         Text("\(index + 1)")
-                                            .font(.custom("Poppins-SemiBold", size: 18))
-                                            .foregroundColor(.white)
+                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                            .foregroundColor(.themeWhite)
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Channel \(index + 1)")
-                                            .font(.custom("Poppins-Medium", size: 16))
-                                            .foregroundColor(.white)
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                            .foregroundColor(.themeWhite)
                                         
                                         Text(channelType == "CCT" ? "Warm/Cool White" : "RGB Color")
-                                            .font(.custom("Poppins-Regular", size: 12))
-                                            .foregroundColor(channelType == "CCT" ? Color.orange : Color.purple)
+                                            .font(.system(size: 12, weight: .regular, design: .rounded))
+                                            .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     }
                                     
                                     Spacer()
@@ -76,29 +84,29 @@ struct ChannelSelectionView: View {
                                         Image(systemName: channelType == "CCT" ? "lightbulb.fill" : "paintpalette.fill")
                                             .font(.system(size: 14))
                                         Text(channelType)
-                                            .font(.custom("Poppins-Medium", size: 12))
+                                            .font(.system(size: 12, weight: .medium, design: .rounded))
                                     }
-                                    .foregroundColor(channelType == "CCT" ? .orange : .purple)
+                                    .foregroundColor(channelType == "CCT" ? Color.appOrange : Color.appPurple)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(channelType == "CCT" ? Color.orange.opacity(0.2) : Color.purple.opacity(0.2))
+                                            .fill(channelType == "CCT" ? Color.appOrange.opacity(0.2) : Color.appPurple.opacity(0.2))
                                     )
                                     
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.5))
+                                        .foregroundColor(.themeWhite.opacity(0.5))
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(hex: "#2A2D33"))
+                                        .fill(Color.appSurfaceSecondaryAlt)
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                        .stroke(Color.themeWhite.opacity(0.1), lineWidth: 1)
                                 )
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -110,47 +118,41 @@ struct ChannelSelectionView: View {
                 
                 Spacer()
             }
-            .background(Color(hex: "#1A1C20").ignoresSafeArea())
+            .background(Color.appSurfaceDeep.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Close")
-                                .font(.custom("Poppins-Medium", size: 14))
-                        }
-                        .foregroundColor(.white)
-                    }
+                    LimiBackButton(icon: "xmark") { dismiss() }
                 }
-                
+
                 ToolbarItem(placement: .principal) {
                     Text("Device Channels")
-                        .font(.custom("Poppins-SemiBold", size: 17))
-                        .foregroundColor(.white)
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Text("Advanced")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.orbGlow4)
+                    }
                 }
             }
-            .fullScreenCover(isPresented: $showChannelControl) {
-                if let index = selectedChannelIndex {
-                    let channelType = device.channelTypes[index]
-                    let channelPosition = index + 1  // 1-based channel position
-                    
-                    if channelType == "CCT" {
-                        CCTLEDView(
-                            chennalMac: device.chennalMac,
-                            chennelPosition: channelPosition
-                        )
-                    } else {
-                        WLEDView(
-                            chennalMac: device.chennalMac,
-                            chennelPosition: channelPosition
-                        )
-                    }
+            .sheet(item: $selectedChannel) { channel in
+                if channel.type == "CCT" {
+                    CCTLEDView(
+                        chennalMac: device.chennalMac,
+                        chennelPosition: channel.position
+                    )
+                } else {
+                    WLEDView(
+                        chennalMac: device.chennalMac,
+                        chennelPosition: channel.position
+                    )
                 }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

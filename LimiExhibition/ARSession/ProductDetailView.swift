@@ -46,12 +46,12 @@ struct ProductDetailView: View {
                                 .font(.system(size: 13))
             
                         }
-                    }).tint(.black)
+                    }).tint(.themeBlack)
                     .padding()
-                    .background(Capsule().fill(Color.white))
+                    .background(Capsule().fill(Color.themeWhite))
                     .overlay(
                         Capsule()
-                            .stroke(Color.black, lineWidth: 1)
+                            .stroke(Color.themeBlack, lineWidth: 1)
                             .frame(height: 40)
                     )
                     .fullScreenCover(isPresented: $arIsPresented, content: {

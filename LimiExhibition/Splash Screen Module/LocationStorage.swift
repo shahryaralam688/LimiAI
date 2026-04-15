@@ -15,7 +15,7 @@
 //    var body: some View {
 //        ZStack {
 //            // Background color
-//            Color(hex: "#111214")
+//            Color.appCanvasPrimary
 //                .ignoresSafeArea(.all)
 //            
 //            
@@ -31,8 +31,8 @@
 //                    // Bottom gradient overlay
 //                    LinearGradient(
 //                        gradient: Gradient(colors: [
-//                            Color(hex: "#111214"),
-//                            Color(hex: "#111214")
+//                            Color.appCanvasPrimary,
+//                            Color.appCanvasPrimary
 //                        ]),
 //                        startPoint: .bottom,
 //                        endPoint: .top

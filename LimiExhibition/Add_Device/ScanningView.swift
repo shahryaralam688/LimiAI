@@ -36,14 +36,8 @@ struct ScanningView: View {
             VStack(spacing: 24) {
                 // Navigation bar
                 HStack {
-                    Button(action: {
+                    LimiBackButton {
                         onBack()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.white)
-                            .font(.title2)
-                            .padding()
-                            .background(Circle().fill(Color.black.opacity(0.3)))
                     }
                     Spacer()
                 }
@@ -71,7 +65,7 @@ struct ScanningView: View {
                     // Rotating circle
                     Circle()
                         .trim(from: 0, to: 0.8)
-                        .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                        .stroke(Color.themeWhite.opacity(0.5), lineWidth: 1)
                         .frame(width: 280, height: 280)
                         .rotationEffect(Angle(degrees: rotation))
                         .onAppear {
@@ -98,7 +92,7 @@ struct ScanningView: View {
                             .frame(width: 100, height: 100)
                         Text("\(Int(currentProgress))%")
                             .font(.system(size: 36, weight: .medium))
-                            .foregroundColor(Color.charlestonGreen)
+                            .foregroundColor(.appTextInverse)
                     }
                 }
                 .frame(height: 300)
@@ -145,7 +139,7 @@ struct ScanningView: View {
                 VStack(spacing: 16) {
                     Text("Discovered Devices")
                         .font(.headline)
-                        .foregroundColor(.charlestonGreen)
+                        .foregroundColor(.appTextInverse)
                     
                     ScrollView {
                         VStack(spacing: 8) {
@@ -159,44 +153,14 @@ struct ScanningView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color.alabaster.opacity(0.9))
                                     .cornerRadius(8)
-                                    .foregroundColor(.charlestonGreen)
+                                    .foregroundColor(.appTextInverse)
                                     .onTapGesture {
                                         isLoading = true
                                         print("⚠️ DEPRECATED: ScanningView flow is deprecated. Please use DemoScanDevicesView for proper WiFi provisioning.")
                                         // Show alert to user instead of breaking flow
                                         showDeprecatedAlert = true
                                         isLoading = false
-//                                                // Then handle the connection logic
-//                                                let receivedBytes = SharedDevice.shared.lastReceivedBytes
-//                                                print("⚡️ Checking received bytes: \(receivedBytes)")
-//                                                
-//                                                showDevicesList = false
-//                                                if UserRoleManager.shared.currentRole == .productionUser  {
-//                                                    showDeveloperModeAlert = true
-//                                                    let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-//                                                    let window = windowScene?.windows.first
-//                                                    window?.rootViewController = UIHostingController(rootView: ContentView())
-//                                                    
-//                                                } else {
-//                                                        if !SharedDevice.shared.lastReceivedBytes.isEmpty &&
-//                                                       SharedDevice.shared.lastReceivedBytes[0] == 91 {
-//                                                        print("✅ Normal mode detected: \(SharedDevice.shared.lastReceivedBytes)")
-//                                                        print("Regular user - showing hub home")
-//                                                        showHubHomeView = true
-//                                                        
-//                                                        // Send device info to the API
-//                                                        let deviceInfo = String(describing: SharedDevice.shared.connectedDevice)
-//                                                        sendDeviceInfo(deviceInfo: deviceInfo)
-//
-//                                                    } else {
-//                                                        print("❌ Invalid mode")
-//                                                        print("Expected: Normal mode (91)")
-//                                                        print("Received: \(SharedDevice.shared.lastReceivedBytes)")
-//                                                        bluetoothManager.disconnectCurrentDevice()
-//                                                        showOfflineAlert = true
-//                                                    }
-//                                                }
-//                                            }
+
                                     }
                             }
                         }
@@ -255,14 +219,14 @@ struct ScanningView: View {
         }
         // Inside the main ZStack, after all other views and alerts
         if isLoading {
-            Color.black.opacity(0.5)
+            Color.themeBlack.opacity(0.5)
                 .edgesIgnoringSafeArea(.all)
             VStack {
                 ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
                     .scaleEffect(2)
                 Text("Connecting with Device")
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .font(.headline)
                     .padding(.top, 20)
             }
@@ -322,7 +286,7 @@ struct ScanningView: View {
     }
     
     private func openBluetoothSettings() {
-        if let url = URL(string: "App-Prefs:root=Bluetooth"),
+        if let url = URL(string: AppURLs.Settings.bluetooth),
            UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }

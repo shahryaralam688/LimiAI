@@ -183,35 +183,24 @@ struct LimiWebView: UIViewRepresentable {
 
 
 struct LimiContentView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var navigateToARPortal = false
     @State private var showNoLiDARAlert = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .topLeading) {
                 if let token = AuthManager.shared.getToken(),
-                   let url = URL(string: "https://limi-configurator-ios.vercel.app/configurator?token=\(token)") {
+                   let url = URL(string: AppURLs.Web.configurator(token: token)) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
-                } else if let url = URL(string: "https://limi-configurator-ios.vercel.app/configurator") {
+                } else if let url = URL(string: AppURLs.Web.configurator()) {
                     LimiWebView(url: url)
                         .ignoresSafeArea(.all)
                 }
                 HStack{
                     // 🔙 Back Button
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 20, weight: .bold))
-                            .frame(width: 34, height: 34) // fixed size
-                            .background(
-                                Circle()
-                                    .fill(Color.charlestonGreen)
-                            )
-                    }
+                    LimiBackButton { dismiss() }
 
                     // 🟩 ARKit Button
                     Button(action: {
@@ -224,12 +213,12 @@ struct LimiContentView: View {
                         }
                     }) {
                         Image(systemName: "arkit")
-                            .foregroundColor(.alabaster)
+                            .foregroundColor(.appTextPrimary)
                             .font(.system(size: 20, weight: .bold))
                             .frame(width: 34, height: 34) // same fixed size
                             .background(
                                 Circle()
-                                    .fill(Color.charlestonGreen)
+                                    .fill(Color.appCanvasPrimary)
                             )
                     }
 
@@ -239,7 +228,7 @@ struct LimiContentView: View {
                 .padding(.horizontal, 24)
 
             }
-            .background(Color.charlestonGreen)
+            .background(Color.appCanvasPrimary)
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $navigateToARPortal) {
                 PortalWebView()
@@ -255,7 +244,7 @@ struct LimiContentView: View {
         }
         .onAppear {
             if let token = AuthManager.shared.getToken() {
-                let url = "https://limi-configurator-ios.vercel.app/configurator?token=\(token)"
+                let url = AppURLs.Web.configurator(token: token)
                 print("Configurator URL: \(url)")
             } else {
                 print("No token found")

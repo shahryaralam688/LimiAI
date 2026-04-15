@@ -18,7 +18,7 @@ struct DeafPersonIllustration: View {
             VStack(spacing: 0) {
                 // Animated head
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 25, height: 25)
                     .offset(y: headAnimation ? -2 : 0)
                     .animation(
@@ -29,7 +29,7 @@ struct DeafPersonIllustration: View {
                 
                 // Body
                 Rectangle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 20, height: 30)
                     .cornerRadius(8)
             }
@@ -37,7 +37,7 @@ struct DeafPersonIllustration: View {
             
             // Animated phone
             PhoneShape()
-                .fill(Color.white)
+                .fill(Color.themeWhite)
                 .frame(width: 18, height: 32)
                 .offset(x: 15, y: phoneAnimation ? 3 : 7)
                 .rotationEffect(.degrees(phoneAnimation ? 10 : -10))
@@ -82,13 +82,13 @@ struct InterpreterIllustration: View {
             VStack(spacing: 0) {
                 // Head with slight movement
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 25, height: 25)
                     .offset(y: bodyAnimation ? -2 : 0)
                 
                 // Body
                 Rectangle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 20, height: 30)
                     .cornerRadius(8)
             }
@@ -103,13 +103,13 @@ struct InterpreterIllustration: View {
             HStack(spacing: 25) {
                 // Left hand
                 HandShape()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 15, height: 20)
                     .rotationEffect(.degrees(handAnimation ? -30 : 0))
                 
                 // Right hand
                 HandShape()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 15, height: 20)
                     .rotationEffect(.degrees(handAnimation ? 30 : 0))
             }

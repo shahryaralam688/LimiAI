@@ -7,7 +7,7 @@ struct FileListView: View {
     @State private var errorMessage = ""
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List(fileNames, id: \.self) { file in
                 Button(action: {
                     if let url = RoominatorFileManager.shared.getUSDZFileURL(for: file) {
@@ -25,7 +25,7 @@ struct FileListView: View {
                 }) {
                     HStack {
                         Image(systemName: "cube.box")
-                            .foregroundColor(.blue)
+                            .foregroundColor(.orbGlow4)
                         
                         VStack(alignment: .leading) {
                             Text(file)
@@ -38,7 +38,7 @@ struct FileListView: View {
                                 
                                 Text("\(modDate, formatter: dateFormatter) • \(formatFileSize(fileSize))")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.appTextMuted)
                             }
                         }
                     }

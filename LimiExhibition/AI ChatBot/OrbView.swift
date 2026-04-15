@@ -243,12 +243,12 @@ struct OrbShowcase: View {
                 .frame(width: 300, height: 300)
                 .background(Color.clear)
             Text("Animation Intensity:")
-                .foregroundColor(.white)
+                .foregroundColor(.themeWhite)
             Slider(value: $intensity, in: 0.5...120, step: 0.5)
                 .padding(.horizontal)
         }
         .padding()
-        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .background(Color.themeBlack.edgesIgnoringSafeArea(.all))
     }
 }
 

@@ -29,22 +29,22 @@ struct AIButtonView: View {
                 HStack {
                     Image(systemName: isAIModeActive ? "stop.circle.fill" : "waveform.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(isAIModeActive ? .red : .white)
+                        .foregroundColor(isAIModeActive ? .red : .themeWhite)
                     
                     Text(isAIModeActive ? "Stop AI" : "Limi")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isAIModeActive ? Color.red.opacity(0.3) : Color.black.opacity(0.5))
-                        .shadow(color: isAIModeActive ? .red.opacity(0.6) : .black.opacity(0.3), radius: 5)
+                        .fill(isAIModeActive ? Color.red.opacity(0.3) : Color.themeBlack.opacity(0.5))
+                        .shadow(color: isAIModeActive ? .red.opacity(0.6) : .themeBlack.opacity(0.3), radius: 5)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(isAIModeActive ? Color.red : Color.white.opacity(0.5), lineWidth: 1)
+                        .stroke(isAIModeActive ? Color.red : Color.themeWhite.opacity(0.5), lineWidth: 1)
                 )
                 .opacity(isOn ? 1.0 : 0.5) // Show as faded when disabled
             }
@@ -53,10 +53,10 @@ struct AIButtonView: View {
             if showToast {
                 Text("AI adjusting environment...")
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.black.opacity(0.7))
+                    .background(Color.themeBlack.opacity(0.7))
                     .cornerRadius(8)
                     .transition(.opacity)
                     .onAppear {

@@ -1,5 +1,5 @@
 //
-//  NotificationView 2.swift
+//  PrivacyPolicyView.swift
 //  Limi
 //
 //  Created by Shahrukh Ahmed on 20/11/2025.
@@ -27,16 +27,9 @@ struct PrivacyPolicyView: View {
         VStack{
             VStack{
                 HStack {
-                    Button(action: {
+                    LimiBackButton {
                         onBack()
                         dismiss()
-                    }) {
-                        Image("Solid arrow right sm")
-                            .foregroundColor(.alabaster)
-                            .font(.system(size: 18, weight: .medium))
-                            .frame(width: 44, height: 44)
-                            .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
                     Text("Privacy Policy")
@@ -50,7 +43,7 @@ struct PrivacyPolicyView: View {
                 .frame(height: 124)
                 .background(
                     RoundedRectangle(cornerRadius: 0)
-                        .fill(Color(hex: "#393C43"))
+                        .fill(Color.appSurfaceTertiary)
                         .clipShape(
                         .rect(
                             topLeadingRadius: 40,
@@ -65,17 +58,9 @@ struct PrivacyPolicyView: View {
             Spacer()
             ScrollView{
                 VStack(alignment: .leading, spacing: 16) {
-                    Button(action: {
+                    LimiPrimaryButton(title: "Grant Google Permissions") {
                         print("[PrivacyPolicyView] Grant Google Permissions button tapped")
                         showGooglePermissionAlert = true
-                    }) {
-                        Text("Grant Google Permissions")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.blue)
-                            .cornerRadius(12)
                     }
                     .disabled(isRequestingGooglePermissions)
                     .alert("Google Permissions", isPresented: $showGooglePermissionAlert) {
@@ -87,12 +72,7 @@ struct PrivacyPolicyView: View {
                             guard !isRequestingGooglePermissions else { return }
                             print("[PrivacyPolicyView] Starting Google permissions request...")
                             isRequestingGooglePermissions = true
-                            let scopes = [
-                                "https://www.googleapis.com/auth/calendar",
-                                "https://www.googleapis.com/auth/gmail.send",
-                                "https://www.googleapis.com/auth/gmail.readonly",
-                                "https://www.googleapis.com/auth/contacts.readonly"
-                            ]
+                            let scopes = AppURLs.External.googleScopes
                             print("[PrivacyPolicyView] Requesting Google permissions with scopes: \(scopes)")
                             googleAuthManager.requestGooglePermissions(scopes: scopes) { success in
                                 print("[PrivacyPolicyView] Google permissions request completed. Success = \(success)")
@@ -175,7 +155,7 @@ If you have any questions about this Privacy Policy or our data practices, pleas
 [Email Address]
 [Contact Address]
 """)
-                    .foregroundColor(.white)
+                    .foregroundColor(.appTextSecondary)
                     .padding(.top, 8)
                 }
                 .padding()

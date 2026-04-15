@@ -26,14 +26,14 @@ struct SubDevicesView: View {
             HStack {
                 Text("Settings")
                     .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding()
                     .padding(.top, 40)
                 Spacer()
             }
             .background(
                 Rectangle()
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
                     .frame(height: 114)
                     .cornerRadius(40)
             )
@@ -43,7 +43,7 @@ struct SubDevicesView: View {
             VStack {
                 HStack {
                     Text("Connected Devices")
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -59,7 +59,7 @@ struct SubDevicesView: View {
                 }
             }
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.appCanvasPrimary.ignoresSafeArea())
     }
     
     
@@ -74,12 +74,12 @@ struct SubDevicesView: View {
                 HStack {
                     ZStack {
                         Circle()
-                            .fill(Color(hex: "#2C2F33"))
+                            .fill(Color.appSurfaceCard)
                             .frame(width: 45, height: 45)
                         
                         Image(systemName: "home")
                             .font(.title2)
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                     }
                     Spacer()
                 }
@@ -89,12 +89,12 @@ struct SubDevicesView: View {
                     Text(deviceName)
                         .font(.custom("Lexend", size: 17))
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                         .lineLimit(2)
                     
                     Text("\(channelCount) channels")
                         .font(.custom("Lexend", size: 13))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.themeWhite.opacity(0.6))
                 }
                 
                 Spacer()
@@ -104,7 +104,7 @@ struct SubDevicesView: View {
                     Text(isOn ? "On" : "Off")
                         .font(.custom("Inter", size: 16))
                         .fontWeight(.medium)
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                     
                     Spacer()
                     
@@ -114,12 +114,12 @@ struct SubDevicesView: View {
                     }) {
                         ZStack {
                             Rectangle()
-                                .fill(isOn ? Color.green : Color(hex: "#292929"))
+                                .fill(isOn ? Color.green : Color.appCanvasHotel)
                                 .frame(width: 50, height: 26)
                                 .cornerRadius(100)
                             
                             Circle()
-                                .fill(Color.white)
+                                .fill(Color.themeWhite)
                                 .frame(width: 20, height: 20)
                                 .offset(x: isOn ? 12 : -12)
                                 .animation(.easeInOut(duration: 0.2), value: isOn)
@@ -131,7 +131,7 @@ struct SubDevicesView: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(hex: "#393C43"))
+                    .fill(Color.appSurfaceTertiary)
             )
             .frame(width: 163.5, height: 207)
         }

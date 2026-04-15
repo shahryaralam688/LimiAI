@@ -28,7 +28,7 @@ struct HubCHView: View {
                 .padding()
             }
         }
-        .background(ElegantGradientBackgroundView())
+        .background(DeepSpaceBackground())
 
     }
 }
@@ -63,7 +63,7 @@ struct CardView: View {
             }) {
                 Text("Ch-\(cardNumber)")
                     .font(.title)
-                    .foregroundColor(.black)
+                    .foregroundColor(.themeBlack)
                     .opacity(buttonOpacity)
                     .animation(isAnimating ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .none, value: buttonOpacity)
             }

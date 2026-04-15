@@ -21,7 +21,7 @@ struct HubCardContent: View {
             HStack {
                 Image(systemName: "house.fill")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                 Spacer()
             }
             .padding(10)
@@ -30,7 +30,7 @@ struct HubCardContent: View {
                 Text(bluetoothManager.connectedDeviceName ?? hub.name)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.alabaster)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(10)
@@ -52,11 +52,11 @@ struct HubCardContent: View {
         .frame(height: 165.5)
         .frame(height: 160)
         .background(
-            Color(hex: "#24262B")
+            Color.appSurfacePrimary
 
         )
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.themeBlack.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 

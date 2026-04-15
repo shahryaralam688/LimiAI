@@ -143,9 +143,9 @@ struct CompactWaveform: View {
 #Preview {
     VStack(spacing: 20) {
         // Speaking state
-        AIResponseIndicator(isAISpeaking: true, barColor: .white)
+        AIResponseIndicator(isAISpeaking: true, barColor: .themeWhite)
 
     }
     .padding()
-    .background(Color.black)
+    .background(Color.themeBlack)
 }

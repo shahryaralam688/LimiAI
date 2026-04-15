@@ -18,7 +18,7 @@ struct AddDevicesView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Add your devices")
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .padding(.top, 20)
                 
                 Text("Select the method of adding the device")
@@ -83,7 +83,7 @@ struct AddDevicesView: View {
         .background(
             RoundedRectangle(cornerRadius: 30)
                 .fill(Color.alabaster.opacity(0.9))
-                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .shadow(color: Color.themeBlack.opacity(0.1), radius: 20, x: 0, y: 10)
         )
         .padding(.horizontal, 16)
         .padding(.vertical, 20)
@@ -141,13 +141,13 @@ struct ConnectionOptionCard: View {
                     
                     Image(systemName: icon)
                         .font(.system(size: 22))
-                        .foregroundColor(.white)
+                        .foregroundColor(.themeWhite)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.charlestonGreen)
+                        .foregroundColor(.appTextInverse)
                     
                     Text(description)
                         .font(.system(size: 14))
@@ -159,10 +159,10 @@ struct ConnectionOptionCard: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
             }
             .padding()
-            .background(Color.white)
+            .background(Color.themeWhite)
             .cornerRadius(16)
             .shadow(color: Color.charlestonGreen.opacity(0.05), radius: 10, x: 0, y: 5)
             .scaleEffect(isPressed ? 0.97 : 1.0)

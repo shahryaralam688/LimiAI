@@ -13,7 +13,7 @@ struct ModelListView: View {
     @State private var files: [String] = []
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(files, id: \.self) { file in
                     NavigationLink(destination: ModelEditorView(modelName: file)) {
@@ -22,7 +22,7 @@ struct ModelListView: View {
                 }
             }
             .navigationTitle("Edit 3D Models")
-
+            .background(Color.appCanvasPrimary.ignoresSafeArea())
             .onAppear(perform: refreshFileList)
         }
     }

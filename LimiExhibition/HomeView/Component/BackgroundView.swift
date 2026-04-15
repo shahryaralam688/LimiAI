@@ -19,7 +19,7 @@ struct BackgroundView: View {
             
             // Animated overlay gradient for dynamic effect
             RadialGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.3), Color.clear]),
+                gradient: Gradient(colors: [Color.themeWhite.opacity(0.3), Color.clear]),
                 center: .topLeading,
                 startRadius: 0,
                 endRadius: UIScreen.main.bounds.width * 1.3
@@ -36,7 +36,7 @@ struct BackgroundView: View {
             ZStack {
                 ForEach(0..<5) { i in
                     Circle()
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.themeWhite.opacity(0.05))
                         .frame(width: CGFloat.random(in: 100...200))
                         .position(
                             x: CGFloat.random(in: 0...UIScreen.main.bounds.width),

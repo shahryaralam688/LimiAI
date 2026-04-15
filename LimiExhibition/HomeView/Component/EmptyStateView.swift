@@ -37,7 +37,7 @@ struct EmptyStateView: View {
             VStack(spacing: 10) {
                 Text("No devices linked yet")
                     .font(.headline)
-                    .foregroundColor(.charlestonGreen)
+                    .foregroundColor(.appTextInverse)
                     .opacity(isLoaded ? 1 : 0)
                     .animation(.easeIn.delay(0.6), value: isLoaded)
                 
@@ -57,7 +57,7 @@ struct EmptyStateView: View {
                         Text("Add Device")
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.themeWhite)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 20)
                     .background(

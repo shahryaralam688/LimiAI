@@ -20,6 +20,36 @@ enum VoiceConnectionState: String {
     case error = "Error"
 }
 
+// MARK: - Tool Call Models
+
+struct LimiToolCall: Identifiable {
+    let id = UUID()
+    let callId: String
+    let name: String
+    let action: String
+    let mode: String?
+    let brightness: Int?
+    let room: String?
+    let userText: String?
+    let timestamp: Date = Date()
+
+    var displayText: String {
+        switch action {
+        case "turn_on":
+            return "Turning on lights\(room.map { " in \($0)" } ?? "")"
+        case "turn_off":
+            return "Turning off lights\(room.map { " in \($0)" } ?? "")"
+        case "set_mode":
+            return "Setting \(mode ?? "mode")\(room.map { " in \($0)" } ?? "")"
+        case "set_brightness":
+            let pct = brightness.map { "\($0)" } ?? "—"
+            return "Setting brightness to \(pct)\(room.map { " in \($0)" } ?? "")"
+        default:
+            return "Controlling lights\(room.map { " in \($0)" } ?? "")"
+        }
+    }
+}
+
 // MARK: - WebRTC Client
 final class WebRTCVoiceClient: NSObject, ObservableObject {
     // Public
@@ -32,11 +62,15 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     // High-level speaking state for UI (user/assistant/idle)
     @Published var isUserSpeaking: Bool = false
     @Published var isAssistantSpeaking: Bool = false
+    /// Short message for alerts when connection fails (auth, session, etc.).
+    @Published var lastUserVisibleError: String?
+    /// Latest tool call from OpenAI (e.g. control_light) for UI feedback.
+    @Published var lastToolCall: LimiToolCall?
 
     // Configure this to your backend base URL (must be HTTPS in production)
     private let backendBaseURL: URL
     // Optional webhook to forward conversation events
-    private let webhookURL: URL? = URL(string: APIConstants.webHook)
+    private let webhookURL: URL? = URL(string: "https://dev.api.limitless-lighting.co.uk/limi-ai/webhook")
     // RTC
     private var factory: RTCPeerConnectionFactory!
     private var peerConnection: RTCPeerConnection?
@@ -48,8 +82,10 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     private var maxReconnectAttempts = 3
     private var reconnectWorkItem: DispatchWorkItem?
 
-    // Token
+    // Session (populated from backend /limi-ai/session response)
     private var ephemeralKey: String?
+    private var sessionId: String?
+    private var sessionModel: String?
 
     // Queues
     private let workQueue = DispatchQueue(label: "webrtc.voice.client")
@@ -83,6 +119,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             req.httpMethod = "POST"
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.setValue("application/json", forHTTPHeaderField: "Accept")
+            if let token = webhookTokenHeaderValue() {
+                req.setValue(token, forHTTPHeaderField: "Authorization")
+            }
             req.httpBody = data
             
             if let jsonString = String(data: data, encoding: .utf8) {
@@ -110,8 +149,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     // MARK: Public API
     func start() {
         guard state != .connecting && state != .connected else { return }
+        lastUserVisibleError = nil
         state = .connecting
-        log("Starting voice session…")
+        log("🚀 START — backendBaseURL: \(backendBaseURL.absoluteString)")
         postWebhook(event: "session_start", payload: [:])
         requestMicPermission { [weak self] granted in
             guard let self else { return }
@@ -137,6 +177,8 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         reconnectWorkItem?.cancel()
         reconnectWorkItem = nil
         ephemeralKey = nil
+        sessionId = nil
+        sessionModel = nil
         tearDownPeer()
         state = .disconnected
         log("Stopped voice session")
@@ -471,80 +513,111 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     }
 
     // MARK: Backend
-    private struct TokenResponse: Decodable { let key: String }
-    private struct SDPObject: Codable { let type: String; let sdp: String }
-    private struct OfferRequest: Codable { let key: String; let sdp: String }
-    private struct AnswerResponse: Decodable { let sdp: String }
-    private struct IceCandidatePayload: Codable {
+
+    /// Backend controls model, voice, instructions, and tools — frontend does not send them.
+    private struct SessionResponse: Decodable {
         let key: String
-        let candidate: String
-        let sdpMid: String?
-        let sdpMLineIndex: Int32
+        let sessionId: String?
+        let expiresAt: Int?
+        let model: String?
+        let voice: String?
+        let instructions: String?
+        // tools is complex nested JSON managed by backend; skip full decode
     }
 
     private func fetchEphemeralKey(completion: @escaping (Result<String, Error>) -> Void) {
-        // Check if we have a valid authentication token
-        guard let authToken = AuthManager.shared.getToken() else {
+        // Check if we have a valid authentication token (Bearer aligned with other API routes)
+        guard let authHeader = AuthManager.shared.authorizationHeaderValue() else {
             log("❌ No valid authentication token available")
+            let msg = "Sign in to use voice — Limi couldn’t find your session."
             DispatchQueue.main.async {
-                completion(.failure(NSError(domain: "auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "No authentication token available"])))
+                self.lastUserVisibleError = msg
+                completion(.failure(NSError(domain: "auth", code: -1, userInfo: [NSLocalizedDescriptionKey: msg])))
             }
             return
         }
         
-        let url = backendBaseURL.appendingPathComponent("limi-ai/session")
+        let urlString = backendBaseURL.absoluteString.hasSuffix("/")
+            ? backendBaseURL.absoluteString + "limi-ai/session"
+            : backendBaseURL.absoluteString + "/limi-ai/session"
+        guard let url = URL(string: urlString) else {
+            log("❌ Invalid session URL: \(urlString)")
+            completion(.failure(NSError(domain: "url", code: -1)))
+            return
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("\(authToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(authHeader, forHTTPHeaderField: "Authorization")
 
-        // Log outgoing request
-        log("➡️ Request: Post \(url.absoluteString)")
-        if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
-            log("➡️ Headers: \(headers)")
-        }
+        log("➡️ Request: POST \(url.absoluteString)")
+        log("➡️ Auth: \(authHeader.prefix(20))…")
 
-        URLSession.shared.dataTask(with: request) { data, resp, err in
-            // Log response status and headers
+        URLSession.shared.dataTask(with: request) { [weak self] data, resp, err in
+            guard let self else { return }
             if let http = resp as? HTTPURLResponse {
                 self.log("⬅️ Status: \(http.statusCode) from \(url.host ?? "?")")
                 self.log("⬅️ Response Headers: \(http.allHeaderFields)")
             }
 
             if let err {
-                self.log("❌ Token request error: \(err.localizedDescription)")
-                DispatchQueue.main.async { completion(.failure(err)) }
+                self.log("❌ Session request error: \(err.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.lastUserVisibleError = "Network error — check your connection and try again."
+                    completion(.failure(err))
+                }
+                return
+            }
+            if let http = resp as? HTTPURLResponse, !(200 ... 299).contains(http.statusCode) {
+                let responseBody = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<empty>"
+                self.log("❌ Session endpoint HTTP \(http.statusCode) — URL: \(url.absoluteString)")
+                self.log("❌ Response body: \(responseBody)")
+                let msg: String
+                if http.statusCode == 401 {
+                    msg = "Session expired or not allowed. Sign in again to use voice."
+                } else {
+                    msg = "Could not start voice (error \(http.statusCode)). Tap to retry."
+                }
+                DispatchQueue.main.async {
+                    self.lastUserVisibleError = msg
+                    completion(.failure(NSError(domain: "limi.session", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: msg])))
+                }
                 return
             }
             guard let data else {
-                self.log("❌ Token response had empty body")
-                DispatchQueue.main.async { completion(.failure(NSError(domain: "token", code: -1))) }
+                self.log("❌ Session response had empty body")
+                DispatchQueue.main.async {
+                    self.lastUserVisibleError = "Invalid response from voice service."
+                    completion(.failure(NSError(domain: "session", code: -1)))
+                }
                 return
             }
 
-            // Log raw body
             if let body = String(data: data, encoding: .utf8) {
                 self.log("⬅️ Body: \(body)")
             }
 
             do {
-                let t = try JSONDecoder().decode(TokenResponse.self, from: data)
-                self.log("✅ Parsed token key: \(t.key)")
-                DispatchQueue.main.async { completion(.success(t.key)) }
+                let session = try JSONDecoder().decode(SessionResponse.self, from: data)
+                self.sessionId = session.sessionId
+                self.sessionModel = session.model
+                self.log("✅ Session: key=\(session.key.prefix(12))… id=\(session.sessionId ?? "-") model=\(session.model ?? "-") voice=\(session.voice ?? "-")")
+                DispatchQueue.main.async { completion(.success(session.key)) }
             } catch {
-                self.log("❌ Token decode error: \(error.localizedDescription)")
-                DispatchQueue.main.async { completion(.failure(error)) }
+                self.log("❌ Session decode error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.lastUserVisibleError = "Voice session response was invalid. Try again later."
+                    completion(.failure(error))
+                }
             }
         }.resume()
     }
 
     private func sendOfferToBackend(offer: RTCSessionDescription) {
         guard let key = ephemeralKey else { fail("Missing ephemeral key"); return }
-        // OpenAI Realtime WebRTC expects POST to /v1/realtime?model=...
-        // with headers: Authorization: Bearer <ephemeral-key>, OpenAI-Beta: realtime=v1, Content-Type: application/sdp
-        // and raw SDP in the body, returning SDP answer as text.
-        let model = "gpt-realtime"
-        guard let url = URL(string: "https://api.openai.com/v1/realtime?model=\(model)") else { fail("Invalid OpenAI URL"); return }
+        let model = sessionModel ?? "gpt-realtime"
+        guard let url = URL(string: AppURLs.External.openAIRealtime(model: model)) else { fail("Invalid OpenAI URL"); return }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
@@ -559,12 +632,14 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         URLSession.shared.dataTask(with: request) { [weak self] data, resp, err in
             guard let self else { return }
             if let http = resp as? HTTPURLResponse {
-                self.log("⬅️ Status: \(http.statusCode) from \(url.host ?? "?")")
-                self.log("⬅️ Response Headers: \(http.allHeaderFields)")
+                self.log("⬅️ OpenAI Status: \(http.statusCode) from \(url.absoluteString)")
+                if !(200...299).contains(http.statusCode) {
+                    let body = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<empty>"
+                    self.log("❌ OpenAI error \(http.statusCode): \(body)")
+                }
             }
             if let err { self.fail("Offer POST error: \(err.localizedDescription)"); return }
             guard let data else { self.fail("Empty answer body"); return }
-            // Try to decode as text SDP first; if it's JSON, log the error JSON explicitly
             if let contentType = (resp as? HTTPURLResponse)?.allHeaderFields["Content-Type"] as? String, contentType.contains("application/json"),
                let json = String(data: data, encoding: .utf8) {
                 self.fail("OpenAI error JSON: \(json)")
@@ -640,6 +715,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             req.httpMethod = "POST"
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.setValue("application/json", forHTTPHeaderField: "Accept")
+            if let token = webhookTokenHeaderValue() {
+                req.setValue(token, forHTTPHeaderField: "Authorization")
+            }
             req.httpBody = data
             
             // Log outgoing request
@@ -694,6 +772,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             // Only change state if not already in error state
             if self.state != .error {
                 self.state = .error
+            }
+            if self.lastUserVisibleError == nil {
+                self.lastUserVisibleError = message
             }
         }
         
@@ -803,6 +884,18 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         workQueue.asyncAfter(deadline: .now() + delay, execute: work)
         
         postWebhook(event: "reconnect_scheduled", payload: ["attempt": reconnectAttempts, "delay": delay])
+    }
+
+    /// Webhook auth header token (raw token only, no `Bearer` prefix).
+    private func webhookTokenHeaderValue() -> String? {
+        guard let raw = AuthManager.shared.getToken()?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else {
+            return nil
+        }
+        if raw.lowercased().hasPrefix("bearer ") {
+            return String(raw.dropFirst(7)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return raw
     }
 }
 
@@ -957,12 +1050,11 @@ extension WebRTCVoiceClient: RTCDataChannelDelegate {
 // MARK: - Realtime UI Helpers
 
 private extension WebRTCVoiceClient {
-    /// Handle generic OpenAI Realtime-style JSON payloads to update
-    /// user/assistant speaking state and transcript fields for the UI.
     func handleRealtimePayload(_ obj: [String: Any]) {
-        let lowercasedType = (obj["type"] as? String)?.lowercased() ?? ""
+        let eventType = (obj["type"] as? String) ?? ""
+        let lowercasedType = eventType.lowercased()
 
-        // Transcript handling (works with many schemas)
+        // Transcript handling
         if let transcript = obj["transcript"] as? String, !transcript.isEmpty {
             let isFinal = (obj["final"] as? Bool == true)
                         || (obj["is_final"] as? Bool == true)
@@ -978,7 +1070,12 @@ private extension WebRTCVoiceClient {
             }
         }
 
-        // Speaking state heuristics based on common event types
+        // Tool call handling: response.function_call_arguments.done
+        if lowercasedType == "response.function_call_arguments.done" {
+            handleFunctionCallDone(obj)
+        }
+
+        // Speaking state
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
 
@@ -987,16 +1084,103 @@ private extension WebRTCVoiceClient {
                 self.isUserSpeaking = true
             case "input_audio_buffer.speech_stopped":
                 self.isUserSpeaking = false
-
             case "response.audio.delta", "response.audio.started":
                 self.isAssistantSpeaking = true
             case "response.audio.completed", "response.completed":
                 self.isAssistantSpeaking = false
-
             default:
                 break
             }
         }
     }
-}
 
+    /// Parses a completed function call from OpenAI (e.g. control_light),
+    /// publishes it for UI feedback, sends the tool output back via data channel,
+    /// and forwards to the webhook.
+    func handleFunctionCallDone(_ obj: [String: Any]) {
+        let callId = obj["call_id"] as? String ?? UUID().uuidString
+        let name = obj["name"] as? String ?? ""
+        let argsString = obj["arguments"] as? String ?? "{}"
+
+        log("🔧 Tool call: \(name) id=\(callId) args=\(argsString)")
+
+        guard let argsData = argsString.data(using: .utf8),
+              let args = try? JSONSerialization.jsonObject(with: argsData) as? [String: Any] else {
+            log("❌ Failed to parse tool call arguments")
+            sendToolOutput(callId: callId, output: "{\"error\": \"Failed to parse arguments\"}")
+            return
+        }
+
+        let action = args["action"] as? String ?? "unknown"
+        let mode = args["mode"] as? String
+        let brightness = args["brightness"] as? Int
+        let room = args["room"] as? String
+        let userText = args["user_text"] as? String
+
+        let toolCall = LimiToolCall(
+            callId: callId,
+            name: name,
+            action: action,
+            mode: mode,
+            brightness: brightness,
+            room: room,
+            userText: userText
+        )
+
+        DispatchQueue.main.async { [weak self] in
+            self?.lastToolCall = toolCall
+        }
+
+        postWebhook(event: "tool_call", payload: [
+            "call_id": callId,
+            "name": name,
+            "action": action,
+            "mode": mode ?? "",
+            "brightness": brightness ?? -1,
+            "room": room ?? "",
+            "user_text": userText ?? ""
+        ])
+
+        let result: [String: Any] = [
+            "status": "ok",
+            "action": action,
+            "room": room ?? "default",
+            "executed": true
+        ]
+        if let resultData = try? JSONSerialization.data(withJSONObject: result),
+           let resultString = String(data: resultData, encoding: .utf8) {
+            sendToolOutput(callId: callId, output: resultString)
+        }
+    }
+
+    /// Sends tool call output back to OpenAI via the data channel so the model
+    /// can incorporate the result into its response.
+    func sendToolOutput(callId: String, output: String) {
+        guard let dc = dataChannel, dc.readyState == .open else {
+            log("⚠️ DataChannel not open — cannot send tool output for \(callId)")
+            return
+        }
+
+        let itemCreate: [String: Any] = [
+            "type": "conversation.item.create",
+            "item": [
+                "type": "function_call_output",
+                "call_id": callId,
+                "output": output
+            ]
+        ]
+
+        if let data = try? JSONSerialization.data(withJSONObject: itemCreate),
+           dc.sendData(RTCDataBuffer(data: data, isBinary: false)) {
+            log("✅ Sent tool output for \(callId)")
+        } else {
+            log("❌ Failed to send tool output for \(callId)")
+        }
+
+        let responseCreate: [String: Any] = ["type": "response.create"]
+        if let data = try? JSONSerialization.data(withJSONObject: responseCreate) {
+            dc.sendData(RTCDataBuffer(data: data, isBinary: false))
+            log("✅ Sent response.create after tool output")
+        }
+    }
+}

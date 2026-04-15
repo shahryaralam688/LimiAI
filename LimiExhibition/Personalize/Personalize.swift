@@ -9,6 +9,15 @@ enum UseCase: String, CaseIterable, Codable, Identifiable {
     case others = "Others"
 
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .home: return "house.fill"
+        case .business: return "building.2.fill"
+        case .hospitality: return "bed.double.fill"
+        case .others: return "sparkles"
+        }
+    }
 }
 
 enum Goal: String, CaseIterable, Codable, Identifiable {
@@ -20,6 +29,17 @@ enum Goal: String, CaseIterable, Codable, Identifiable {
     case experimenting = "Experimenting"
 
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .aiAutomation: return "cpu"
+        case .smartControl: return "slider.horizontal.3"
+        case .energyManagement: return "bolt.fill"
+        case .security: return "shield.fill"
+        case .ambientExperience: return "light.max"
+        case .experimenting: return "flask.fill"
+        }
+    }
 }
 
 struct OnboardingData: Codable {
@@ -78,12 +98,11 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func completeOnboarding() {
-        // Prepare payload for backend user preference API
         let userName = name
         let whereLimiUsed = selectedUseCase?.rawValue
         let puroseOfLimi = Array(selectedGoals).map { $0.rawValue }
 
-        guard let url = URL(string: "https://dev.api.limitless-lighting.co.uk/sendUserPreference") else { return }
+        guard let url = URL(string: APIConstants.sendUserPreference) else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -96,7 +115,7 @@ final class OnboardingViewModel: ObservableObject {
         let body: [String: Any] = [
             "userName": userName,
             "whereLimiUsed": whereLimiUsed as Any,
-            "puroseOfLimi": puroseOfLimi
+            "purposeOfLimi": puroseOfLimi
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
@@ -106,11 +125,9 @@ final class OnboardingViewModel: ObservableObject {
                 print("[Onboarding] sendUserPreference error: \(error.localizedDescription)")
                 return
             }
-
             if let http = response as? HTTPURLResponse {
                 print("[Onboarding] sendUserPreference status: \(http.statusCode)")
             }
-
             if let data = data, let raw = String(data: data, encoding: .utf8) {
                 print("[Onboarding] sendUserPreference response: \(raw)")
             }
@@ -118,10 +135,10 @@ final class OnboardingViewModel: ObservableObject {
     }
 }
 
-// MARK: - Root App
+// MARK: - Root Preview
 
-#Preview{
-            OnboardingFlowView()
+#Preview {
+    OnboardingFlowView()
 }
 
 // MARK: - Flow Container
@@ -132,51 +149,61 @@ struct OnboardingFlowView: View {
     private let totalSteps: Int = 4
     @State private var showHomeView = false
     @State private var showDemoScanView = false
+    @State private var isCompleting = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                DeepSpaceBackground(showParticles: true)
 
                 VStack(spacing: 0) {
                     if step <= 3 {
-                        OnboardingHeader(step: step, total: totalSteps)
+                        OnboardingHeader(step: $step, total: totalSteps)
                     }
 
                     Spacer().frame(height: 24)
 
-                    switch step {
-                    case 1:
-                        NameStepView(
-                            name: $viewModel.name,
-                            onContinue: { step += 1 }
-                        )
-                    case 2:
-                        UseCaseStepView(
-                            selectedUseCase: $viewModel.selectedUseCase,
-                            onContinue: { step += 1 }
-                        )
-                    case 3:
-                        GoalsStepView(
-                            selectedGoals: $viewModel.selectedGoals,
-                            onContinue: { step += 1 }
-                        )
-                    default:
-                        BluetoothStepView(
-                            onSkip: {
-                                viewModel.bluetoothAllowed = false
-                                viewModel.completeOnboarding()
-                                AuthManager.shared.isAuthenticated = true
-                                showHomeView = true
-                            },
-                            onAllow: {
-                                viewModel.bluetoothAllowed = true
-                                viewModel.completeOnboarding()
-                                AuthManager.shared.isAuthenticated = true
-                                showDemoScanView = true
-                            }
-                        )
+                    Group {
+                        switch step {
+                        case 1:
+                            NameStepView(
+                                name: $viewModel.name,
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
+                            )
+                        case 2:
+                            UseCaseStepView(
+                                selectedUseCase: $viewModel.selectedUseCase,
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
+                            )
+                        case 3:
+                            GoalsStepView(
+                                selectedGoals: $viewModel.selectedGoals,
+                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
+                            )
+                        default:
+                            BluetoothStepView(
+                                onSkip: {
+                                    isCompleting = true
+                                    viewModel.bluetoothAllowed = false
+                                    viewModel.completeOnboarding()
+                                    AuthManager.shared.isAuthenticated = true
+                                    showHomeView = true
+                                },
+                                onAllow: {
+                                    isCompleting = true
+                                    viewModel.bluetoothAllowed = true
+                                    viewModel.completeOnboarding()
+                                    AuthManager.shared.isAuthenticated = true
+                                    showDemoScanView = true
+                                },
+                                isLoading: isCompleting
+                            )
+                        }
                     }
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                 }
                 .padding(.horizontal, 24)
             }
@@ -193,42 +220,37 @@ struct OnboardingFlowView: View {
 // MARK: - Shared Header
 
 struct OnboardingHeader: View {
-    let step: Int
+    @Binding var step: Int
     let total: Int
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         HStack {
-            Button(action: {
-                // let parent handle back if needed
-            }) {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(.white)
-                    .padding(10)
-                    .background(Color.white.opacity(0.08))
-                    .clipShape(Circle())
+            LimiBackButton {
+                if step > 1 {
+                    withAnimation(LimiMotion.smooth) { step -= 1 }
+                } else {
+                    dismiss()
+                }
             }
 
             Spacer()
 
-                Text("Personalize")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
+            Text("Personalize")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
 
             Spacer()
-            
+
             Text("\(step) of \(total)")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(Color(hex: "43EB25"))      // text color
-                .padding(.horizontal, 12)                   // Figma: padding X = 12
-                .padding(.vertical, 6)                      // Figma: padding Y = 6
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.orbGlow4)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(
-                    RoundedRectangle(cornerRadius: 11)      // Figma: corner radius = 11
-                        .fill(Color(hex: "17543B"))         // Figma: fill color
+                    Capsule()
+                        .fill(Color.orbGlow4.opacity(0.12))
                 )
-
-            
-
-//            Spacer().frame(width: 44) // balance chevron space
         }
         .padding(.top, 16)
     }
@@ -239,26 +261,34 @@ struct OnboardingHeader: View {
 struct NameStepView: View {
     @Binding var name: String
     var onContinue: () -> Void
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("What should we call you?")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .center)
+            VStack(spacing: 8) {
+                Text("What should we call you?")
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("Limi will use this to greet you")
+                    .font(.system(size: 14))
+                    .foregroundColor(.appTextSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
 
-            TextField("Enter Your Name", text: $name)
+            TextField("", text: $name, prompt: Text("Your name").foregroundColor(.appTextPlaceholder))
                 .textInputAutocapitalization(.words)
                 .disableAutocorrection(true)
-                .foregroundColor(.white)
-                .font(.system(size: 30, weight: .medium))
-                .padding(.vertical, 8)
+                .foregroundColor(.appTextPrimary)
+                .font(.system(size: 28, weight: .medium, design: .rounded))
+                .padding(.vertical, 12)
                 .overlay(
                     Rectangle()
                         .frame(height: 1)
-                        .foregroundColor(.white.opacity(0.3)),
+                        .foregroundColor(isFocused ? Color.orbGlow4.opacity(0.5) : Color.white.opacity(0.12)),
                     alignment: .bottom
                 )
+                .focused($isFocused)
 
             Spacer()
 
@@ -269,6 +299,7 @@ struct NameStepView: View {
             )
         }
         .padding(.bottom, 32)
+        .onAppear { isFocused = true }
     }
 }
 
@@ -281,24 +312,26 @@ struct UseCaseStepView: View {
     var body: some View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
-                Text("Where will you use LIMI?")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.white)
+                Text("Where will you use Limi?")
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-
-                Text("(Select any one)")
+                Text("Select one")
                     .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.appTextSecondary)
             }
 
-            Spacer().frame(height: 12)
+            Spacer().frame(height: 8)
 
             ForEach(UseCase.allCases) { option in
                 SelectableRow(
                     title: option.rawValue,
+                    icon: option.icon,
                     isSelected: selectedUseCase == option
                 ) {
-                    selectedUseCase = option
+                    withAnimation(LimiMotion.quick) {
+                        selectedUseCase = option
+                    }
                 }
             }
 
@@ -323,29 +356,31 @@ struct GoalsStepView: View {
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
-                Text("What do you want LIMI to help with?")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.white)
+                Text("What should Limi help with?")
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-
-                Text("(Select one or more)")
+                Text("Select one or more")
                     .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.appTextSecondary)
             }
 
-            Spacer().frame(height: 12)
+            Spacer().frame(height: 8)
 
-            ScrollView {
-                VStack(spacing: 16) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 12) {
                     ForEach(Goal.allCases) { goal in
                         SelectableRow(
                             title: goal.rawValue,
+                            icon: goal.icon,
                             isSelected: selectedGoals.contains(goal)
                         ) {
-                            if selectedGoals.contains(goal) {
-                                selectedGoals.remove(goal)
-                            } else {
-                                selectedGoals.insert(goal)
+                            withAnimation(LimiMotion.quick) {
+                                if selectedGoals.contains(goal) {
+                                    selectedGoals.remove(goal)
+                                } else {
+                                    selectedGoals.insert(goal)
+                                }
                             }
                         }
                     }
@@ -368,82 +403,128 @@ struct GoalsStepView: View {
 struct BluetoothStepView: View {
     var onSkip: () -> Void
     var onAllow: () -> Void
+    var isLoading: Bool = false
+    @State private var appeared = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 20)
 
-            Text("Allow LIMI AI to use\nBluetooth")
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundColor(.white)
+            ZStack {
+                Circle()
+                    .fill(Color.orbGlow2.opacity(0.08))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "antenna.radiowaves.left.and.right")
+                    .font(.system(size: 32, weight: .light))
+                    .foregroundColor(.orbGlow4)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .scaleEffect(appeared ? 1 : 0.8)
+            .opacity(appeared ? 1 : 0)
 
-            Text("LIMI AI needs permission to use your mobile device's Bluetooth connection so nearby products can be automatically discovered.")
-                .foregroundColor(.white.opacity(0.8))
-                .font(.system(size: 16))
-                .lineSpacing(4)
+            Text("Allow Limi to use\nBluetooth")
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
+                .offset(y: appeared ? 0 : 10)
+                .opacity(appeared ? 1 : 0)
+                .animation(LimiMotion.appear.delay(0.1), value: appeared)
+
+            Text("Limi needs Bluetooth to discover nearby devices and bring your space to life.")
+                .foregroundColor(.appTextSecondary)
+                .font(.system(size: 15))
+                .lineSpacing(5)
+                .offset(y: appeared ? 0 : 10)
+                .opacity(appeared ? 1 : 0)
+                .animation(LimiMotion.appear.delay(0.2), value: appeared)
 
             Spacer()
 
             Button(action: onSkip) {
-                Text("Skip")
-                    .underline()
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                Text("Skip for now")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.appTextMuted)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, 8)
 
             PrimaryButton(
                 title: "Allow",
                 isEnabled: true,
+                isLoading: isLoading,
                 action: onAllow
             )
         }
         .padding(.bottom, 32)
+        .onAppear {
+            withAnimation(LimiMotion.appear) {
+                appeared = true
+            }
+        }
     }
 }
 
 // MARK: - Reusable UI
 
-struct PrimaryButton: View {
+// PrimaryButton is now an alias for the global LimiPrimaryButton
+typealias PrimaryButton = LimiPrimaryButtonWrapper
+
+struct LimiPrimaryButtonWrapper: View {
     let title: String
-    let isEnabled: Bool
+    var isEnabled: Bool = true
+    var isLoading: Bool = false
     let action: () -> Void
 
     var body: some View {
-        Button(action: {
-            if isEnabled { action() }
-        }) {
-            Text(title)
-                .font(.system(size: 18, weight: .medium))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isEnabled ? Color.green : Color.gray.opacity(0.5))
-                .foregroundColor(.black)
-                .cornerRadius(28)
-        }
-        .disabled(!isEnabled)
+        LimiPrimaryButton(title: title, isEnabled: isEnabled, isLoading: isLoading, action: action)
     }
 }
 
 struct SelectableRow: View {
     let title: String
+    var icon: String? = nil
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.white.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 28)
-                        .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
-                )
-                .cornerRadius(28)
+            HStack(spacing: 14) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 16))
+                        .foregroundColor(isSelected ? .orbGlow4 : .appTextMuted)
+                        .frame(width: 24)
+                }
+
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.appTextPrimary)
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.orbGlow4)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .glassCard(
+                cornerRadius: 16,
+                strokeOpacity: isSelected ? 0.2 : 0.06,
+                fillOpacity: isSelected ? 0.08 : 0.04
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(
+                        isSelected
+                        ? LinearGradient(colors: [.orbGlow4.opacity(0.4), .orbGlow1.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        : LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing),
+                        lineWidth: 1
+                    )
+            )
         }
+        .tapScale()
     }
 }

@@ -12,27 +12,27 @@ struct PersonIllustration: View {
             // Deaf person illustration
             if isDeaf {
                 // Head
-                context.stroke(head, with: .color(.black), lineWidth: 2)
-                context.fill(head, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(head, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(head, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
                 
                 // Body
-                context.stroke(body, with: .color(.black), lineWidth: 2)
-                context.fill(body, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(body, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(body, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
                 
                 // Phone
                 let phone = Path(roundedRect: CGRect(x: 25, y: 60, width: 15, height: 20), cornerRadius: 3)
-                context.stroke(phone, with: .color(.black), lineWidth: 2)
-                context.fill(phone, with: .linearGradient(Gradient(colors: [.white, .gray]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(phone, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(phone, with: .linearGradient(Gradient(colors: [.themeWhite, .gray]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
             }
             // Sign language interpreter
             else {
                 // Head
-                context.stroke(head, with: .color(.black), lineWidth: 2)
-                context.fill(head, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(head, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(head, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
                 
                 // Body
-                context.stroke(body, with: .color(.black), lineWidth: 2)
-                context.fill(body, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(body, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(body, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
                 
                 // Arms outstretched (left arm)
                 let leftArm = Path { path in
@@ -42,8 +42,8 @@ struct PersonIllustration: View {
                     path.addLine(to: CGPoint(x: 30, y: 60))
                     path.closeSubpath()
                 }
-                context.stroke(leftArm, with: .color(.black), lineWidth: 2)
-                context.fill(leftArm, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(leftArm, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(leftArm, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
                 
                 // Arms outstretched (right arm)
                 let rightArm = Path { path in
@@ -53,8 +53,8 @@ struct PersonIllustration: View {
                     path.addLine(to: CGPoint(x: 50, y: 60))
                     path.closeSubpath()
                 }
-                context.stroke(rightArm, with: .color(.black), lineWidth: 2)
-                context.fill(rightArm, with: .linearGradient(Gradient(colors: [.gray, .black]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
+                context.stroke(rightArm, with: .color(.themeBlack), lineWidth: 2)
+                context.fill(rightArm, with: .linearGradient(Gradient(colors: [.gray, .themeBlack]), startPoint: CGPoint(x: 0.5, y: 0), endPoint: CGPoint(x: 0.5, y: 1)))
             }
         }
         .frame(width: 60, height: 60)

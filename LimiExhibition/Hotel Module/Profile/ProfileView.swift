@@ -9,7 +9,7 @@ struct ProfileView: View {
     @State private var isDarkMode = true
     @State private var showProfileEditView = false
     @State private var debugMessage: String = "Initializing..."
-    @State private var showCongigurator = false
+    @State private var showConfigurator = false
     @State private var showIFrameView = false
     @State private var navigateToLIMI = false
     @State private var showGetStartScreen = false
@@ -18,9 +18,8 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showLanguageSelector = false
     @State private var isChangingLanguage = false
+    @State private var appeared = false
 
-    
-    // AI Integration
     @State private var showAIAppStore = false
     @State private var showAIConnection = false
     @State private var showAISetting = false
@@ -34,308 +33,238 @@ struct ProfileView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
     @AppStorage("demoEmail") var demoEmail: String = "umer.asif@terralumen.co.uk"
-    
+
     var body: some View {
-        // Step 1: Compute URL outside ViewBuilder
         let imageURL = URL(string: userDataManager.userData?.profilePicture?.url ?? "")
 
-        VStack(spacing: 20) {
+        ZStack {
+            DeepSpaceBackground(showParticles: false)
 
-            // MARK: Title
-            HStack {
-                Button(action: {
+            VStack(spacing: 0) {
+                LimiScreenHeader(title: "settings.title".localized) {
                     dismiss()
-                }) {
-                    Image("Solid arrow right sm")
-                        .foregroundColor(.alabaster)
-                        .font(.system(size: 18, weight: .medium))
-                        .frame(width: 44, height: 44)
-                        .background(Color(red: 0.15, green: 0.15, blue: 0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .padding()
-                .padding(.top)
-                Text("settings.title".localized)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.top)
-                Spacer()
-            }
-            
-            .background(
-                Rectangle()
-                    .fill(Color(hex: "#393C43"))
-                    .frame(height: 114)
-                    .cornerRadius(40)
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.top, 8)
-            VStack {
+                .padding(.bottom, 8)
+
+                // Language
                 HStack(spacing: 12) {
-                    Image(systemName: "globe")
-                        .foregroundColor(.white)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.orbGlow2.opacity(0.08))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "globe")
+                            .foregroundColor(.orbGlow3)
+                    }
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("settings.language".localized)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.appTextPrimary)
                         Text(LanguageSettings.currentLanguage() == .zhHant ? AppLanguage.zhHant.displayName : AppLanguage.en.displayName)
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(.system(size: 12))
+                            .foregroundColor(.appTextSecondary)
                     }
 
                     Spacer()
 
-                    Button {
-                        showLanguageSelector = true
-                    } label: {
+                    Button { showLanguageSelector = true } label: {
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.appTextMuted)
+                            .font(.system(size: 14))
                     }
                 }
                 .padding(14)
-                .background(Color(hex: "#393C43"))
-                .cornerRadius(12)
-                .padding(.horizontal)
-            }
-            .confirmationDialog("settings.language".localized, isPresented: $showLanguageSelector, titleVisibility: .visible) {
-                Button(AppLanguage.en.displayName) {
-                    applyLanguage(.en)
+                .glassCard(cornerRadius: 14, fillOpacity: 0.05)
+                .padding(.horizontal, 20)
+                .confirmationDialog("settings.language".localized, isPresented: $showLanguageSelector, titleVisibility: .visible) {
+                    Button(AppLanguage.en.displayName) { applyLanguage(.en) }
+                    Button(AppLanguage.zhHant.displayName) { applyLanguage(.zhHant) }
+                    Button("Cancel", role: .cancel) {}
                 }
-                Button(AppLanguage.zhHant.displayName) {
-                    applyLanguage(.zhHant)
+
+                let role = AuthManager.shared.getRole()
+                if role != "Installer User created" {
+                    // Profile avatar
+                    VStack(spacing: 10) {
+                        ZStack(alignment: .bottomTrailing) {
+                            WebImage(url: imageURL) { img in
+                                img.resizable().scaledToFill()
+                            } placeholder: {
+                                Circle()
+                                    .fill(Color.orbGlow1.opacity(0.15))
+                                    .overlay(
+                                        Image(systemName: "person.fill")
+                                            .foregroundColor(.orbGlow4)
+                                            .font(.system(size: 32))
+                                    )
+                            }
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 88, height: 88)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.orbGlow4.opacity(0.3), lineWidth: 2)
+                            )
+                            .shadow(color: Color.orbGlow1.opacity(0.2), radius: 16)
+                        }
+
+                        let displayName = userDataManager.userData?.username?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "User"
+                        Text(displayName)
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
+                    }
+                    .padding(.top, 20)
                 }
-                Button("Cancel", role: .cancel) {}
-            }
-            let role = AuthManager.shared.getRole()
-            if role != "Installer User created" {
-                // MARK: Profile Section
-                VStack(spacing: 10) {
-                    ZStack(alignment: .bottomTrailing) {
-                        
-                        WebImage(url: imageURL) { img in
-                            img
-                                .resizable()
-                                .scaledToFill()
-                            //maybe need to create image here i think.
-                        } placeholder: {
-                            Circle() .fill(Color.gray.opacity(0.3)) .overlay( Image(systemName: "person.fill") .foregroundColor(.white) .font(.system(size: 40)) )
+
+                // Options
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 12) {
+                        let role = AuthManager.shared.getRole()
+                        if role != "Installer User created" {
+                            ProfileSection {
+                                ProfileRow(icon: "person.crop.circle", title: "profile.edit".localized) {
+                                    showProfileEditView = true
+                                }
+                            }
+                        } else {
+                            ProfileSection {
+                                ProfileRow(icon: "person.crop.circle", title: "profile.login_better".localized) {
+                                    showloginView = true
+                                }
+                            }
                         }
-                        .resizable() // make it resizable
-                        .scaledToFill()
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
+
+                        ProfileSection {
+                            ProfileRow(icon: "ic_outline-assistant", title: "profile.ai_app_store".localized) {
+                                if role == "Installer User created" { showLoginToast = true }
+                                else { showAIAppStore = true }
+                            }
+                            ProfileRow(icon: "tabler_apps", title: "profile.ai_connections".localized) {
+                                if role == "Installer User created" { showLoginToast = true }
+                                else { showAIConnection = true }
+                            }
+                            ProfileRow(icon: "humbleicons_ai", title: "profile.ai_settings".localized) {
+                                if role == "Installer User created" { showLoginToast = true }
+                                else { showAISetting = true }
+                            }
+                        }
+
+                        ProfileSection {
+                            ProfileRow(icon: "bell", title: "profile.notifications".localized) {
+                                showNotifications = true
+                            }
+                            ProfileRow(icon: "star", title: "profile.configurator".localized) {
+                                showConfigurator = true
+                            }
+                            ProfileRow(icon: "RoomPlan", title: "profile.room_scan".localized) {
+                                showRoomPlanScreen = true
+                            }
+                        }
+
+                        ProfileSection {
+                            ProfileRow(icon: "shield", title: "profile.privacy_security".localized) {
+                                showPrivacyPolicy = true
+                            }
+                            ProfileRow(icon: "globe", title: "profile.our_website".localized) {
+                                showWebSiteView = true
+                            }
+                        }
+
+                        if role != "Installer User created" {
+                            Button(action: {
+                                AuthManager.shared.clearToken()
+                                BluetoothManager.shared.disconnectAllDevices()
+                                hasCompletedOnboarding = false
+                                hasLaunchedBefore = false
+                                demoEmail = ""
+                                showGetStartScreen = true
+                            }) {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        .foregroundColor(.appDanger)
+                                    Text("profile.logout".localized)
+                                        .foregroundColor(.appDanger)
+                                        .font(.system(size: 15, weight: .semibold))
+                                    Spacer()
+                                }
+                                .padding(16)
+                                .glassCard(cornerRadius: 14, fillOpacity: 0.04)
+                            }
+                        }
                     }
-                    
-                    // Display username with fallback
-                    let displayName = userDataManager.userData?.username?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "User"
-                    
-                    Text(displayName)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
-                        .onChange(of: userDataManager.userData) { oldValue, newValue in
-                            print("📱 ProfileView - User data updated. Username: \(newValue?.username ?? "nil")")
-                            debugMessage = "Last updated: \(Date())\nUsername: \(newValue?.username ?? "none")"
-                        }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 40)
                 }
-                .padding(.top, 16)
             }
-            // MARK: Options ScrollView
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    let role = AuthManager.shared.getRole()
-                    if role != "Installer User created"{
-                        // Section 1: Profile
-                        VStack(spacing: 1) {
-                            ProfileRow(icon: "person.crop.circle", title: "profile.edit".localized) {
-                                showProfileEditView = true
-                            }
-                        }
-                        .background(Color(hex: "1F1F1F"))
-                        .cornerRadius(12)
-                    } else {
-                        VStack(spacing: 1) {
-                            ProfileRow(icon: "person.crop.circle", title: "profile.login_better".localized) {
-                                showloginView = true
-                            }
-                        }
-                        .background(Color(hex: "1F1F1F"))
-                        .cornerRadius(12)
-                    }
-                    // Section 2: AI
-                    VStack(spacing: 1) {
-
-                        ProfileRow(icon: "ic_outline-assistant", title: "profile.ai_app_store".localized) {
-                            if role == "Installer User created" {
-                                showLoginToast = true
-                            } else {
-                                showAIAppStore = true
-                            }
-                        }
-                        ProfileRow(icon: "tabler_apps", title: "profile.ai_connections".localized) {
-                            if role == "Installer User created" {
-                                showLoginToast = true
-                            } else {
-                                showAIConnection = true
-                            }
-                        }
-                        ProfileRow(icon: "humbleicons_ai", title: "profile.ai_settings".localized) {
-                            if role == "Installer User created" {
-                                showLoginToast = true
-                            } else {
-                                showAISetting = true
-                            }
-                        }
-                    }
-                    .background(Color(hex: "#393C43"))
-                    .cornerRadius(12)
-
-                    // Section 3: Apps & Notifications
-                    VStack(spacing: 1) {
-                        ProfileRow(icon: "bell", title: "profile.notifications".localized) {
-                            showNotifications = true
-
-                        }
-                        ProfileRow(icon: "star", title: "profile.configurator".localized) {
-                            showCongigurator = true
-                        }
-                        ProfileRow(icon: "RoomPlan", title: "profile.room_scan".localized) {
-                            showRoomPlanScreen = true
-                        }
-                    }
-                    .background(Color(hex: "#393C43"))
-                    .cornerRadius(12)
-
-                    // Section 4: Privacy & Website
-                    VStack(spacing: 1) {
-                        ProfileRow(icon: "shield", title: "profile.privacy_security".localized) {
-                            showPrivacyPolicy = true
-
-                        }
-                        ProfileRow(icon: "globe", title: "profile.our_website".localized) {
-                            showWebSiteView = true
-                        }
-                    }
-                    .background(Color(hex: "#393C43"))
-                    .cornerRadius(12)
-                    
-                    if role != "Installer User created"{
-                        // Log Out Button
-                        Button(action: {
-                            AuthManager.shared.clearToken()
-                            BluetoothManager.shared.disconnectAllDevices()
-                            hasCompletedOnboarding = false
-                            hasLaunchedBefore = false
-                            demoEmail = ""
-                            showGetStartScreen = true
-                        }) {
-                            HStack {
-                                Image(systemName: "arrowshape.turn.up.left.fill")
-                                    .foregroundColor(Color(hex: "FF9292"))
-                                Text("profile.logout".localized)
-                                    .foregroundColor(Color(hex: "FF9292"))
-                                    .font(.system(size: 16, weight: .semibold))
-                                Spacer()
-                            }
-                            .padding()
-                            .background(Color(hex: "#393C43"))
-                            .cornerRadius(12)
-                        }
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
-            }
-
         }
-        .background(Color.black.ignoresSafeArea())
         .overlay(
             Group {
                 if isChangingLanguage {
                     ZStack {
-                        Color.black.opacity(0.45).ignoresSafeArea()
+                        Color.appCanvasPrimary.opacity(0.6).ignoresSafeArea()
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
                             .scaleEffect(1.25)
                     }
                 }
             }
         )
-        .sheet(isPresented: $showImagePicker) {
-            TheImagePicker(selectedImage: $selectedImage)
-        }
-        .sheet(isPresented: $showProfileEditView) {
-            ProfileEditView()
-        }
-        .sheet(isPresented: $showCongigurator) {
-            LimiContentView()
-        }
-        .sheet(isPresented: $showWebSiteView) {
-            WebViewScreen(showWebView: $showWebSiteView)
-        }
-        .sheet(isPresented: $showPrivacyPolicy) {
-            PrivacyPolicyView()
-        }
-        .sheet(isPresented: $showNotifications) {
-            NotificationView()
-        }
+        .sheet(isPresented: $showImagePicker) { TheImagePicker(selectedImage: $selectedImage) }
+        .sheet(isPresented: $showProfileEditView) { ProfileEditView() }
+        .sheet(isPresented: $showConfigurator) { LimiContentView() }
+        .sheet(isPresented: $showWebSiteView) { WebViewScreen(showWebView: $showWebSiteView) }
+        .sheet(isPresented: $showPrivacyPolicy) { PrivacyPolicyView() }
+        .sheet(isPresented: $showNotifications) { NotificationView() }
         .sheet(isPresented: $showAIAppStore) { AIAppStoreView() }
         .sheet(isPresented: $showAIConnection) { AIConnectionsView() }
-        .fullScreenCover(isPresented: $showloginView) { LoginSkipView() }
-        .fullScreenCover(isPresented: $showRoomPlanScreen) { RoomPlanContentView().environment(roomCaptureController)
-}
+        .fullScreenCover(isPresented: $showloginView) { SignInView() }
+        .fullScreenCover(isPresented: $showRoomPlanScreen) {
+            RoomPlanContentView().environment(roomCaptureController)
+        }
         .overlay(
             ZStack {
                 if showLoginToast {
-                    Color.black.opacity(0.5)
+                    Color.themeBlack.opacity(0.5)
                         .ignoresSafeArea()
-                        .onTapGesture {
-                            showLoginToast = false
-                        }
-                    
+                        .onTapGesture { showLoginToast = false }
+
                     VStack(spacing: 16) {
                         Text("Please Login First")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
-                        
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
                         Text("Please login before using this feature")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(.gray)
+                            .font(.system(size: 14))
+                            .foregroundColor(.appTextSecondary)
                             .multilineTextAlignment(.center)
-                        
                         HStack(spacing: 12) {
-                            Button(action: {
-                                showLoginToast = false
-                            }) {
+                            Button(action: { showLoginToast = false }) {
                                 Text("Close")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.appTextPrimary)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color(hex: "#393C43"))
-                                    .cornerRadius(8)
+                                    .glassCard(cornerRadius: 10, fillOpacity: 0.08)
                             }
-                            
                             Button(action: {
                                 showLoginToast = false
                                 showloginView = true
                             }) {
                                 Text("Login")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.charlestonGreen)
+                                    .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color.emerald)
-                                    .cornerRadius(8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .fill(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
+                                    )
                             }
                         }
                     }
-                    .padding(20)
-                    .background(Color(hex: "#393C43"))
-                    .cornerRadius(16)
-                    .padding(20)
+                    .padding(24)
+                    .glassCard(cornerRadius: 20, fillOpacity: 0.12)
+                    .padding(24)
                 }
             }
         )
@@ -345,16 +274,8 @@ struct ProfileView: View {
             }
         }
         .onAppear {
-    print("🔄 ProfileView appeared, refreshing user data...")
-    userDataManager.refreshUserData()
-    
-    // Debug view (can be removed later)
-    let _ = print("🔍 Debug Info:")
-    let _ = print("- User data exists:", userDataManager.userData != nil)
-    let _ = print("- Username:", userDataManager.userData?.username ?? "Not set")
-    let _ = print("- Profile image URL:", userDataManager.userData?.profilePicture?.url ?? "No image")
-}
-        
+            userDataManager.refreshUserData()
+        }
     }
 
     private func applyLanguage(_ lang: AppLanguage) {
@@ -364,50 +285,64 @@ struct ProfileView: View {
     }
 }
 
+// MARK: - Profile Section
+
+private struct ProfileSection<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(spacing: 1) {
+            content
+        }
+        .glassCard(cornerRadius: 14, fillOpacity: 0.05)
+    }
+}
+
 // MARK: - Profile Row
+
 private struct ProfileRow: View {
     let icon: String
     let title: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack {
+            HStack(spacing: 14) {
                 if UIImage(systemName: icon) != nil {
                     Image(systemName: icon)
                         .resizable()
-                        .foregroundColor(.alabaster)
-                        .frame(width: 24, height: 24)
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.orbGlow3)
                 } else {
                     Image(icon)
                         .resizable()
-                        .renderingMode(.template) // allows foregroundColor to work
-                        .foregroundColor(.alabaster)
-                        .frame(width: 24, height: 24)
-                        .aspectRatio(contentMode: .fit)
+                        .renderingMode(.template)
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.orbGlow3)
                 }
                 Text(title)
-                    .foregroundColor(.alabaster)
-                    .font(.system(size: 16))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.appTextMuted)
             }
-            .padding()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
         }
-        .background(Color(hex: "393C43"))
     }
 }
 
 // MARK: - Image Picker
+
 struct TheImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage?
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
@@ -415,42 +350,27 @@ struct TheImagePicker: UIViewControllerRepresentable {
         picker.sourceType = .photoLibrary
         return picker
     }
-    
+
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
+
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: TheImagePicker
         init(_ parent: TheImagePicker) { self.parent = parent }
-        
+
         func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage {
                 parent.selectedImage = image
             }
             picker.dismiss(animated: true)
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             picker.dismiss(animated: true)
         }
     }
 }
 
-// MARK: - Color Extension
-//extension Color {
-//    init(hex: String) {
-//        let scanner = Scanner(string: hex)
-//        _ = scanner.scanString("#")
-//        var rgb: UInt64 = 0
-//        scanner.scanHexInt64(&rgb)
-//        let r = Double((rgb >> 16) & 0xFF) / 255.0
-//        let g = Double((rgb >> 8) & 0xFF) / 255.0
-//        let b = Double(rgb & 0xFF) / 255.0
-//        self.init(red: r, green: g, blue: b)
-//    }
-//}
-
-// MARK: - Preview
 #Preview {
     ProfileView()
 }

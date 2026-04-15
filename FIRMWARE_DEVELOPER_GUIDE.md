@@ -10,7 +10,7 @@ Your firmware MUST broadcast the following TXT records via mDNS/Bonjour for the 
 |------------|------|-------------|---------|
 | `deviceId` | String | Unique device identifier (MAC address preferred) | `"80b54ee8b228"` |
 | `channelCount` | Integer | Number of light channels this device controls | `1` or `2` |
-| `channelPosition` | Integer | The starting channel position for this device | `1`, `2`, `3`, etc. |
+| `channelTypes` | String | Comma-separated channel types (CCT/RGB) | `"CCT,RGB,CCT,CCT"` |
 
 ### TXT Record Implementation Example (ESP32/Arduino)
 
@@ -33,12 +33,12 @@ void setupMDNS() {
     // Add required TXT records
     String deviceId = "80b54ee8b228";  // Your device MAC or unique ID
     String channelCount = "1";          // Number of channels (1 or 2)
-    String channelPosition = "1";       // Starting position (1-based)
+    String channelTypes = "CCT,RGB,CCT,CCT";  // Channel types (CCT or RGB)
     
     // Add TXT records for service discovery
     MDNS.addServiceTxt("_Limi1Ch", "_udp", "deviceId", deviceId);
     MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelCount", channelCount);
-    MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelPosition", channelPosition);
+    MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelTypes", channelTypes);
     
     Serial.println("mDNS initialized with TXT records:");
     Serial.println("  deviceId: " + deviceId);
@@ -60,11 +60,11 @@ void setupMDNS() {
 
 Based on `channelCount`, the iOS app will display different control interfaces:
 
-| channelCount | View Shown | Light Type |
-|--------------|------------|------------|
-| `1` | `CCTLEDView` | CCT (Correlated Color Temperature) - Warm/Cool White |
-| `2` | `WLEDView` | RGB - Full color control |
+| channelCount | View Shown | Description |
+|--------------|------------|-------------|
 | `0` | Alert | "No pendant connected" error |
+| `1` | Direct view | Single channel - opens CCTLEDView or WLEDView based on `channelTypes[0]` |
+| `>1` | ChannelSelectionView | Multi-channel popup showing all channels with their types |
 
 ---
 
@@ -96,9 +96,9 @@ When user adjusts CCT (warm/cool white) lights:
 | Field | Type | Range | Description |
 |-------|------|-------|-------------|
 | `deviceId` | String | - | Device MAC address (uppercase) |
-| `command.channel` | Integer | 1+ | The channel position from TXT record |
-| `command.ww` | Integer | 0-100 | Warm white percentage |
-| `command.cw` | Integer | 0-100 | Cool white percentage |
+| `command.channel` | Integer | 1+ | The 1-based channel index user selected |
+| `command.ww` | Integer | 0-100 | Warm white percentage (CCT only) |
+| `command.cw` | Integer | 0-100 | Cool white percentage (CCT only) |
 | `command.brightness` | Integer | 0-255 | Overall brightness level |
 
 ### 3.2 RGB Light Control (channelCount = 2)
@@ -126,7 +126,7 @@ When user adjusts RGB lights:
 | Field | Type | Range | Description |
 |-------|------|-------|-------------|
 | `deviceId` | String | - | Device MAC address (uppercase) |
-| `command.channel` | Integer | 1+ | The channel position from TXT record |
+| `command.channel` | Integer | 1+ | The 1-based channel index user selected |
 | `command.red` | Integer | 0-255 | Red color value |
 | `command.green` | Integer | 0-255 | Green color value |
 | `command.blue` | Integer | 0-255 | Blue color value |
@@ -210,7 +210,7 @@ When user selects an animation pattern:
 │  Firmware   │ ───────────────────────> │   iOS App   │
 │             │  TXT: deviceId           │             │
 │             │  TXT: channelCount       │             │
-│             │  TXT: channelPosition    │             │
+│             │  TXT: channelTypes (CCT,RGB...)   │             │
 └─────────────┘                          └─────────────┘
                                                 │
                                                 │ HTTP POST
@@ -237,7 +237,7 @@ When user selects an animation pattern:
 - [ ] Implement mDNS/Bonjour service advertising
 - [ ] Add TXT record: `deviceId` (unique device identifier)
 - [ ] Add TXT record: `channelCount` (1 or 2)
-- [ ] Add TXT record: `channelPosition` (1-based starting position)
+- [ ] Add TXT record: `channelTypes` (comma-separated: CCT,RGB,CCT,RGB)
 - [ ] Implement WebSocket client to connect to backend
 - [ ] Listen for `light_controll` events
 - [ ] Parse JSON commands for CCT (ww, cw, brightness)
@@ -260,8 +260,8 @@ const char* password = "YOUR_WIFI_PASSWORD";
 
 // Device configuration
 String DEVICE_ID = "80b54ee8b228";  // Your device MAC or unique ID
-int CHANNEL_COUNT = 2;               // 1 = CCT, 2 = RGB
-int CHANNEL_POSITION = 1;            // Starting channel position
+int CHANNEL_COUNT = 4;               // Number of channels
+String CHANNEL_TYPES = "CCT,RGB,CCT,CCT";  // Type of each channel
 
 void setup() {
     Serial.begin(115200);
@@ -287,13 +287,13 @@ void setup() {
     // Add TXT records - THESE ARE CRITICAL FOR iOS APP DISCOVERY
     MDNS.addServiceTxt("_Limi1Ch", "_udp", "deviceId", DEVICE_ID);
     MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelCount", String(CHANNEL_COUNT));
-    MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelPosition", String(CHANNEL_POSITION));
+    MDNS.addServiceTxt("_Limi1Ch", "_udp", "channelTypes", CHANNEL_TYPES);
     
     Serial.println("mDNS service started with:");
     Serial.println("  Service: _Limi1Ch._udp");
     Serial.println("  deviceId: " + DEVICE_ID);
     Serial.println("  channelCount: " + String(CHANNEL_COUNT));
-    Serial.println("  channelPosition: " + String(CHANNEL_POSITION));
+    Serial.println("  channelTypes: " + CHANNEL_TYPES);
 }
 
 void loop() {

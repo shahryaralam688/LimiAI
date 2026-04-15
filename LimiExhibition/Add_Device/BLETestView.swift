@@ -72,7 +72,7 @@ struct BLETestView: View {
                             .padding(.vertical, 10)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color(uiColor: .secondarySystemBackground))
                             )
                         }
                     }

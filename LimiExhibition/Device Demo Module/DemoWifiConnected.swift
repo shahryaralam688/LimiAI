@@ -21,17 +21,17 @@ struct DemoConnectedWifiView: View {
                     .padding(.top,100)
                 
                 
-                Text(deviceName!)
-                    .font(.custom("Poppins-Medium", size: 20))   // 500 weight = Medium
-                    .foregroundColor(Color.white)      // matches #C9C4BD
+                Text(deviceName ?? "Device")
+                    .font(.system(size: 20, weight: .medium, design: .rounded))   // 500 weight = Medium
+                    .foregroundColor(Color.themeWhite)      // matches #C9C4BD
                     .multilineTextAlignment(.center)             // aligns text centrally
                     .lineSpacing(0)                              // 100% line height = no extra spacing
                     .kerning(0)// letter-spacing: 0px
                     .padding(.top, 32)
                 
                 Text("Device added Successfully")
-                    .font(.custom("Poppins-Medium", size: 24))   // 500 weight = Medium
-                    .foregroundColor(Color.white)      // matches #C9C4BD
+                    .font(.system(size: 24, weight: .medium, design: .rounded))   // 500 weight = Medium
+                    .foregroundColor(Color.themeWhite)      // matches #C9C4BD
                     .multilineTextAlignment(.center)             // aligns text centrally
                     .lineSpacing(0)                              // 100% line height = no extra spacing
                     .kerning(0)// letter-spacing: 0px
@@ -46,13 +46,13 @@ struct DemoConnectedWifiView: View {
                     Spacer()
                     
                     Text("Add Your First Device")
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.appTextInverse)
                         .lineSpacing(0) // line-height: 100% (no extra spacing)
                         .kerning(0)     // letter-spacing: 0%
                     Image("Monotone arrow right")
-                        .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundColor(Color.charlestonGreen)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.appTextInverse)
                         .lineSpacing(0) // line-height: 100% (no extra spacing)
                         .kerning(0)     // letter-spacing: 0%
                     Spacer()
@@ -60,14 +60,14 @@ struct DemoConnectedWifiView: View {
                 .font(.system(size: 17, weight: .semibold))
                 .padding(.vertical, 14)
                 .padding(.horizontal, 20)
-                .background(Color.white)
-                .foregroundColor(.black)
-                .cornerRadius(19)
+                .background(Color.themeWhite)
+                .foregroundColor(.themeBlack)
+                .clipShape(Capsule(style: .continuous))
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 27)
         }
-        .background(Color(hex: "#111214"))
+        .background(Color.appCanvasPrimary)
         .fullScreenCover(isPresented: $showDemoScanDevicesView) {
             ConnectedDevicesView()
         }

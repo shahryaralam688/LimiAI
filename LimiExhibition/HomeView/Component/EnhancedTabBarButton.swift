@@ -37,7 +37,7 @@ struct EnhancedTabBarButton: View {
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .foregroundColor(.white)
+                            .foregroundColor(.themeWhite)
                             .frame(width: 22, height: 22)
                             .blur(radius: 4)
                             .opacity(glowOpacity)
@@ -56,7 +56,7 @@ struct EnhancedTabBarButton: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(isSelected ? .white : .gray.opacity(0.7))
+                        .foregroundColor(isSelected ? .themeWhite : .gray.opacity(0.7))
                         .frame(width: 22, height: 22)
                         .scaleEffect(bounceAnimation && isSelected ? 1.2 : 1.0)
                 }
@@ -64,7 +64,7 @@ struct EnhancedTabBarButton: View {
                 // Title with animation
                 Text(title)
                     .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(isSelected ? .white : .gray.opacity(0.7))
+                    .foregroundColor(isSelected ? .themeWhite : .gray.opacity(0.7))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
@@ -74,13 +74,13 @@ struct EnhancedTabBarButton: View {
                     if isSelected {
                         // Pill indicator
                         Capsule()
-                            .fill(Color.white.opacity(0.2))
+                            .fill(Color.themeWhite.opacity(0.2))
                             .frame(width: 25, height: 3)
                             .offset(y: 16)
                         
                         // Dot indicator
                         Circle()
-                            .fill(Color.white)
+                            .fill(Color.themeWhite)
                             .frame(width: 4, height: 4)
                             .offset(y: 16)
                     }

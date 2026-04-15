@@ -17,7 +17,7 @@ struct DemoAddDeviceView: View {
         VStack {
             if isSearching {
                 Text("Searching…")
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .padding()
             } else {
                 Button(action: {
@@ -28,11 +28,19 @@ struct DemoAddDeviceView: View {
                     }
                 }) {
                     Text("Add Device")
-                        .font(.title)
+                        .font(LimiTypography.title)
                         .padding()
-                        .background(Color.blue)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.orbGlow4, .orbGlow1],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                        )
                 }
             }
         }

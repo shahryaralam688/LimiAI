@@ -28,7 +28,7 @@ struct CatalogPanelView: View {
             }
             .padding()
         }
-        .background(Color(.systemGray6))
+        .background(Color(uiColor: .systemGray6))
     }
 }
 #Preview {

@@ -60,12 +60,11 @@ struct WhatIsLimi: View {
             .onDisappear {
                 stopVideo()
             }
-            .navigationBarItems(leading: Button(action: {
-                navigateToHomeView = true
-            }) {
-                Image(systemName: "arrow.left")
-                    .foregroundColor(.charlestonGreen)
-            })
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    LimiBackButton { navigateToHomeView = true }
+                }
+            }
             .fullScreenCover(isPresented: $navigateToHomeView) {
                 HomeView()
             }

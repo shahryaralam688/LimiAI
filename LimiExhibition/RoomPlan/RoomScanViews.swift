@@ -28,13 +28,20 @@ struct RoomScanningView: View {
         ZStack(alignment: .bottom) {
             CameraCaptureView()
                 .navigationBarBackButtonHidden(true)
-                .navigationBarItems(leading: Button("Cancel") {
-                    captureController.stopSession()
-                    dismiss()
-                })
-                .navigationBarItems(trailing: Button("Done") {
-                    captureController.stopSession()
-                }.opacity(captureController.isScanComplete ? 0 : 1))
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            captureController.stopSession()
+                            dismiss()
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            captureController.stopSession()
+                        }
+                        .opacity(captureController.isScanComplete ? 0 : 1)
+                    }
+                }
                 .onAppear() {
                     captureController.showSaveButton = false
                     captureController.isScanComplete = false
@@ -61,26 +68,30 @@ struct RoomScanningView: View {
 struct SaveScanView: View {
     @ObservedObject var captureController: RoomCaptureController
     var dismiss: DismissAction
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismissSheet
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 TextField("Enter file name", text: $captureController.fileName)
             }
             .navigationTitle("Name Your Scan")
-            .navigationBarItems(
-                leading: Button("Cancel") { presentationMode.wrappedValue.dismiss() },
-                trailing: Button("Save") {
-                    captureController.saveScan()
-                    presentationMode.wrappedValue.dismiss()
-                    dismiss()
-                    let fileNameWithExtension = captureController.fileName.hasSuffix(".usdz") ? captureController.fileName : "\(captureController.fileName).usdz"
-                    if let fileURL = RoominatorFileManager.shared.getUSDZFileURL(for: fileNameWithExtension) {
-                        captureController.uploadScanModel(fileURL: fileURL, metadata: ["name": captureController.fileName])
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismissSheet() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        captureController.saveScan()
+                        dismissSheet()
+                        dismiss()
+                        let fileNameWithExtension = captureController.fileName.hasSuffix(".usdz") ? captureController.fileName : "\(captureController.fileName).usdz"
+                        if let fileURL = RoominatorFileManager.shared.getUSDZFileURL(for: fileNameWithExtension) {
+                            captureController.uploadScanModel(fileURL: fileURL, metadata: ["name": captureController.fileName])
+                        }
                     }
                 }
-            )
+            }
         }
     }
 }
