@@ -87,6 +87,11 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     private var sessionId: String?
     private var sessionModel: String?
 
+    /// After each new connection, send one `response.create` so the assistant can speak first (e.g. hello) without the user talking.
+    private var pendingProactiveGreetingForThisConnection = true
+    /// Avoid duplicate flush if `dataChannelDidChangeState` fires more than once while open.
+    private var didFlushContextOnDataChannelOpen = false
+
     // Queues
     private let workQueue = DispatchQueue(label: "webrtc.voice.client")
 
@@ -149,14 +154,24 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     // MARK: Public API
     func start() {
         guard state != .connecting && state != .connected else { return }
+        guard AuthManager.shared.authorizationHeaderValue() != nil else {
+            let msg = "Sign in to use voice — Limi couldn’t find your session."
+            log("❌ start() aborted: no auth token")
+            DispatchQueue.main.async {
+                self.lastUserVisibleError = msg
+                self.state = .error
+            }
+            return
+        }
         lastUserVisibleError = nil
+        pendingProactiveGreetingForThisConnection = true
         state = .connecting
         log("🚀 START — backendBaseURL: \(backendBaseURL.absoluteString)")
         postWebhook(event: "session_start", payload: [:])
         requestMicPermission { [weak self] granted in
             guard let self else { return }
             if !granted {
-                self.fail("Microphone permission denied")
+                self.fail("Microphone permission denied", allowReconnect: false)
                 return
             }
             self.configureAVAudioSession()
@@ -167,10 +182,21 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
                     self?.ephemeralKey = key
                     self?.createPeerAndConnect()
                 case .failure(let error):
-                    self?.fail("Token error: \(error.localizedDescription)")
+                    self?.fail(
+                        "Token error: \(error.localizedDescription)",
+                        allowReconnect: Self.errorAllowsReconnect(after: error)
+                    )
                 }
             }
         }
+    }
+
+    /// Auth/session identity failures cannot be fixed by reconnecting; avoid reconnect storms and log spam.
+    private static func errorAllowsReconnect(after error: Error) -> Bool {
+        let ns = error as NSError
+        if ns.domain == "auth" { return false }
+        if ns.domain == "limi.session" && ns.code == 401 { return false }
+        return true
     }
 
     func stop() {
@@ -508,6 +534,8 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             pc.close()
         }
         peerConnection = nil
+
+        didFlushContextOnDataChannelOpen = false
         
         log("Peer connection torn down successfully")
     }
@@ -515,14 +543,27 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     // MARK: Backend
 
     /// Backend controls model, voice, instructions, and tools — frontend does not send them.
-    private struct SessionResponse: Decodable {
+    /// API may return either a flat object or `{ "success": true, "data": { ... } }`.
+    private struct SessionDataPayload: Decodable {
         let key: String
         let sessionId: String?
         let expiresAt: Int?
         let model: String?
         let voice: String?
         let instructions: String?
-        // tools is complex nested JSON managed by backend; skip full decode
+    }
+
+    private struct SessionEnvelope: Decodable {
+        let success: Bool?
+        let data: SessionDataPayload?
+    }
+
+    private static func decodeSessionPayload(from data: Data) throws -> SessionDataPayload {
+        let decoder = JSONDecoder()
+        if let envelope = try? decoder.decode(SessionEnvelope.self, from: data), let inner = envelope.data {
+            return inner
+        }
+        return try decoder.decode(SessionDataPayload.self, from: data)
     }
 
     private func fetchEphemeralKey(completion: @escaping (Result<String, Error>) -> Void) {
@@ -599,7 +640,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             }
 
             do {
-                let session = try JSONDecoder().decode(SessionResponse.self, from: data)
+                let session = try Self.decodeSessionPayload(from: data)
                 self.sessionId = session.sessionId
                 self.sessionModel = session.model
                 self.log("✅ Session: key=\(session.key.prefix(12))… id=\(session.sessionId ?? "-") model=\(session.model ?? "-") voice=\(session.voice ?? "-")")
@@ -765,28 +806,32 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         sendWebhook(json: webhookPayload)
     }
 
-    private func fail(_ message: String) {
+    private func fail(_ message: String, allowReconnect: Bool = true) {
         log("FAILURE: \(message)")
-        
+        postWebhook(event: "error", payload: ["message": message, "reconnect_attempts": reconnectAttempts])
+
         DispatchQueue.main.async {
-            // Only change state if not already in error state
+            self.reconnectWorkItem?.cancel()
+            self.reconnectWorkItem = nil
+
             if self.state != .error {
                 self.state = .error
             }
             if self.lastUserVisibleError == nil {
                 self.lastUserVisibleError = message
             }
-        }
-        
-        postWebhook(event: "error", payload: ["message": message, "reconnect_attempts": reconnectAttempts])
-        
-        // Only schedule reconnect if we haven't exceeded max attempts
-        if reconnectAttempts < maxReconnectAttempts {
-            scheduleReconnect()
-        } else {
-            log("Max reconnect attempts reached - not scheduling further reconnects")
-            // Deactivate audio session to prevent resource leaks
-            deactivateAudioSession()
+
+            if allowReconnect, self.reconnectAttempts < self.maxReconnectAttempts {
+                self.scheduleReconnect()
+            } else {
+                if !allowReconnect {
+                    self.log("Not scheduling reconnect (sign-in required or non-recoverable error).")
+                } else {
+                    self.log("Max reconnect attempts reached - not scheduling further reconnects")
+                }
+                self.tearDownPeer()
+                self.deactivateAudioSession()
+            }
         }
     }
     
@@ -849,19 +894,38 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         cc.stopCommand.removeTarget(nil)
     }
 
+    /// Reconnect path only tears down the peer; if we never obtained a key (e.g. first failure was decode), fetch session again.
+    private func resumeWebRTCAfterReconnectTeardown() {
+        if ephemeralKey != nil {
+            createPeerAndConnect()
+            return
+        }
+        fetchEphemeralKey { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let key):
+                self.ephemeralKey = key
+                self.createPeerAndConnect()
+            case .failure(let error):
+                self.fail(
+                    "Token error: \(error.localizedDescription)",
+                    allowReconnect: Self.errorAllowsReconnect(after: error)
+                )
+            }
+        }
+    }
+
     private func scheduleReconnect() {
+        if !Thread.isMainThread {
+            DispatchQueue.main.async { [weak self] in self?.scheduleReconnect() }
+            return
+        }
         guard reconnectAttempts < maxReconnectAttempts else {
             log("Max reconnect attempts (\(maxReconnectAttempts)) reached - stopping")
             fail("Connection failed after \(maxReconnectAttempts) attempts")
             return
         }
-        
-        // Don't reconnect if already connected or connecting
-        guard state != .connected && state != .connecting else {
-            log("Skipping reconnect - already connected/connecting")
-            return
-        }
-        
+
         reconnectAttempts += 1
         let delay = min(pow(2.0, Double(reconnectAttempts)), 30.0) // Cap at 30s
         log("Reconnecting in \(Int(delay))s… (attempt \(reconnectAttempts)/\(maxReconnectAttempts))")
@@ -874,10 +938,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             self.configureAVAudioSession()
             
             self.tearDownPeer()
-            
-            // Add small delay before creating new connection
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.createPeerAndConnect()
+                self.resumeWebRTCAfterReconnectTeardown()
             }
         }
         reconnectWorkItem = work
@@ -962,6 +1025,42 @@ extension WebRTCVoiceClient: RTCDataChannelDelegate {
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
         log("DataChannel state=\(dataChannel.readyState.rawValue) label=\(dataChannel.label)")
         postWebhook(event: "datachannel_state", payload: ["state": dataChannel.readyState.rawValue, "label": dataChannel.label])
+
+        guard dataChannel.readyState == .open else { return }
+        // Context was often skipped when `.connected` fired before the channel opened; flush here + optional first spoken turn.
+        DispatchQueue.main.async { [weak self] in
+            self?.flushContextAndProactiveGreeting()
+        }
+    }
+
+    /// Called when the Realtime data channel first opens for this peer connection.
+    private func flushContextAndProactiveGreeting() {
+        guard !didFlushContextOnDataChannelOpen else { return }
+        didFlushContextOnDataChannelOpen = true
+
+        sendContextEvent()
+
+        guard pendingProactiveGreetingForThisConnection else { return }
+        pendingProactiveGreetingForThisConnection = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.sendRealtimeResponseCreate()
+        }
+    }
+
+    /// Ask the Realtime model to produce audio/text without user speech (first turn after connect).
+    private func sendRealtimeResponseCreate() {
+        guard let dc = dataChannel, dc.readyState == .open else {
+            log("⚠️ response.create skipped — data channel not open")
+            return
+        }
+        let event: [String: Any] = ["type": "response.create"]
+        if let data = try? JSONSerialization.data(withJSONObject: event),
+           dc.sendData(RTCDataBuffer(data: data, isBinary: false)) {
+            log("✅ Sent response.create (proactive greeting)")
+        } else {
+            log("❌ Failed to send response.create")
+        }
     }
 
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
@@ -1043,6 +1142,40 @@ extension WebRTCVoiceClient: RTCDataChannelDelegate {
                 // Update speaking state and transcript for UI
                 handleRealtimePayload(obj)
             }
+        }
+    }
+}
+
+// MARK: - Context Pre-flight
+
+extension WebRTCVoiceClient {
+    /// Sends the current app context to OpenAI via `conversation.item.create`
+    /// before audio streaming begins, so the AI has full awareness of the
+    /// user's current screen and session state.
+    func sendContextEvent() {
+        guard let dc = dataChannel, dc.readyState == .open else {
+            log("⚠️ DataChannel not open — skipping context pre-flight")
+            return
+        }
+
+        let summary = ContextManager.shared.contextSummary()
+        let event: [String: Any] = [
+            "type": "conversation.item.create",
+            "item": [
+                "type": "message",
+                "role": "user",
+                "content": [[
+                    "type": "input_text",
+                    "text": "[System Context] \(summary)"
+                ]]
+            ]
+        ]
+
+        if let data = try? JSONSerialization.data(withJSONObject: event),
+           dc.sendData(RTCDataBuffer(data: data, isBinary: false)) {
+            log("✅ Sent context pre-flight: \(summary)")
+        } else {
+            log("❌ Failed to send context pre-flight")
         }
     }
 }

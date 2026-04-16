@@ -66,6 +66,7 @@ class UserDataManager: ObservableObject {
             await MainActor.run {
                 self.userData = userData
                 self.isLoading = false
+                ContextManager.shared.updateHomeUserDisplayName(userData.username)
             }
             
             // Load profile image

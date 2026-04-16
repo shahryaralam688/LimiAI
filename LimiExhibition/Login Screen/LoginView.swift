@@ -546,6 +546,12 @@ struct OTPVerificationView: View {
                 isAppearing = true
             }
         }
+        .trackScreen(
+            "OTPVerificationView",
+            metadata: [
+                "ui_guide": "Enter the six-digit code from your email, then Verify. Use Resend if needed. Never share the OTP in voice chat."
+            ]
+        )
     }
     
     func verifyOTP() {
@@ -1138,6 +1144,12 @@ struct LoginSkipView: View {
         .fullScreenCover(isPresented: $showHomeView){
             HomeView()
         }
+        .trackScreen(
+            "LoginSkipView",
+            metadata: [
+                "ui_guide": "Email sign-in: enter your email, tap Sign in; you will get an OTP by email. Google and other options may appear depending on build. Back returns to the previous screen."
+            ]
+        )
     }
     
     // MARK: - Helper Functions

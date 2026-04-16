@@ -59,6 +59,7 @@ struct AddDeviceView: View {
                 }
             }
             .preferredColorScheme(.dark)
+            .trackScreen("AddDeviceView")
             .onAppear {
                 // Set the visibility of the back button based on the current screen
                 updateBackButtonVisibility()

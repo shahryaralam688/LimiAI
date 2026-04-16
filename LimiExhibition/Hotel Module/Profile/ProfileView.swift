@@ -276,6 +276,7 @@ struct ProfileView: View {
         .onAppear {
             userDataManager.refreshUserData()
         }
+        .trackScreen("ProfileView", metadata: ["surface": "settings_profile"])
     }
 
     private func applyLanguage(_ lang: AppLanguage) {

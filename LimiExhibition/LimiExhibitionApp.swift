@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct YourApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     // Shared BackgroundLogic instance for the whole app
     @State private var bgLogic = BackgroundLogic()
     @State private var languageRefreshID = UUID()

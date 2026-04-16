@@ -111,29 +111,10 @@ struct GlassCardStyle: ViewModifier {
     var blurRadius: CGFloat = 0
 
     func body(content: Content) -> some View {
-        content
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Color.white.opacity(fillOpacity))
-                    .background(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(.ultraThinMaterial.opacity(blurRadius > 0 ? 1 : 0))
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(strokeOpacity),
-                                Color.white.opacity(strokeOpacity * 0.3)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 0.5
-                    )
-            )
+        content.modifier(NeuElevationModifier(
+            level: 1,
+            shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        ))
     }
 }
 
@@ -144,12 +125,7 @@ extension View {
         fillOpacity: Double = 0.06,
         blur: CGFloat = 0
     ) -> some View {
-        modifier(GlassCardStyle(
-            cornerRadius: cornerRadius,
-            strokeOpacity: strokeOpacity,
-            fillOpacity: fillOpacity,
-            blurRadius: blur
-        ))
+        modifier(GlassCardStyle(cornerRadius: cornerRadius))
     }
 }
 
@@ -176,7 +152,7 @@ extension View {
     }
 }
 
-// MARK: - Limi Floating Orb (main AI entry point)
+// MARK: - Limi Floating Orb (main AI entry point — Neural Sphere)
 
 struct LimiOrbView: View {
     var size: CGFloat = 72
@@ -185,83 +161,95 @@ struct LimiOrbView: View {
 
     @State private var breathe = false
     @State private var rotation: Double = 0
+    @State private var pulseGlow = false
+
+    private let cyanAccent  = Color(hex: "00E5FF")
+    private let violetCore  = Color(hex: "9B5DE5")
+    private let deepViolet  = Color(hex: "6A1B9A")
 
     var body: some View {
         Button(action: onTap) {
             ZStack {
-                // Outermost aura
+                // Ambient glow halo
                 Circle()
                     .fill(
                         RadialGradient(
                             colors: [
-                                Color.orbGlow1.opacity(isActive ? 0.4 : 0.15),
-                                Color.orbGlow2.opacity(isActive ? 0.2 : 0.05),
+                                cyanAccent.opacity(isActive ? 0.25 : 0.10),
+                                violetCore.opacity(isActive ? 0.15 : 0.05),
                                 Color.clear
                             ],
                             center: .center,
-                            startRadius: size * 0.3,
-                            endRadius: size * 1.2
+                            startRadius: size * 0.25,
+                            endRadius: size * 1.3
                         )
                     )
-                    .frame(width: size * 2, height: size * 2)
-                    .scaleEffect(breathe ? 1.08 : 0.95)
+                    .frame(width: size * 2.4, height: size * 2.4)
+                    .scaleEffect(breathe ? 1.06 : 0.94)
 
-                // Rotating gradient ring
+                // Outer glass shell ring
                 Circle()
                     .stroke(
                         AngularGradient(
                             colors: [
-                                Color.orbGlow1.opacity(0.6),
-                                Color.orbGlow3.opacity(0.3),
-                                Color.orbGlow4.opacity(0.6),
-                                Color.orbGlow1.opacity(0.6)
+                                cyanAccent.opacity(0.5),
+                                violetCore.opacity(0.3),
+                                cyanAccent.opacity(0.15),
+                                violetCore.opacity(0.5),
+                                cyanAccent.opacity(0.5)
                             ],
                             center: .center
                         ),
-                        lineWidth: 1.5
+                        lineWidth: 1.2
                     )
-                    .frame(width: size + 8, height: size + 8)
+                    .frame(width: size + 6, height: size + 6)
                     .rotationEffect(.degrees(rotation))
-                    .blur(radius: 1)
+                    .blur(radius: 0.5)
 
-                // Core orb
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                Color.orbGlow4.opacity(0.9),
-                                Color.orbGlow1.opacity(0.7),
-                                Color.orbGlow2.opacity(0.5)
-                            ],
-                            center: .init(x: 0.4, y: 0.35),
-                            startRadius: 0,
-                            endRadius: size * 0.55
-                        )
-                    )
+                // Neural sphere image
+                Image("neuralOrb")
+                    .resizable()
+                    .scaledToFill()
                     .frame(width: size, height: size)
+                    .clipShape(Circle())
                     .overlay(
                         Circle()
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        Color.white.opacity(0.2),
+                                        Color.white.opacity(0.12),
                                         Color.clear
                                     ],
                                     startPoint: .topLeading,
-                                    endPoint: .center
+                                    endPoint: .bottomTrailing
                                 )
                             )
                     )
-                    .shadow(color: Color.orbGlow1.opacity(0.5), radius: isActive ? 30 : 15)
-                    .shadow(color: Color.orbGlow3.opacity(0.3), radius: isActive ? 50 : 25)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        cyanAccent.opacity(0.4),
+                                        violetCore.opacity(0.2),
+                                        Color.clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.8
+                            )
+                    )
+                    .shadow(color: cyanAccent.opacity(isActive ? 0.6 : 0.3), radius: isActive ? 24 : 12)
+                    .shadow(color: violetCore.opacity(isActive ? 0.4 : 0.2), radius: isActive ? 40 : 20)
                     .scaleEffect(breathe ? 1.02 : 0.98)
 
-                // Inner highlight
+                // Specular highlight dot
                 Circle()
-                    .fill(Color.white.opacity(0.12))
-                    .frame(width: size * 0.35, height: size * 0.35)
-                    .offset(x: -size * 0.12, y: -size * 0.12)
-                    .blur(radius: 4)
+                    .fill(Color.white.opacity(pulseGlow ? 0.18 : 0.08))
+                    .frame(width: size * 0.22, height: size * 0.22)
+                    .offset(x: -size * 0.14, y: -size * 0.14)
+                    .blur(radius: 3)
             }
         }
         .buttonStyle(.plain)
@@ -269,8 +257,11 @@ struct LimiOrbView: View {
             withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) {
                 breathe = true
             }
-            withAnimation(.linear(duration: 12).repeatForever(autoreverses: false)) {
+            withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) {
                 rotation = 360
+            }
+            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                pulseGlow = true
             }
         }
     }
@@ -429,7 +420,7 @@ extension AnyTransition {
 
 // MARK: - Unified Button System
 
-/// Standard back / dismiss button — 40×40 glass circle with chevron.left
+/// Standard back / dismiss button — 40×40 raised neumorphic rounded square
 struct LimiBackButton: View {
     var icon: String = "chevron.left"
     var action: () -> Void
@@ -440,33 +431,42 @@ struct LimiBackButton: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.appTextPrimary)
                 .frame(width: 40, height: 40)
-                .glassCard(cornerRadius: 12, fillOpacity: 0.08)
+                .neuCard(cornerRadius: 12)
         }
         .buttonStyle(.plain)
     }
 }
 
-/// Circular icon button — 44×44 minimum touch target
+/// Circular icon button — 44×44 raised neumorphic circle with press state
 struct LimiIconButton: View {
     let icon: String
     var size: CGFloat = 44
     var iconSize: CGFloat = 18
     var action: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        }) {
             Image(systemName: icon)
                 .font(.system(size: iconSize, weight: .medium))
                 .foregroundColor(.appTextPrimary)
                 .frame(width: size, height: size)
-                .glassCard(cornerRadius: size / 2, fillOpacity: 0.06)
+                .neuCircle(isPressed: isPressed)
         }
         .buttonStyle(.plain)
-        .tapScale()
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
 
-/// Primary CTA — full-width gradient capsule, height 52
+/// Primary CTA — emerald gradient with neumorphic elevation toggle
 struct LimiPrimaryButton: View {
     let title: String
     var isEnabled: Bool = true
@@ -474,6 +474,7 @@ struct LimiPrimaryButton: View {
     var height: CGFloat = 52
     var action: () -> Void
 
+    @State private var isPressed = false
     private var effectiveEnabled: Bool { isEnabled && !isLoading }
 
     var body: some View {
@@ -495,7 +496,7 @@ struct LimiPrimaryButton: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(height: height - 10)
             .foregroundColor(effectiveEnabled ? .white : .appTextDisabled)
             .background(
                 Capsule(style: .continuous)
@@ -509,9 +510,18 @@ struct LimiPrimaryButton: View {
                         : AnyShapeStyle(Color.white.opacity(0.06))
                     )
             )
+            .clipShape(Capsule(style: .continuous))
+            .padding(5)
         }
+        .frame(height: height)
+        .neuElevationCapsule(level: isPressed ? -1 : 1)
+        .animation(LimiMotion.quick, value: isPressed)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
         .disabled(!effectiveEnabled)
-        .tapScale()
         .animation(LimiMotion.quick, value: isLoading)
     }
 }
@@ -582,37 +592,40 @@ struct LimiSecondaryButton: View {
     }
 }
 
-/// Small pill button — for inline actions (Connect, Active, etc.)
+/// Small pill button — raised when off (isFilled=false), sunken when on (isFilled=true)
 struct LimiPillButton: View {
     let title: String
     var isFilled: Bool = true
     var action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            action()
+        }) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(isFilled ? .appCanvasPrimary : .appTextPrimary)
+                .foregroundColor(isFilled ? .white : .appTextPrimary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
                 .background(
-                    Capsule()
-                        .fill(
-                            isFilled
-                            ? AnyShapeStyle(LinearGradient(
-                                colors: [.orbGlow4, .orbGlow1],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            : AnyShapeStyle(Color.clear)
-                        )
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(Color.white.opacity(isFilled ? 0 : 0.12), lineWidth: 1)
+                    Group {
+                        if isFilled {
+                            Capsule(style: .continuous)
+                                .fill(LinearGradient(
+                                    colors: [.orbGlow4, .orbGlow1],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ))
+                        } else {
+                            Capsule(style: .continuous)
+                                .fill(Color.clear)
+                        }
+                    }
                 )
         }
-        .tapScale()
+        .neuCapsule(isPressed: isFilled)
+        .animation(LimiMotion.quick, value: isFilled)
     }
 }
 
@@ -657,6 +670,6 @@ struct LimiTextField: View {
         .foregroundColor(.appTextPrimary)
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
-        .glassCard(cornerRadius: CGFloat(LimiRadius.medium), strokeOpacity: 0.1, fillOpacity: 0.08)
+        .neuCarvedField(cornerRadius: CGFloat(LimiRadius.medium))
     }
 }

@@ -7,6 +7,8 @@ struct SplashScreen: View {
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("globalUserLocation") private var storedLocation = ""
+    /// Lets users continue without sharing location after the logged-in prompt.
+    @AppStorage("locationPromptSkipped") private var locationPromptSkipped = false
     @State private var isActive = false
     @State private var logoScale = 0.8
     @State private var logoOpacity = 0.0
@@ -25,24 +27,25 @@ struct SplashScreen: View {
             }
         }
         .animation(.easeInOut(duration: 0.8), value: isActive)
+        .trackScreen("SplashScreen", metadata: ["phase": "splash_or_routing"])
     }
 
     @ViewBuilder
     private var destinationView: some View {
-        if storedLocation.isEmpty {
-            LocationStorageView()
-                .ignoresSafeArea()
-        } else {
-            if authManager.isAuthenticated {
-                HomeView()
-                    .ignoresSafeArea()
-            } else if !hasLaunchedBefore || !hasCompletedOnboarding {
-                OnboardingView()
+        if authManager.isAuthenticated {
+            if storedLocation.isEmpty && !locationPromptSkipped {
+                LocationStorageView(showSkipButton: true)
                     .ignoresSafeArea()
             } else {
-                GetStart()
+                HomeView()
                     .ignoresSafeArea()
             }
+        } else if !hasLaunchedBefore || !hasCompletedOnboarding {
+            OnboardingView()
+                .ignoresSafeArea()
+        } else {
+            GetStart()
+                .ignoresSafeArea()
         }
     }
 

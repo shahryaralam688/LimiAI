@@ -108,6 +108,7 @@ struct HomeView: View {
     }
 
     @State private var isWeatherExpanded: Bool = false
+    @AppStorage("globalUserLocation") private var storedUserLocation: String = ""
 
     var body: some View {
         NavigationStack {
@@ -152,6 +153,7 @@ struct HomeView: View {
                         HStack {
                             Spacer()
                             LimiPillButton(title: "Add More Modules") {
+                                ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
                                 showModulerView = true
                             }
                             .padding(.horizontal, 16)
@@ -314,6 +316,16 @@ struct HomeView: View {
 
         }
         .frame(maxWidth: .infinity)
+        .trackScreen("HomeView")
+        .onChange(of: storedUserLocation) { _, _ in
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: [:])
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .limiUserLocationDidChange)) { _ in
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: [:])
+        }
+        .onChange(of: viewModel.selectedTab) { _, new in
+            ContextManager.shared.updateHomeTab(new)
+        }
         .onAppear {
             let role = AuthManager.shared.getRole()
                 print("🔹 Current Role:", role)
@@ -363,6 +375,12 @@ struct HomeView: View {
         .sheet(isPresented: $showProfileFromHome) {
             ProfileView()
         }
+        .onChange(of: showConfigurator) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: showConnectedDevices) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: showARView) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: showRoomScan) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: showModulerView) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: showVoiceView) { _, open in if !open { clearHomeSheetFlowMarker() } }
         .onDisappear {
             // ✅ Bonjour OFF (exact lifecycle)
             bonjourBrowser.stopBrowsing()
@@ -471,6 +489,7 @@ struct HomeView: View {
                 .multilineTextAlignment(.center)
 
             LimiPrimaryButton(title: "home.empty.cta".localized, height: 48) {
+                ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
                 showModulerView = true
             }
             .padding(.horizontal, 40)
@@ -627,6 +646,7 @@ struct HomeView: View {
                 Image("Vector-2")
                     .scaledToFit()
                     .onTapGesture {
+                        ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "voice_chat"])
                         showVoiceView = true
                     }
 
@@ -732,16 +752,24 @@ struct HomeView: View {
     private func handleModuleTap(_ module: Module) {
         switch module.id {
         case 1:
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "devices"])
             showConnectedDevices = true
         case 2:
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "configurator"])
             showConfigurator = true
         case 3:
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "ar_portal"])
             showARView = true
         case 4:
+            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "room_scan"])
             showRoomScan = true
         default:
             break
         }
+    }
+
+    private func clearHomeSheetFlowMarker() {
+        ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": ""])
     }
 
 }

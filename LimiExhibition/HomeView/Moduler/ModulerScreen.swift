@@ -275,6 +275,7 @@ struct ModulerView: View {
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showToast)
             }
         }
+        .trackScreen("ModulerView", metadata: ["surface": "home_modules"])
     }
 }
 

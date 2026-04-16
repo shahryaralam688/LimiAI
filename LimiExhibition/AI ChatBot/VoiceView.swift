@@ -56,6 +56,7 @@ struct VoiceView: View {
             }
         }
         .ignoresSafeArea(.all)
+        .trackScreen("VoiceView")
         .onAppear {
             withAnimation(.easeOut(duration: 1.0)) { appeared = true }
             startAmbientLoop()

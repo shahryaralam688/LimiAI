@@ -32,6 +32,7 @@ struct ContentView: View {
                 .tag(1)
         }
         .accentColor(.orbGlow4)
+        .trackScreen("ContentView", metadata: ["surface": "dev_led_testing_shell"])
         .onAppear {
             let appearance = UITabBarAppearance()
             appearance.configureWithOpaqueBackground()

@@ -250,6 +250,7 @@ struct LimiContentView: View {
                 print("No token found")
             }
         }
+        .trackScreen("ConfiguratorWebView", metadata: ["surface": "web_configurator", "flow": "product_configurator"])
     }
 }
 

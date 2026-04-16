@@ -125,6 +125,9 @@ enum AppTheme {
         static let orbGlow4 = Color(hex: "10B981")
         static let glassStroke = Color(hex: "FFFFFF").opacity(0.08)
         static let glassFill = Color(hex: "FFFFFF").opacity(0.04)
+
+        // Neumorphic — aliases into NeuTheme (single source of truth)
+        static let neuBase = Color(hex: "131318")
     }
 }
 
@@ -288,6 +291,9 @@ extension Color {
     static let orbGlow2 = AppTheme.Palette.orbGlow2
     static let orbGlow3 = AppTheme.Palette.orbGlow3
     static let orbGlow4 = AppTheme.Palette.orbGlow4
+
+    // Neumorphic — alias into NeuTheme
+    static let neuBase = AppTheme.Palette.neuBase
 
     static let verticalGradient = LinearGradient(
         gradient: Gradient(colors: [AppTheme.Palette.orbGlow4.opacity(0.4), AppTheme.Palette.brandPrimary]),

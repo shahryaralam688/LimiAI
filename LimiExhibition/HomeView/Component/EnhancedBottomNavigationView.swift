@@ -106,6 +106,30 @@ struct EnhancedBottomNavigationView: View {
                 }
             }
         }
+        .onChange(of: showCustomer) { _, open in
+            ContextManager.shared.updateContext(
+                screen: "HomeView",
+                metadata: ["sheet_flow": open ? "profile" : ""]
+            )
+        }
+        .onChange(of: showWebView) { _, open in
+            ContextManager.shared.updateContext(
+                screen: "HomeView",
+                metadata: ["sheet_flow": open ? "web" : ""]
+            )
+        }
+        .onChange(of: showARScan) { _, open in
+            ContextManager.shared.updateContext(
+                screen: "HomeView",
+                metadata: ["sheet_flow": open ? "ar_portal" : ""]
+            )
+        }
+        .onChange(of: showVoiceView) { _, open in
+            ContextManager.shared.updateContext(
+                screen: "HomeView",
+                metadata: ["sheet_flow": open ? "voice_chat" : ""]
+            )
+        }
     }
 
     // MARK: - Floating Glass Bar

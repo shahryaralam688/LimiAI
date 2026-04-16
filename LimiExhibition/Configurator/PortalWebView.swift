@@ -56,6 +56,16 @@ struct PortalWebView: View {
         .onAppear {
             checkLightConfigs()
             withAnimation(LimiMotion.appear) { appeared = true }
+            ContextManager.shared.updateContext(
+                screen: "PortalWebView",
+                metadata: ["portal_tab": selectedTab.rawValue, "surface": "ar_portal"]
+            )
+        }
+        .onChange(of: selectedTab) { _, tab in
+            ContextManager.shared.updateContext(
+                screen: "PortalWebView",
+                metadata: ["portal_tab": tab.rawValue, "surface": "ar_portal"]
+            )
         }
         .fullScreenCover(isPresented: $showCustomView) {
             CustomView(
@@ -470,6 +480,14 @@ struct CustomView: View {
             color: "red"
         ))
         .frame(maxWidth: .infinity)
+        .trackScreen(
+            "CustomARView",
+            metadata: [
+                "download_id": downloadId,
+                "light_type": lightType,
+                "surface": "ar_placement"
+            ]
+        )
     }
 }
 

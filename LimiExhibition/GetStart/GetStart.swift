@@ -159,6 +159,12 @@ struct GetStart: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
         .background(Color.appCanvasPrimary)
+        .trackScreen(
+            "GetStart",
+            metadata: [
+                "ui_guide": "Choose your user type (installer vs end user), optional space selection, then Get Started to continue to sign-in."
+            ]
+        )
 
         
     

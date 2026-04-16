@@ -1,323 +1,686 @@
 import SwiftUI
-import UIKit
-import WebKit
-import SDWebImageSwiftUI
 
-class ImageRotationCeiling: ObservableObject {
-    @Published var currentIndex = 0
-    private var timer: Timer?
-
-    let images = ["ceilingVertical", "ceilingHorizontal"]
-
-    init() {
-        startImageRotation()
-    }
-
-    func startImageRotation() {
-        stopImageRotation() // Stop any existing timer before starting a new one
-        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            DispatchQueue.main.async {
-                self.currentIndex = (self.currentIndex + 1) % self.images.count
-            }
-        }
-    }
-
-    func stopImageRotation() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    deinit {
-        stopImageRotation() // Ensure timer is stopped when the object is deallocated
-    }
-}
+// MARK: - AI Bubble Storyboard Onboarding
 
 struct OnboardingView: View {
     @State private var currentPage = 0
-    @State private var showDemoAddDevice = false // ✅ showDemoAddDevice state
+    @State private var showSignIn = false
+    @State private var showPostStoryboardLocation = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @State private var skipButtonOpacity: Double = 0
-    private let totalPages = 5
+    @AppStorage("globalUserLocation") private var storedLocation = ""
+
+    private let totalPages = 4
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            if showDemoAddDevice {
+        ZStack {
+            if showSignIn {
                 SignInView()
-//                LoginSkipView()
-                .transition(.asymmetric( insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity) ))
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            } else {
+                storyboardContent
+                    .ignoresSafeArea()
             }
-            else {
+        }
+        .fullScreenCover(isPresented: $showPostStoryboardLocation) {
+            LocationStorageView(
+                onFinished: {
+                    showPostStoryboardLocation = false
+                    finishOnboardingAndShowSignIn()
+                },
+                showSkipButton: true
+            )
+        }
+        .onAppear { FloatingAssistantManager.shared.hide() }
+        .onDisappear {
+            FloatingAssistantManager.shared.refreshFloatingVisibility()
+        }
+    }
+
+    private func finishOnboardingAndShowSignIn() {
+        hasCompletedOnboarding = true
+        withAnimation(.easeInOut(duration: 0.6)) { showSignIn = true }
+        FloatingAssistantManager.shared.refreshFloatingVisibility()
+    }
+
+    private func handleStoryboardActivated() {
+        let trimmed = storedLocation.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            showPostStoryboardLocation = true
+        } else {
+            finishOnboardingAndShowSignIn()
+        }
+    }
+
+    private func storyboardMetadata(page: Int) -> [String: String] {
+        var m: [String: String] = [
+            "page_index": "\(page)",
+            "page_number": "\(page + 1)",
+            "total_pages": "\(totalPages)",
+            "surface": "ai_storyboard_onboarding"
+        ]
+        switch page {
+        case 0: m["ui_guide"] = "Intro: meet Limi AI — swipe left for the next story."
+        case 1: m["ui_guide"] = "Talk naturally; Limi controls lights and routines from context."
+        case 2: m["ui_guide"] = "The orb can be dragged; tap for voice, long-press for more later."
+        case 3: m["ui_guide"] = "Final frame: larger orb — Continue to sign in or enable the assistant."
+        default: break
+        }
+        return m
+    }
+
+    private var storyboardContent: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+
+            ZStack {
                 TabView(selection: $currentPage) {
-                    OnboardingPageView(
-                        index: 0,
-                        image: "Onboarding_img_1",
-                        title: "Meet LIMI — Your Ambient AI System",
-                        description: "LIMI blends intelligence into your space. Always present. Always aware. Always helpful — without demanding your attention.",
-                        pageIndex: $currentPage,
-                        totalPages: totalPages,
-                        showDemoAddDevice: $showDemoAddDevice
-                    ).tag(0).ignoresSafeArea()
-                    
-                    OnboardingPageView(
-                        index: 1,
-                        image: "Onboarding_img_2",
-                        title: "Control Your World, Naturally",
-                        description: "Lights, comfort, routines, moments — all controlled by voice, touch, or automation. Your space responds to you, not the other way around.",
-                        pageIndex: $currentPage,
-                        totalPages: totalPages,
-                        showDemoAddDevice: $showDemoAddDevice
-                    ).tag(1).ignoresSafeArea()
-                    
-                    OnboardingPageView(
-                        index: 2,
-                        image: "Onboarding_img_3",
-                        title: "Spaces That Feel Alive",
-                        description: "LIMI adapts lighting and ambience to your mood, time, and activity — from focus to relaxation, mornings to evenings.",
-                        pageIndex: $currentPage,
-                        totalPages: totalPages,
-                        showDemoAddDevice: $showDemoAddDevice
-                    ).tag(2).ignoresSafeArea()
-                    
-                    OnboardingPageView(
-                        index: 3,
-                        image: "Onboarding_img_4",
-                        title: "Learns Quietly. Acts Intelligently.",
-                        description: "LIMI understands patterns — not just commands. It senses routines, anticipates needs, and supports you without interruption.",
-                        pageIndex: $currentPage,
-                        totalPages: totalPages,
-                        showDemoAddDevice: $showDemoAddDevice
-                    ).tag(3).ignoresSafeArea()
-                    
-                    OnboardingPageView(
-                        index: 4,
-                        image: "Onboarding_img_5",
-                        title: "Welcome to Intelligent Living",
-                        description: "Installation-free. Effortless to use. AI that lives in your space — not on your screen.",
-                        pageIndex: $currentPage,
-                        totalPages: totalPages,
-                        showDemoAddDevice: $showDemoAddDevice
-                    ).tag(4).ignoresSafeArea()
+                    StoryboardPage(backgroundImage: "storyboard_bg_1", screenSize: geo.size).tag(0).ignoresSafeArea()
+                    StoryboardPage(backgroundImage: "storyboard_bg_2", screenSize: geo.size).tag(1).ignoresSafeArea()
+                    StoryboardPage(backgroundImage: "storyboard_bg_3", screenSize: geo.size).tag(2).ignoresSafeArea()
+                    StoryboardPage(backgroundImage: "storyboard_bg_4", screenSize: geo.size).tag(3).ignoresSafeArea()
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .ignoresSafeArea()
-//                if currentPage != 4 {
-//                    Button("Skip") {
-//                        hasCompletedOnboarding = true
-//                        showDemoAddDevice = true // ✅ showDemoAddDevice triggers on Skip
-//                    }
-//                    .foregroundColor(.appTextPrimary)
-//                    .padding(.top, 50)
-//                    .padding(.trailing, 20)
-//                    .opacity(skipButtonOpacity)
-//                    .animation(.easeOut(duration: 0.6).delay(0.8), value: skipButtonOpacity)
-//                }
-                
-            }
-        }
-        .ignoresSafeArea()
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                skipButtonOpacity = 1.0
-            }
-        }
-        .onChange(of: currentPage) { _, _ in
-            skipButtonOpacity = 0.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                skipButtonOpacity = 1.0
-            }
-        }
-    }
-}
 
-struct OnboardingPageView: View {
-    let index: Int
-    let image: String
-    let title: String
-    let description: String
-    @Binding var pageIndex: Int
-    let totalPages: Int
-
-    @Binding var showDemoAddDevice: Bool
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    
-    @State private var imageOpacity: Double = 0
-    @State private var cardOffset: CGFloat = 50
-    @State private var cardOpacity: Double = 0
-    @State private var titleScale: CGFloat = 0.8
-    @State private var titleOpacity: Double = 0
-    @State private var descriptionOpacity: Double = 0
-    @State private var buttonScale: CGFloat = 0.8
-    @State private var buttonOpacity: Double = 0
-    @State private var indicatorOpacity: Double = 0
-    @State private var wasActive: Bool = false
-
-    private let brandGreen = Color.appBrandSecondary
-
-    private var isActive: Bool {
-        pageIndex == index
-    }
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                // Background
-                Color.appCanvasPrimary.ignoresSafeArea()
-
-                // Image - preserved exactly as before
-                Image(image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: geo.size.width, height: geo.size.height)
-                    .clipped()
-                    .ignoresSafeArea()
-                    .opacity(imageOpacity)
-                    .animation(.easeOut(duration: 0.8), value: imageOpacity)
+                OrbWithSpeechCard(currentPage: currentPage, screenWidth: w, screenHeight: h)
+                    .allowsHitTesting(false)
 
                 VStack {
                     Spacer()
-
-                    // Bottom card
-                    ZStack(alignment: .top) {
-                        // Frosted glass card background
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(Color.themeWhite.opacity(0.08))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .stroke(brandGreen.opacity(0.15), lineWidth: 1)
-                            )
-                            .background(.ultraThinMaterial)
-
-                        // Card content
-                        VStack(spacing: 20) {
-                            Text(title)
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.appTextPrimary)
-                                .limiAppear(delay: 0.2)
-                                .scaleEffect(titleScale)
-                                .opacity(titleOpacity)
-                                .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0).delay(0.3), value: titleScale)
-                                .animation(.easeOut(duration: 0.6).delay(0.3), value: titleOpacity)
-
-                            Text(description)
-                                .font(.system(size: 16, weight: .medium, design: .default))
-                                .foregroundColor(.appTextSecondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-                                .opacity(descriptionOpacity)
-                                .animation(.easeOut(duration: 0.6).delay(0.5), value: descriptionOpacity)
-
-                            if pageIndex == totalPages - 1 {
-                                LimiPrimaryButton(title: "Get Started") {
-                                    hasCompletedOnboarding = true
-                                    showDemoAddDevice = true
-                                }
-                                .padding(.horizontal, 30)
-                                .scaleEffect(buttonScale)
-                                .opacity(buttonOpacity)
-                                .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0).delay(0.7), value: buttonScale)
-                                .animation(.easeOut(duration: 0.5).delay(0.7), value: buttonOpacity)
-                            }
-
-                            // Page indicators
-                            HStack(spacing: 8) {
-                                ForEach(0..<totalPages, id: \.self) { idx in
-                                    Circle()
-                                        .fill(idx == pageIndex ? brandGreen : Color.themeWhite.opacity(0.3))
-                                        .frame(width: idx == pageIndex ? 20 : 8, height: 8)
-                                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pageIndex)
-                                }
-                            }
-                            .padding(.top, pageIndex == totalPages - 1 ? 26 : 56)
-                            .opacity(indicatorOpacity)
-                            .animation(.easeOut(duration: 0.5).delay(0.6), value: indicatorOpacity)
-
-                            Spacer(minLength: geo.safeAreaInsets.bottom)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 24)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300 + geo.safeAreaInsets.bottom)
-                    .offset(y: cardOffset)
-                    .opacity(cardOpacity)
-                    .animation(.spring(response: 0.7, dampingFraction: 0.8, blendDuration: 0).delay(0.2), value: cardOffset)
-                    .animation(.easeOut(duration: 0.6).delay(0.2), value: cardOpacity)
-//                    .padding(.horizontal, 16)
+                    BottomContent(
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        onComplete: handleStoryboardActivated
+                    )
                 }
             }
-        }
-        .onAppear {
-            wasActive = isActive
-            if isActive {
-                startAnimations()
+            .onAppear {
+                ContextManager.shared.updateContext(
+                    screen: "OnboardingStoryboard",
+                    metadata: storyboardMetadata(page: currentPage)
+                )
             }
-        }
-        .onChange(of: pageIndex) { _, _ in
-            let currentlyActive = isActive
-            if currentlyActive && !wasActive {
-                resetAndStartAnimations()
+            .onChange(of: currentPage) { _, new in
+                ContextManager.shared.updateContext(
+                    screen: "OnboardingStoryboard",
+                    metadata: storyboardMetadata(page: new)
+                )
             }
-            wasActive = currentlyActive
-        }
-    }
-    
-    private func startAnimations() {
-        imageOpacity = 1.0
-        cardOffset = 0
-        cardOpacity = 1.0
-        titleScale = 1.0
-        titleOpacity = 1.0
-        descriptionOpacity = 1.0
-        buttonScale = 1.0
-        buttonOpacity = 1.0
-        indicatorOpacity = 1.0
-    }
-    
-    private func resetAndStartAnimations() {
-        imageOpacity = 0
-        cardOffset = 50
-        cardOpacity = 0
-        titleScale = 0.8
-        titleOpacity = 0
-        descriptionOpacity = 0
-        buttonScale = 0.8
-        buttonOpacity = 0
-        indicatorOpacity = 0
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            startAnimations()
         }
     }
 }
 
-struct CustomPageIndicator: View {
-    var currentPage: Int
-    var totalPages: Int
-    var activeColor: Color
-    var inactiveColor: Color
-    
+// MARK: - Page Background
+
+private struct StoryboardPage: View {
+    let backgroundImage: String
+    let screenSize: CGSize
+
     var body: some View {
-        HStack(spacing: 12) {
-            ForEach(0..<totalPages, id: \.self) { index in
-                if currentPage == index {
+        ZStack {
+            NeuTheme.baseCanvas.ignoresSafeArea()
+            Image(backgroundImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: screenSize.width, height: screenSize.height)
+                .clipped()
+                .opacity(0.30)
+                .ignoresSafeArea()
+            AmbientParticlesView(count: 15)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+// MARK: - Typing Text View
+
+private struct TypingText: View {
+    let fullText: String
+    let speed: Double
+    let font: Font
+    let color: Color
+    let alignment: TextAlignment
+
+    @State private var displayed = ""
+    @State private var charIndex = 0
+    @State private var isComplete = false
+
+    init(_ text: String, speed: Double = 0.056, font: Font = .system(size: 16, weight: .semibold, design: .rounded), color: Color = .appTextPrimary, alignment: TextAlignment = .leading) {
+        self.fullText = text
+        self.speed = speed
+        self.font = font
+        self.color = color
+        self.alignment = alignment
+    }
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            Text(displayed)
+                .font(font)
+                .foregroundColor(color)
+                .multilineTextAlignment(alignment)
+                .lineSpacing(3)
+
+            if !isComplete {
+                TypingCursor()
+            }
+        }
+        .onAppear { startTyping() }
+        .onChange(of: fullText) { _, _ in
+            displayed = ""
+            charIndex = 0
+            isComplete = false
+            startTyping()
+        }
+    }
+
+    private func startTyping() {
+        let chars = Array(fullText)
+        func typeNext() {
+            guard charIndex < chars.count else {
+                isComplete = true
+                return
+            }
+            displayed.append(chars[charIndex])
+            charIndex += 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + speed) { typeNext() }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { typeNext() }
+    }
+}
+
+// MARK: - Typing Cursor
+
+private struct TypingCursor: View {
+    @State private var visible = true
+
+    var body: some View {
+        Rectangle()
+            .fill(Color(hex: "00E5FF"))
+            .frame(width: 2, height: 16)
+            .opacity(visible ? 1 : 0)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                    visible = false
+                }
+            }
+    }
+}
+
+// MARK: - Orb + Speech Card
+
+private struct OrbWithSpeechCard: View {
+    let currentPage: Int
+    let screenWidth: CGFloat
+    let screenHeight: CGFloat
+
+    @State private var breathe = false
+    @State private var rotation: Double = 0
+    @State private var wiggle = false
+
+    private let cyanAccent = Color(hex: "00E5FF")
+    private let violetCore = Color(hex: "9B5DE5")
+
+    private var orbSize: CGFloat { currentPage == 3 ? 160 : 56 }
+
+    private var orbCenter: CGPoint {
+        switch currentPage {
+        case 0:  return CGPoint(x: 52, y: screenHeight * 0.20)
+        case 1:  return CGPoint(x: screenWidth - 52, y: screenHeight * 0.45)
+        case 2:  return CGPoint(x: 52, y: screenHeight * 0.70)
+        default: return CGPoint(x: screenWidth / 2, y: screenHeight * 0.24)
+        }
+    }
+
+    private struct PageContent {
+        let speech: String
+        let detail: String
+    }
+
+    private var content: PageContent {
+        switch currentPage {
+        case 0: return PageContent(
+            speech: "Hey! I'm Limi — your ambient AI assistant.",
+            detail: "I live inside your space, always ready to help. No app switching, no searching — just ask."
+        )
+        case 1: return PageContent(
+            speech: "Talk to me naturally — I understand context.",
+            detail: "\"Turn the lights warm\" or \"Set a morning routine\" — I handle your lights, schedules, and environment intelligently."
+        )
+        case 2: return PageContent(
+            speech: "I go wherever you need me.",
+            detail: "Drag me to any edge of your screen. I stay tucked away until you tap. Your space, your rules."
+        )
+        default: return PageContent(speech: "", detail: "")
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            if currentPage < 3 {
+                speechCardView
+            }
+            orbView
+        }
+        .animation(.spring(response: 0.7, dampingFraction: 0.75), value: currentPage)
+        .onAppear { startAnimations() }
+    }
+
+    // MARK: - Orb
+
+    private var orbView: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            cyanAccent.opacity(currentPage == 3 ? 0.22 : 0.10),
+                            violetCore.opacity(0.05),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: orbSize * 0.25,
+                        endRadius: orbSize * 1.5
+                    )
+                )
+                .frame(width: orbSize * 2.4, height: orbSize * 2.4)
+                .scaleEffect(breathe ? 1.06 : 0.94)
+
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        colors: [cyanAccent.opacity(0.4), violetCore.opacity(0.2), cyanAccent.opacity(0.1), violetCore.opacity(0.4), cyanAccent.opacity(0.4)],
+                        center: .center
+                    ),
+                    lineWidth: currentPage == 3 ? 1.5 : 0.8
+                )
+                .frame(width: orbSize + 6, height: orbSize + 6)
+                .rotationEffect(.degrees(rotation))
+                .blur(radius: 0.5)
+
+            Image("neuralOrb")
+                .resizable()
+                .scaledToFill()
+                .frame(width: orbSize, height: orbSize)
+                .clipShape(Circle())
+                .overlay(
+                    Circle().stroke(
+                        LinearGradient(colors: [cyanAccent.opacity(0.35), violetCore.opacity(0.15), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: currentPage == 3 ? 1.2 : 0.6
+                    )
+                )
+                .shadow(color: cyanAccent.opacity(currentPage == 3 ? 0.5 : 0.3), radius: currentPage == 3 ? 22 : 10)
+                .shadow(color: violetCore.opacity(currentPage == 3 ? 0.35 : 0.15), radius: currentPage == 3 ? 38 : 16)
+                .scaleEffect(breathe ? 1.02 : 0.98)
+                .rotationEffect(.degrees(currentPage == 2 && wiggle ? 4 : 0))
+        }
+        .position(orbCenter)
+    }
+
+    // MARK: - Speech Card with Typing Animation
+
+    private var speechCardView: some View {
+        let cardX: CGFloat
+        let cardY: CGFloat
+        let cardWidth: CGFloat = screenWidth * 0.68
+        /// Stable outer height so the neumorphic card doesn’t resize while text types.
+        let cardOuterHeight: CGFloat = min(max(screenHeight * 0.26, 168), 226)
+        let innerTypingHeight: CGFloat = cardOuterHeight - 36
+        let align: TextAlignment
+
+        switch currentPage {
+        case 0:
+            cardX = screenWidth * 0.56
+            cardY = screenHeight * 0.20
+            align = .leading
+        case 1:
+            cardX = screenWidth * 0.42
+            cardY = screenHeight * 0.45
+            align = .leading
+        default:
+            cardX = screenWidth * 0.56
+            cardY = screenHeight * 0.70 - 80
+            align = .leading
+        }
+
+        return VStack(alignment: .leading, spacing: 10) {
+            SequentialTypingCard(
+                headline: content.speech,
+                detail: content.detail,
+                alignment: align,
+                pageId: currentPage,
+                fixedContentHeight: innerTypingHeight
+            )
+        }
+        .padding(18)
+        .frame(width: cardWidth, height: cardOuterHeight, alignment: .top)
+        .neuElevation(level: 1, cornerRadius: 20)
+        .position(x: cardX, y: cardY)
+        .transition(.opacity.combined(with: .scale(scale: 0.92)))
+    }
+
+    private func startAnimations() {
+        withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) { breathe = true }
+        withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) { rotation = 360 }
+        withAnimation(.easeInOut(duration: 0.35).repeatForever(autoreverses: true).delay(0.3)) { wiggle = true }
+    }
+}
+
+// MARK: - Sequential Typing Card (heading first, then paragraph)
+
+private struct SequentialTypingCard: View {
+    let headline: String
+    let detail: String
+    let alignment: TextAlignment
+    let pageId: Int
+    let fixedContentHeight: CGFloat
+
+    @State private var headlineText = ""
+    @State private var detailText = ""
+    @State private var headlineComplete = false
+    @State private var detailComplete = false
+    @State private var headlineCharIdx = 0
+    @State private var detailCharIdx = 0
+
+    var body: some View {
+        VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 8) {
+            HStack(alignment: .bottom, spacing: 2) {
+                Text(headlineText)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
+                    .multilineTextAlignment(alignment)
+                    .lineSpacing(3)
+                if !headlineComplete {
+                    TypingCursor()
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: alignment == .trailing ? .trailing : .leading)
+
+            if headlineComplete {
+                HStack(alignment: .bottom, spacing: 2) {
+                    Text(detailText)
+                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextSecondary)
+                        .multilineTextAlignment(alignment)
+                        .lineSpacing(4)
+                    if !detailComplete {
+                        TypingCursor()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: alignment == .trailing ? .trailing : .leading)
+            }
+        }
+        .frame(height: fixedContentHeight, alignment: .top)
+        .clipped()
+        .id("seqcard_\(pageId)")
+        .onAppear { startHeadline() }
+        .onChange(of: pageId) { _, _ in
+            headlineText = ""
+            detailText = ""
+            headlineComplete = false
+            detailComplete = false
+            headlineCharIdx = 0
+            detailCharIdx = 0
+            startHeadline()
+        }
+    }
+
+    private func startHeadline() {
+        let chars = Array(headline)
+        func next() {
+            guard headlineCharIdx < chars.count else {
+                headlineComplete = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) { startDetail() }
+                return
+            }
+            headlineText.append(chars[headlineCharIdx])
+            headlineCharIdx += 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.054) { next() }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.38) { next() }
+    }
+
+    private func startDetail() {
+        let chars = Array(detail)
+        func next() {
+            guard detailCharIdx < chars.count else {
+                detailComplete = true
+                return
+            }
+            detailText.append(chars[detailCharIdx])
+            detailCharIdx += 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.041) { next() }
+        }
+        next()
+    }
+}
+
+// MARK: - Swipe Hint (pulsing text + arrows)
+
+private struct SwipeHint: View {
+    @State private var pulse = false
+
+    private let cyanAccent = Color(hex: "00E5FF")
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(cyanAccent.opacity(0.4))
+
+            Text("Swipe to continue")
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundColor(.appTextMuted)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(cyanAccent.opacity(0.4))
+        }
+        .opacity(pulse ? 1.0 : 0.4)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
+    }
+}
+
+// MARK: - Bottom Content
+
+private struct BottomContent: View {
+    let currentPage: Int
+    let totalPages: Int
+    let onComplete: () -> Void
+
+    private let cyanAccent = Color(hex: "00E5FF")
+
+    private var title: String {
+        switch currentPage {
+        case 0: return "Meet Limi AI"
+        case 1: return "Natural Conversation"
+        case 2: return "Always Within Reach"
+        default: return "Your AI, Always Ready"
+        }
+    }
+
+    private var subtitle: String {
+        switch currentPage {
+        case 0: return "Intelligence that blends into your space"
+        case 1: return "Voice, touch, or full automation"
+        case 2: return "Tuck it away. Call it back anytime."
+        default: return ""
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            if currentPage == 3 {
+                finalScreen
+            } else {
+                standardBottom
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 46)
+    }
+
+    private var standardBottom: some View {
+        VStack(spacing: 10) {
+            Text(title)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
+
+            Text(subtitle)
+                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .foregroundColor(.appTextSecondary)
+                .multilineTextAlignment(.center)
+
+            SwipeHint()
+                .padding(.top, 14)
+
+            pageIndicators
+                .padding(.top, 6)
+        }
+    }
+
+    private var finalScreen: some View {
+        VStack(spacing: 18) {
+            Text(title)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(.appTextPrimary)
+
+            Text("The operating system for your physical space")
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(.appTextSecondary)
+                .multilineTextAlignment(.center)
+
+            VStack(alignment: .leading, spacing: 16) {
+                InstructionRow(icon: "hand.tap", label: "Tap", detail: "to start a conversation")
+                InstructionRow(icon: "hand.tap.fill", label: "Tap again", detail: "to end the session")
+                InstructionRow(icon: "arrow.up.and.down.and.arrow.left.and.right", label: "Drag", detail: "to reposition anywhere")
+            }
+            .padding(20)
+            .neuElevation(level: 1, cornerRadius: 22)
+
+            ActivateLimiButton(action: onComplete)
+                .padding(.top, 8)
+
+            pageIndicators
+                .padding(.top, 4)
+        }
+    }
+
+    private var pageIndicators: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<totalPages, id: \.self) { idx in
+                if idx == currentPage {
                     Capsule()
-                        .fill(activeColor)
-                        .frame(width: 34, height: 8)
-                        .transition(.scale)
+                        .fill(cyanAccent)
+                        .frame(width: 24, height: 6)
                 } else {
                     Circle()
-                        .fill(inactiveColor)
-                        .frame(width: 8, height: 8)
+                        .fill(Color.appSurfaceField.opacity(0.4))
+                        .frame(width: 6, height: 6)
                 }
             }
         }
-        .animation(LimiMotion.quick, value: currentPage)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPage)
     }
 }
 
-struct OnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        OnboardingView()
+// MARK: - Instruction Row
+
+private struct InstructionRow: View {
+    let icon: String
+    let label: String
+    let detail: String
+
+    private let cyanAccent = Color(hex: "00E5FF")
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(cyanAccent)
+                .frame(width: 28)
+            HStack(spacing: 4) {
+                Text(label)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
+                Text(detail)
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .foregroundColor(.appTextSecondary)
+            }
+            Spacer()
+        }
     }
+}
+
+// MARK: - Activate Limi AI Button (animated gradient border)
+
+private struct ActivateLimiButton: View {
+    let action: () -> Void
+    @State private var gradientRotation: Double = 0
+
+    private let cyanAccent = Color(hex: "00E5FF")
+
+    private let borderColors: [Color] = [
+        Color(hex: "00E5FF"),
+        Color(hex: "34D399"),
+        Color(hex: "6366F1"),
+        Color(hex: "EC4899"),
+        Color(hex: "F59E0B"),
+        Color(hex: "00E5FF")
+    ]
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: "waveform.circle.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(cyanAccent)
+                Text("Activate Limi AI")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .foregroundColor(.appTextPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.appTextMuted)
+            }
+            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(NeuTheme.baseSurface)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(
+                        AngularGradient(
+                            colors: borderColors,
+                            center: .center,
+                            angle: .degrees(gradientRotation)
+                        ),
+                        lineWidth: 1.5
+                    )
+            )
+            .shadow(color: cyanAccent.opacity(0.15), radius: 16, y: 6)
+        }
+        .onAppear {
+            withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
+                gradientRotation = 360
+            }
+        }
+    }
+}
+
+#Preview {
+    OnboardingView()
 }

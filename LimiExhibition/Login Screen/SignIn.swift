@@ -16,200 +16,34 @@ struct SignInView: View {
     @State private var showPrivacyPolicy = false
     @State private var appeared = false
     var body: some View {
-        ZStack{
-            Image("Sign in")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea() // covers entire screen
+        GeometryReader { geo in
+            let horizontalInset: CGFloat = 24
+            let maxColumn = min(geo.size.width - horizontalInset * 2, 400)
+            let bottomInset = max(geo.safeAreaInsets.bottom, 12) + 8
 
-            
-            
-            VStack{
-
-                
-                Image("LoginViewLogo")
+            ZStack {
+                Image("signInBg")
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 200, height: 40)
-                    .padding(.bottom, 159)
-                
-                Text("Invisible by design, Intelligent by nature")
-                    .font(.system(size: 32, weight: .medium, design: .rounded))
-                    .foregroundColor(.themeWhite)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(9.6) // 130% of 32pt
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .ignoresSafeArea()
 
-                Text("Login with the options below")
-                    .font(.system(size: 15, weight: .regular, design: .rounded))
-                    .foregroundColor(Color.appTextQuiet)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)        // 120% of 15pt = 18pt → 18 - 15 = 3pt extraenvelope.front
-                    .kerning(-0.15)        // Letter spacing -0.15px (Figma)
-                
-                
-                
-                Button(action: {
-                    showLoginView = true
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "envelope.fill")
-                            .font(.system(size: 20, weight: .regular))
-                        
-                        Text("Continue with Email")
-                            .font(.system(size: 16, weight: .semibold))
-                            .tracking(-0.3)
-                    }
-                    .foregroundColor(.themeWhite)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: LimiRadius.large)
-                            .stroke(Color.appBorderPrimary, lineWidth: 1)
-                    )
-                    
-                }
-                .background(Color.appSurfacePrimary)
-                .cornerRadius(LimiRadius.large)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.top, 15)
-                
-                Button(action: {
-                    authManager.signInWithGoogle { success in
-                        if success {
-                            DispatchQueue.main.async {
-                                showHomeView = true
-                            }
-                        }
-                    }
-                }) {
-                    ZStack {
-                        HStack {
-                            Spacer()
-                            HStack(spacing: 8) {
-                                Image("google")
-                                    .scaledToFit()
-                                Text("Continue with Google")
-                                
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.appTextPrimary)
-                            }
-                            Spacer()
-                        }
-                        .padding(.horizontal, 20)
-                        .frame(height: 56)
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+
+                    signInColumn(maxWidth: maxColumn)
+                        .frame(maxWidth: maxColumn)
                         .frame(maxWidth: .infinity)
-                        .background(Color.appSurfacePrimary)
-                        .cornerRadius(LimiRadius.large)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: LimiRadius.large)
-                                .stroke(Color.appBorderPrimary, lineWidth: 1)
-                        )
-                    }
-                    
                 }
-                .background(Color.appSurfacePrimary)
-                .cornerRadius(LimiRadius.large)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.top, 15)
-                
-                
-//                Button(action: {
-//                    authManager.signInWithApple { success in
-//                        if success {
-//                            DispatchQueue.main.async {
-//                                showHomeView = true
-//                            }
-//                        }
-//                    }
-//
-//                }) {
-//                    HStack(spacing: 8) {
-//                        Image(systemName: "applelogo")
-//                            .font(.system(size: 20, weight: .regular))
-//                        
-//                        Text("Continue with Apple")
-//                            .font(.system(size: 16, weight: .semibold))
-//                            .tracking(-0.3)
-//                    }
-//                    .foregroundColor(.themeWhite)
-//                    .frame(maxWidth: .infinity, minHeight: 56)
-//                    .overlay(
-//                        RoundedRectangle(cornerRadius: LimiRadius.large)
-//                            .stroke(Color.appBorderPrimary, lineWidth: 1)
-//                    )
-//                }
-//                .padding(.horizontal, 20)
-//                .padding(.top, 15)
-                
-               
-
-                
-                
-
-                Button {
-                    createInstallerUser()
-                } label: {
-                    Text("Continue as a Guest")
-                        .font(LimiTypography.body)
-                        .foregroundColor(.appTextPrimary)
-                        .kerning(0)
-                        .multilineTextAlignment(.center)
-                        .underline()
-                        .padding()
-                }
-                .buttonStyle(.plain)
-                .tapScale()
-
-
-                HStack(spacing: 0) {
-                    Text("By continuing you are agreeing to our ")
-                        .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.appTextQuiet)
-                        .kerning(-0.15)
-                    
-                    Button(action: {
-                        // navigate or open Terms
-                        
-                        
-                        print("Terms tapped")
-                    }) {
-                        Text("Terms")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.appTextQuiet)
-                            .underline(true, color: Color.appTextQuiet)
-                            .kerning(-0.15)
-                    }
-                    
-                    Text(" and ")
-                        .font(.system(size: 13, weight: .regular, design: .rounded))
-                        .foregroundColor(Color.appTextQuiet)
-                        .kerning(-0.15)
-                    
-                    Button(action: {
-                        // navigate or open Privacy Policy
-                        print("Privacy Policy tapped")
-                        showPrivacyPolicy = true
-                    }) {
-                        Text("Privacy Policy")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.appTextQuiet)
-                            .underline(true, color: Color.appTextQuiet)
-                            .kerning(-0.15)
-                    }
-                }
-                .multilineTextAlignment(.center)
-//                .lineSpacing(4.8) // 140% of 12pt
-//                .frame(width: 283) // matches Figma width
-
-
-
+                .padding(.horizontal, horizontalInset)
+                .padding(.bottom, bottomInset)
+                .padding(.top, max(geo.safeAreaInsets.top, 8))
             }
-            .padding()
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 20)
+            .frame(width: geo.size.width, height: geo.size.height)
         }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 20)
         .onAppear { withAnimation(LimiMotion.gentle) { appeared = true } }
         .fullScreenCover(isPresented: $showHomeView) {
             //HomeView()
@@ -221,8 +55,128 @@ struct SignInView: View {
         .fullScreenCover(isPresented: $showPrivacyPolicy) {
             PrivacyPolicyView()
         }
+        .trackScreen(
+            "SignInView",
+            metadata: [
+                "ui_guide": "Welcome to Limi AI. Use Continue with Email (opens full login), Continue with Google, or Guest. You can open Privacy Policy from here."
+            ]
+        )
     }
-    
+
+    @ViewBuilder
+    private func signInColumn(maxWidth: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            Image("LoginViewLogo")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: min(160, maxWidth * 0.85), height: 32)
+                .padding(.bottom, 20)
+
+            Text("Invisible by design,\nIntelligent by nature")
+                .font(.system(size: 25, weight: .medium, design: .rounded))
+                .foregroundColor(.themeWhite)
+                .multilineTextAlignment(.center)
+                .lineSpacing(6)
+                .frame(maxWidth: .infinity)
+
+            Text("Login with the options below")
+                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .foregroundColor(Color.appTextQuiet)
+                .multilineTextAlignment(.center)
+                .padding(.top, 4)
+                .padding(.bottom, 16)
+
+            Button(action: { showLoginView = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "envelope.fill")
+                        .font(.system(size: 16, weight: .regular))
+                    Text("Continue with Email")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundColor(.themeWhite)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.appBorderPrimary, lineWidth: 1)
+                )
+            }
+            .background(Color.appSurfacePrimary)
+            .cornerRadius(16)
+
+            Button(action: {
+                authManager.signInWithGoogle { success in
+                    if success {
+                        DispatchQueue.main.async { showHomeView = true }
+                    }
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image("google")
+                        .resizable()
+                        .frame(width: 18, height: 18)
+                    Text("Continue with Google")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.appSurfacePrimary)
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color.appBorderPrimary, lineWidth: 1)
+                )
+            }
+            .padding(.top, 10)
+
+            Button {
+                createInstallerUser()
+            } label: {
+                Text("Continue as a Guest")
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextPrimary)
+                    .kerning(0)
+                    .multilineTextAlignment(.center)
+                    .underline()
+                    .padding()
+            }
+            .buttonStyle(.plain)
+            .tapScale()
+
+            legalAgreementFooter
+                .padding(.top, 8)
+        }
+        .frame(maxWidth: maxWidth)
+    }
+
+    private var legalAgreementFooter: some View {
+        VStack(spacing: 10) {
+            Text("By continuing you are agreeing to our")
+                .font(.system(size: 12, weight: .regular, design: .rounded))
+                .foregroundColor(Color.appTextQuiet)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 6) {
+                Button(action: { print("Terms tapped") }) {
+                    Text("Terms")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.appTextQuiet)
+                        .underline(true, color: Color.appTextQuiet)
+                }
+                Text("·")
+                    .foregroundColor(Color.appTextQuiet.opacity(0.6))
+                Button(action: { showPrivacyPolicy = true }) {
+                    Text("Privacy Policy")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(Color.appTextQuiet)
+                        .underline(true, color: Color.appTextQuiet)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
     private func createInstallerUser() {
         isLoading = true
         guard let url = URL(string: APIConstants.LoginInstallerUser) else { return }

@@ -87,6 +87,18 @@ struct DemoARView: View {
         .padding(.bottom, 32)
         .background(Color.appCanvasPrimary)
         .ignoresSafeArea()
+        .onAppear {
+            ContextManager.shared.updateContext(
+                screen: "DemoARView",
+                metadata: ["surface": "ar_presets_carousel", "carousel_index": "\(currentPage)"]
+            )
+        }
+        .onChange(of: currentPage) { _, page in
+            ContextManager.shared.updateContext(
+                screen: "DemoARView",
+                metadata: ["surface": "ar_presets_carousel", "carousel_index": "\(page)"]
+            )
+        }
     }
 }
 

@@ -3,15 +3,22 @@ import CoreLocation
 import MapKit
 
 struct LocationStorageView: View {
+    /// When set (e.g. post–storyboard sheet), called after save or skip so the presenter can continue.
+    var onFinished: (() -> Void)? = nil
+    /// Show “Not now” for optional flows (e.g. right after the AI storyboard).
+    var showSkipButton: Bool = false
+
     @StateObject private var locationManager = LocationManager()
     @StateObject private var storageManager = LocationStorageManager()
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var contentOpacity = 0.0
     @State private var contentOffset: CGFloat = 20
-    
+
+    @AppStorage("locationPromptSkipped") private var locationPromptSkipped = false
+
     private let brandGreen = Color.appBrandSecondary
-    
+
     var body: some View {
         ZStack {
             Color.appCanvasPrimary.ignoresSafeArea()
@@ -41,6 +48,7 @@ struct LocationStorageView: View {
                 contentOffset = 0
             }
         }
+        .trackScreen("LocationPrompt")
         .onReceive(locationManager.$authorizationStatus) { status in
             handleLocationAuthorizationChange(status)
         }
@@ -141,8 +149,17 @@ struct LocationStorageView: View {
                 .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
             }
             .padding(.horizontal, 24)
-            .padding(.bottom, 50)
+
+            if showSkipButton {
+                Button(action: skipAndContinue) {
+                    Text("Not now")
+                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .foregroundColor(.themeWhite.opacity(0.65))
+                }
+                .buttonStyle(.plain)
+            }
         }
+        .padding(.bottom, 32)
     }
     
     private func saveLocationAndContinue() {
@@ -151,20 +168,30 @@ struct LocationStorageView: View {
             showingAlert = true
             return
         }
-        
-        // Store location in global variable
+
         let locationString = "\(location.coordinate.latitude),\(location.coordinate.longitude)"
         globalUserLocation = locationString
-        
-        // Also store the address if available
+
         if let address = storageManager.currentAddress {
             UserDefaults.standard.set(address, forKey: "globalUserAddress")
         }
+
+        NotificationCenter.default.post(name: .limiUserLocationDidChange, object: nil)
+
+        onFinished?()
     }
-    
+
+    private func skipAndContinue() {
+        if let finished = onFinished {
+            finished()
+        } else {
+            locationPromptSkipped = true
+        }
+    }
+
     private func skipLocationSetup() {
-        // Set empty location and continue
         globalUserLocation = ""
+        NotificationCenter.default.post(name: .limiUserLocationDidChange, object: nil)
     }
     
     private func handleLocationAuthorizationChange(_ status: CLAuthorizationStatus) {

@@ -29,6 +29,7 @@ struct HubHomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .trackScreen("HubHomeView", metadata: ["surface": "hub_list", "hub_count": "\(bluetoothManager.storedHubs.count)"])
     }
 }
 

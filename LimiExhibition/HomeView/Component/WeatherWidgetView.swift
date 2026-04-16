@@ -20,6 +20,24 @@ struct WeatherWidgetView: View {
             }
         }
         .onAppear { vm.startFetching() }
+        .onChange(of: vm.temperature) { _, _ in
+            guard vm.weatherData != nil else { return }
+            ContextManager.shared.updateHomeWeather(
+                city: vm.cityName,
+                condition: vm.conditionDescription,
+                tempC: vm.temperature,
+                feelsLikeC: vm.feelsLike
+            )
+        }
+        .onChange(of: vm.cityName) { _, _ in
+            guard vm.weatherData != nil else { return }
+            ContextManager.shared.updateHomeWeather(
+                city: vm.cityName,
+                condition: vm.conditionDescription,
+                tempC: vm.temperature,
+                feelsLikeC: vm.feelsLike
+            )
+        }
     }
 
     // MARK: - Content

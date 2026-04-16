@@ -93,6 +93,7 @@ struct HotelHomeView: View {
         .background(Color.appCanvasHotel)
         .preferredColorScheme(.dark)
         .ignoresSafeArea()
+        .trackScreen("HotelHomeView")
         .fullScreenCover(isPresented: $showVoiceView) {
             VoiceView()
         }
@@ -428,16 +429,46 @@ private struct BottomTabBar: View {
             showVoiceView = true
         } label: {
             ZStack {
-                Color.appSurfaceQuaternary // solid gray background
+                // Ambient glow
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color(hex: "00E5FF").opacity(0.15),
+                                Color(hex: "9B5DE5").opacity(0.08),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 55
+                        )
+                    )
+                    .frame(width: 96, height: 96)
 
-                OrbView(intensity: $orbIntensity, currentVolume: $orbVolume)
-                    .frame(width: 160, height: 160) // smaller orb inside
+                // Neural orb image
+                Image("neuralOrb")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 78, height: 78)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color(hex: "00E5FF").opacity(0.4),
+                                        Color(hex: "9B5DE5").opacity(0.2),
+                                        Color.clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .shadow(color: Color(hex: "00E5FF").opacity(0.4), radius: 14)
+                    .shadow(color: Color(hex: "9B5DE5").opacity(0.25), radius: 24)
             }
-            .frame(width: 78, height: 78)
-            .clipShape(Circle()) // makes it circular
-            .overlay(
-                Circle().stroke(Color.emerald, lineWidth: 0.5) // adds emerald border
-            )
         }
         .buttonStyle(.plain)
     }

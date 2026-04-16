@@ -149,6 +149,13 @@ struct PWM2LEDView: View {
                 HotelHomeView()
             }
             // Removed the allowsHitTesting and opacity modifiers from here
+            .trackScreen(
+                "PWM2LEDView",
+                metadata: [
+                    "hub_name": hub.name,
+                    "surface": "device_control_pwm"
+                ]
+            )
         }
 
     }

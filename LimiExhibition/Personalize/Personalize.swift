@@ -214,6 +214,42 @@ struct OnboardingFlowView: View {
         .fullScreenCover(isPresented: $showDemoScanView) {
             DemoScanDevicesView()
         }
+        .onAppear { syncPersonalizeContext() }
+        .onChange(of: step) { _, _ in syncPersonalizeContext() }
+    }
+
+    private func syncPersonalizeContext() {
+        var meta: [String: String] = [
+            "step": "\(step)",
+            "flow": "personalize",
+            "total_steps": "\(totalSteps)"
+        ]
+        switch step {
+        case 1: meta["step_name"] = "name"
+        case 2: meta["step_name"] = "use_case"
+        case 3: meta["step_name"] = "goals"
+        default: meta["step_name"] = "bluetooth"
+        }
+        let trimmedName = viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedName.isEmpty { meta["pref_name"] = trimmedName }
+        if let uc = viewModel.selectedUseCase { meta["use_case"] = uc.rawValue }
+        if !viewModel.selectedGoals.isEmpty {
+            meta["goals"] = viewModel.selectedGoals.map(\.rawValue).joined(separator: ",")
+        }
+        if let bt = viewModel.bluetoothAllowed {
+            meta["bluetooth_pref"] = bt ? "allowed" : "skipped"
+        }
+        switch step {
+        case 1:
+            meta["ui_guide"] = "Enter the name Limi should use when speaking to you, then Continue."
+        case 2:
+            meta["ui_guide"] = "Pick where you will use Limi (home, business, hospitality, etc.), then Continue."
+        case 3:
+            meta["ui_guide"] = "Select one or more goals (smart control, automation, energy, …), then Continue."
+        default:
+            meta["ui_guide"] = "Allow Bluetooth for first-time device pairing, or Skip for now. Both choices continue to the app."
+        }
+        ContextManager.shared.updateContext(screen: "PersonalizeFlow", metadata: meta)
     }
 }
 

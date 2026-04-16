@@ -142,6 +142,7 @@ struct RoomPlanContentView: View {
             .navigationDestination(isPresented: $navigateToHome) {
                 HomeView()
             }
+            .trackScreen("RoomPlanContentView", metadata: ["surface": "room_scan_list"])
         }
     }
 //    func testDownloadUSDZModel() {

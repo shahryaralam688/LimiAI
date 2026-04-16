@@ -814,6 +814,7 @@ struct DemoScanDevicesView: View {
         .fullScreenCover(isPresented: $showLiginSkip) {
             ConnectedDevicesView()
         }
+        .trackScreen("DemoScanDevicesView", metadata: ["surface": "ble_wifi_device_scan"])
     }
 
     private func updateBLEPresence() {
