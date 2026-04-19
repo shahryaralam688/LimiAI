@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Models
 
@@ -150,6 +151,13 @@ struct OnboardingFlowView: View {
     @State private var showHomeView = false
     @State private var showDemoScanView = false
     @State private var isCompleting = false
+    /// Step 1: user confirms the typed name before Continue (pairs with voice “say yes when it’s correct”).
+    @State private var nameStepConfirmed = false
+    /// Steps 2–3: brief AI-selection pulse (white border + scale) when `personalize_set_field` updates a row.
+    @State private var pulseUseCaseRaw: String?
+    @State private var pulseGoalRaws: Set<String> = []
+    @State private var pulseUseCaseGeneration = 0
+    @State private var pulseGoalsGeneration = 0
 
     var body: some View {
         NavigationStack {
@@ -168,16 +176,21 @@ struct OnboardingFlowView: View {
                         case 1:
                             NameStepView(
                                 name: $viewModel.name,
-                                onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
+                                nameConfirmed: $nameStepConfirmed,
+                                onContinue: {
+                                    withAnimation(LimiMotion.smooth) { step += 1 }
+                                }
                             )
                         case 2:
                             UseCaseStepView(
                                 selectedUseCase: $viewModel.selectedUseCase,
+                                pulseHighlightRaw: pulseUseCaseRaw,
                                 onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
                             )
                         case 3:
                             GoalsStepView(
                                 selectedGoals: $viewModel.selectedGoals,
+                                pulseHighlightRaws: pulseGoalRaws,
                                 onContinue: { withAnimation(LimiMotion.smooth) { step += 1 } }
                             )
                         default:
@@ -187,6 +200,7 @@ struct OnboardingFlowView: View {
                                     viewModel.bluetoothAllowed = false
                                     viewModel.completeOnboarding()
                                     AuthManager.shared.isAuthenticated = true
+                                    persistPendingHomeWelcome()
                                     showHomeView = true
                                 },
                                 onAllow: {
@@ -194,6 +208,7 @@ struct OnboardingFlowView: View {
                                     viewModel.bluetoothAllowed = true
                                     viewModel.completeOnboarding()
                                     AuthManager.shared.isAuthenticated = true
+                                    persistPendingHomeWelcome()
                                     showDemoScanView = true
                                 },
                                 isLoading: isCompleting
@@ -214,8 +229,139 @@ struct OnboardingFlowView: View {
         .fullScreenCover(isPresented: $showDemoScanView) {
             DemoScanDevicesView()
         }
-        .onAppear { syncPersonalizeContext() }
-        .onChange(of: step) { _, _ in syncPersonalizeContext() }
+        .onAppear {
+            FloatingAssistantManager.shared.setPersonalizeFlowActive(true)
+            syncPersonalizeContext()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                startPersonalizeVoiceIfNeeded()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
+                FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
+            }
+        }
+        .onDisappear {
+            FloatingAssistantManager.shared.setPersonalizeFlowActive(false)
+        }
+        .onChange(of: showHomeView) { _, isShowingHome in
+            if isShowingHome { FloatingAssistantManager.shared.setPersonalizeFlowActive(false) }
+        }
+        .onChange(of: showDemoScanView) { _, isShowingDemo in
+            if isShowingDemo { FloatingAssistantManager.shared.setPersonalizeFlowActive(false) }
+        }
+        .onChange(of: step) { _, newStep in
+            if newStep != 1 {
+                nameStepConfirmed = false
+            }
+            pulseUseCaseGeneration += 1
+            pulseGoalsGeneration += 1
+            pulseUseCaseRaw = nil
+            pulseGoalRaws = []
+            syncPersonalizeContext()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
+                FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .limiPersonalizeToolUpdate)) { note in
+            applyPersonalizeTool(note: note)
+        }
+    }
+
+    /// Keep realtime voice session active while Personalize is visible (orb “on” when connected).
+    private func startPersonalizeVoiceIfNeeded() {
+        let voice = FloatingAssistantManager.shared.voiceClient
+        switch voice.state {
+        case .disconnected, .error:
+            voice.start()
+        case .connecting, .connected:
+            break
+        }
+    }
+
+    private func schedulePulseUseCaseHighlight(_ raw: String) {
+        pulseUseCaseGeneration += 1
+        let gen = pulseUseCaseGeneration
+        pulseUseCaseRaw = raw
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.65) {
+            if gen == pulseUseCaseGeneration {
+                pulseUseCaseRaw = nil
+            }
+        }
+    }
+
+    private func schedulePulseGoalsHighlight(_ raws: Set<String>) {
+        pulseGoalsGeneration += 1
+        let gen = pulseGoalsGeneration
+        pulseGoalRaws = raws
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.65) {
+            if gen == pulseGoalsGeneration {
+                pulseGoalRaws = []
+            }
+        }
+    }
+
+    /// First `HomeView` after this flow should run the spoken welcome; also used when user goes to Demo Scan first.
+    private func persistPendingHomeWelcome() {
+        let ud = UserDefaults.standard
+        let k = ContextManager.PendingHomeWelcome.self
+        ud.set(true, forKey: k.pendingFlag)
+        ud.set(viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines), forKey: k.nameKey)
+        ud.set(viewModel.selectedUseCase?.rawValue ?? "", forKey: k.useCaseKey)
+        ud.set(viewModel.selectedGoals.map(\.rawValue).joined(separator: ", "), forKey: k.goalsKey)
+    }
+
+    private func applyPersonalizeTool(note: Notification) {
+        guard let field = note.userInfo?["field"] as? String else { return }
+        let value = (note.userInfo?["value"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        switch field.lowercased() {
+        case "name":
+            viewModel.name = value
+            nameStepConfirmed = true
+        case "use_case", "usecase":
+            if let uc = Self.matchUseCase(from: value) {
+                viewModel.selectedUseCase = uc
+                schedulePulseUseCaseHighlight(uc.rawValue)
+            }
+        case "goals", "goal":
+            let set = Self.matchGoals(from: value)
+            if !set.isEmpty {
+                viewModel.selectedGoals = set
+                schedulePulseGoalsHighlight(Set(set.map(\.rawValue)))
+            }
+        default:
+            break
+        }
+    }
+
+    private static func matchUseCase(from raw: String) -> UseCase? {
+        let t = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let exact = UseCase.allCases.first(where: { $0.rawValue.caseInsensitiveCompare(t) == .orderedSame }) {
+            return exact
+        }
+        let lower = t.lowercased()
+        if lower.contains("home") || lower.contains("house") { return .home }
+        if lower.contains("business") || lower.contains("office") || lower.contains("work") { return .business }
+        if lower.contains("hospitality") || lower.contains("hotel") { return .hospitality }
+        if lower.contains("other") { return .others }
+        return UseCase.allCases.first { lower.contains($0.rawValue.lowercased()) }
+    }
+
+    private static func matchGoals(from raw: String) -> Set<Goal> {
+        let parts = raw.split(whereSeparator: { $0 == "," || $0 == ";" }).map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        var out = Set<Goal>()
+        for p in parts {
+            if let g = Goal.allCases.first(where: { $0.rawValue.caseInsensitiveCompare(p) == .orderedSame }) {
+                out.insert(g)
+                continue
+            }
+            let pl = p.lowercased()
+            for g in Goal.allCases where pl.contains(g.rawValue.lowercased()) {
+                out.insert(g)
+            }
+        }
+        return out
     }
 
     private func syncPersonalizeContext() {
@@ -239,17 +385,71 @@ struct OnboardingFlowView: View {
         if let bt = viewModel.bluetoothAllowed {
             meta["bluetooth_pref"] = bt ? "allowed" : "skipped"
         }
+        meta["ui_guide"] = Self.personalizeUIGuide(for: step)
+        meta["assistant_behavior"] = Self.personalizeAssistantBehavior(for: step)
+        meta["optional_tool"] = "If the Realtime session exposes personalize_set_field, call it with {field,value} to sync the UI. field: name | use_case | goals. goals value: comma-separated labels matching on-screen options."
+        ContextManager.shared.updateContext(screen: "PersonalizeFlow", metadata: meta)
+    }
+
+    private static func personalizeUIGuide(for step: Int) -> String {
         switch step {
         case 1:
-            meta["ui_guide"] = "Enter the name Limi should use when speaking to you, then Continue."
+            return """
+            Personalize step 1 of 4: Name. One large text field (placeholder “Your name”) and a primary “Continue” button at the bottom. \
+            A switch “This is how I want to be called” must be on before Continue is enabled. \
+            User can type or (if backend tool is enabled) voice can fill the field via personalize_set_field.
+            """
         case 2:
-            meta["ui_guide"] = "Pick where you will use Limi (home, business, hospitality, etc.), then Continue."
+            return """
+            Personalize step 2 of 4: Where to use Limi. Four tappable rows: Home, Business, Hospitality, Others — single select. \
+            Primary “Continue” at the bottom (enabled when one row is selected).
+            """
         case 3:
-            meta["ui_guide"] = "Select one or more goals (smart control, automation, energy, …), then Continue."
+            return """
+            Personalize step 3 of 4: Goals. Scrollable list — multi-select rows (AI Automation, Smart Control, Energy Management, Security, Ambient Experience, Experimenting). \
+            Primary “Continue” at the bottom (enabled when at least one goal is selected).
+            """
         default:
-            meta["ui_guide"] = "Allow Bluetooth for first-time device pairing, or Skip for now. Both choices continue to the app."
+            return """
+            Personalize step 4 of 4: Bluetooth. Explains pairing. Two actions only on screen: text “Skip for now” (above) and primary “Allow” (bottom). \
+            You cannot tap these buttons for the user.
+            """
         }
-        ContextManager.shared.updateContext(screen: "PersonalizeFlow", metadata: meta)
+    }
+
+    private static func personalizeAssistantBehavior(for step: Int) -> String {
+        switch step {
+        case 1:
+            return """
+            PHASE 1 — NAME. Ask what they would like to be called. \
+            If the session has tool personalize_set_field, use field \"name\" and value = the name they confirm, so the text field updates. \
+            Otherwise ask them to type or edit the name in the field. \
+            Read it back once and ask if it is correct. If they confirm it is correct, tell them clearly: tap the **Continue** button at the bottom (do not advance the app yourself). \
+            Stay concise and spoken-friendly.
+            """
+        case 2:
+            return """
+            PHASE 2 — WHERE THEY USE LIMI. Options on screen: Home, Business, Hospitality, Others (pick exactly one). \
+            You may ask where they mainly use Limi, or they may tell you without being asked. \
+            Map what they say to one row; use tool personalize_set_field with field \"use_case\" and value = the exact label (e.g. Home) if available. \
+            If they are unsure, briefly clarify then help them pick one. \
+            When the selection matches their intent, tell them to tap **Continue** at the bottom.
+            """
+        case 3:
+            return """
+            PHASE 3 — WHY / GOALS. Multiple goals can be selected. \
+            Encourage them to explain in their own words what they want Limi for; you can suggest matching on-screen goals. \
+            If they ask you to select for them, you may map their words to one or more rows using tool personalize_set_field with field \"goals\" and comma-separated values matching labels (e.g. \"Smart Control, Security\"). \
+            They can also tap rows themselves. When ready, tell them to tap **Continue** at the bottom.
+            """
+        default:
+            return """
+            PHASE 4 — BLUETOOTH / DEVICES. Explain clearly: Limi uses Bluetooth to find nearby lights and devices for pairing; it is needed for discovery and setup. \
+            They may tap **Allow** to grant Bluetooth or **Skip for now** to continue without pairing. \
+            If they ask you to choose Allow or Skip for them, say honestly that you cannot tap those buttons or decide for them — only they can press **Allow** or **Skip** on screen. \
+            Do not pretend to perform the system permission for them.
+            """
+        }
     }
 }
 
@@ -296,19 +496,25 @@ struct OnboardingHeader: View {
 
 struct NameStepView: View {
     @Binding var name: String
+    @Binding var nameConfirmed: Bool
     var onContinue: () -> Void
     @FocusState private var isFocused: Bool
 
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 32) {
+        VStack(alignment: .leading, spacing: 24) {
             VStack(spacing: 8) {
                 Text("What should we call you?")
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Limi will use this to greet you")
+                Text("Tell Limi or type below — confirm when it looks right, then tap Continue.")
                     .font(.system(size: 14))
                     .foregroundColor(.appTextSecondary)
+                    .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
@@ -326,16 +532,27 @@ struct NameStepView: View {
                 )
                 .focused($isFocused)
 
+            Toggle(isOn: $nameConfirmed) {
+                Text("This is how I want to be called")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.appTextPrimary)
+            }
+            .tint(.orbGlow4)
+            .disabled(trimmedName.isEmpty)
+
             Spacer()
 
             PrimaryButton(
                 title: "Continue",
-                isEnabled: !name.trimmingCharacters(in: .whitespaces).isEmpty,
+                isEnabled: !trimmedName.isEmpty && nameConfirmed,
                 action: onContinue
             )
         }
         .padding(.bottom, 32)
         .onAppear { isFocused = true }
+        .onChange(of: name) { _, _ in
+            if trimmedName.isEmpty { nameConfirmed = false }
+        }
     }
 }
 
@@ -343,6 +560,8 @@ struct NameStepView: View {
 
 struct UseCaseStepView: View {
     @Binding var selectedUseCase: UseCase?
+    /// Matches `UseCase.rawValue` while AI pulse is active.
+    var pulseHighlightRaw: String?
     var onContinue: () -> Void
 
     var body: some View {
@@ -352,9 +571,10 @@ struct UseCaseStepView: View {
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Select one")
+                Text("Choose one place — tap a card or tell Limi, then Continue below.")
                     .font(.system(size: 14))
                     .foregroundColor(.appTextSecondary)
+                    .multilineTextAlignment(.center)
             }
 
             Spacer().frame(height: 8)
@@ -363,7 +583,8 @@ struct UseCaseStepView: View {
                 SelectableRow(
                     title: option.rawValue,
                     icon: option.icon,
-                    isSelected: selectedUseCase == option
+                    isSelected: selectedUseCase == option,
+                    isPulseHighlight: pulseHighlightRaw == option.rawValue
                 ) {
                     withAnimation(LimiMotion.quick) {
                         selectedUseCase = option
@@ -387,6 +608,8 @@ struct UseCaseStepView: View {
 
 struct GoalsStepView: View {
     @Binding var selectedGoals: Set<Goal>
+    /// `Goal.rawValue` set while AI pulse is active.
+    var pulseHighlightRaws: Set<String>
     var onContinue: () -> Void
 
     var body: some View {
@@ -396,9 +619,10 @@ struct GoalsStepView: View {
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Select one or more")
+                Text("Select one or more — you can explain in detail and Limi can help match goals.")
                     .font(.system(size: 14))
                     .foregroundColor(.appTextSecondary)
+                    .multilineTextAlignment(.center)
             }
 
             Spacer().frame(height: 8)
@@ -409,7 +633,8 @@ struct GoalsStepView: View {
                         SelectableRow(
                             title: goal.rawValue,
                             icon: goal.icon,
-                            isSelected: selectedGoals.contains(goal)
+                            isSelected: selectedGoals.contains(goal),
+                            isPulseHighlight: pulseHighlightRaws.contains(goal.rawValue)
                         ) {
                             withAnimation(LimiMotion.quick) {
                                 if selectedGoals.contains(goal) {
@@ -425,7 +650,7 @@ struct GoalsStepView: View {
             }
 
             PrimaryButton(
-                title: "Finish",
+                title: "Continue",
                 isEnabled: !selectedGoals.isEmpty,
                 action: onContinue
             )
@@ -465,13 +690,22 @@ struct BluetoothStepView: View {
                 .opacity(appeared ? 1 : 0)
                 .animation(LimiMotion.appear.delay(0.1), value: appeared)
 
-            Text("Limi needs Bluetooth to discover nearby devices and bring your space to life.")
+            Text("Bluetooth lets Limi scan for nearby lights and controllers so you can pair them securely. You can allow access now for setup, or skip and add devices later from settings.")
                 .foregroundColor(.appTextSecondary)
                 .font(.system(size: 15))
                 .lineSpacing(5)
                 .offset(y: appeared ? 0 : 10)
                 .opacity(appeared ? 1 : 0)
                 .animation(LimiMotion.appear.delay(0.2), value: appeared)
+
+            Text("Only you can tap Allow or Skip — Limi’s voice can explain, but cannot choose for you.")
+                .foregroundColor(.appTextMuted)
+                .font(.system(size: 13))
+                .lineSpacing(4)
+                .padding(.top, 4)
+                .offset(y: appeared ? 0 : 10)
+                .opacity(appeared ? 1 : 0)
+                .animation(LimiMotion.appear.delay(0.25), value: appeared)
 
             Spacer()
 
@@ -519,6 +753,8 @@ struct SelectableRow: View {
     let title: String
     var icon: String? = nil
     let isSelected: Bool
+    /// Short AI-driven emphasis: white border + slight scale, then returns to normal.
+    var isPulseHighlight: Bool = false
     let action: () -> Void
 
     var body: some View {
@@ -560,6 +796,13 @@ struct SelectableRow: View {
                         lineWidth: 1
                     )
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.white.opacity(isPulseHighlight ? 0.92 : 0), lineWidth: isPulseHighlight ? 2.5 : 0)
+                    .shadow(color: .white.opacity(isPulseHighlight ? 0.35 : 0), radius: isPulseHighlight ? 10 : 0)
+            )
+            .scaleEffect(isPulseHighlight ? 1.045 : 1.0)
+            .animation(.spring(response: 0.38, dampingFraction: 0.78), value: isPulseHighlight)
         }
         .tapScale()
     }

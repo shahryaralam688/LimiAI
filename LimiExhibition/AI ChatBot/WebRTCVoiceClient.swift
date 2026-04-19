@@ -44,6 +44,9 @@ struct LimiToolCall: Identifiable {
         case "set_brightness":
             let pct = brightness.map { "\($0)" } ?? "—"
             return "Setting brightness to \(pct)\(room.map { " in \($0)" } ?? "")"
+        case "whatsapp_draft":
+            let who = room ?? "contact"
+            return "Opening WhatsApp to message \(who)"
         default:
             return "Controlling lights\(room.map { " in \($0)" } ?? "")"
         }
@@ -91,6 +94,10 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     private var pendingProactiveGreetingForThisConnection = true
     /// Avoid duplicate flush if `dataChannelDidChangeState` fires more than once while open.
     private var didFlushContextOnDataChannelOpen = false
+    /// Client-registered Realtime tools (merges with `session.created` / `session.updated` tool lists).
+    private var cachedRealtimeSessionTools: [[String: Any]] = []
+    private var didRegisterClientWhatsAppToolThisConnection = false
+    private var receivedRealtimeSessionSnapshot = false
 
     // Queues
     private let workQueue = DispatchQueue(label: "webrtc.voice.client")
@@ -536,13 +543,16 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         peerConnection = nil
 
         didFlushContextOnDataChannelOpen = false
-        
+        cachedRealtimeSessionTools = []
+        didRegisterClientWhatsAppToolThisConnection = false
+        receivedRealtimeSessionSnapshot = false
+
         log("Peer connection torn down successfully")
     }
 
     // MARK: Backend
 
-    /// Backend controls model, voice, instructions, and tools — frontend does not send them.
+    /// Backend controls model, voice, and instructions; the client may send `session.update` to add tools (e.g. WhatsApp) when missing.
     /// API may return either a flat object or `{ "success": true, "data": { ... } }`.
     private struct SessionDataPayload: Decodable {
         let key: String
@@ -1039,6 +1049,7 @@ extension WebRTCVoiceClient: RTCDataChannelDelegate {
         didFlushContextOnDataChannelOpen = true
 
         sendContextEvent()
+        scheduleClientWhatsAppToolRegistration()
 
         guard pendingProactiveGreetingForThisConnection else { return }
         pendingProactiveGreetingForThisConnection = false
@@ -1178,14 +1189,67 @@ extension WebRTCVoiceClient {
             log("❌ Failed to send context pre-flight")
         }
     }
+
+    /// After [System Context] changes mid-session (e.g. Personalize step), ask the model for a short spoken orientation turn.
+    func requestProactiveAssistantTurn() {
+        guard let dc = dataChannel, dc.readyState == .open else {
+            log("⚠️ requestProactiveAssistantTurn skipped — data channel not open")
+            return
+        }
+        let event: [String: Any] = ["type": "response.create"]
+        if let data = try? JSONSerialization.data(withJSONObject: event),
+           dc.sendData(RTCDataBuffer(data: data, isBinary: false)) {
+            log("✅ Sent response.create (proactive after context change)")
+        }
+    }
 }
 
 // MARK: - Realtime UI Helpers
+
+/// OpenAI Realtime `session.tools` entry — registered from the app via `session.update` when absent.
+private enum LimiRealtimeClientToolDefinitions {
+    static let sendWhatsappMessage: [String: Any] = {
+        let properties: [String: Any] = [
+            "contact_name": [
+                "type": "string",
+                "description": "Recipient as in the user's address book (e.g. Ali, Ali Khan).",
+            ],
+            "phone": [
+                "type": "string",
+                "description": "Optional. Digits with country code if the user specified a number instead of a name.",
+            ],
+            "message": [
+                "type": "string",
+                "description": "Exact message body to pre-fill in WhatsApp.",
+            ],
+        ]
+        let parameters: [String: Any] = [
+            "type": "object",
+            "properties": properties,
+            "required": ["message"],
+        ]
+        return [
+            "type": "function",
+            "name": "send_whatsapp_message",
+            "description": "Open WhatsApp with a draft message. The user taps Send in WhatsApp. Use when the user asks to send a WhatsApp. Provide contact_name from their wording when possible, or phone with country code if they gave a number. Required: message.",
+            "parameters": parameters,
+        ]
+    }()
+}
 
 private extension WebRTCVoiceClient {
     func handleRealtimePayload(_ obj: [String: Any]) {
         let eventType = (obj["type"] as? String) ?? ""
         let lowercasedType = eventType.lowercased()
+
+        if lowercasedType == "session.created" || lowercasedType == "session.updated" {
+            if let session = obj["session"] as? [String: Any] {
+                receivedRealtimeSessionSnapshot = true
+                let tools = (session["tools"] as? [[String: Any]]) ?? []
+                cachedRealtimeSessionTools = tools
+                registerClientWhatsAppToolIfNeeded()
+            }
+        }
 
         // Transcript handling
         if let transcript = obj["transcript"] as? String, !transcript.isEmpty {
@@ -1227,6 +1291,43 @@ private extension WebRTCVoiceClient {
         }
     }
 
+    /// Merges `send_whatsapp_message` into the Realtime `session.tools` list via `session.update` so voice works without a backend tool definition.
+    func scheduleClientWhatsAppToolRegistration() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self else { return }
+            if self.receivedRealtimeSessionSnapshot {
+                self.registerClientWhatsAppToolIfNeeded()
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.15) { [weak self] in
+            self?.registerClientWhatsAppToolIfNeeded()
+        }
+    }
+
+    func registerClientWhatsAppToolIfNeeded() {
+        guard let dc = dataChannel, dc.readyState == .open else { return }
+        guard !didRegisterClientWhatsAppToolThisConnection else { return }
+        let current = cachedRealtimeSessionTools
+        if current.contains(where: { ($0["name"] as? String) == "send_whatsapp_message" }) {
+            didRegisterClientWhatsAppToolThisConnection = true
+            log("✅ send_whatsapp_message already on session (\(current.count) tools)")
+            return
+        }
+        var merged = current
+        merged.append(LimiRealtimeClientToolDefinitions.sendWhatsappMessage)
+        let event: [String: Any] = [
+            "type": "session.update",
+            "session": ["tools": merged],
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject: event),
+              dc.sendData(RTCDataBuffer(data: data, isBinary: false)) else {
+            log("❌ session.update (tools) failed to send")
+            return
+        }
+        log("✅ session.update: appended send_whatsapp_message → \(merged.count) tools")
+        didRegisterClientWhatsAppToolThisConnection = true
+    }
+
     /// Parses a completed function call from OpenAI (e.g. control_light),
     /// publishes it for UI feedback, sends the tool output back via data channel,
     /// and forwards to the webhook.
@@ -1241,6 +1342,18 @@ private extension WebRTCVoiceClient {
               let args = try? JSONSerialization.jsonObject(with: argsData) as? [String: Any] else {
             log("❌ Failed to parse tool call arguments")
             sendToolOutput(callId: callId, output: "{\"error\": \"Failed to parse arguments\"}")
+            return
+        }
+
+        // Personalize / onboarding: backend should register `personalize_set_field` with { "field": "name"|"use_case"|"goals", "value": "..." }
+        let toolNameLower = name.lowercased()
+        if toolNameLower == "personalize_set_field" || toolNameLower == "set_personalize_field" {
+            handlePersonalizeSetFieldTool(callId: callId, args: args)
+            return
+        }
+        // WhatsApp: tool is registered client-side (`session.update`) and/or on the server.
+        if toolNameLower == "send_whatsapp_message" || toolNameLower == "whatsapp_send_message" {
+            handleSendWhatsAppTool(callId: callId, args: args)
             return
         }
 
@@ -1283,6 +1396,104 @@ private extension WebRTCVoiceClient {
         if let resultData = try? JSONSerialization.data(withJSONObject: result),
            let resultString = String(data: resultData, encoding: .utf8) {
             sendToolOutput(callId: callId, output: resultString)
+        }
+    }
+
+    private func handleSendWhatsAppTool(callId: String, args: [String: Any]) {
+        let message = (args["message"] as? String)
+            ?? (args["text"] as? String)
+            ?? (args["body"] as? String)
+            ?? ""
+        let contactName = (args["contact_name"] as? String)
+            ?? (args["recipient_name"] as? String)
+            ?? (args["recipient"] as? String)
+        let phone = (args["phone"] as? String)
+            ?? (args["phone_e164"] as? String)
+            ?? (args["phone_number"] as? String)
+
+        let recipientLabel = [contactName, phone]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { !$0.isEmpty } ?? "contact"
+
+        WhatsAppContactMessenger.shared.openDraft(
+            contactName: contactName,
+            phoneDigitsOverride: phone,
+            message: message
+        ) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let detail):
+                self.log("✅ WhatsApp tool: \(detail)")
+                let toolCall = LimiToolCall(
+                    callId: callId,
+                    name: "send_whatsapp_message",
+                    action: "whatsapp_draft",
+                    mode: nil,
+                    brightness: nil,
+                    room: recipientLabel,
+                    userText: message.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                DispatchQueue.main.async {
+                    self.lastToolCall = toolCall
+                }
+                self.postWebhook(event: "tool_call", payload: [
+                    "call_id": callId,
+                    "name": "send_whatsapp_message",
+                    "action": "whatsapp_draft",
+                    "recipient_hint": recipientLabel,
+                    "ok": true,
+                ])
+                let payload: [String: Any] = [
+                    "ok": true,
+                    "opened_whatsapp": true,
+                    "detail": detail,
+                    "recipient_hint": recipientLabel,
+                ]
+                if let data = try? JSONSerialization.data(withJSONObject: payload),
+                   let str = String(data: data, encoding: .utf8) {
+                    self.sendToolOutput(callId: callId, output: str)
+                }
+            case .failure(let error):
+                self.log("❌ WhatsApp tool: \(error.localizedDescription)")
+                self.postWebhook(event: "tool_call", payload: [
+                    "call_id": callId,
+                    "name": "send_whatsapp_message",
+                    "action": "whatsapp_draft",
+                    "ok": false,
+                    "error": error.localizedDescription,
+                ])
+                let payload: [String: Any] = [
+                    "ok": false,
+                    "error": error.localizedDescription,
+                ]
+                if let data = try? JSONSerialization.data(withJSONObject: payload),
+                   let str = String(data: data, encoding: .utf8) {
+                    self.sendToolOutput(callId: callId, output: str)
+                }
+            }
+        }
+    }
+
+    private func handlePersonalizeSetFieldTool(callId: String, args: [String: Any]) {
+        let field = (args["field"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let value = (args["value"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !field.isEmpty, !value.isEmpty else {
+            if let errData = try? JSONSerialization.data(withJSONObject: ["ok": false, "error": "missing field or value"] as [String: Any]),
+               let errStr = String(data: errData, encoding: .utf8) {
+                sendToolOutput(callId: callId, output: errStr)
+            }
+            return
+        }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: .limiPersonalizeToolUpdate,
+                object: nil,
+                userInfo: ["field": field, "value": value]
+            )
+        }
+        if let okData = try? JSONSerialization.data(withJSONObject: ["ok": true, "field": field, "applied": true] as [String: Any]),
+           let okStr = String(data: okData, encoding: .utf8) {
+            sendToolOutput(callId: callId, output: okStr)
         }
     }
 

@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - AI Bubble Storyboard Onboarding
 
 struct OnboardingView: View {
+    @StateObject private var onboardingSpeech = OnboardingSpeechSync()
     @State private var currentPage = 0
     @State private var showSignIn = false
     @State private var showPostStoryboardLocation = false
@@ -34,7 +35,14 @@ struct OnboardingView: View {
             )
         }
         .onAppear { FloatingAssistantManager.shared.hide() }
+        .onChange(of: showSignIn) { _, showing in
+            if showing { onboardingSpeech.stop() }
+        }
+        .onChange(of: showPostStoryboardLocation) { _, showing in
+            if showing { onboardingSpeech.stop() }
+        }
         .onDisappear {
+            onboardingSpeech.stop()
             FloatingAssistantManager.shared.refreshFloatingVisibility()
         }
     }
@@ -86,7 +94,12 @@ struct OnboardingView: View {
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .ignoresSafeArea()
 
-                OrbWithSpeechCard(currentPage: currentPage, screenWidth: w, screenHeight: h)
+                OrbWithSpeechCard(
+                    currentPage: currentPage,
+                    screenWidth: w,
+                    screenHeight: h,
+                    speech: onboardingSpeech
+                )
                     .allowsHitTesting(false)
 
                 VStack {
@@ -103,12 +116,14 @@ struct OnboardingView: View {
                     screen: "OnboardingStoryboard",
                     metadata: storyboardMetadata(page: currentPage)
                 )
+                onboardingSpeech.speakPage(currentPage)
             }
             .onChange(of: currentPage) { _, new in
                 ContextManager.shared.updateContext(
                     screen: "OnboardingStoryboard",
                     metadata: storyboardMetadata(page: new)
                 )
+                onboardingSpeech.speakPage(new)
             }
         }
     }
@@ -218,6 +233,7 @@ private struct OrbWithSpeechCard: View {
     let currentPage: Int
     let screenWidth: CGFloat
     let screenHeight: CGFloat
+    @ObservedObject var speech: OnboardingSpeechSync
 
     @State private var breathe = false
     @State private var rotation: Double = 0
@@ -234,29 +250,6 @@ private struct OrbWithSpeechCard: View {
         case 1:  return CGPoint(x: screenWidth - 52, y: screenHeight * 0.45)
         case 2:  return CGPoint(x: 52, y: screenHeight * 0.70)
         default: return CGPoint(x: screenWidth / 2, y: screenHeight * 0.24)
-        }
-    }
-
-    private struct PageContent {
-        let speech: String
-        let detail: String
-    }
-
-    private var content: PageContent {
-        switch currentPage {
-        case 0: return PageContent(
-            speech: "Hey! I'm Limi — your ambient AI assistant.",
-            detail: "I live inside your space, always ready to help. No app switching, no searching — just ask."
-        )
-        case 1: return PageContent(
-            speech: "Talk to me naturally — I understand context.",
-            detail: "\"Turn the lights warm\" or \"Set a morning routine\" — I handle your lights, schedules, and environment intelligently."
-        )
-        case 2: return PageContent(
-            speech: "I go wherever you need me.",
-            detail: "Drag me to any edge of your screen. I stay tucked away until you tap. Your space, your rules."
-        )
-        default: return PageContent(speech: "", detail: "")
         }
     }
 
@@ -328,8 +321,8 @@ private struct OrbWithSpeechCard: View {
         let cardX: CGFloat
         let cardY: CGFloat
         let cardWidth: CGFloat = screenWidth * 0.68
-        /// Stable outer height so the neumorphic card doesn’t resize while text types.
-        let cardOuterHeight: CGFloat = min(max(screenHeight * 0.26, 168), 226)
+        /// Stable outer height so the neumorphic card doesn’t resize while text types (includes swipe line).
+        let cardOuterHeight: CGFloat = min(max(screenHeight * 0.29, 196), 252)
         let innerTypingHeight: CGFloat = cardOuterHeight - 36
         let align: TextAlignment
 
@@ -349,11 +342,10 @@ private struct OrbWithSpeechCard: View {
         }
 
         return VStack(alignment: .leading, spacing: 10) {
-            SequentialTypingCard(
-                headline: content.speech,
-                detail: content.detail,
-                alignment: align,
+            SequentialSpeechAlignedCard(
+                speech: speech,
                 pageId: currentPage,
+                alignment: align,
                 fixedContentHeight: innerTypingHeight
             )
         }
@@ -371,44 +363,90 @@ private struct OrbWithSpeechCard: View {
     }
 }
 
-// MARK: - Sequential Typing Card (heading first, then paragraph)
+// MARK: - Speech-aligned card (text follows `AVSpeechSynthesizer` timing)
 
-private struct SequentialTypingCard: View {
-    let headline: String
-    let detail: String
-    let alignment: TextAlignment
+private struct SequentialSpeechAlignedCard: View {
+    @ObservedObject var speech: OnboardingSpeechSync
     let pageId: Int
+    let alignment: TextAlignment
     let fixedContentHeight: CGFloat
 
-    @State private var headlineText = ""
-    @State private var detailText = ""
-    @State private var headlineComplete = false
-    @State private var detailComplete = false
-    @State private var headlineCharIdx = 0
-    @State private var detailCharIdx = 0
+    private var headlineTarget: String { OnboardingStoryboardCopy.headline(pageId) }
+    private var detailTarget: String { OnboardingStoryboardCopy.detail(pageId) }
+
+    private var headlineDisplay: String {
+        guard speech.currentPage == pageId else { return "" }
+        return speech.headlineText
+    }
+
+    private var detailDisplay: String {
+        guard speech.currentPage == pageId else { return "" }
+        return speech.detailText
+    }
+
+    private var swipeDisplay: String {
+        guard speech.currentPage == pageId else { return "" }
+        return speech.swipeHintText
+    }
+
+    private var swipeTarget: String { OnboardingStoryboardCopy.swipeInstruction }
+
+    private var headlineDone: Bool {
+        !headlineTarget.isEmpty && headlineDisplay == headlineTarget
+    }
+
+    private var detailDone: Bool {
+        !detailTarget.isEmpty && detailDisplay == detailTarget
+    }
+
+    private var showHeadlineCursor: Bool {
+        speech.currentPage == pageId && !speech.isPageSpeechComplete && headlineDisplay != headlineTarget
+    }
+
+    private var showDetailCursor: Bool {
+        speech.currentPage == pageId && !speech.isPageSpeechComplete && headlineDone && detailDisplay != detailTarget
+    }
+
+    private var showSwipeCursor: Bool {
+        speech.currentPage == pageId && !speech.isPageSpeechComplete && detailDone && swipeDisplay != swipeTarget
+    }
 
     var body: some View {
         VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 8) {
             HStack(alignment: .bottom, spacing: 2) {
-                Text(headlineText)
+                Text(headlineDisplay)
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundColor(.appTextPrimary)
                     .multilineTextAlignment(alignment)
                     .lineSpacing(3)
-                if !headlineComplete {
+                if showHeadlineCursor {
                     TypingCursor()
                 }
             }
             .frame(maxWidth: .infinity, alignment: alignment == .trailing ? .trailing : .leading)
 
-            if headlineComplete {
+            if headlineDone {
                 HStack(alignment: .bottom, spacing: 2) {
-                    Text(detailText)
+                    Text(detailDisplay)
                         .font(.system(size: 13, weight: .regular, design: .rounded))
                         .foregroundColor(.appTextSecondary)
                         .multilineTextAlignment(alignment)
                         .lineSpacing(4)
-                    if !detailComplete {
+                    if showDetailCursor {
+                        TypingCursor()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: alignment == .trailing ? .trailing : .leading)
+            }
+
+            if detailDone {
+                HStack(alignment: .bottom, spacing: 2) {
+                    Text(swipeDisplay)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundColor(.appTextMuted)
+                        .multilineTextAlignment(alignment)
+                        .lineSpacing(3)
+                    if showSwipeCursor {
                         TypingCursor()
                     }
                 }
@@ -418,45 +456,6 @@ private struct SequentialTypingCard: View {
         .frame(height: fixedContentHeight, alignment: .top)
         .clipped()
         .id("seqcard_\(pageId)")
-        .onAppear { startHeadline() }
-        .onChange(of: pageId) { _, _ in
-            headlineText = ""
-            detailText = ""
-            headlineComplete = false
-            detailComplete = false
-            headlineCharIdx = 0
-            detailCharIdx = 0
-            startHeadline()
-        }
-    }
-
-    private func startHeadline() {
-        let chars = Array(headline)
-        func next() {
-            guard headlineCharIdx < chars.count else {
-                headlineComplete = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) { startDetail() }
-                return
-            }
-            headlineText.append(chars[headlineCharIdx])
-            headlineCharIdx += 1
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.054) { next() }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.38) { next() }
-    }
-
-    private func startDetail() {
-        let chars = Array(detail)
-        func next() {
-            guard detailCharIdx < chars.count else {
-                detailComplete = true
-                return
-            }
-            detailText.append(chars[detailCharIdx])
-            detailCharIdx += 1
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.041) { next() }
-        }
-        next()
     }
 }
 
@@ -554,7 +553,7 @@ private struct BottomContent: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundColor(.appTextPrimary)
 
-            Text("The operating system for your physical space")
+            Text(OnboardingStoryboardCopy.page3Subtitle)
                 .font(.system(size: 14, weight: .regular, design: .rounded))
                 .foregroundColor(.appTextSecondary)
                 .multilineTextAlignment(.center)
@@ -593,7 +592,7 @@ private struct BottomContent: View {
     }
 }
 
-// MARK: - Instruction Row
+// MARK: - Instruction Row (final onboarding screen)
 
 private struct InstructionRow: View {
     let icon: String

@@ -4,6 +4,8 @@ import SwiftUI
 extension Notification.Name {
     /// Posted when `ContextManager.updateContext` runs so the voice client can push fresh screen context on an active session.
     static let limiScreenContextDidChange = Notification.Name("limiScreenContextDidChange")
+    /// Realtime tool `personalize_set_field` (or equivalent) — update Personalize flow fields from voice.
+    static let limiPersonalizeToolUpdate = Notification.Name("limiPersonalizeToolUpdate")
     /// Posted when `globalUserLocation` / address is saved so Home voice context can refresh.
     static let limiUserLocationDidChange = Notification.Name("limiUserLocationDidChange")
 }
@@ -18,7 +20,9 @@ final class ContextManager {
     [Client] Primary persona is set in server Realtime instructions. \
     Obey the latest Screen + metadata in this message. \
     Use `ui_guide` for “where is…?”; describe labels/positions, not pixels; never invent controls. \
-    Short replies unless the user asks for detail.
+    Short replies unless the user asks for detail. \
+    WhatsApp: The app registers the Realtime tool `send_whatsapp_message` on connect (and opens WhatsApp with a draft; user taps Send). \
+    You MUST call it when the user asks to send a WhatsApp—do not say you cannot send WhatsApp.
     """
 
     struct ScreenContext {
@@ -41,13 +45,27 @@ final class ContextManager {
     private var homeCity: String = ""
     /// Optional: which Home modal/sheet is open (devices, configurator, ar, room_scan, modules, voice).
     private var homeSheetFlow: String = ""
+    /// One-shot keys merged into Home voice context (e.g. first visit welcome after Personalize). Survives `updateContext(HomeView, [:])` until cleared.
+    private var homeOverlayMetadata: [String: String] = [:]
 
     private init() {}
+
+    /// Keys stored in `homeOverlayMetadata` when passed into `updateContext` for `HomeView`.
+    private static let homeOverlayKeys: Set<String> = [
+        "first_home_after_personalize",
+        "welcome_user_name",
+        "welcome_use_case",
+        "welcome_goals",
+        "assistant_behavior"
+    ]
 
     func updateContext(screen: String, metadata: [String: String] = [:]) {
         lock.lock()
         if screen == "HomeView" {
             mergeHomeFields(into: metadata)
+            for (k, v) in metadata where Self.homeOverlayKeys.contains(k) {
+                homeOverlayMetadata[k] = v
+            }
         }
         let meta = screen == "HomeView" ? mergedHomeMetadataLocked() : metadata
         currentContext = ScreenContext(
@@ -137,7 +155,27 @@ final class ContextManager {
         if !udAddr.isEmpty {
             m["user_address"] = udAddr
         }
+        for (k, v) in homeOverlayMetadata where Self.homeOverlayKeys.contains(k) {
+            m[k] = v
+        }
         return m
+    }
+
+    /// Removes first-visit welcome overlay fields so later Home sessions use normal context only.
+    func clearHomeWelcomeOverlay() {
+        lock.lock()
+        for k in Self.homeOverlayKeys {
+            homeOverlayMetadata.removeValue(forKey: k)
+        }
+        if currentContext.viewControllerName == "HomeView" {
+            currentContext = ScreenContext(
+                viewControllerName: "HomeView",
+                metadata: mergedHomeMetadataLocked(),
+                timestamp: Date()
+            )
+        }
+        lock.unlock()
+        NotificationCenter.default.post(name: .limiScreenContextDidChange, object: nil)
     }
 
     private func publishHomeContextLocked() {
@@ -203,5 +241,16 @@ struct ScreenTrackingModifier: ViewModifier {
 extension View {
     func trackScreen(_ name: String, metadata: [String: String] = [:]) -> some View {
         modifier(ScreenTrackingModifier(screenName: name, metadata: metadata))
+    }
+}
+
+// MARK: - First Home after Personalize (UserDefaults keys)
+
+extension ContextManager {
+    enum PendingHomeWelcome {
+        static let pendingFlag = "pendingFirstHomeWelcomeAfterPersonalize"
+        static let nameKey = "pendingHomeWelcomeName"
+        static let useCaseKey = "pendingHomeWelcomeUseCase"
+        static let goalsKey = "pendingHomeWelcomeGoals"
     }
 }

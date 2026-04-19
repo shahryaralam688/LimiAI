@@ -10,6 +10,8 @@ final class FloatingAssistantManager {
     private var stateObserver: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     private var didBindAuthAndContext = false
+    /// While the Personalize (`OnboardingFlowView`) flow is visible, show the orb even though auth is not set until the final step.
+    private var isPersonalizeFlowActive = false
 
     let voiceClient = WebRTCVoiceClient(
         backendBaseURL: URL(string: "https://dev.api.limitless-lighting.co.uk/")!
@@ -65,8 +67,18 @@ final class FloatingAssistantManager {
         applyFloatingVisibilityPolicy()
     }
 
-    /// Shows the orb only after onboarding is done **and** the user has a valid session (logged in).
+    /// Toggle when `OnboardingFlowView` (Personalize) appears / disappears so the floating orb is visible during that flow.
+    func setPersonalizeFlowActive(_ active: Bool) {
+        isPersonalizeFlowActive = active
+        applyFloatingVisibilityPolicy()
+    }
+
+    /// Shows the orb only after onboarding is done **and** the user has a valid session (logged in), unless Personalize is active.
     private func applyFloatingVisibilityPolicy() {
+        if isPersonalizeFlowActive {
+            show()
+            return
+        }
         let onboardingDone = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         let authed = AuthManager.shared.isAuthenticated
         if onboardingDone && authed {

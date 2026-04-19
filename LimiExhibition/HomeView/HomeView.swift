@@ -342,6 +342,7 @@ struct HomeView: View {
             // BLE scan
             startBLEScan()
 
+            runFirstHomeWelcomeAfterPersonalizeIfNeeded()
         }
         // Sheet for Wi-Fi device detail based on channel count
 //        .sheet(item: $selectedWifiDevice) { device in
@@ -770,6 +771,72 @@ struct HomeView: View {
 
     private func clearHomeSheetFlowMarker() {
         ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": ""])
+    }
+
+    /// After Personalize, first Home appearance: push welcome context and trigger Limi voice (name + intro + UI tour + “what would you like to do?”).
+    private func runFirstHomeWelcomeAfterPersonalizeIfNeeded() {
+        let ud = UserDefaults.standard
+        let k = ContextManager.PendingHomeWelcome.self
+        guard ud.bool(forKey: k.pendingFlag) else { return }
+
+        let name = ud.string(forKey: k.nameKey)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let useCase = ud.string(forKey: k.useCaseKey) ?? ""
+        let goals = ud.string(forKey: k.goalsKey) ?? ""
+
+        ud.set(false, forKey: k.pendingFlag)
+        ud.removeObject(forKey: k.nameKey)
+        ud.removeObject(forKey: k.useCaseKey)
+        ud.removeObject(forKey: k.goalsKey)
+
+        let behavior = Self.firstHomeWelcomeAssistantBehavior(name: name, useCase: useCase, goals: goals)
+        ContextManager.shared.updateContext(screen: "HomeView", metadata: [
+            "first_home_after_personalize": "true",
+            "welcome_user_name": name,
+            "welcome_use_case": useCase,
+            "welcome_goals": goals,
+            "assistant_behavior": behavior
+        ])
+
+        let voice = FloatingAssistantManager.shared.voiceClient
+        switch voice.state {
+        case .connected:
+            voice.sendContextEvent()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                voice.requestProactiveAssistantTurn()
+            }
+        case .disconnected, .error:
+            voice.start()
+        case .connecting:
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
+                FloatingAssistantManager.shared.voiceClient.sendContextEvent()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
+                }
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
+            ContextManager.shared.clearHomeWelcomeOverlay()
+        }
+    }
+
+    private static func firstHomeWelcomeAssistantBehavior(name: String, useCase: String, goals: String) -> String {
+        let n = name.isEmpty ? "(name not provided)" : name
+        let u = useCase.isEmpty ? "unspecified" : useCase
+        let g = goals.isEmpty ? "unspecified" : goals
+        return """
+        FIRST HOME VISIT right after Personalize — treat this as the user’s first time on Home.
+        User name: \(n). Where they use Limi: \(u). Their selected goals: \(g).
+
+        Deliver ONE coherent spoken response in order (single turn, conversational):
+        1) Warm welcome using their name.
+        2) Short Limi AI intro tied to their context — smart lighting, control, and spatial / home features at a high level (not a lecture).
+        3) Brief Home UI orientation using the `ui_guide` metadata: bottom navigation, main scroll, weather when present, floating orb for realtime voice.
+        4) Close by asking what they would like to do next.
+
+        Match the user’s spoken language when possible; otherwise English. Calm, premium, concise.
+        """
     }
 
 }
