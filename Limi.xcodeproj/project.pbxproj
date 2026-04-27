@@ -115,29 +115,17 @@
 		105185162F050D9D001A2404 /* Exceptions for "LimiExhibition" folder in "Limi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"2D RoomPlan/Utils/CGPoint+Extensions.swift",
 				Info.plist,
 			);
 			target = 9ADA72132D6DD6D80044A7CF /* Limi */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		10B5CB2A2F0E2428007A15F6 /* Exceptions for "LimiExhibition" folder in "Copy Bundle Resources" phase from "Limi" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 9ADA72122D6DD6D80044A7CF /* Resources */;
-			membershipExceptions = (
-				"2D RoomPlan/Utils/CGPoint+Extensions.swift",
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9A6EFC5C2D8BB14500272B02 /* LimiExhibition */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				105185162F050D9D001A2404 /* Exceptions for "LimiExhibition" folder in "Limi" target */,
-				10B5CB2A2F0E2428007A15F6 /* Exceptions for "LimiExhibition" folder in "Copy Bundle Resources" phase from "Limi" target */,
 			);
 			path = LimiExhibition;
 			sourceTree = "<group>";

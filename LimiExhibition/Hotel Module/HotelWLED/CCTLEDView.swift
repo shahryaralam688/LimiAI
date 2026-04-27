@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Foundation
+import SwiftData
 
 // MARK: - WLED API Manager
 
@@ -19,6 +20,7 @@ import Foundation
 // MARK: - Main WLED View
 
 struct CCTLEDView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var apiManager = WLEDAPIManager()
     @State private var selectedHue: Double = 0.0
 
@@ -46,6 +48,7 @@ struct CCTLEDView: View {
 
     @State private var isEditingSliderBrightness = false
     @State private var isEditingSliderColor = false
+    @State private var isWarmCoolReversed = false
     @State private var selectedTopTab: Int = 0 // 0 = Offline, 1 = Customize
     @State private var isOnline: Bool = true
     @State private var showToast: Bool = false
@@ -56,6 +59,39 @@ struct CCTLEDView: View {
 
     /// Helper: percentage derived from 0…255 UI slider
     private var brightnessPercent: Double { (brightness / 255.0) * 100.0 }
+
+    private var warmCoolPreferenceDeviceID: String? {
+        guard let rawDeviceID = chennalMac?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawDeviceID.isEmpty else {
+            return nil
+        }
+
+        return rawDeviceID
+    }
+
+    private var warmCoolPreferenceChannelPosition: Int {
+        chennelPosition ?? 1
+    }
+
+    private var warmCoolSliderBinding: Binding<Double> {
+        Binding(
+            get: {
+                isWarmCoolReversed ? (100 - led1warmCold) : led1warmCold
+            },
+            set: { newValue in
+                let clampedValue = min(max(newValue, 0), 100)
+                led1warmCold = isWarmCoolReversed ? (100 - clampedValue) : clampedValue
+            }
+        )
+    }
+
+    private var leftTemperatureLabel: String {
+        isWarmCoolReversed ? "Cool" : "Warm"
+    }
+
+    private var rightTemperatureLabel: String {
+        isWarmCoolReversed ? "Warm" : "Cool"
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -125,31 +161,38 @@ struct CCTLEDView: View {
                                 .fixedSize()
 
                             Spacer()
+
+                            Menu {
+                                Button {
+                                    updateWarmCoolDirection(isReversed: false)
+                                } label: {
+                                    if isWarmCoolReversed {
+                                        Text("Warm to Cool")
+                                    } else {
+                                        Label("Warm to Cool", systemImage: "checkmark")
+                                    }
+                                }
+
+                                Button {
+                                    updateWarmCoolDirection(isReversed: true)
+                                } label: {
+                                    if isWarmCoolReversed {
+                                        Label("Cool to Warm", systemImage: "checkmark")
+                                    } else {
+                                        Text("Cool to Warm")
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "arrow.left.arrow.right.circle")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.appTextPrimary)
+                            }
                         }
 
-                        ZStack {
-                            HorizontalWarmCoolSlider(
-                                value: $led1warmCold,
-                                in: 0...100,
-                                step: 1,
-                                onEditingChanged: { isEditing in
-                                    if isEditing {
-                                        isEditingSliderColor = true
-                                        sendHapticFeedback()
-                                    } else if isEditingSliderColor {
-                                        sendColor()
-                                        isEditingSliderColor = false
-                                    }
-                                },
-                                disabled: !isOn
-                            )
-                        }
-                        .frame(height: 40)
-                        .padding(.horizontal, 25)
-                        .padding(.bottom,12)
+∂
 
                         HStack{
-                            Text("Warm")
+                            Text(leftTemperatureLabel)
                                 .font(.system(size: 16, weight: .medium, design: .rounded))
                                 .fontWeight(.medium)
                                 .foregroundColor(.appTextPrimary)
@@ -158,7 +201,7 @@ struct CCTLEDView: View {
 
                             Spacer()
 
-                            Text("Cool")
+                            Text(rightTemperatureLabel)
                                 .font(.system(size: 16, weight: .medium, design: .rounded))
                                 .fontWeight(.medium)
                                 .foregroundColor(.appTextPrimary)
@@ -219,6 +262,9 @@ struct CCTLEDView: View {
                 }
             }
         }
+        .task(id: warmCoolPreferenceStorageKey) {
+            loadWarmCoolPreference()
+        }
         .onChange(of: selectedColor) { _, newValue in
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
@@ -233,20 +279,97 @@ struct CCTLEDView: View {
 
     // MARK: - Device Senders
 
+    private var warmCoolPreferenceStorageKey: String {
+        "\(warmCoolPreferenceDeviceID ?? "unknown")-\(warmCoolPreferenceChannelPosition)"
+    }
+
+    private func updateWarmCoolDirection(isReversed: Bool) {
+        guard isWarmCoolReversed != isReversed else { return }
+        isWarmCoolReversed = isReversed
+        persistWarmCoolPreference()
+    }
+
+    private func loadWarmCoolPreference() {
+        guard let deviceID = warmCoolPreferenceDeviceID else {
+            isWarmCoolReversed = false
+            return
+        }
+
+        let channelPosition = warmCoolPreferenceChannelPosition
+        let descriptor = FetchDescriptor<WarmCoolSliderPreference>(
+            predicate: #Predicate { preference in
+                preference.deviceID == deviceID && preference.channelPosition == channelPosition
+            }
+        )
+
+        do {
+            let preference = try modelContext.fetch(descriptor).first
+            isWarmCoolReversed = preference?.isReversed ?? false
+        } catch {
+            print("Failed to load warm/cool slider preference: \(error)")
+            isWarmCoolReversed = false
+        }
+    }
+
+    private func persistWarmCoolPreference() {
+        guard let deviceID = warmCoolPreferenceDeviceID else { return }
+
+        let channelPosition = warmCoolPreferenceChannelPosition
+        let descriptor = FetchDescriptor<WarmCoolSliderPreference>(
+            predicate: #Predicate { preference in
+                preference.deviceID == deviceID && preference.channelPosition == channelPosition
+            }
+        )
+
+        do {
+            let storedPreference = try modelContext.fetch(descriptor).first
+
+            if let storedPreference {
+                storedPreference.isReversed = isWarmCoolReversed
+            } else {
+                let preference = WarmCoolSliderPreference(
+                    deviceID: deviceID,
+                    channelPosition: channelPosition,
+                    isReversed: isWarmCoolReversed
+                )
+                modelContext.insert(preference)
+            }
+
+            try modelContext.save()
+        } catch {
+            print("Failed to save warm/cool slider preference: \(error)")
+        }
+    }
+
+    private func warmCoolLevels(for sliderValue: Double) -> (cool: Int, warm: Int) {
+        let clampedValue = min(max(sliderValue, 0), 100)
+
+        if clampedValue == 50 {
+            return (cool: 100, warm: 100)
+        } else if clampedValue < 50 {
+            let progressToCool = (50 - clampedValue) / 50.0
+            let warmLevel = Int((1.0 - progressToCool) * 100.0)
+            return (cool: 100, warm: max(0, min(100, warmLevel)))
+        } else {
+            let progressToWarm = (clampedValue - 50) / 50.0
+            let coolLevel = Int((1.0 - progressToWarm) * 100.0)
+            return (cool: max(0, min(100, coolLevel)), warm: 100)
+        }
+    }
+
     private func sendColor() {
-        let intensityValue = led1warmCold
-        let intensityValue2: Double = abs(intensityValue - 100)
+        let levels = warmCoolLevels(for: led1warmCold)
         let brightnessValue = Int((led2Brightness / 100.0) * 255.0)
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
             String(chennelPosition ?? 1),
-            String(Int(intensityValue2)),
-            String(Int(intensityValue)),
+            String(levels.cool),
+            String(levels.warm),
             String(Int(brightnessValue))
         ]
 
-        print("🔶 sendColor() -> cw=\(Int(intensityValue2)) ww=\(Int(intensityValue)) bri255=\(Int(brightnessValue))")
+        print("🔶 sendColor() -> cw=\(levels.cool) ww=\(levels.warm) bri255=\(Int(brightnessValue))")
         pwmIntensityObj.sendLightControl(message: byteArray)
     }
 
@@ -281,18 +404,17 @@ struct CCTLEDView: View {
         let clamped =  pct
         led2Brightness = clamped
 
-        let intensityValue = led1warmCold
-        let intensityValue2: Double = abs(intensityValue - 100)
+        let levels = warmCoolLevels(for: led1warmCold)
 
-        let brightness255 = Int((clamped / 100.0) * 255.0)
+        let brightness255 = Int((clamped) )
         let byteArray: [String] = [
             String(chennalMac ?? ""),
             String(chennelPosition ?? 1),
-            String(Int(intensityValue2)),
-            String(Int(intensityValue)),
+            String(levels.cool),
+            String(levels.warm),
             String(brightness255)
         ]
-        print("🚚 updateBrightness() -> cw=\(Int(intensityValue2)) ww=\(Int(intensityValue)) bri%=\(Int(clamped)) bri255=\(brightness255)")
+        print("🚚 updateBrightness() -> cw=\(levels.cool) ww=\(levels.warm) bri%=\(Int(clamped)) bri255=\(brightness255)")
         pwmIntensityObj.sendLightControl(message: byteArray)
     }
 
@@ -369,27 +491,18 @@ struct CCTLEDView: View {
 
     private func sendLampState() {
         if isOn {
-            let uiColor = UIColor(selectedColor)
-            var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-            uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-
-            // Convert RGB to 0-255 range
-            let redValue = Int(red * 255)
-            let greenValue = Int(green * 255)
-            let blueValue = Int(blue * 255)
-
-            // Use the same brightness source used by the slider (not RGBBrightness)
+            let levels = warmCoolLevels(for: led1warmCold)
             let brightnessValue = Int(led2Brightness) // 0-100
 
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
                 String(chennelPosition ?? 1),
-                String(redValue),
-                String(greenValue),
+                String(levels.cool),
+                String(levels.warm),
                 String(brightnessValue)
             ]
 
-            print("💡 Lamp ON -> RGB=(\(redValue),\(greenValue),\(blueValue)) bri%=\(brightnessValue)")
+            print("💡 Lamp ON -> cw=\(levels.cool) ww=\(levels.warm) bri%=\(brightnessValue)")
             sendMessage(message: byteArray)
         } else {
             // When lamp is off, send off command
@@ -592,10 +705,6 @@ struct CCTLEDView: View {
                 // 0…100 for device
                 let pct = (newBrightness255 / 255.0) * 100.0
                 led2Brightness = pct // keep AppStorage aligned
-            }
-            .onEnded { _ in
-                // Send ONLY when user releases
-                let pct = (brightness / 255.0) * 100.0
                 updateBrightness(pct)
             }
     }
@@ -701,6 +810,7 @@ struct CCTLEDView: View {
 struct CCtLEDView_Previews: PreviewProvider {
     static var previews: some View {
         CCTLEDView(chennalMac: "80b54ee8b228", chennelPosition: 2)
+            .modelContainer(for: WarmCoolSliderPreference.self, inMemory: true)
     }
 }
 
@@ -711,13 +821,15 @@ struct HorizontalWarmCoolSlider: View {
     let range: ClosedRange<Double>
     let step: Double
     var onEditingChanged: (Bool) -> Void
+    var isReversed: Bool
     var isDisabled: Bool
 
-    init(value: Binding<Double>, in range: ClosedRange<Double>, step: Double = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, disabled: Bool = false) {
+    init(value: Binding<Double>, in range: ClosedRange<Double>, step: Double = 1, onEditingChanged: @escaping (Bool) -> Void = { _ in }, isReversed: Bool = false, disabled: Bool = false) {
         self._value = value
         self.range = range
         self.step = step
         self.onEditingChanged = onEditingChanged
+        self.isReversed = isReversed
         self.isDisabled = disabled
     }
 
@@ -739,9 +851,9 @@ struct HorizontalWarmCoolSlider: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color.spotlightWarm, // warm
+                                isReversed ? Color.spotlightCool : Color.spotlightWarm,
                                 Color.themeWhite,
-                                Color.spotlightCool   // cool
+                                isReversed ? Color.spotlightWarm : Color.spotlightCool
                             ],
                             startPoint: .leading,
                             endPoint: .trailing

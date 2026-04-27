@@ -302,8 +302,8 @@ struct ConnectedDevicesView: View {
                     WLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
                 }
             } else if device.chennalCount > 1 {
-                // Multi-channel - show selection popup
-                ChannelSelectionView(device: device)
+                // Multi-channel - show advanced/configurator first, then channel selection
+                MultiChannelAdvancedView(device: device)
             } else {
                 Color.clear
                     .onAppear {

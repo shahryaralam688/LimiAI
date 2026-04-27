@@ -547,17 +547,12 @@ struct WLEDView: View {
                                 .frame(height: 20)
                                 .onChange(of: colorValue) { oldValue, newValue in
                                     selectedColor = getColorFromSlider(newValue)
+                                    sendColorToLED(selectedColor)
                                     sendHapticFeedback()
                                     // Haptic feedback on value change
                                     let generator = UIImpactFeedbackGenerator(style: .medium)
                                     generator.impactOccurred()
                                 }
-                                .simultaneousGesture(DragGesture().onEnded { _ in
-                                    // Send color only when user releases the slider
-                                    sendColorToLED(selectedColor)
-                                    // Print the final selected color after slider is released
-                                    print("Final Selected Color: \(selectedColor)")
-                                })
                                 .disabled(!isOn)
                                 .opacity(isOn ? 1.0 : 0.4)
                         }
@@ -693,7 +688,7 @@ struct WLEDView: View {
         let blueValue = Int(blue * 255)
 
         // Map 0-100% brightness to 0-255 for device use
-        let brightness255 = Int((brightness / 100.0) * 255.0)
+        let brightness255 = Int((brightness ) )
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
@@ -1090,9 +1085,6 @@ struct WLEDView: View {
                 // Map drag position to 0-100% brightness for UI
                 let newBrightnessPercent = max(0, min(100, ((clampedX - padding) / availableWidth) * 100))
                 brightness = newBrightnessPercent
-            }
-            .onEnded { _ in
-                // Send ONLY when user releases
                 updateBrightness(brightness, selectedColor: selectedColor)
             }
     }
