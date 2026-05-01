@@ -206,6 +206,10 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
         resetBrowser()
     }
 
+    private func serviceIdentity(for service: NetService) -> String {
+        "\(ObjectIdentifier(service).hashValue)"
+    }
+
     private func resetBrowser() {
         if serviceBrowser != nil {
             serviceBrowser.stop()
@@ -303,7 +307,8 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
         print("🔍 Found Bonjour service: \(service.name) of type _Limi1Ch._udp.")
-        servicesByName[service.name] = service
+        print("   ↳ type=\(service.type) domain=\(service.domain) host=\(service.hostName ?? "nil") moreComing=\(moreComing)")
+        servicesByName[serviceIdentity(for: service)] = service
         service.delegate = self
         resolvingServices.append(service)
         service.resolve(withTimeout: 10.0)
@@ -312,10 +317,12 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
         print("🔴 Bonjour service removed: \(service.name)")
-        let uuid = nameToUuid[service.name] ?? service.name
+        print("   ↳ type=\(service.type) domain=\(service.domain) host=\(service.hostName ?? "nil") moreComing=\(moreComing)")
+        let identity = serviceIdentity(for: service)
+        let uuid = nameToUuid[identity] ?? service.name
         markOffline(uuid: uuid, because: "Bonjour didRemove")
-        servicesByName.removeValue(forKey: service.name)
-        nameToUuid.removeValue(forKey: service.name)
+        servicesByName.removeValue(forKey: identity)
+        nameToUuid.removeValue(forKey: identity)
         servicesByUuid.removeValue(forKey: uuid)
     }
 
@@ -327,6 +334,7 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
 
     func netServiceDidResolveAddress(_ sender: NetService) {
         print("✅ Resolved Bonjour service: \(sender.name)")
+        print("   ↳ type=\(sender.type) domain=\(sender.domain) host=\(sender.hostName ?? "nil") port=\(sender.port)")
         guard let addresses = sender.addresses, !addresses.isEmpty else {
             print("⚠️ No addresses found for service: \(sender.name)")
             return
@@ -353,10 +361,21 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
                 }
             }
         }
+        print("🧾 TXT count for \(sender.name): \(txtRecordDict.count)")
+        if txtRecordDict.isEmpty {
+            print("🧾 TXT payload is empty for \(sender.name)")
+        } else {
+            for key in txtRecordDict.keys.sorted() {
+                print("   • \(key)=\(txtRecordDict[key] ?? "")")
+            }
+        }
 
-        let uuid = txtRecordDict["deviceId"] ?? sender.name
-        nameToUuid[sender.name] = uuid
+        // Keep each resolved device distinct even when multiple units share
+        // the same deviceId or Bonjour name.
+        let uuid = ipAddress.map { "\(sender.name)|\($0)" } ?? serviceIdentity(for: sender)
+        nameToUuid[serviceIdentity(for: sender)] = uuid
         servicesByUuid[uuid] = sender
+        print("🆔 Discovery identity for \(sender.name): \(uuid)")
 
         // Verify reachability once before deciding initial state
         if let ip = ipAddress {
@@ -373,7 +392,7 @@ class BonjourServiceBrowser: NSObject, ObservableObject, NetServiceBrowserDelega
     }
 
     func netService(_ sender: NetService, didUpdateTXTRecord data: Data) {
-        let uuid = nameToUuid[sender.name] ?? sender.name
+        let uuid = nameToUuid[serviceIdentity(for: sender)] ?? sender.name
         deviceLastSeenTXT[uuid] = Date()
         updateReachability(uuid: uuid, reach: .online)
     }

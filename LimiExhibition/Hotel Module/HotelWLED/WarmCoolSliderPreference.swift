@@ -13,3 +13,14 @@ final class WarmCoolSliderPreference {
         self.isReversed = isReversed
     }
 }
+
+@Model
+final class DeviceNamePreference {
+    var deviceID: String
+    var customName: String
+
+    init(deviceID: String, customName: String) {
+        self.deviceID = deviceID
+        self.customName = customName
+    }
+}

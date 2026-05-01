@@ -399,7 +399,7 @@ extension Color {
 struct WLEDView: View {
     @StateObject private var apiManager = WLEDAPIManager()
     @State private var selectedHue: Double = 0.0
-    @State private var brightness: Double = 50 // UI brightness percentage (0-100)
+    @State private var brightness: Double = 128 // Slider drives 0...255 for UI/thumb location
     @State private var selectedEffect = 0
     @State private var showingColorPicker = false
     @State private var selectedTopTab: Int = 0 // 0 = Offline, 1 = Customize
@@ -408,13 +408,14 @@ struct WLEDView: View {
 
     // rainBow Color Bar Variable
     @AppStorage("lampRGB") private var isOn: Bool = false
-    @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50
+    @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50 // Device brightness 0...100
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
     @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
     @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
     @State private var patternSpeed: Double = 50      // 0-100 UI
     @State private var patternIntensity: Double = 50  // 0-100 UI
     @State private var hasSelectedPattern: Bool = false
+    @State private var lastSentBrightnessStep: Int?
     private var hexColor: Color {
         Color(hex: selectedColorHex)
     }
@@ -424,6 +425,8 @@ struct WLEDView: View {
 
     let selectColorObj =  LightControllingSocket.shared
     @State private var showSolidColor: Bool = true // State variable to toggle between sliders
+
+    private var brightnessPercent: Double { (brightness / 255.0) * 100.0 }
 
     
     var body: some View {
@@ -608,8 +611,9 @@ struct WLEDView: View {
             if let state = apiManager.currentState {
                 DispatchQueue.main.async {
                     self.isOn = state.on
-                    // Convert 0-255 API brightness to 0-100% for UI
-                    self.brightness = (Double(state.bri) / 255.0) * 100.0
+                    self.brightness = Double(state.bri)
+                    self.RGBBrightness = (Double(state.bri) / 255.0) * 100.0
+                    self.lastSentBrightnessStep = Int(self.RGBBrightness.rounded())
                     self.selectedEffect = state.seg.first?.fx ?? 0
                 }
             }
@@ -660,8 +664,7 @@ struct WLEDView: View {
         let greenValue = Int(green * 255)
         let blueValue = Int(blue * 255)
         
-        // Convert brightness to 0-100 range (as previously used for color send)
-        let brightnessValue = Int(RGBBrightness)
+        let brightnessValue = Int(min(max(RGBBrightness.rounded(), 0), 100))
         
         // Convert all to strings for message array
         let byteArray: [String] = [
@@ -676,33 +679,56 @@ struct WLEDView: View {
         // Prepare and send combined info
         sendMessage(message: byteArray)
     }
-    func updateBrightness(_ brightness: Double, selectedColor: Color) {
-        // brightness is 0-100% from UI
-        let uiColor = UIColor(selectedColor)
-        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+    func updateBrightness(_ brightness100: Double, selectedColor: Color) {
+        let clamped = min(max(brightness100, 0), 100)
+        RGBBrightness = clamped
 
-        // Convert RGB to 0-255 range
-        let redValue = Int(red * 255)
-        let greenValue = Int(green * 255)
-        let blueValue = Int(blue * 255)
+        let targetBrightness = Int(clamped.rounded())
+        let startBrightness = lastSentBrightnessStep ?? targetBrightness
+        let step = startBrightness <= targetBrightness ? 1 : -1
+        let rgb = currentRGBValues(from: selectedColor)
 
-        // Map 0-100% brightness to 0-255 for device use
-        let brightness255 = Int((brightness ) )
+        for brightnessStep in stride(from: startBrightness, through: targetBrightness, by: step) {
+            sendBrightnessStep(
+                brightnessStep,
+                red: rgb.red,
+                green: rgb.green,
+                blue: rgb.blue
+            )
+        }
 
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(redValue),
-            String(greenValue),
-            String(blueValue),
-            String(brightness255)
-        ]
-
-        sendMessage(message: byteArray)
+        lastSentBrightnessStep = targetBrightness
     }
     private func sendMessage( message: [String]) {
             selectColorObj.sendLightControlRGB( message: message) // Convert Data back to [UInt8]
+    }
+
+    private func currentRGBValues(from color: Color) -> (red: Int, green: Int, blue: Int) {
+        let uiColor = UIColor(color)
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+        return (
+            red: Int(red * 255),
+            green: Int(green * 255),
+            blue: Int(blue * 255)
+        )
+    }
+
+    private func sendBrightnessStep(_ brightnessStep: Int, red: Int, green: Int, blue: Int) {
+        let byteArray: [String] = [
+            String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
+            String(red),
+            String(green),
+            String(blue),
+            String(brightnessStep)
+        ]
+
+        sendMessage(message: byteArray)
     }
     // Function to map slider value to a color
     func getColorFromSlider(_ value: Double) -> Color {
@@ -864,8 +890,7 @@ struct WLEDView: View {
             let redValue = Int(red * 255)
             let greenValue = Int(green * 255)
             let blueValue = Int(blue * 255)
-            // When lamp is on, send current color with brightness
-            let brightnessValue = Int((RGBBrightness / 100.0) * 255.0)
+            let brightnessValue = Int(min(max(RGBBrightness.rounded(), 0), 100))
             
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
@@ -1010,7 +1035,7 @@ struct WLEDView: View {
             .fill(Color.appSurfacePrimary)
             .frame(width: 46, height: 46)
             .overlay(
-                Text("\(Int(brightness))%")
+                Text("\(Int(100))%")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.themeWhite)
             )
@@ -1070,8 +1095,7 @@ struct WLEDView: View {
                 
             )
             .position(
-                // brightness is 0-100% in UI, map to track width
-                x: 15 + ((brightness / 100) * (geometry.size.width - 30)),
+                x: 15 + ((brightness / 255) * (geometry.size.width - 30)),
                 y: 10
             )
     }
@@ -1082,10 +1106,12 @@ struct WLEDView: View {
                 let padding: CGFloat = 15
                 let availableWidth = geometry.size.width - (padding * 2)
                 let clampedX = max(padding, min(geometry.size.width - padding, value.location.x))
-                // Map drag position to 0-100% brightness for UI
-                let newBrightnessPercent = max(0, min(100, ((clampedX - padding) / availableWidth) * 100))
-                brightness = newBrightnessPercent
-                updateBrightness(brightness, selectedColor: selectedColor)
+                let newBrightness255 = max(0, min(255, ((clampedX - padding) / availableWidth) * 255))
+                brightness = newBrightness255
+
+                let brightness100 = (newBrightness255 / 255.0) * 100.0
+                RGBBrightness = brightness100
+                updateBrightness(brightness100, selectedColor: selectedColor)
             }
     }
     

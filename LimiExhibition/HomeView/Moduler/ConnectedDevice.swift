@@ -6,19 +6,29 @@
 //
 
 import SwiftUI
+import SwiftData
 
 // MARK: - WiFi Device Model (from HomeView)
 
 struct ConnectedDevicesView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     let onBack: () -> Void = {}
     
     // MARK: - Bonjour Integration
     @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
-    private let allowedNames: Set<String> = ["1 CH-HUB", "Mini Controller","LIMI Device"]
+    private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB", "8 CH-HUB", "16 CH-HUB", "Mini Controller", "LIMI Device"]
     @State private var allocatedWifiDeviceIds: Set<String> = []
     @State private var banpurUploadedDeviceIds: Set<String> = []
     @State private var gridUploadedDeviceIds: Set<String> = []
+
+    private func isAllowedDeviceName(_ name: String) -> Bool {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
+        return normalizedAllowed.contains(normalized)
+            || normalized.hasPrefix("limi1ch-")
+            || normalized.hasPrefix("limi device")
+    }
 
     // MARK: - State Variables
     @State private var wifiDevices: [WifiDevice] = []
@@ -26,13 +36,11 @@ struct ConnectedDevicesView: View {
     @State private var selectedWifiDevice: WifiDevice? = nil
     @State private var isShowingDevice: Bool = false
     @State private var showDemoAddingWifi: Bool = false
-    @State private var selectedDeviceName: String = ""
-    @State private var selectedDeviceId: String = ""
-    @State private var selectedWifiSSID: [String] = []
-    
-
     @State private var showHomeView: Bool = false
     @State private var showNoPendantAlert: Bool = false
+    @State private var renameTargetDevice: WifiDevice?
+    @State private var renameInput: String = ""
+    @State private var customDeviceNames: [String: String] = [:]
 
 
     // Grid layout
@@ -46,6 +54,71 @@ struct ConnectedDevicesView: View {
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         return formatter.string(from: Date())
+    }
+
+    private func deviceStorageKey(for device: WifiDevice) -> String {
+        let trimmedMac = device.chennalMac.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedMac.isEmpty ? device.uuid : trimmedMac
+    }
+
+    private func customName(for device: WifiDevice) -> String? {
+        let key = deviceStorageKey(for: device)
+        return customDeviceNames[key]
+    }
+
+    private func displayName(for device: WifiDevice) -> String {
+        if let customName = customName(for: device),
+           !customName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return customName
+        }
+        return device.deviceName
+    }
+
+    private func beginRenaming(_ device: WifiDevice) {
+        renameTargetDevice = device
+        renameInput = customName(for: device) ?? device.deviceName
+    }
+
+    private func saveCustomDeviceName() {
+        guard let device = renameTargetDevice else { return }
+
+        let key = deviceStorageKey(for: device)
+        let trimmedName = renameInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        let descriptor = FetchDescriptor<DeviceNamePreference>(
+            predicate: #Predicate { $0.deviceID == key }
+        )
+
+        do {
+            let storedPreference = try modelContext.fetch(descriptor).first
+
+            if trimmedName.isEmpty || trimmedName == device.deviceName {
+                if let storedPreference {
+                    modelContext.delete(storedPreference)
+                }
+            } else if let storedPreference {
+                storedPreference.customName = trimmedName
+            } else {
+                modelContext.insert(DeviceNamePreference(deviceID: key, customName: trimmedName))
+            }
+
+            try modelContext.save()
+            loadSavedDeviceNames()
+        } catch {
+            print("❌ Failed to save local device name: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadSavedDeviceNames() {
+        let descriptor = FetchDescriptor<DeviceNamePreference>()
+
+        do {
+            let storedPreferences = try modelContext.fetch(descriptor)
+            customDeviceNames = Dictionary(
+                uniqueKeysWithValues: storedPreferences.map { ($0.deviceID, $0.customName) }
+            )
+        } catch {
+            print("❌ Failed to load local device names: \(error.localizedDescription)")
+        }
     }
 
     var body: some View {
@@ -157,7 +230,11 @@ struct ConnectedDevicesView: View {
                                             chennalCount: device.chennalCount,
                                             channelTypes: device.channelTypes,
                                             deviceName: device.deviceName,
-                                            isOnline: device.isOnline
+                                            displayName: displayName(for: device),
+                                            isOnline: device.isOnline,
+                                            onRename: {
+                                                beginRenaming(device)
+                                            }
                                         )
                                         .onAppear {
                                             // Send each real device shown in the grid to backend once
@@ -168,6 +245,7 @@ struct ConnectedDevicesView: View {
                                         }
                                         .contentShape(Rectangle())
                                         .onTapGesture {
+                                            guard renameTargetDevice == nil else { return }
                                             selectedWifiDevice = device
                                         }
                                     }
@@ -191,6 +269,7 @@ struct ConnectedDevicesView: View {
         .ignoresSafeArea()
         .onAppear {
             UserDataManager.shared.refreshUserData()
+            loadSavedDeviceNames()
             
             // Connect WebSocket for light controlling (token is attached in LightControllingSocket init)
             LightControllingSocket.shared.connect()
@@ -210,11 +289,8 @@ struct ConnectedDevicesView: View {
         }
         // ✅ Respect Bonjour reachability + keep offline ghosts listed
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
-            let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
-            
             let filtered = newDevices.filter { dev in
-                let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
+                isAllowedDeviceName(dev.name)
             }
             
             // UUIDs seen in this tick
@@ -293,8 +369,11 @@ struct ConnectedDevicesView: View {
                         }
                     }
             } else if device.chennalCount == 1 {
-                // Single channel - show direct control view based on channel type
-                let channelType = device.channelTypes.first ?? "CCT"
+                // Default to CCT unless the parsed channel type is explicitly RGB.
+                let normalizedChannelType = device.channelTypes.first?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .uppercased()
+                let channelType = normalizedChannelType == "RGB" ? "RGB" : "CCT"
                 let channelPosition = 1
                 if channelType == "CCT" {
                     CCTLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
@@ -322,6 +401,33 @@ struct ConnectedDevicesView: View {
         .fullScreenCover(isPresented: $isShowingDevice) {
             DemoScanDevicesView()
         }
+        .alert(
+            "Rename Device",
+            isPresented: Binding(
+                get: { renameTargetDevice != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        renameTargetDevice = nil
+                    }
+                }
+            )
+        ) {
+            TextField("Device name", text: $renameInput)
+            Button("Save") {
+                saveCustomDeviceName()
+                renameTargetDevice = nil
+            }
+            Button("Reset") {
+                renameInput = ""
+                saveCustomDeviceName()
+                renameTargetDevice = nil
+            }
+            Button("Cancel", role: .cancel) {
+                renameTargetDevice = nil
+            }
+        } message: {
+            Text("This name will be saved only on this mobile.")
+        }
     }
     
     private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
@@ -332,7 +438,10 @@ struct ConnectedDevicesView: View {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
             // Parse channelTypes from TXT (firmware sends as 'channelTypes')
             if let p = txt["channelTypes"] {
-                let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
+                let types = p
+                    .split(separator: ",")
+                    .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+                    .filter { $0 == "CCT" || $0 == "RGB" }
                 if !types.isEmpty {
                     channelTypes = types
                 }
@@ -351,12 +460,9 @@ struct ConnectedDevicesView: View {
     }
     // MARK: - Bonjour Device Update Logic
     private func updateWifiDevices(with newDevices: [BLEDevice]) {
-        let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
-        
-        // Filter only allowed device names or limi1ch- prefix
+        // Filter only allowed device names or expected prefixes
         let filtered = newDevices.filter { dev in
-            let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
+            isAllowedDeviceName(dev.name)
         }
         
         // Track current UUIDs
@@ -461,23 +567,31 @@ struct WifiDeviceSpace: View {
     private func isAllowedDeviceName(_ name: String) -> Bool {
         let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
-        return normalizedAllowed.contains(normalized) || normalized.hasPrefix("limi1ch-")
+        return normalizedAllowed.contains(normalized)
+            || normalized.hasPrefix("limi1ch-")
+            || normalized.hasPrefix("limi device")
     }
 
     let chennalMac: String
     let chennalCount : Int
     let channelTypes: [String]
     let deviceName: String
+    let displayName: String
     let isOnline: Bool
+    let onRename: () -> Void
     
     private var channelSummary: String {
-        if channelTypes.isEmpty { return "Unknown" }
-        if channelTypes.count == 1 {
-            return channelTypes[0]
+        let normalizedTypes = channelTypes
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+            .filter { $0 == "CCT" || $0 == "RGB" }
+
+        if normalizedTypes.isEmpty { return "CCT" }
+        if normalizedTypes.count == 1 {
+            return normalizedTypes[0]
         }
         // Count CCT and RGB channels
-        let cctCount = channelTypes.filter { $0 == "CCT" }.count
-        let rgbCount = channelTypes.filter { $0 == "RGB" }.count
+        let cctCount = normalizedTypes.filter { $0 == "CCT" }.count
+        let rgbCount = normalizedTypes.filter { $0 == "RGB" }.count
         if cctCount > 0 && rgbCount > 0 {
             return "\(cctCount) CCT + \(rgbCount) RGB"
         } else if cctCount > 0 {
@@ -495,11 +609,20 @@ struct WifiDeviceSpace: View {
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(.themeWhite)
                 Spacer()
+                Button(action: onRename) {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.themeWhite)
+                        .frame(width: 28, height: 28)
+                        .background(Color.themeBlack.opacity(0.25))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
             }
             .padding(10)
 
             HStack {
-                Text(deviceName)
+                Text(displayName)
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.appTextPrimary)

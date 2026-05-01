@@ -52,6 +52,13 @@ struct CCTLEDView: View {
     @State private var selectedTopTab: Int = 0 // 0 = Offline, 1 = Customize
     @State private var isOnline: Bool = true
     @State private var showToast: Bool = false
+    @State private var lastSentBrightnessStep: Int?
+    @State private var isBrightnessDragActive = false
+    @State private var brightnessDragSessionID = 0
+    @State private var dragUIEventCount = 0
+    @State private var dragSentMessageCount = 0
+    @State private var dragAckCount = 0
+    @State private var dragAckTotalMs: Double = 0
 
     
     let pwmIntensityObj = LightControllingSocket.shared
@@ -71,18 +78,6 @@ struct CCTLEDView: View {
 
     private var warmCoolPreferenceChannelPosition: Int {
         chennelPosition ?? 1
-    }
-
-    private var warmCoolSliderBinding: Binding<Double> {
-        Binding(
-            get: {
-                isWarmCoolReversed ? (100 - led1warmCold) : led1warmCold
-            },
-            set: { newValue in
-                let clampedValue = min(max(newValue, 0), 100)
-                led1warmCold = isWarmCoolReversed ? (100 - clampedValue) : clampedValue
-            }
-        )
     }
 
     private var leftTemperatureLabel: String {
@@ -189,7 +184,29 @@ struct CCTLEDView: View {
                             }
                         }
 
-∂
+                        ZStack {
+                            HorizontalWarmCoolSlider(
+                                value: $led1warmCold,
+                                in: 0...100,
+                                step: 4,
+                                onEditingChanged: { isEditing in
+                                    if isEditing {
+                                        if !isEditingSliderColor {
+                                            isEditingSliderColor = true
+                                            sendHapticFeedback()
+                                        }
+                                        sendColor()
+                                    } else if isEditingSliderColor {
+                                        isEditingSliderColor = false
+                                    }
+                                },
+                                isReversed: isWarmCoolReversed,
+                                disabled: !isOn
+                            )
+                        }
+                        .frame(height: 40)
+                        .padding(.horizontal, 25)
+                        .padding(.bottom,12)
 
                         HStack{
                             Text(leftTemperatureLabel)
@@ -257,7 +274,8 @@ struct CCTLEDView: View {
                 DispatchQueue.main.async {
                     self.isOn = state.on
                     self.brightness = Double(state.bri)              // 0…255 from WLED
-                    self.led2Brightness = (Double(state.bri) / 255) * 100 // keep % aligned
+                    self.led2Brightness = (Double(state.bri) / 255.0) * 100.0
+                    self.lastSentBrightnessStep = Int(self.led2Brightness.rounded())
                     self.selectedEffect = state.seg.first?.fx ?? 0
                 }
             }
@@ -347,29 +365,29 @@ struct CCTLEDView: View {
         if clampedValue == 50 {
             return (cool: 100, warm: 100)
         } else if clampedValue < 50 {
-            let progressToCool = (50 - clampedValue) / 50.0
-            let warmLevel = Int((1.0 - progressToCool) * 100.0)
-            return (cool: 100, warm: max(0, min(100, warmLevel)))
-        } else {
-            let progressToWarm = (clampedValue - 50) / 50.0
+            let progressToWarm = (50 - clampedValue) / 50.0
             let coolLevel = Int((1.0 - progressToWarm) * 100.0)
             return (cool: max(0, min(100, coolLevel)), warm: 100)
+        } else {
+            let progressToCool = (clampedValue - 50) / 50.0
+            let warmLevel = Int((1.0 - progressToCool) * 100.0)
+            return (cool: 100, warm: max(0, min(100, warmLevel)))
         }
     }
 
     private func sendColor() {
         let levels = warmCoolLevels(for: led1warmCold)
-        let brightnessValue = Int((led2Brightness / 100.0) * 255.0)
+        let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
             String(chennelPosition ?? 1),
-            String(levels.cool),
             String(levels.warm),
+            String(levels.cool),
             String(Int(brightnessValue))
         ]
 
-        print("🔶 sendColor() -> cw=\(levels.cool) ww=\(levels.warm) bri255=\(Int(brightnessValue))")
+        print("🔶 sendColor() -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(Int(brightnessValue))")
         pwmIntensityObj.sendLightControl(message: byteArray)
     }
 
@@ -383,8 +401,8 @@ struct CCTLEDView: View {
         let greenValue = Int(green * 255)
         let blueValue = Int(blue * 255)
 
-        // Use led2Brightness as current brightness %
-        let brightnessValue = Int((led2Brightness / 100.0) * 255.0)
+        // Use led2Brightness as current brightness value in 0...100
+        let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
 
         let byteArray: [String] = [
             String(chennalMac ?? ""),
@@ -395,31 +413,82 @@ struct CCTLEDView: View {
             String(brightnessValue)
         ]
 
-        print("🔷 sendColorToLED() -> RGB=(\(redValue),\(greenValue),\(blueValue)) bri%=\(brightnessValue)")
+        print("🔷 sendColorToLED() -> RGB=(\(redValue),\(greenValue),\(blueValue)) bri100=\(brightnessValue)")
         sendMessage(message: byteArray)
     }
 
-    /// IMPORTANT: now uses the parameter you pass (in %) and also updates AppStorage to keep it in sync.
-    func updateBrightness(_ pct: Double) {
-        let clamped =  pct
+    /// IMPORTANT: brightness is sent and stored in the device's 0...100 range.
+    func updateBrightness(_ brightness100: Double) {
+        let clamped = min(max(brightness100, 0), 100)
         led2Brightness = clamped
 
         let levels = warmCoolLevels(for: led1warmCold)
+        let targetBrightness = Int(clamped.rounded())
+        let startBrightness = lastSentBrightnessStep ?? targetBrightness
+        let step = startBrightness <= targetBrightness ? 1 : -1
 
-        let brightness255 = Int((clamped) )
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(levels.cool),
-            String(levels.warm),
-            String(brightness255)
-        ]
-        print("🚚 updateBrightness() -> cw=\(levels.cool) ww=\(levels.warm) bri%=\(Int(clamped)) bri255=\(brightness255)")
-        pwmIntensityObj.sendLightControl(message: byteArray)
+        for brightnessStep in stride(from: startBrightness, through: targetBrightness, by: step) {
+            sendBrightnessStep(brightnessStep, levels: levels)
+        }
+
+        lastSentBrightnessStep = targetBrightness
     }
 
     private func sendMessage(message: [String]) {
         pwmIntensityObj.sendLightControl(message: message)
+    }
+
+    private func sendBrightnessStep(
+        _ brightnessStep: Int,
+        levels: (cool: Int, warm: Int)
+    ) {
+        let byteArray: [String] = [
+            String(chennalMac ?? ""),
+            String(chennelPosition ?? 1),
+            String(levels.warm),
+            String(levels.cool),
+            String(brightnessStep)
+        ]
+
+        print("🚚 updateBrightness() -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(brightnessStep)")
+        dragSentMessageCount += 1
+        pwmIntensityObj.sendLightControl(message: byteArray) { roundTrip, didReceiveAck in
+            guard isBrightnessDragActive || didReceiveAck else { return }
+
+            let roundTripMs = roundTrip * 1000
+            DispatchQueue.main.async {
+                guard didReceiveAck else { return }
+                dragAckCount += 1
+                dragAckTotalMs += roundTripMs
+            }
+        }
+    }
+
+    private func beginBrightnessDragDiagnosticsIfNeeded() {
+        guard !isBrightnessDragActive else { return }
+        isBrightnessDragActive = true
+        brightnessDragSessionID += 1
+        dragUIEventCount = 0
+        dragSentMessageCount = 0
+        dragAckCount = 0
+        dragAckTotalMs = 0
+    }
+
+    private func finishBrightnessDragDiagnostics() {
+        guard isBrightnessDragActive else { return }
+        isBrightnessDragActive = false
+
+        let sessionID = brightnessDragSessionID
+        print("📊 Brightness drag summary -> uiEvents=\(dragUIEventCount) sentMessages=\(dragSentMessageCount) ackedSoFar=\(dragAckCount)")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            guard brightnessDragSessionID == sessionID else { return }
+
+            let averageAckMs = dragAckCount > 0 ? dragAckTotalMs / Double(dragAckCount) : 0
+            print(
+                "📈 Brightness ack summary -> uiEvents=\(dragUIEventCount) sentMessages=\(dragSentMessageCount) ackCount=\(dragAckCount) avgAckMs=\(Int(averageAckMs.rounded()))"
+            )
+        }
     }
 
     // Function to map slider value to a color
@@ -492,17 +561,17 @@ struct CCTLEDView: View {
     private func sendLampState() {
         if isOn {
             let levels = warmCoolLevels(for: led1warmCold)
-            let brightnessValue = Int(led2Brightness) // 0-100
+            let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
 
             let byteArray: [String] = [
                 String(chennalMac ?? ""),
                 String(chennelPosition ?? 1),
-                String(levels.cool),
                 String(levels.warm),
+                String(levels.cool),
                 String(brightnessValue)
             ]
 
-            print("💡 Lamp ON -> cw=\(levels.cool) ww=\(levels.warm) bri%=\(brightnessValue)")
+            print("💡 Lamp ON -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(brightnessValue)")
             sendMessage(message: byteArray)
         } else {
             // When lamp is off, send off command
@@ -694,6 +763,9 @@ struct CCTLEDView: View {
     private func sliderGesture(geometry: GeometryProxy) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
+                beginBrightnessDragDiagnosticsIfNeeded()
+                dragUIEventCount += 1
+
                 let padding: CGFloat = 15
                 let availableWidth = geometry.size.width - (padding * 2)
                 let clampedX = max(padding, min(geometry.size.width - padding, value.location.x))
@@ -702,10 +774,13 @@ struct CCTLEDView: View {
                 let newBrightness255 = max(0, min(255, ((clampedX - padding) / availableWidth) * 255))
                 brightness = newBrightness255
 
-                // 0…100 for device
-                let pct = (newBrightness255 / 255.0) * 100.0
-                led2Brightness = pct // keep AppStorage aligned
-                updateBrightness(pct)
+                // Convert UI 0...255 slider into device payload 0...100
+                let brightness100 = (newBrightness255 / 255.0) * 100.0
+                led2Brightness = brightness100
+                updateBrightness(brightness100)
+            }
+            .onEnded { _ in
+                finishBrightnessDragDiagnostics()
             }
     }
 

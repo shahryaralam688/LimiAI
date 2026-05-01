@@ -117,12 +117,15 @@ class LightControllingSocket: ObservableObject {
         ]
         
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
-            print("✅ Light control acknowledgment received: \(data)")
+//            ??print("✅ Light control acknowledgment received: \(data)")
         }
         
         print("📤 Sent light control data: \(lightData)")
     }
-    func sendLightControl(message: [String]) {
+    func sendLightControl(
+        message: [String],
+        acknowledgment: ((TimeInterval, Bool) -> Void)? = nil
+    ) {
         guard message.count >= 5 else {
             print("⚠️ Invalid message format: \(message)")
             return
@@ -147,9 +150,13 @@ class LightControllingSocket: ObservableObject {
                 "brightness": blue
             ]
         ]
-        
+
+        let sentAt = Date()
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
-            print("✅ Light control acknowledgment received: \(data)")
+            let roundTrip = Date().timeIntervalSince(sentAt)
+            let didReceiveAck = !data.isEmpty
+//            print("✅ Light control acknowledgment received: \(data)")
+            acknowledgment?(roundTrip, didReceiveAck)
         }
         
         print("📤 Sent light control data: \(lightData)")
@@ -183,7 +190,7 @@ class LightControllingSocket: ObservableObject {
         ]
         
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
-            print("✅ Light control acknowledgment received: \(data)")
+//            print("✅ Light control acknowledgment received: \(data)")
         }
         
         print("📤 Sent light control data: \(lightData)")

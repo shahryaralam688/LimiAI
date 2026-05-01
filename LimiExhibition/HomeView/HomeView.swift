@@ -44,7 +44,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
 
     @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
-    private let allowedNames: Set<String> = ["1 CH-HUB", "Mini Controller","LIMI Device"]
+    private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB", "8 CH-HUB", "16 CH-HUB", "Mini Controller", "LIMI Device"]
 
     init() {
         _ = RoominatorFileManager.shared
@@ -665,7 +665,10 @@ struct HomeView: View {
             if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
             // Parse channelTypes from TXT (firmware sends as 'channelTypes')
             if let p = txt["channelTypes"] {
-                let types = p.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces).uppercased() }
+                let types = p
+                    .split(separator: ",")
+                    .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+                    .filter { $0 == "CCT" || $0 == "RGB" }
                 if !types.isEmpty {
                     channelTypes = types
                 }
@@ -965,4 +968,3 @@ final class DeviceAllocationService {
 
 
 // MARK: - Preview
-

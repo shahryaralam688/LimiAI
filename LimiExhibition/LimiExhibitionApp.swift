@@ -33,7 +33,7 @@ struct YourApp: App {
                     languageRefreshID = UUID()
                 }
         }
-        .modelContainer(for: WarmCoolSliderPreference.self)
+        .modelContainer(for: [WarmCoolSliderPreference.self, DeviceNamePreference.self])
     }
 }
 
