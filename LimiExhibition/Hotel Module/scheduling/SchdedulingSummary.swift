@@ -13,6 +13,7 @@ struct SchedulingSummaryView: View {
     @ObservedObject var schedule: Schedule   // comes from SchedulingView
     
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             header
             
@@ -32,6 +33,9 @@ struct SchedulingSummaryView: View {
             }
         }
         .background(Color.appCanvasPrimary.ignoresSafeArea())
+        .limiModalNavigationBar(title: "Schedule Summary", onClose: { dismiss() })
+        }
+        .limiModalSheetStyle()
     }
     
     // MARK: - Header
@@ -39,8 +43,6 @@ struct SchedulingSummaryView: View {
     private var header: some View {
         VStack(spacing: 0) {
             HStack {
-                LimiBackButton { dismiss() }
-                
                 Spacer()
                 
                 Text("Schedule Summary")

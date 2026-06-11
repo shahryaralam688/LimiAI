@@ -12,6 +12,35 @@
 		1042906F2F0004EE003BB7B4 /* AppAuthTV in Frameworks */ = {isa = PBXBuildFile; productRef = 1042906E2F0004EE003BB7B4 /* AppAuthTV */; };
 		104604CC2EBB1446004D0557 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 104604CB2EBB1446004D0557 /* GoogleSignIn */; };
 		104604CE2EBB1446004D0557 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 104604CD2EBB1446004D0557 /* GoogleSignInSwift */; };
+		105F48272FA4E929008A89D8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47242FA4E929008A89D8 /* LocationManager.swift */; };
+		105F482F2FA4E929008A89D8 /* AuthResponseParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F472E2FA4E929008A89D8 /* AuthResponseParsing.swift */; };
+		105F48302FA4E929008A89D8 /* ManagerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F472F2FA4E929008A89D8 /* ManagerAPI.swift */; };
+		105F48312FA4E929008A89D8 /* WeatherData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47302FA4E929008A89D8 /* WeatherData.swift */; };
+		105F48322FA4E929008A89D8 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47312FA4E929008A89D8 /* WeatherService.swift */; };
+		105F48452FA4E929008A89D8 /* AuthManger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47472FA4E929008A89D8 /* AuthManger.swift */; };
+		105F48472FA4E929008A89D8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474A2FA4E929008A89D8 /* Color.swift */; };
+		105F48482FA4E929008A89D8 /* LimiDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */; };
+		105F48492FA4E929008A89D8 /* NeumorphicSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474C2FA4E929008A89D8 /* NeumorphicSystem.swift */; };
+		105F484B2FA4E929008A89D8 /* LanguageSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47512FA4E929008A89D8 /* LanguageSettings.swift */; };
+		105F484C2FA4E929008A89D8 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47532FA4E929008A89D8 /* NetworkMonitor.swift */; };
+		105F485F2FA4E929008A89D8 /* FloatingAssistantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476A2FA4E929008A89D8 /* FloatingAssistantManager.swift */; };
+		105F48602FA4E929008A89D8 /* FloatingRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476B2FA4E929008A89D8 /* FloatingRootViewController.swift */; };
+		105F48612FA4E929008A89D8 /* FloatingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476C2FA4E929008A89D8 /* FloatingWindow.swift */; };
+		105F488C2FA4E929008A89D8 /* SocketIOExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47A12FA4E929008A89D8 /* SocketIOExample.swift */; };
+		105F48C62FA4E929008A89D8 /* LightControllingSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47EF2FA4E929008A89D8 /* LightControllingSocket.swift */; };
+		105F48CE2FA4E929008A89D8 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47FD2FA4E929008A89D8 /* AuthManager.swift */; };
+		10AB0000000000000000B001 /* LimiCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C001 /* LimiCommand.swift */; };
+		10AB0000000000000000B002 /* Door.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C002 /* Door.swift */; };
+		10AB0000000000000000B003 /* DeviceTransportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C003 /* DeviceTransportState.swift */; };
+		10AB0000000000000000B004 /* DeviceTransportRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C004 /* DeviceTransportRegistry.swift */; };
+		10AB0000000000000000B005 /* MQTTClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C005 /* MQTTClientProtocol.swift */; };
+		10AB0000000000000000B006 /* SocketIOMQTTBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C006 /* SocketIOMQTTBridge.swift */; };
+		10AB0000000000000000B007 /* DeviceWebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C007 /* DeviceWebSocketClient.swift */; };
+		10AB0000000000000000B008 /* BLELightWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C008 /* BLELightWriter.swift */; };
+		10AB0000000000000000B009 /* LimiTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C009 /* LimiTransport.swift */; };
+		10AB0000000000000000B00A /* LimiTransportError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00A /* LimiTransportError.swift */; };
+		10AB0000000000000000B00B /* ThrottledSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00B /* ThrottledSender.swift */; };
+		10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00C /* TransportMediumPreference.swift */; };
 		10B43B762EF922970040610A /* SwiftLAME in Frameworks */ = {isa = PBXBuildFile; productRef = 10B43B752EF922970040610A /* SwiftLAME */; };
 		9A5AFD7B2DDC35EC00B785BE /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */; };
 		9A6A3D622E8BC3FC00924422 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 9A6A3D612E8BC3FC00924422 /* SocketIO */; };
@@ -70,6 +99,35 @@
 /* End PBXBuildRule section */
 
 /* Begin PBXFileReference section */
+		105F47242FA4E929008A89D8 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		105F472E2FA4E929008A89D8 /* AuthResponseParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthResponseParsing.swift; sourceTree = "<group>"; };
+		105F472F2FA4E929008A89D8 /* ManagerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerAPI.swift; sourceTree = "<group>"; };
+		105F47302FA4E929008A89D8 /* WeatherData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherData.swift; sourceTree = "<group>"; };
+		105F47312FA4E929008A89D8 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		105F47472FA4E929008A89D8 /* AuthManger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManger.swift; sourceTree = "<group>"; };
+		105F474A2FA4E929008A89D8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiDesignSystem.swift; sourceTree = "<group>"; };
+		105F474C2FA4E929008A89D8 /* NeumorphicSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeumorphicSystem.swift; sourceTree = "<group>"; };
+		105F47512FA4E929008A89D8 /* LanguageSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettings.swift; sourceTree = "<group>"; };
+		105F47532FA4E929008A89D8 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		105F476A2FA4E929008A89D8 /* FloatingAssistantManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAssistantManager.swift; sourceTree = "<group>"; };
+		105F476B2FA4E929008A89D8 /* FloatingRootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingRootViewController.swift; sourceTree = "<group>"; };
+		105F476C2FA4E929008A89D8 /* FloatingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWindow.swift; sourceTree = "<group>"; };
+		105F47A12FA4E929008A89D8 /* SocketIOExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketIOExample.swift; sourceTree = "<group>"; };
+		105F47EF2FA4E929008A89D8 /* LightControllingSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightControllingSocket.swift; sourceTree = "<group>"; };
+		105F47FD2FA4E929008A89D8 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C001 /* LimiCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiCommand.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C002 /* Door.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Door.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C003 /* DeviceTransportState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTransportState.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C004 /* DeviceTransportRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTransportRegistry.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C005 /* MQTTClientProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MQTTClientProtocol.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C006 /* SocketIOMQTTBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketIOMQTTBridge.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C007 /* DeviceWebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWebSocketClient.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C008 /* BLELightWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLELightWriter.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C009 /* LimiTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiTransport.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00A /* LimiTransportError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiTransportError.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00B /* ThrottledSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThrottledSender.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00C /* TransportMediumPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportMediumPreference.swift; sourceTree = "<group>"; };
 		26CAF47D956ADE8C97D67273 /* Pods-Limi.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.release.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.release.xcconfig"; sourceTree = "<group>"; };
 		41A8537098400FD0063056FC /* Pods-Limi.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.debug.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.debug.xcconfig"; sourceTree = "<group>"; };
 		9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
@@ -159,6 +217,114 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		105F48DC2FA56AA9008A89D8 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				105F48DD2FA56AA9008A89D8 /* Services */,
+				105F48DE2FA56AA9008A89D8 /* Managers */,
+				105F48DF2FA56AA9008A89D8 /* DesignSystem */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		105F48DD2FA56AA9008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				105F48E02FA56AAD008A89D8 /* API */,
+				105F48E12FA56AAD008A89D8 /* Networking */,
+				105F48E22FA56C9B008A89D8 /* Auth */,
+				105F48E32FA56D77008A89D8 /* Location */,
+				105F48E42FA56F24008A89D8 /* WebSocket */,
+				10AB0000000000000000A000 /* Transport */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		105F48DE2FA56AA9008A89D8 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				105F47512FA4E929008A89D8 /* LanguageSettings.swift */,
+				105F476A2FA4E929008A89D8 /* FloatingAssistantManager.swift */,
+				105F476B2FA4E929008A89D8 /* FloatingRootViewController.swift */,
+				105F476C2FA4E929008A89D8 /* FloatingWindow.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		105F48DF2FA56AA9008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				105F474A2FA4E929008A89D8 /* Color.swift */,
+				105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */,
+				105F474C2FA4E929008A89D8 /* NeumorphicSystem.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		105F48E02FA56AAD008A89D8 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				105F472F2FA4E929008A89D8 /* ManagerAPI.swift */,
+				105F47302FA4E929008A89D8 /* WeatherData.swift */,
+				105F47312FA4E929008A89D8 /* WeatherService.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		105F48E12FA56AAD008A89D8 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				105F47532FA4E929008A89D8 /* NetworkMonitor.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		105F48E22FA56C9B008A89D8 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				105F47FD2FA4E929008A89D8 /* AuthManager.swift */,
+				105F47472FA4E929008A89D8 /* AuthManger.swift */,
+				105F472E2FA4E929008A89D8 /* AuthResponseParsing.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		105F48E32FA56D77008A89D8 /* Location */ = {
+			isa = PBXGroup;
+			children = (
+				105F47242FA4E929008A89D8 /* LocationManager.swift */,
+			);
+			path = Location;
+			sourceTree = "<group>";
+		};
+		105F48E42FA56F24008A89D8 /* WebSocket */ = {
+			isa = PBXGroup;
+			children = (
+				105F47EF2FA4E929008A89D8 /* LightControllingSocket.swift */,
+				105F47A12FA4E929008A89D8 /* SocketIOExample.swift */,
+			);
+			path = WebSocket;
+			sourceTree = "<group>";
+		};
+		10AB0000000000000000A000 /* Transport */ = {
+			isa = PBXGroup;
+			children = (
+				10AB0000000000000000C001 /* LimiCommand.swift */,
+				10AB0000000000000000C002 /* Door.swift */,
+				10AB0000000000000000C003 /* DeviceTransportState.swift */,
+				10AB0000000000000000C004 /* DeviceTransportRegistry.swift */,
+				10AB0000000000000000C005 /* MQTTClientProtocol.swift */,
+				10AB0000000000000000C006 /* SocketIOMQTTBridge.swift */,
+				10AB0000000000000000C007 /* DeviceWebSocketClient.swift */,
+				10AB0000000000000000C008 /* BLELightWriter.swift */,
+				10AB0000000000000000C009 /* LimiTransport.swift */,
+				10AB0000000000000000C00A /* LimiTransportError.swift */,
+				10AB0000000000000000C00B /* ThrottledSender.swift */,
+				10AB0000000000000000C00C /* TransportMediumPreference.swift */,
+			);
+			path = Transport;
+			sourceTree = "<group>";
+		};
 		9ABD247B2DA57617003A5A22 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,6 +357,7 @@
 				9A6EFC5C2D8BB14500272B02 /* LimiExhibition */,
 				9ABD247B2DA57617003A5A22 /* Frameworks */,
 				E22F056FBE6961045C6938A3 /* Pods */,
+				105F48DC2FA56AA9008A89D8 /* Core */,
 			);
 			sourceTree = "<group>";
 		};
@@ -451,6 +618,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				105F48272FA4E929008A89D8 /* LocationManager.swift in Sources */,
+				105F482F2FA4E929008A89D8 /* AuthResponseParsing.swift in Sources */,
+				105F48302FA4E929008A89D8 /* ManagerAPI.swift in Sources */,
+				105F48312FA4E929008A89D8 /* WeatherData.swift in Sources */,
+				105F48322FA4E929008A89D8 /* WeatherService.swift in Sources */,
+				105F48452FA4E929008A89D8 /* AuthManger.swift in Sources */,
+				105F48472FA4E929008A89D8 /* Color.swift in Sources */,
+				105F48482FA4E929008A89D8 /* LimiDesignSystem.swift in Sources */,
+				105F48492FA4E929008A89D8 /* NeumorphicSystem.swift in Sources */,
+				105F484B2FA4E929008A89D8 /* LanguageSettings.swift in Sources */,
+				105F484C2FA4E929008A89D8 /* NetworkMonitor.swift in Sources */,
+				105F485F2FA4E929008A89D8 /* FloatingAssistantManager.swift in Sources */,
+				105F48602FA4E929008A89D8 /* FloatingRootViewController.swift in Sources */,
+				105F48612FA4E929008A89D8 /* FloatingWindow.swift in Sources */,
+				105F488C2FA4E929008A89D8 /* SocketIOExample.swift in Sources */,
+				105F48C62FA4E929008A89D8 /* LightControllingSocket.swift in Sources */,
+				105F48CE2FA4E929008A89D8 /* AuthManager.swift in Sources */,
+				10AB0000000000000000B001 /* LimiCommand.swift in Sources */,
+				10AB0000000000000000B002 /* Door.swift in Sources */,
+				10AB0000000000000000B003 /* DeviceTransportState.swift in Sources */,
+				10AB0000000000000000B004 /* DeviceTransportRegistry.swift in Sources */,
+				10AB0000000000000000B005 /* MQTTClientProtocol.swift in Sources */,
+				10AB0000000000000000B006 /* SocketIOMQTTBridge.swift in Sources */,
+				10AB0000000000000000B007 /* DeviceWebSocketClient.swift in Sources */,
+				10AB0000000000000000B008 /* BLELightWriter.swift in Sources */,
+				10AB0000000000000000B009 /* LimiTransport.swift in Sources */,
+				10AB0000000000000000B00A /* LimiTransportError.swift in Sources */,
+				10AB0000000000000000B00B /* ThrottledSender.swift in Sources */,
+				10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

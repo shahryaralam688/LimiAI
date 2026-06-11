@@ -35,6 +35,10 @@
 	<array>
 		<string>Intent</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -46,20 +50,16 @@
 	<string>This app needs Bluetooth to connect to lighting devices.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>This app needs Bluetooth to communicate with smart devices.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Limi needs contacts to find people by name when you ask to send a WhatsApp message.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_wled._tcp.</string>
 		<string>_http._tcp.</string>
 		<string>_Limi1Ch._udp.</string>
 	</array>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>whatsapp</string>
-	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is required for AR features</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Limi needs contacts to find people by name when you ask to send a WhatsApp message.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Discover and control devices on your personal phone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

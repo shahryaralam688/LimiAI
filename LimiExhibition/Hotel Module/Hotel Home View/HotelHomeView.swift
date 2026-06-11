@@ -11,14 +11,11 @@ import CoreLocation
 struct HotelHomeView: View {
     private let socketClient = SocketIOExample()
     @State private var didStartBLE = false // BLE auto-connect flag
-    @State private var selectedTab: BottomTab = .home
+    @StateObject private var viewModel = HotelHomeViewModel()
     @State private var orbIntensity: CGFloat = 2.0
     @State private var orbVolume: CGFloat = 0.1
-    @State private var showVoiceView = false
-    @State private var isSidebarOpen = false
     
     // Floating button states
-    @State private var isNavigating = false
     @State private var isLoaded = true
     @AppStorage("demoEmail") var demoEmail: String = "umer.asif@terralumen.co.uk"
     @StateObject private var bluetoothManager = BluetoothManager()
@@ -30,7 +27,7 @@ struct HotelHomeView: View {
             VStack(spacing: 0) {
                 // Tab content
                 Group {
-                    switch selectedTab {
+                    switch viewModel.selectedTab {
                     case .home:
                         HomeTabView(locationManager: locationManager)
                     case .requests:
@@ -39,18 +36,18 @@ struct HotelHomeView: View {
                         HotelRoomDevices()
 //                        BLEStarterView()
                     case .profile:
-                        ProfileView()
+                        ProfileView(showsCloseButton: false)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Bottom tab bar - always visible
                 BottomTabBar(
-                    selected: $selectedTab,
+                    selected: $viewModel.selectedTab,
                     orbIntensity: $orbIntensity,
                     orbVolume: $orbVolume,
-                    showVoiceView: $showVoiceView,
-                    isSidebarOpen: $isSidebarOpen
+                    showVoiceView: $viewModel.showVoiceView,
+                    isSidebarOpen: $viewModel.isSidebarOpen
                 )
             }
             .background(Color.appCanvasPrimary)
@@ -64,13 +61,11 @@ struct HotelHomeView: View {
 //                .zIndex(3)
         }
         .onAppear {
-            socketClient!.onOrderUpdate = { action in
-                bluetoothManager.BLESend(message: action)
-            }
-            socketClient!.connect()
-            
-            // Ensure permission and start updates (requests if needed)
-            locationManager.ensurePermissionAndStart()
+            viewModel.handleAppear(
+                socketClient: socketClient,
+                bluetoothManager: bluetoothManager,
+                locationManager: locationManager
+            )
         }
 //        .onChange(of: bluetoothManager.isBluetoothOn) { isOn in
 //            if isOn && !didStartBLE {
@@ -94,10 +89,10 @@ struct HotelHomeView: View {
         .preferredColorScheme(.dark)
         .ignoresSafeArea()
         .trackScreen("HotelHomeView")
-        .fullScreenCover(isPresented: $showVoiceView) {
+        .fullScreenCover(isPresented: $viewModel.showVoiceView) {
             VoiceView()
         }
-        .fullScreenCover(isPresented: $isNavigating) {
+        .fullScreenCover(isPresented: $viewModel.showAddDeviceFlow) {
 //            AddDeviceView()
             BLEStarterView()
         }
@@ -345,15 +340,8 @@ private struct FeatureCard: View {
 }
 
 // MARK: - Bottom Tab Bar
-private enum BottomTab: String, CaseIterable {
-    case home = "Home"
-    case requests = "Requests"
-    case system = "Device"
-    case profile = "Profile"
-}
-
 private struct BottomTabBar: View {
-    @Binding var selected: BottomTab
+    @Binding var selected: HotelBottomTab
     @Binding var orbIntensity: CGFloat
     @Binding var orbVolume: CGFloat
     @Binding var showVoiceView: Bool
@@ -387,7 +375,7 @@ private struct BottomTabBar: View {
     
     }
     
-    private func tabItem(_ tab: BottomTab, systemIcon: String) -> some View {
+    private func tabItem(_ tab: HotelBottomTab, systemIcon: String) -> some View {
         Button {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()

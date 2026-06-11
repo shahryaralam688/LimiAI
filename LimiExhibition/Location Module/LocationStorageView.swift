@@ -14,14 +14,21 @@ struct LocationStorageView: View {
     @State private var alertMessage = ""
     @State private var contentOpacity = 0.0
     @State private var contentOffset: CGFloat = 20
+    @State private var ambientVeilExpanded = false
 
     @AppStorage("locationPromptSkipped") private var locationPromptSkipped = false
 
     private let brandGreen = Color.appBrandSecondary
+    private let ctaGradient = LinearGradient(
+        colors: [.appBrandPrimary, .appBrandSecondary, .appBrandTertiary],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
 
     var body: some View {
         ZStack {
             Color.appCanvasPrimary.ignoresSafeArea()
+            ambientWaterVeil
             
             VStack {
                 headerSection
@@ -47,6 +54,9 @@ struct LocationStorageView: View {
                 contentOpacity = 1.0
                 contentOffset = 0
             }
+            withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
+                ambientVeilExpanded = true
+            }
         }
         .trackScreen("LocationPrompt")
         .onReceive(locationManager.$authorizationStatus) { status in
@@ -58,25 +68,53 @@ struct LocationStorageView: View {
             }
         }
     }
+
+    private var ambientWaterVeil: some View {
+        RadialGradient(
+            colors: [
+                Color.appInfoBright.opacity(0.10),
+                Color.appBrandSecondary.opacity(0.08),
+                Color.appAIGradientEnd.opacity(0.02),
+                Color.clear
+            ],
+            center: .center,
+            startRadius: 80,
+            endRadius: 420
+        )
+        .scaleEffect(ambientVeilExpanded ? 1.08 : 0.94)
+        .opacity(ambientVeilExpanded ? 0.95 : 0.72)
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
     
     private var headerSection: some View {
         VStack(spacing: 24) {
-            Image("logo")
-                .resizable()
-                .renderingMode(.template)
-                .foregroundColor(brandGreen)
-                .scaledToFit()
-                .frame(width: 201, height: 40)
-                .shadow(color: brandGreen.opacity(0.3), radius: 20, x: 0, y: 0)
+            ZStack {
+                Image("logo")
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(.appBrandSecondary)
+                    .scaledToFit()
+                    .frame(width: 201, height: 40)
+                    .blur(radius: 18)
+                    .opacity(0.24)
+
+                Image("logo")
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(.appBrandPrimary)
+                    .scaledToFit()
+                    .frame(width: 201, height: 40)
+            }
             
             VStack(spacing: 12) {
                 Text("Enable Location")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
                 
                 Text("We need your location to provide personalized lighting experiences and weather information.")
                     .font(.system(size: 16, weight: .medium, design: .default))
-                    .foregroundColor(.themeWhite.opacity(0.7))
+                    .foregroundColor(.appTextSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -90,25 +128,25 @@ struct LocationStorageView: View {
                 VStack(spacing: 16) {
                     HStack(spacing: 8) {
                         Image(systemName: "location.fill")
-                            .foregroundColor(brandGreen)
+                            .foregroundColor(.appBrandSecondary)
                         Text("Current Location")
                             .font(.system(size: 18, weight: .semibold, design: .default))
-                            .foregroundColor(.themeWhite)
+                            .foregroundColor(.appTextPrimary)
                     }
                     
                     VStack(spacing: 6) {
                         Text("Latitude: \(location.coordinate.latitude, specifier: "%.4f")")
                             .font(.system(size: 13, weight: .medium, design: .monospaced))
-                            .foregroundColor(.themeWhite.opacity(0.6))
+                            .foregroundColor(.appTextMuted)
                         Text("Longitude: \(location.coordinate.longitude, specifier: "%.4f")")
                             .font(.system(size: 13, weight: .medium, design: .monospaced))
-                            .foregroundColor(.themeWhite.opacity(0.6))
+                            .foregroundColor(.appTextMuted)
                     }
                     
                     if let address = storageManager.currentAddress {
                         Text(address)
                             .font(.system(size: 15, weight: .medium, design: .default))
-                            .foregroundColor(.themeWhite.opacity(0.9))
+                            .foregroundColor(.appTextSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                     }
@@ -116,11 +154,31 @@ struct LocationStorageView: View {
                 .padding(24)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.themeWhite.opacity(0.05))
+                        .fill(.thinMaterial)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(brandGreen.opacity(0.2), lineWidth: 1)
+                                .stroke(Color.appBorderPrimary.opacity(0.85), lineWidth: 1)
                         )
+                        .overlay(alignment: .top) {
+                            RoundedRectangle(cornerRadius: 16)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.appTextQuiet.opacity(0.16),
+                                            Color.clear
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    ),
+                                    lineWidth: 1
+                                )
+                                .mask(
+                                    Rectangle()
+                                        .frame(height: 20)
+                                        .offset(y: -1)
+                                )
+                        }
+                        .shadow(color: Color.appCanvasStrong.opacity(0.28), radius: 20, x: 0, y: 10)
                 )
                 .padding(.horizontal, 20)
             }
@@ -139,14 +197,34 @@ struct LocationStorageView: View {
                     Text("Turn on Location")
                         .font(.system(size: 18, weight: .semibold, design: .default))
                 }
-                .foregroundColor(.themeBlack)
+                .foregroundColor(.appTextInverse)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
-                    LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
+                    Capsule(style: .continuous)
+                        .fill(ctaGradient)
+                        .overlay(alignment: .top) {
+                            Capsule(style: .continuous)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.themeWhite.opacity(0.22),
+                                            Color.themeWhite.opacity(0.06),
+                                            Color.clear
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .mask(
+                                    Rectangle()
+                                        .frame(height: 18)
+                                        .offset(y: -1)
+                                )
+                        }
                 )
                 .clipShape(Capsule(style: .continuous))
-                .shadow(color: brandGreen.opacity(0.4), radius: 15, x: 0, y: 8)
+                .shadow(color: Color.appBrandPrimary.opacity(0.24), radius: 18, x: 0, y: 10)
             }
             .padding(.horizontal, 24)
 
@@ -154,7 +232,7 @@ struct LocationStorageView: View {
                 Button(action: skipAndContinue) {
                     Text("Not now")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.themeWhite.opacity(0.65))
+                        .foregroundColor(.appTextMuted)
                 }
                 .buttonStyle(.plain)
             }

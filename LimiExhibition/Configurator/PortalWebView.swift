@@ -27,6 +27,7 @@ struct PortalWebView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        NavigationStack {
         ZStack {
             DeepSpaceBackground(showParticles: false)
 
@@ -84,14 +85,14 @@ struct PortalWebView: View {
             )
             .ignoresSafeArea()
         }
+        .limiModalNavigationBar(title: "AR Experience", onClose: { dismiss() })
+        }
     }
 
     // MARK: - Header
 
     private var header: some View {
         HStack(alignment: .bottom, spacing: 14) {
-            LimiBackButton { dismiss() }
-
             VStack(alignment: .leading, spacing: 3) {
                 Text("AR Experience")
                     .font(.system(size: 22, weight: .bold, design: .rounded))

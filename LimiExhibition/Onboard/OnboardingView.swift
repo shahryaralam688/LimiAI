@@ -216,7 +216,7 @@ private struct TypingCursor: View {
 
     var body: some View {
         Rectangle()
-            .fill(Color(hex: "00E5FF"))
+            .fill(Color.appInfoBright)
             .frame(width: 2, height: 16)
             .opacity(visible ? 1 : 0)
             .onAppear {
@@ -239,8 +239,8 @@ private struct OrbWithSpeechCard: View {
     @State private var rotation: Double = 0
     @State private var wiggle = false
 
-    private let cyanAccent = Color(hex: "00E5FF")
-    private let violetCore = Color(hex: "9B5DE5")
+    private let infoAccent = Color.appInfoBright
+    private let violetCore = Color.appPurple
 
     private var orbSize: CGFloat { currentPage == 3 ? 160 : 56 }
 
@@ -272,7 +272,7 @@ private struct OrbWithSpeechCard: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            cyanAccent.opacity(currentPage == 3 ? 0.22 : 0.10),
+                            infoAccent.opacity(currentPage == 3 ? 0.22 : 0.10),
                             violetCore.opacity(0.05),
                             Color.clear
                         ],
@@ -287,7 +287,7 @@ private struct OrbWithSpeechCard: View {
             Circle()
                 .stroke(
                     AngularGradient(
-                        colors: [cyanAccent.opacity(0.4), violetCore.opacity(0.2), cyanAccent.opacity(0.1), violetCore.opacity(0.4), cyanAccent.opacity(0.4)],
+                        colors: [infoAccent.opacity(0.4), violetCore.opacity(0.2), infoAccent.opacity(0.1), violetCore.opacity(0.4), infoAccent.opacity(0.4)],
                         center: .center
                     ),
                     lineWidth: currentPage == 3 ? 1.5 : 0.8
@@ -303,11 +303,11 @@ private struct OrbWithSpeechCard: View {
                 .clipShape(Circle())
                 .overlay(
                     Circle().stroke(
-                        LinearGradient(colors: [cyanAccent.opacity(0.35), violetCore.opacity(0.15), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        LinearGradient(colors: [infoAccent.opacity(0.35), violetCore.opacity(0.15), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: currentPage == 3 ? 1.2 : 0.6
                     )
                 )
-                .shadow(color: cyanAccent.opacity(currentPage == 3 ? 0.5 : 0.3), radius: currentPage == 3 ? 22 : 10)
+                .shadow(color: infoAccent.opacity(currentPage == 3 ? 0.5 : 0.3), radius: currentPage == 3 ? 22 : 10)
                 .shadow(color: violetCore.opacity(currentPage == 3 ? 0.35 : 0.15), radius: currentPage == 3 ? 38 : 16)
                 .scaleEffect(breathe ? 1.02 : 0.98)
                 .rotationEffect(.degrees(currentPage == 2 && wiggle ? 4 : 0))
@@ -357,7 +357,7 @@ private struct OrbWithSpeechCard: View {
     }
 
     private func startAnimations() {
-        withAnimation(.easeInOut(duration: 3.5).repeatForever(autoreverses: true)) { breathe = true }
+        withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) { breathe = true }
         withAnimation(.linear(duration: 14).repeatForever(autoreverses: false)) { rotation = 360 }
         withAnimation(.easeInOut(duration: 0.35).repeatForever(autoreverses: true).delay(0.3)) { wiggle = true }
     }
@@ -464,7 +464,7 @@ private struct SequentialSpeechAlignedCard: View {
 private struct SwipeHint: View {
     @State private var pulse = false
 
-    private let cyanAccent = Color(hex: "00E5FF")
+    private let cyanAccent = Color.appInfoBright
 
     var body: some View {
         HStack(spacing: 8) {
@@ -496,7 +496,7 @@ private struct BottomContent: View {
     let totalPages: Int
     let onComplete: () -> Void
 
-    private let cyanAccent = Color(hex: "00E5FF")
+    private let cyanAccent = Color.appInfoBright
 
     private var title: String {
         switch currentPage {
@@ -583,7 +583,7 @@ private struct BottomContent: View {
                         .frame(width: 24, height: 6)
                 } else {
                     Circle()
-                        .fill(Color.appSurfaceField.opacity(0.4))
+                        .fill(Color.appBorderPrimary.opacity(0.45))
                         .frame(width: 6, height: 6)
                 }
             }
@@ -599,7 +599,7 @@ private struct InstructionRow: View {
     let label: String
     let detail: String
 
-    private let cyanAccent = Color(hex: "00E5FF")
+    private let cyanAccent = Color.appInfoBright
 
     var body: some View {
         HStack(spacing: 14) {
@@ -626,15 +626,15 @@ private struct ActivateLimiButton: View {
     let action: () -> Void
     @State private var gradientRotation: Double = 0
 
-    private let cyanAccent = Color(hex: "00E5FF")
+    private let cyanAccent = Color.appInfoBright
 
     private let borderColors: [Color] = [
-        Color(hex: "00E5FF"),
-        Color(hex: "34D399"),
-        Color(hex: "6366F1"),
-        Color(hex: "EC4899"),
-        Color(hex: "F59E0B"),
-        Color(hex: "00E5FF")
+        Color.appInfoBright,
+        Color.appBrandSecondary,
+        Color.appIndigo,
+        Color.appPink,
+        Color.appOrange,
+        Color.appInfoBright
     ]
 
     var body: some View {

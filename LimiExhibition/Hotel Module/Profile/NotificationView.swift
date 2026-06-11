@@ -31,14 +31,10 @@ struct NotificationView: View {
     }
 
     var body: some View {
+        NavigationStack {
         VStack{
             VStack{
                 HStack {
-                    LimiBackButton {
-                        onBack()
-                        dismiss()
-                    }
-                    
                     Text("Notification Settings")
                         .font(AIDesignTokens.h1Font)
                         .foregroundColor(AIDesignTokens.textPrimary)
@@ -81,6 +77,12 @@ struct NotificationView: View {
         }
         .background(AIDesignTokens.bgBase)
         .ignoresSafeArea(.container, edges: .bottom)
+        .limiModalNavigationBar(title: "Notification Settings", onClose: {
+            onBack()
+            dismiss()
+        })
+        }
+        .limiModalSheetStyle()
     }
 }
 #Preview {

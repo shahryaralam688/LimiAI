@@ -39,6 +39,7 @@ struct VoiceView: View {
     @State private var statusOpacity: Double = 1
 
     var body: some View {
+        NavigationStack {
         GeometryReader { geometry in
             ZStack {
                 if networkMonitor.isConnected {
@@ -54,6 +55,12 @@ struct VoiceView: View {
                     offlineView
                 }
             }
+        }
+        .limiModalNavigationBar(
+            title: isChatMode ? "Limi" : "",
+            showsCloseButton: !isChatMode,
+            onClose: { dismiss() }
+        )
         }
         .ignoresSafeArea(.all)
         .trackScreen("VoiceView")
@@ -184,15 +191,6 @@ struct VoiceView: View {
 
     private var presenceHeader: some View {
         HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.appTextMuted)
-                    .frame(width: 36, height: 36)
-                    .glassCard(cornerRadius: 18, fillOpacity: 0.06)
-            }
-            .buttonStyle(.plain)
-
             Spacer()
 
             // Connection indicator

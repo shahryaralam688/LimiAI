@@ -19,18 +19,8 @@ struct WifiDevice: Identifiable {
 extension HomeView {
     private func startBLEScan() {
         bluetoothManager.startScanning { devices in
-            let filtered = devices.filter { 
-                (allowedNames.contains($0.name) || $0.name.lowercased().hasPrefix("limi1ch-")) 
-                && !bleAcceptedIds.contains($0.id) 
-                && !bleRejectedIds.contains($0.id) 
-            }
-            if let match = filtered.first {
-                DispatchQueue.main.async {
-                    if pendingBLEDevice?.id != match.id {
-                        pendingBLEDevice = match
-                        showBLEFoundCard = true
-                    }
-                }
+            DispatchQueue.main.async {
+                viewModel.handleDiscoveredBLEDevices(devices, allowedNames: allowedNames)
             }
         }
     }
@@ -42,55 +32,32 @@ struct HomeView: View {
 
     // MARK: - Properties
     @StateObject private var viewModel = HomeViewModel()
-
-    @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
+    @StateObject private var bonjourBrowser = HomeBonjourAdapter()
     private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB", "8 CH-HUB", "16 CH-HUB", "Mini Controller", "LIMI Device"]
 
     init() {
         _ = RoominatorFileManager.shared
     }
     @AppStorage("demoEmail") var demoEmail: String = "umer.asif@terralumen.co.uk"
-    @ObservedObject var bluetoothManager = BluetoothManager.shared
-    @ObservedObject var sharedDevice = SharedDevice.shared
-    @ObservedObject var modulesManager = ModulesManager.shared
+    @StateObject private var bluetoothManager = HomeBluetoothAdapter()
+    @StateObject private var modulesManager = HomeModulesAdapter()
+    private let contextManager: HomeContextManaging = DefaultHomeContextManager()
+    private let userDataRefresher: HomeUserDataRefreshing = DefaultHomeUserDataRefresher()
+    private let roleProvider: HomeRoleProviding = DefaultHomeRoleProvider()
+    private let welcomeCoordinator: HomeWelcomeCoordinating = DefaultHomeWelcomeCoordinator()
 
     // 2-column grid layout
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
-    @State private var wifiDevices: [WifiDevice] = []
-    @State private var knownWifiDevices: [String: WifiDevice] = [:] // uuid -> device (persists offline with status)
-    @State private var selectedWifiDevice: WifiDevice? = nil
-    @State private var showBLEFoundCard: Bool = false
-    @State private var pendingBLEDevice: (name: String, id: String)? = nil
-    @State private var bleAcceptedIds: Set<String> = []
-    @State private var bleRejectedIds: Set<String> = []
-    @State private var showDemoAddingWifi: Bool = false
     @State private var showProfileFromHome: Bool = false
-    @State private var selectedDeviceName: String = ""
-    @State private var selectedDeviceId: String = ""
-    @State private var selectedWifiSSID: [String] = []
     @State private var orbIntensity: CGFloat = 4.0
     @State private var orbVolume: CGFloat = 0.2
-    @State private var showVoiceView: Bool = false
-    @State private var showModulerView: Bool = false
     @State private var isModulesButtonAnimating: Bool = false
-    @State private var selectedModuleForAction: Module? = nil
-    @State private var showModuleActionMenu: Bool = false
     @State private var selectedModule: Module? = nil
     @State private var isModuleEditMode: Bool = false
-    @State private var showConnectedDevices: Bool = false
-    @State private var showConfigurator: Bool = false
-    @State private var showARView: Bool = false
-    @State private var showRoomScan: Bool = false
     @StateObject private var roomCaptureController = RoomCaptureController()
-
-    // 🔹 NEW: track which deviceIds we’ve already sent to the backend
-    @State private var allocatedWifiDeviceIds: Set<String> = []
-
-    // 🔹 Track which Banpur uploads we have already sent to avoid duplicates
-    @State private var banpurUploadedDeviceIds: Set<String> = []
 
     // Controls presentation of the "Add Your First Device" login flow
     @State private var isShowingLogin: Bool = false
@@ -119,8 +86,7 @@ struct HomeView: View {
                         if isModuleEditMode {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                 isModuleEditMode = false
-                                showModuleActionMenu = false
-                                selectedModuleForAction = nil
+                                viewModel.dismissModuleActionMenu()
                             }
                         }
                     }
@@ -136,7 +102,7 @@ struct HomeView: View {
                         WeatherWidgetView(isExpanded: $isWeatherExpanded)
                             .padding(.top, 60)
 
-                        if modulesManager.getAddedModules().isEmpty {
+                        if modulesManager.addedModules.isEmpty {
                             emptyStateView
                                 .padding(.top, 20)
                         } else {
@@ -147,14 +113,14 @@ struct HomeView: View {
                         Spacer(minLength: 120)
                     }
                 }
-                if isModuleEditMode && !modulesManager.getAddedModules().isEmpty {
+                if isModuleEditMode && !modulesManager.addedModules.isEmpty {
                     VStack {
                         Spacer()
                         HStack {
                             Spacer()
                             LimiPillButton(title: "Add More Modules") {
-                                ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
-                                showModulerView = true
+                                contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
+                                viewModel.presentModulesView()
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 24)
@@ -162,7 +128,7 @@ struct HomeView: View {
                     }
                 }
 
-                    if showBLEFoundCard, let device = pendingBLEDevice {
+                    if let device = viewModel.pendingBLEDevice {
                         VStack {
                             Spacer()
                             VStack(spacing: 14) {
@@ -185,25 +151,17 @@ struct HomeView: View {
 
                                 HStack(spacing: 12) {
                                     LimiPrimaryButton(title: "Connect", height: 46) {
-                                        if let dev = pendingBLEDevice {
-                                            bleAcceptedIds.insert(dev.id)
-                                            showBLEFoundCard = false
-                                            pendingBLEDevice = nil
-                                            selectedDeviceName = dev.name
-                                            selectedDeviceId = dev.id
-                                            BluetoothManager.shared.selectAndConnect(name: dev.name, uuidString: dev.id)
-                                            BluetoothManager.shared.readWifiList { list in
+                                        if let dev = viewModel.acceptPendingBLEDevice() {
+                                            bluetoothManager.selectAndConnect(name: dev.name, uuidString: dev.id)
+                                            bluetoothManager.readWifiList { list in
                                                 DispatchQueue.main.async {
-                                                    self.selectedWifiSSID = list
-                                                    self.showDemoAddingWifi = true
+                                                    viewModel.presentWifiProvisioning(list: list)
                                                 }
                                             }
                                         }
                                     }
                                     LimiSecondaryButton(title: "Not Now", height: 46) {
-                                        if let id = pendingBLEDevice?.id { bleRejectedIds.insert(id) }
-                                        showBLEFoundCard = false
-                                        pendingBLEDevice = nil
+                                        viewModel.rejectPendingBLEDevice()
                                     }
                                 }
                                 .padding(.horizontal, 4)
@@ -217,12 +175,12 @@ struct HomeView: View {
                     }
                     
                     // MARK: - Module Action Menu Popup
-                    if showModuleActionMenu, let module = selectedModuleForAction {
+                    if viewModel.showModuleActionMenu, let module = viewModel.selectedModuleForAction {
                         ZStack {
                             Color.black.opacity(0.5)
                                 .ignoresSafeArea()
                                 .onTapGesture {
-                                    showModuleActionMenu = false
+                                    viewModel.dismissModuleActionMenu()
                                     isModuleEditMode = false
                                 }
 
@@ -246,8 +204,7 @@ struct HomeView: View {
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                         modulesManager.toggleModuleStatus(for: module.id)
                                     }
-                                    showModuleActionMenu = false
-                                    selectedModuleForAction = nil
+                                    viewModel.dismissModuleActionMenu()
                                     isModuleEditMode = false
                                 }) {
                                     HStack(spacing: 12) {
@@ -268,8 +225,7 @@ struct HomeView: View {
                                     .frame(height: 1)
 
                                 Button(action: {
-                                    showModuleActionMenu = false
-                                    selectedModuleForAction = nil
+                                    viewModel.dismissModuleActionMenu()
                                     isModuleEditMode = false
                                 }) {
                                     HStack(spacing: 12) {
@@ -289,7 +245,7 @@ struct HomeView: View {
                             .padding(.horizontal, 36)
                             .transition(.scale(scale: 0.9).combined(with: .opacity))
                         }
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showModuleActionMenu)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.showModuleActionMenu)
                         .zIndex(5)
                     }
                 
@@ -318,23 +274,23 @@ struct HomeView: View {
         .frame(maxWidth: .infinity)
         .trackScreen("HomeView")
         .onChange(of: storedUserLocation) { _, _ in
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: [:])
+            contextManager.updateContext(screen: "HomeView", metadata: [:])
         }
         .onReceive(NotificationCenter.default.publisher(for: .limiUserLocationDidChange)) { _ in
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: [:])
+            contextManager.updateContext(screen: "HomeView", metadata: [:])
         }
         .onChange(of: viewModel.selectedTab) { _, new in
-            ContextManager.shared.updateHomeTab(new)
+            contextManager.updateHomeTab(new)
         }
         .onAppear {
-            let role = AuthManager.shared.getRole()
+            let role = roleProvider.role()
                 print("🔹 Current Role:", role)
 
             
 
             viewModel.setupInitialState()
             // Fetch user data when home view appears
-            UserDataManager.shared.refreshUserData()
+            userDataRefresher.refreshUserData()
 
             // ✅ Bonjour ON (exact lifecycle)
             bonjourBrowser.startBrowsing()
@@ -342,7 +298,7 @@ struct HomeView: View {
             // BLE scan
             startBLEScan()
 
-            runFirstHomeWelcomeAfterPersonalizeIfNeeded()
+            welcomeCoordinator.runFirstHomeWelcomeIfNeeded(contextManager: contextManager)
         }
         // Sheet for Wi-Fi device detail based on channel count
 //        .sheet(item: $selectedWifiDevice) { device in
@@ -352,36 +308,36 @@ struct HomeView: View {
 //                CCTLEDView(chennalMac: device.chennalMac)
 //            }
 //        }
-        .fullScreenCover(isPresented: $showVoiceView) {
+        .fullScreenCover(isPresented: $viewModel.showVoiceView) {
             VoiceView()
         }
-        .fullScreenCover(isPresented: $showModulerView) {
+        .fullScreenCover(isPresented: $viewModel.showModulerView) {
             ModulerView()
         }
-        .fullScreenCover(isPresented: $showDemoAddingWifi) {
-            WifiList(deviceName: selectedDeviceName, deviceId:  selectedDeviceId , wifiList: selectedWifiSSID)
+        .fullScreenCover(isPresented: $viewModel.showDemoAddingWifi) {
+            WifiList(deviceName: viewModel.selectedDeviceName, deviceId:  viewModel.selectedDeviceId , wifiList: viewModel.selectedWifiSSID)
         }
-        .fullScreenCover(isPresented: $showConnectedDevices) {
+        .fullScreenCover(isPresented: $viewModel.showConnectedDevices) {
             ConnectedDevicesView()
         }
-        .sheet(isPresented: $showConfigurator) {
+        .sheet(isPresented: $viewModel.showConfigurator) {
             LimiContentView()
         }
-        .fullScreenCover(isPresented: $showARView) {
+        .fullScreenCover(isPresented: $viewModel.showARView) {
             PortalWebView()
         }
-        .fullScreenCover(isPresented: $showRoomScan) {
+        .fullScreenCover(isPresented: $viewModel.showRoomScan) {
             RoomPlanContentView().environment(roomCaptureController)
         }
         .sheet(isPresented: $showProfileFromHome) {
             ProfileView()
         }
-        .onChange(of: showConfigurator) { _, open in if !open { clearHomeSheetFlowMarker() } }
-        .onChange(of: showConnectedDevices) { _, open in if !open { clearHomeSheetFlowMarker() } }
-        .onChange(of: showARView) { _, open in if !open { clearHomeSheetFlowMarker() } }
-        .onChange(of: showRoomScan) { _, open in if !open { clearHomeSheetFlowMarker() } }
-        .onChange(of: showModulerView) { _, open in if !open { clearHomeSheetFlowMarker() } }
-        .onChange(of: showVoiceView) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showConfigurator) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showConnectedDevices) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showARView) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showRoomScan) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showModulerView) { _, open in if !open { clearHomeSheetFlowMarker() } }
+        .onChange(of: viewModel.showVoiceView) { _, open in if !open { clearHomeSheetFlowMarker() } }
         .onDisappear {
             // ✅ Bonjour OFF (exact lifecycle)
             bonjourBrowser.stopBrowsing()
@@ -391,82 +347,13 @@ struct HomeView: View {
         // ✅ Respect Bonjour reachability + keep offline ghosts listed
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
             let normalizedAllowed = Set(allowedNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
-
-            // Only keep allowed device names or devices with limi1ch- prefix
-            let filtered = newDevices.filter { dev in
-                let n = dev.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                return normalizedAllowed.contains(n) || n.hasPrefix("limi1ch-")
-            }
-
-            // UUIDs seen in this tick
-            let currentUUIDs = Set(filtered.map { $0.uuid })
-
-            // Update/insert seen devices using actual reachability from Bonjour
-            for dev in filtered {
-                knownWifiDevices[dev.uuid] = wifiDevice(from: dev)
-
-                // 🔹 API CALL: when a Bonjour Wi-Fi device is online and has deviceId in TXT record
-                if dev.reachability == .online,
-                   let txt = dev.txtRecord,
-                   let deviceId = txt["deviceId"],
-                   !allocatedWifiDeviceIds.contains(deviceId) {
-
-                    allocatedWifiDeviceIds.insert(deviceId)
-                    print("🌐 [Bonjour] New online device discovered, allocating: \(deviceId)")
-                    DeviceAllocationService.shared.allocateDevice(deviceId: deviceId)
-                }
-
-                // 🔹 Upload to backend only when discovered in Banpur (by address match)
-                if dev.reachability == .online,
-                   let txt = dev.txtRecord,
-                   let deviceId = txt["deviceId"],
-                   !banpurUploadedDeviceIds.contains(deviceId) {
-
-                    let currentAddress = LocationHelper.getCurrentAddress()?.lowercased() ?? ""
-                    if currentAddress.contains("banpur") {
-                        // Build a WifiDevice where id equals the TXT deviceId expected by backend
-                        let w = wifiDevice(from: dev)
-                        let upload = WifiDevice(
-                            id: deviceId,
-                            uuid: w.uuid,
-                            chennalMac: w.chennalMac,
-                            chennalCount: w.chennalCount,
-                            channelTypes: w.channelTypes,
-                            deviceName: w.deviceName,
-                            isOnline: w.isOnline
-                        )
-                        print("⬆️ [Banpur] Uploading device to backend: \(upload)")
-                        sendDeviceToBackend(device: upload)
-                        banpurUploadedDeviceIds.insert(deviceId)
-                    }
-                }
-            }
-
-            // Devices not seen this tick remain, but flip to offline
-            for (uuid, device) in knownWifiDevices {
-                if !currentUUIDs.contains(uuid), device.isOnline {
-                    var offlineCopy = device
-                    offlineCopy.isOnline = false
-                    knownWifiDevices[uuid] = offlineCopy
-                }
-            }
-
-            // Project to array for UI
-            let list = Array(knownWifiDevices.values)
-                .sorted { $0.deviceName.localizedCaseInsensitiveCompare($1.deviceName) == .orderedAscending }
-            self.wifiDevices = list
-
-            let onlineCount = filtered.filter { dev in
-                dev.reachability == .online
-            }.count
-//            print("Updated wifiDevices array with \(list.count) devices (source: \(newDevices.count), currently online: \(onlineCount))")
+            viewModel.processBonjourWiFiDevices(newDevices, allowedNames: normalizedAllowed)
         }
         .onChange(of: bluetoothManager.isBluetoothOn) { _, on in
             if on {
                 startBLEScan()
             } else {
-                showBLEFoundCard = false
-                pendingBLEDevice = nil
+                viewModel.handleBluetoothStateChanged(isOn: on)
             }
         }
         // hello world
@@ -490,8 +377,8 @@ struct HomeView: View {
                 .multilineTextAlignment(.center)
 
             LimiPrimaryButton(title: "home.empty.cta".localized, height: 48) {
-                ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
-                showModulerView = true
+                contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "modules"])
+                viewModel.presentModulesView()
             }
             .padding(.horizontal, 40)
         }
@@ -505,7 +392,7 @@ struct HomeView: View {
 
     private var modulesGrid: some View {
         LazyVGrid(columns: columns, spacing: 14) {
-            let addedModules = modulesManager.getAddedModules()
+            let addedModules = modulesManager.addedModules
             ForEach(addedModules) { module in
                 ZStack(alignment: .topLeading) {
                     VStack(alignment: .leading, spacing: 10) {
@@ -527,8 +414,7 @@ struct HomeView: View {
                                 .foregroundColor(.appTextSecondary)
                             Spacer()
                             Button(action: {
-                                selectedModuleForAction = module
-                                showModuleActionMenu = true
+                                viewModel.presentModuleActionMenu(for: module)
                             }) {
                                 Image(systemName: "ellipsis")
                                     .rotationEffect(.degrees(90))
@@ -557,8 +443,7 @@ struct HomeView: View {
 
                     if isModuleEditMode {
                         Button(action: {
-                            selectedModuleForAction = module
-                            showModuleActionMenu = true
+                            viewModel.presentModuleActionMenu(for: module)
                         }) {
                             ZStack {
                                 Circle()
@@ -647,8 +532,8 @@ struct HomeView: View {
                 Image("Vector-2")
                     .scaledToFit()
                     .onTapGesture {
-                        ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "voice_chat"])
-                        showVoiceView = true
+                        contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "voice_chat"])
+                        viewModel.presentVoiceView()
                     }
 
             }
@@ -656,190 +541,24 @@ struct HomeView: View {
         .frame(width: 260, height: 260)
         .contentShape(Circle())
     }
-    // MARK: - Mapper: BLEDevice -> WifiDevice respecting Bonjour reachability
-    private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
-        var channelCount = 1
-        var channelTypes: [String] = ["CCT"]  // Default to CCT if not specified
-        var mac = dev.uuid
-        if let txt = dev.txtRecord {
-            if let s = txt["channelCount"], let c = Int(s) { channelCount = c }
-            // Parse channelTypes from TXT (firmware sends as 'channelTypes')
-            if let p = txt["channelTypes"] {
-                let types = p
-                    .split(separator: ",")
-                    .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
-                    .filter { $0 == "CCT" || $0 == "RGB" }
-                if !types.isEmpty {
-                    channelTypes = types
-                }
-            }
-            if let m = txt["deviceId"] { mac = m }
-        }
-        return WifiDevice(
-            id: dev.uuid,
-            uuid: dev.uuid,
-            chennalMac: mac,
-            chennalCount: channelCount,
-            channelTypes: channelTypes,
-            deviceName: dev.name,
-            isOnline: (dev.reachability == .online) // <- the important bit
-        )
-    }
-
-    func sendDeviceToBackend(device: WifiDevice) {
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("📡 [sendDeviceToBackend] STARTED")
-
-        guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
-            print("⚠️ [sendDeviceToBackend] No token found. Cannot send device.")
-            return
-        }
-
-        guard let url = URL(string: APIConstants.deviceUser) else {
-            print("❌ [sendDeviceToBackend] Invalid URL: \(APIConstants.deviceUser)")
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(token, forHTTPHeaderField: "Authorization")
-
-        print("🔗 [sendDeviceToBackend] URL: \(url.absoluteString)")
-        print("📋 [sendDeviceToBackend] Method: POST")
-        print("🔑 [sendDeviceToBackend] Authorization: \(String(token.prefix(30)))...")
-        print("📎 [sendDeviceToBackend] Content-Type: application/json")
-
-        let body: [String: Any] = [
-            "deviceId": device.chennalMac,
-            "metadata":["uuid": device.uuid,
-            "chennalMac": device.chennalMac,
-            "chennalCount": device.chennalCount,
-            "channelTypes": device.channelTypes,
-            "deviceName": device.deviceName,
-            "isOnline": device.isOnline]
-        ]
-
-        do {
-            let data = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-            request.httpBody = data
-            if let json = String(data: data, encoding: .utf8) {
-                print("📤 [sendDeviceToBackend] Body:\n\(json)")
-            }
-            print("📏 [sendDeviceToBackend] Body size: \(data.count) bytes")
-        } catch {
-            print("❌ [sendDeviceToBackend] Failed to encode body: \(error)")
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ [sendDeviceToBackend] Network error: \(error.localizedDescription)")
-                return
-            }
-
-            if let http = response as? HTTPURLResponse {
-                print("📬 [sendDeviceToBackend] HTTP Status: \(http.statusCode)")
-                print("📬 [sendDeviceToBackend] Response Headers: \(http.allHeaderFields)")
-            }
-
-            if let data = data, let body = String(data: data, encoding: .utf8) {
-                print("📩 [sendDeviceToBackend] Response Body: \(body)")
-            } else {
-                print("📩 [sendDeviceToBackend] Response Body: (empty)")
-            }
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        }.resume()
-    }
-
     // MARK: - Module Navigation Handler
     private func handleModuleTap(_ module: Module) {
-        switch module.id {
-        case 1:
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "devices"])
-            showConnectedDevices = true
-        case 2:
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "configurator"])
-            showConfigurator = true
-        case 3:
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "ar_portal"])
-            showARView = true
-        case 4:
-            ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": "room_scan"])
-            showRoomScan = true
+        switch viewModel.presentDestination(for: module) {
+        case .connectedDevices:
+            contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "devices"])
+        case .configurator:
+            contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "configurator"])
+        case .arView:
+            contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "ar_portal"])
+        case .roomScan:
+            contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": "room_scan"])
         default:
             break
         }
     }
 
     private func clearHomeSheetFlowMarker() {
-        ContextManager.shared.updateContext(screen: "HomeView", metadata: ["sheet_flow": ""])
-    }
-
-    /// After Personalize, first Home appearance: push welcome context and trigger Limi voice (name + intro + UI tour + “what would you like to do?”).
-    private func runFirstHomeWelcomeAfterPersonalizeIfNeeded() {
-        let ud = UserDefaults.standard
-        let k = ContextManager.PendingHomeWelcome.self
-        guard ud.bool(forKey: k.pendingFlag) else { return }
-
-        let name = ud.string(forKey: k.nameKey)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let useCase = ud.string(forKey: k.useCaseKey) ?? ""
-        let goals = ud.string(forKey: k.goalsKey) ?? ""
-
-        ud.set(false, forKey: k.pendingFlag)
-        ud.removeObject(forKey: k.nameKey)
-        ud.removeObject(forKey: k.useCaseKey)
-        ud.removeObject(forKey: k.goalsKey)
-
-        let behavior = Self.firstHomeWelcomeAssistantBehavior(name: name, useCase: useCase, goals: goals)
-        ContextManager.shared.updateContext(screen: "HomeView", metadata: [
-            "first_home_after_personalize": "true",
-            "welcome_user_name": name,
-            "welcome_use_case": useCase,
-            "welcome_goals": goals,
-            "assistant_behavior": behavior
-        ])
-
-        let voice = FloatingAssistantManager.shared.voiceClient
-        switch voice.state {
-        case .connected:
-            voice.sendContextEvent()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                voice.requestProactiveAssistantTurn()
-            }
-        case .disconnected, .error:
-            voice.start()
-        case .connecting:
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
-                FloatingAssistantManager.shared.voiceClient.sendContextEvent()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
-                }
-            }
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
-            ContextManager.shared.clearHomeWelcomeOverlay()
-        }
-    }
-
-    private static func firstHomeWelcomeAssistantBehavior(name: String, useCase: String, goals: String) -> String {
-        let n = name.isEmpty ? "(name not provided)" : name
-        let u = useCase.isEmpty ? "unspecified" : useCase
-        let g = goals.isEmpty ? "unspecified" : goals
-        return """
-        FIRST HOME VISIT right after Personalize — treat this as the user’s first time on Home.
-        User name: \(n). Where they use Limi: \(u). Their selected goals: \(g).
-
-        Deliver ONE coherent spoken response in order (single turn, conversational):
-        1) Warm welcome using their name.
-        2) Short Limi AI intro tied to their context — smart lighting, control, and spatial / home features at a high level (not a lecture).
-        3) Brief Home UI orientation using the `ui_guide` metadata: bottom navigation, main scroll, weather when present, floating orb for realtime voice.
-        4) Close by asking what they would like to do next.
-
-        Match the user’s spoken language when possible; otherwise English. Calm, premium, concise.
-        """
+        contextManager.updateContext(screen: "HomeView", metadata: ["sheet_flow": ""])
     }
 
 }
@@ -872,99 +591,3 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
     }
 }
-
-// MARK: - Device Allocation API Models + Service
-
-struct DeviceAllocationData: Decodable {
-    let allocationId: String?
-    let message: String?
-    let success: Bool?
-}
-
-struct DeviceAllocationResponse: Decodable {
-    let success: Bool
-    let message: String
-    let data: DeviceAllocationData?
-}
-
-final class DeviceAllocationService {
-    static let shared = DeviceAllocationService()
-    private init() {}
-
-    private let endpoint = URL(string: APIConstants.deviceUser)!
-
-    func allocateDevice(deviceId: String) {
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("📡 [DeviceAllocation] STARTED for deviceId: \(deviceId)")
-
-        guard let token = AuthManager.shared.getToken(), !token.isEmpty else {
-            print("❌ [DeviceAllocation] No valid token. Cannot allocate device.")
-            return
-        }
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(token, forHTTPHeaderField: "Authorization")
-
-        print("🔗 [DeviceAllocation] URL: \(endpoint.absoluteString)")
-        print("📋 [DeviceAllocation] Method: POST")
-        print("🔑 [DeviceAllocation] Authorization: \(String(token.prefix(30)))...")
-        print("📎 [DeviceAllocation] Content-Type: application/json")
-
-        let body: [String: String] = [
-            "deviceId": deviceId
-        ]
-
-        do {
-            let encoded = try JSONEncoder().encode(body)
-            request.httpBody = encoded
-            if let json = String(data: encoded, encoding: .utf8) {
-                print("📤 [DeviceAllocation] Body: \(json)")
-            }
-            print("📏 [DeviceAllocation] Body size: \(encoded.count) bytes")
-        } catch {
-            print("❌ [DeviceAllocation] Failed to encode body: \(error)")
-            return
-        }
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ [DeviceAllocation] Network error: \(error.localizedDescription)")
-                return
-            }
-
-            if let http = response as? HTTPURLResponse {
-                print("📬 [DeviceAllocation] HTTP Status: \(http.statusCode)")
-                print("📬 [DeviceAllocation] Response Headers: \(http.allHeaderFields)")
-            }
-
-            guard let data = data else {
-                print("❌ [DeviceAllocation] Empty response data")
-                return
-            }
-
-            if let raw = String(data: data, encoding: .utf8) {
-                print("📩 [DeviceAllocation] Response Body: \(raw)")
-            }
-
-            do {
-                let decoded = try JSONDecoder().decode(DeviceAllocationResponse.self, from: data)
-                print("✅ [DeviceAllocation] success: \(decoded.success), message: \(decoded.message)")
-                if let dataObj = decoded.data {
-                    print("   ↳ allocationId: \(dataObj.allocationId ?? "nil")")
-                    print("   ↳ inner message: \(dataObj.message ?? "nil")")
-                    print("   ↳ inner success: \(dataObj.success.map { String($0) } ?? "nil")")
-                }
-            } catch {
-                print("❌ [DeviceAllocation] Failed to decode JSON: \(error)")
-            }
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        }.resume()
-    }
-}
-
-
-
-// MARK: - Preview

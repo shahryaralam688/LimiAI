@@ -199,9 +199,6 @@ struct LimiContentView: View {
                         .ignoresSafeArea(.all)
                 }
                 HStack{
-                    // 🔙 Back Button
-                    LimiBackButton { dismiss() }
-
                     // 🟩 ARKit Button
                     Button(action: {
                         // Check LiDAR / Scene Depth support before opening the AR portal
@@ -229,13 +226,14 @@ struct LimiContentView: View {
 
             }
             .background(Color.appCanvasPrimary)
-            .navigationBarHidden(true)
+            .limiModalNavigationBar(title: "Configurator", onClose: { dismiss() })
             .fullScreenCover(isPresented: $navigateToARPortal) {
                 PortalWebView()
                     .ignoresSafeArea(.all)
 
             }
         }
+        .limiModalSheetStyle()
         .ignoresSafeArea()
         .alert("LiDAR Not Available", isPresented: $showNoLiDARAlert) {
             Button("OK", role: .cancel) {}

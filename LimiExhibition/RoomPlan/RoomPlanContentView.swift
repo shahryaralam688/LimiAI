@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RoomPlanContentView: View {
     @Environment(RoomCaptureController.self) private var captureController
-    @State private var navigateToHome = false
+    @Environment(\.dismiss) private var dismiss
     @State private var files: [String] = []
     @State private var analyzingFile: String? = nil
     @State private var showAnalysisAlert = false
@@ -77,8 +77,8 @@ struct RoomPlanContentView: View {
             }
             .navigationTitle("Room Scans")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    LimiBackButton { navigateToHome = true }
+                ToolbarItem(placement: .cancellationAction) {
+                    LimiCloseToolbarButton { dismiss() }
                 }
 
 //                ToolbarItem(placement: .navigationBarTrailing) {
@@ -138,9 +138,6 @@ struct RoomPlanContentView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text("Dimensions for \(analyzingFile ?? "room") have been printed to the Xcode console.")
-            }
-            .navigationDestination(isPresented: $navigateToHome) {
-                HomeView()
             }
             .trackScreen("RoomPlanContentView", metadata: ["surface": "room_scan_list"])
         }

@@ -112,120 +112,11 @@ import SwiftUI
 struct BLEDevicesView: View {
     @StateObject private var bluetoothManager = BluetoothManager.shared
     @ObservedObject private var sharedDevice = SharedDevice.shared
+    @StateObject private var viewModel = HotelRoomDevicesViewModel()
 
-    @State private var didStartBLE = false
-    @State private var showWLEDView = false
-    @State private var showWLEDViewScan = false
-    @State private var showPWMView = false
-    @State private var showDataRGB = false
-    @State private var showMiniController = false
-    @State private var selectedHub: Hub? = nil
     // MiniController requires brightness and warm/cold bindings
     @State private var miniBrightness: Double = 50
     @State private var miniWarmCold: Double = 50
-
-    // Map live connected devices to your card model
-    private var connectedDeviceItems: [DeviceItem] {
-        bluetoothManager.connectedDevices
-            .compactMap { (uuid, entry) in
-                let title = entry.peripheral.name ?? "Unnamed Device"
-                return DeviceItem(
-                    icon: "antenna.radiowaves.left.and.right",
-                    title: title,
-                    deviceCount: 1,
-                    isOn: false
-                )
-            }
-            .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
-    }
-    
-    // Handle device card tap
-    private func handleDeviceCardTap(for item: DeviceItem) {
-        // Find the matching connected device
-        let matchingDevice = bluetoothManager.connectedDevices.first { (uuid, deviceEntry) in
-            let deviceName = deviceEntry.peripheral.name ?? "Unnamed Device"
-            return deviceName == item.title
-        }
-        
-        guard let match = matchingDevice else {
-            print("❌ No matching connected device found for: \(item.title)")
-            return
-        }
-        
-        // Mark as current device for rest of app
-        SharedDevice.shared.connectedDevice = DeviceInfo(
-            name: item.title,
-            id: match.key.uuidString
-        )
-        
-        // Handle routing based on device byte data
-        handleDeviceSelection(for: match.key)
-    }
-    
-    // Handle device selection based on raw byte data
-    private func handleDeviceSelection(for deviceUUID: UUID) {
-        guard let deviceEntry = bluetoothManager.connectedDevices[deviceUUID] else {
-            print("❌ Device not found in connected devices")
-            return
-        }
-        // Build Hub model for downstream views
-        selectedHub = Hub(peripheral: deviceEntry.peripheral)
-        
-        // Check if we have received raw byte data from SharedDevice
-        let rawBytes = SharedDevice.shared.lastReceivedBytes
-        
-        if !rawBytes.isEmpty, let firstByte = rawBytes.first {
-            print("📥 Device byte data: [\(firstByte)]")
-            
-            switch firstByte {
-            case 1:
-                print("🔀 Routing to PWM2LEDView")
-                showPWMView = true
-            case 2:
-                print("🔀 Routing to DataRGB")
-                showDataRGB = true
-            case 3:
-                print("🔀 Routing to MiniController")
-                showMiniController = true
-            default:
-                print("🔀 Unknown byte value [\(firstByte)], defaulting to WLEDView")
-                showWLEDView = true
-            }
-        } else {
-            print("⚠️ No raw byte data available, defaulting to WLEDView")
-            showWLEDView = true
-        }
-    }
-
-    // Auto-route when FF02 bytes arrive (open correct view immediately)
-    private func autoRouteOnBytes(_ bytes: [UInt8]) {
-        guard let first = bytes.first else { return }
-        // Resolve current hub from SharedDevice preferred device or fall back to any connected
-        if let current = SharedDevice.shared.connectedDevice, let uuid = UUID(uuidString: current.id), let entry = bluetoothManager.connectedDevices[uuid] {
-            selectedHub = Hub(peripheral: entry.peripheral)
-        } else if let any = bluetoothManager.connectedDevices.first {
-            selectedHub = Hub(peripheral: any.value.peripheral)
-        }
-        // Dismiss all first to avoid multiple sheets
-        showWLEDView = false
-        showPWMView = false
-        showDataRGB = false
-        showMiniController = false
-        // Route
-        switch first {
-        case 1:
-            print("🔀 Auto-route to PWM2LEDView (byte 1)")
-            showPWMView = true
-        case 2:
-            print("🔀 Auto-route to DataRGB (byte 2)")
-            showDataRGB = true
-        case 3:
-            print("🔀 Auto-route to MiniController (byte 3)")
-            showMiniController = true
-        default:
-            print("ℹ️ Byte \(first) not mapped — no auto route")
-        }
-    }
 
     var body: some View {
         NavigationStack {
@@ -239,7 +130,7 @@ struct BLEDevicesView: View {
                     Spacer()
 
                     Button("WLED") {
-                        showWLEDViewScan = true
+                        viewModel.presentWLEDDiscovery()
                     }
                     .foregroundColor(.themeWhite)
                     .padding(.horizontal, 10)
@@ -273,13 +164,17 @@ struct BLEDevicesView: View {
                             GridItem(.flexible(), spacing: 15),
                             GridItem(.flexible(), spacing: 15)
                         ], spacing: 20) {
-                            ForEach(connectedDeviceItems.indices, id: \.self) { index in
-                                let item = connectedDeviceItems[index]
+                            ForEach(viewModel.connectedDeviceItems.indices, id: \.self) { index in
+                                let item = viewModel.connectedDeviceItems[index]
                                 DeviceCard(
                                     device: item,
                                     onToggle: { _ in /* hook to BLE command if needed */ },
                                     onTap: {
-                                        self.handleDeviceCardTap(for: item)
+                                        viewModel.handleDeviceCardTap(
+                                            item,
+                                            bluetoothManager: bluetoothManager,
+                                            sharedDevice: sharedDevice
+                                        )
                                     }
                                 )
                             }
@@ -295,27 +190,35 @@ struct BLEDevicesView: View {
             .background(Color.appCanvasPrimary)
             .ignoresSafeArea(edges: .bottom)
         }
-        .sheet(isPresented: $showWLEDView) {
+        .sheet(isPresented: $viewModel.showWLEDView) {
         //    WLEDView()
         }
-        .sheet(isPresented: $showWLEDViewScan) { WLEDDiscoveryView() }
-        .sheet(isPresented: $showPWMView) {
-            if let hub = selectedHub {
-                PWM2LEDView(hub: hub)
+        .sheet(isPresented: $viewModel.showWLEDDiscovery) {
+            WLEDDiscoveryView()
+        }
+        .sheet(isPresented: $viewModel.showPWMView) {
+            if let hub = viewModel.selectedHub {
+                LimiModalNavigationShell(title: "PWM Control", onClose: { viewModel.showPWMView = false }) {
+                    PWM2LEDView(hub: hub)
+                }
             } else {
                 EmptyView()
             }
         }
-        .sheet(isPresented: $showDataRGB) {
-            if let hub = selectedHub {
-                DataRGBView(hub: hub)
+        .sheet(isPresented: $viewModel.showDataRGB) {
+            if let hub = viewModel.selectedHub {
+                LimiModalNavigationShell(title: "RGB Control", onClose: { viewModel.showDataRGB = false }) {
+                    DataRGBView(hub: hub)
+                }
             } else {
                 EmptyView()
             }
         }
-        .sheet(isPresented: $showMiniController) {
-            if let hub = selectedHub {
-                MiniControllerView(hub: hub, brightness: $miniBrightness, warmCold: $miniWarmCold)
+        .sheet(isPresented: $viewModel.showMiniController) {
+            if let hub = viewModel.selectedHub {
+                LimiModalNavigationShell(title: "Mini Controller", onClose: { viewModel.showMiniController = false }) {
+                    MiniControllerView(hub: hub, brightness: $miniBrightness, warmCold: $miniWarmCold)
+                }
             } else {
                 EmptyView()
             }
@@ -323,23 +226,7 @@ struct BLEDevicesView: View {
 
         // 🔎 Your auto-scan/auto-connect block (unchanged logic)
         .onChange(of: bluetoothManager.isBluetoothOn) { _, isOn in
-            if isOn && !didStartBLE {
-                didStartBLE = true
-                bluetoothManager.startScanning { devices in
-                    if let found = devices.first(where: { $0.name == "1 CH-HUB" }) {
-                        print("🔍 Found newHub, attempting to connect...")
-                        bluetoothManager.connectToDevice(deviceId: found.id)
-
-                        // Give it a moment, then send a message if connected
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                            if bluetoothManager.isConnected {
-                                bluetoothManager.BLESend(message: "Connected device")
-                            }
-                        }
-                        bluetoothManager.stopScanning()
-                    }
-                }
-            }
+            viewModel.handleBluetoothStateChanged(isOn: isOn, bluetoothManager: bluetoothManager)
         }
 
         // 🖨️ Console confirmation when a connection appears
@@ -439,6 +326,7 @@ struct WiFiDevicesView: View {
         }
         .sheet(isPresented: $showWLEDViewScan) {
             WLEDDiscoveryView()
+                .limiModalSheetStyle()
         }
     }
 }

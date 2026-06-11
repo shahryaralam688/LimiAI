@@ -24,14 +24,10 @@ struct PrivacyPolicyView: View {
     }
 
     var body: some View {
+        NavigationStack {
         VStack{
             VStack{
                 HStack {
-                    LimiBackButton {
-                        onBack()
-                        dismiss()
-                    }
-                    
                     Text("Privacy Policy")
                         .font(AIDesignTokens.h1Font)
                         .foregroundColor(AIDesignTokens.textPrimary)
@@ -164,6 +160,12 @@ If you have any questions about this Privacy Policy or our data practices, pleas
         }
         .background(AIDesignTokens.bgBase)
         .ignoresSafeArea(.container, edges: .bottom)
+        .limiModalNavigationBar(title: "Privacy Policy", onClose: {
+            onBack()
+            dismiss()
+        })
+        }
+        .limiModalSheetStyle()
     }
 }
 #Preview {

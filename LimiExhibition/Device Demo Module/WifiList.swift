@@ -27,17 +27,11 @@ struct WifiList: View {
 //    @StateObject private var authProxy = LocationAuthProxy()
     
     var body: some View {
+        NavigationStack {
         VStack {
             
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    LimiBackButton {
-                        if let onBack {
-                            onBack()
-                        } else {
-                            dismiss()
-                        }
-                    }
                     Spacer()
                     Text("Add Device")
                         .font(LimiTypography.largeTitle)
@@ -131,7 +125,14 @@ struct WifiList: View {
         .fullScreenCover(isPresented: $showConnectedView) {
             DemoConnectedWifiView( deviceName: deviceName)
         }
-
+        .limiModalNavigationBar(title: "Add Device", onClose: {
+            if let onBack {
+                onBack()
+            } else {
+                dismiss()
+            }
+        })
+        }
     }
 }
 

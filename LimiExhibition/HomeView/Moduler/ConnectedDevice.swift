@@ -42,6 +42,8 @@ struct ConnectedDevicesView: View {
     @State private var renameInput: String = ""
     @State private var customDeviceNames: [String: String] = [:]
 
+    /// Manual control-path override (MQTT / LAN WebSocket / BLE / Automatic). Persisted locally.
+    @ObservedObject private var transportMediumPreference = TransportMediumPreferenceStore.shared
 
     // Grid layout
     let columns = [
@@ -122,6 +124,7 @@ struct ConnectedDevicesView: View {
     }
 
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             
             
@@ -135,9 +138,6 @@ struct ConnectedDevicesView: View {
                         .frame(height: 124)
                     
                     HStack(alignment: .bottom, spacing: 16) {
-                        // Back Button
-                        LimiBackButton { dismiss() }
-                        
                         // Title and Subtitle
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Devices")
@@ -176,7 +176,9 @@ struct ConnectedDevicesView: View {
                         Spacer()
                     }
                     .padding(.top)
-                    
+
+                    controlMediumPickerRow
+
                     let role = AuthManager.shared.getRole()
                     if role == "Installer User created" {
                         Text("Please log in to view your Wi-Fi devices.")
@@ -358,41 +360,19 @@ struct ConnectedDevicesView: View {
         }
         
         .sheet(item: $selectedWifiDevice) { device in
-            if device.chennalCount == 0 {
-                Color.clear
-                    .onAppear {
-                        showNoPendantAlert = true
-                    }
-                    .alert("No pendant connected to this device", isPresented: $showNoPendantAlert) {
-                        Button("OK") {
-                            selectedWifiDevice = nil
-                        }
-                    }
-            } else if device.chennalCount == 1 {
-                // Default to CCT unless the parsed channel type is explicitly RGB.
-                let normalizedChannelType = device.channelTypes.first?
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                    .uppercased()
-                let channelType = normalizedChannelType == "RGB" ? "RGB" : "CCT"
-                let channelPosition = 1
-                if channelType == "CCT" {
-                    CCTLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
-                } else {
-                    WLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
-                }
-            } else if device.chennalCount > 1 {
-                // Multi-channel - show advanced/configurator first, then channel selection
+            if device.chennalCount > 1 {
                 MultiChannelAdvancedView(device: device)
+                    .id("multi-\(device.chennalMac)")
+                    .deviceControlSheetStyle()
             } else {
-                Color.clear
-                    .onAppear {
-                        showNoPendantAlert = true
-                    }
-                    .alert("No pendant connected to this device", isPresented: $showNoPendantAlert) {
-                        Button("OK") {
-                            selectedWifiDevice = nil
-                        }
-                    }
+                let channelLabel = device.channelTypes.first?.uppercased() == "RGB" ? "RGB Control" : "CCT Control"
+                DeviceControlNavigationShell(
+                    title: displayName(for: device),
+                    subtitle: channelLabel,
+                    onClose: { selectedWifiDevice = nil }
+                ) {
+                    connectedDeviceSheetInner(device: device)
+                }
             }
         }
         .fullScreenCover(isPresented: $showHomeView) {
@@ -428,8 +408,51 @@ struct ConnectedDevicesView: View {
         } message: {
             Text("This name will be saved only on this mobile.")
         }
+        .limiModalNavigationBar(title: "Devices", onClose: {
+            onBack()
+            dismiss()
+        })
+        }
     }
-    
+
+    private var controlMediumPickerRow: some View {
+        ControlPathPickerCard(store: transportMediumPreference)
+            .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func connectedDeviceSheetInner(device: WifiDevice) -> some View {
+        if device.chennalCount == 1 {
+            singleChannelControlView(for: device)
+        } else {
+            Color.clear
+                .onAppear {
+                    showNoPendantAlert = true
+                }
+                .alert("No pendant connected to this device", isPresented: $showNoPendantAlert) {
+                    Button("OK") {
+                        selectedWifiDevice = nil
+                    }
+                }
+        }
+    }
+
+    @ViewBuilder
+    private func singleChannelControlView(for device: WifiDevice) -> some View {
+        let normalizedChannelType = device.channelTypes.first?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+        let channelType = normalizedChannelType == "RGB" ? "RGB" : "CCT"
+        let channelPosition = 1
+        if channelType == "CCT" {
+            CCTLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
+                .id("cct-\(device.chennalMac)-\(channelPosition)")
+        } else {
+            WLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
+                .id("rgb-\(device.chennalMac)-\(channelPosition)")
+        }
+    }
+
     private func wifiDevice(from dev: BLEDevice) -> WifiDevice {
         var channelCount = 1
         var channelTypes: [String] = ["CCT"]  // Default to CCT if not specified

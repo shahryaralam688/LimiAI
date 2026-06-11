@@ -19,12 +19,18 @@ struct YourApp: App {
     init() {
         LanguageSettings.applyRuntimeLanguage()
         BluetoothManager.shared.enableBackgroundScan()
+
+        // Force-init the three-door transport stack so it starts listening to
+        // Bonjour reachability and Socket.IO presence at app launch.
+        _ = LimiTransport.shared
+        _ = DeviceTransportRegistry.shared
     }
-    
+
     var body: some Scene {
         WindowGroup {
             SplashScreen()
                 .id(languageRefreshID)
+                .environmentObject(LimiTransport.shared)
                 .environment(bgLogic)
                 .environment(\.locale, Locale(identifier: LanguageSettings.currentLanguage().rawValue == AppLanguage.system.rawValue ? Locale.current.identifier : LanguageSettings.currentLanguage().rawValue))
                 .environment(\.layoutDirection, LanguageSettings.currentLanguage().isRTL ? .rightToLeft : .leftToRight)

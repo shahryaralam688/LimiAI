@@ -135,11 +135,15 @@ struct AIToggle: View {
 
 struct AIAppBar: View {
     let title: String
+    var closeTitle: String = "Close"
     let onBack: () -> Void
 
     var body: some View {
         HStack(spacing: 14) {
-            LimiBackButton(action: onBack)
+            Button(closeTitle, action: onBack)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(.orbGlow4)
+                .accessibilityLabel("Close")
 
             Text(title)
                 .font(.system(size: 24, weight: .bold, design: .rounded))

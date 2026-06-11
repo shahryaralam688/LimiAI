@@ -23,17 +23,11 @@ struct DemoAddingWifiView: View {
 
 
     var body: some View {
+        NavigationStack {
         VStack {
 
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    LimiBackButton {
-                        if let onBack {
-                            onBack()
-                        } else {
-                            dismiss()
-                        }
-                    }
                     Spacer()
                     Text("Add Device")
                         .font(.system(size: 30, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
@@ -182,7 +176,14 @@ struct DemoAddingWifiView: View {
         .fullScreenCover(isPresented: $showWifiConected) {
             DemoConnectedWifiView(deviceName: deviceName ?? "")
         }
-
+        .limiModalNavigationBar(title: "Add Device", onClose: {
+            if let onBack {
+                onBack()
+            } else {
+                dismiss()
+            }
+        })
+        }
     }
 }
 

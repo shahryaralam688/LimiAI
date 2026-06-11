@@ -31,20 +31,20 @@ struct CCTLEDView: View {
     @State private var showingColorPicker = false
 
     // Rainbow Color Bar Variable
-    @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50 // kept for backwards-compat, not used to send
+    @State private var RGBBrightness: Double = 50 // kept for backwards-compat, not used to send
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
+    @State private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
+    @State private var selectedColor: Color = Color(hex: AppThemeDefaults.selectedColorHex)
     private var hexColor: Color { Color(hex: selectedColorHex) }
 
     // Global Variable
     let chennalMac: String?
     let chennelPosition : Int?
     // PWM
-    @AppStorage("led1WarmCold") private var led1warmCold: Double = 50
+    @State private var led1warmCold: Double = 50
     /// This is the ONLY brightness value we send to the device (0…100)
-    @AppStorage("led2Brightness") private var led2Brightness: Double = 50
-    @AppStorage("lampPWM") private var isOn: Bool = false
+    @State private var led2Brightness: Double = 50
+    @State private var isOn: Bool = false
 
     @State private var isEditingSliderBrightness = false
     @State private var isEditingSliderColor = false
@@ -60,9 +60,22 @@ struct CCTLEDView: View {
     @State private var dragAckCount = 0
     @State private var dragAckTotalMs: Double = 0
 
-    
-    let pwmIntensityObj = LightControllingSocket.shared
+
+    /// Slider-aware throttled sender that talks to LimiTransport.
+    @StateObject private var throttle: ThrottledSender
+    /// Per-device transport state, used for the door indicator.
+    @StateObject private var transportState: DeviceTransportState
+    @ObservedObject private var transportMediumPrefs = TransportMediumPreferenceStore.shared
+
     @State private var showSolidColor: Bool = true // State variable to toggle between sliders
+
+    init(chennalMac: String?, chennelPosition: Int?) {
+        self.chennalMac = chennalMac
+        self.chennelPosition = chennelPosition
+        let id = (chennalMac ?? "unknown").uppercased()
+        _throttle = StateObject(wrappedValue: ThrottledSender(deviceId: id))
+        _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: id))
+    }
 
     /// Helper: percentage derived from 0…255 UI slider
     private var brightnessPercent: Double { (brightness / 255.0) * 100.0 }
@@ -80,6 +93,14 @@ struct CCTLEDView: View {
         chennelPosition ?? 1
     }
 
+    /// Shows effective control path (manual override or firmware auto).
+    private var pathDisplay: DeviceControlPathDisplay {
+        let raw = (warmCoolPreferenceDeviceID ?? chennalMac ?? "unknown")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let id = raw.uppercased()
+        return DeviceControlPathDisplay(deviceId: id, preference: transportMediumPrefs.preference)
+    }
+
     private var leftTemperatureLabel: String {
         isWarmCoolReversed ? "Cool" : "Warm"
     }
@@ -89,63 +110,23 @@ struct CCTLEDView: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Custom Title with safe area
+        DeviceControlScreenLayout { metrics in
+            VStack(spacing: metrics.sectionSpacing) {
+                DeviceControlPreviewHeader(
+                    macAddress: chennalMac,
+                    selectedTopTab: $selectedTopTab,
+                    showToast: $showToast,
+                    isOnline: isOnline,
+                    metrics: metrics,
+                    gearActiveColor: .themeWhite,
+                    gearIdleColor: Color.gray.opacity(0.4)
+                )
+
+                powerToggleButton
+                brightnessBar
+
+                DeviceControlSectionCard {
                     VStack(spacing: 12) {
-                        ZStack(alignment: .topTrailing) {
-                            // Content stays in place
-                            Group {
-                                if selectedTopTab == 0 {
-                                    StaticLightARViewContainer(macAddress: chennalMac)
-                                        .frame(height: 400)
-                                        .cornerRadius(16)
-                                        .clipped()
-                                } else {
-                                    if let token = AuthManager.shared.getToken(),
-                                       let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
-                                        LimiWebViewCon(url: url, macAddress: chennalMac)
-                                            .frame(height: 450)
-                                            .cornerRadius(16)
-                                            .clipped()
-                                        
-                                    }
-                                }
-                            }
-
-                            // Buttons overlaid on top with padding, without shifting content
-                            HStack(spacing: 10) {
-                                Spacer()
-                                Button(action: {
-                                    if selectedTopTab == 0 {
-                                        if isOnline { selectedTopTab = 1 } else { showToast = true }
-                                    } else {
-                                        selectedTopTab = 0
-                                    }
-                                }) {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 16, weight: .semibold))
-//                                        .foregroundColor((selectedTopTab == 1 ? Color.themeBlack : Color.themeWhite))
-                                        .frame(width: 36, height: 36)
-                                        .background((selectedTopTab == 1 ? Color.themeWhite : Color.gray.opacity(0.4)))
-                                        .clipShape(Circle())
-                                }
-                                
-                            }
-                            .padding(12)
-                        }
-                    }
-                    // Power Toggle Button
-                    powerToggleButton
-
-                    // Brightness Bar
-                    brightnessBar
-
-                    // Rainbow Color Bar
-                    // rainbowColorBar
-
-                    VStack {
                         HStack{
                             Text("Select Color")
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
@@ -198,6 +179,8 @@ struct CCTLEDView: View {
                                         sendColor()
                                     } else if isEditingSliderColor {
                                         isEditingSliderColor = false
+                                        // Final-value guarantee on slider release.
+                                        throttle.flush()
                                     }
                                 },
                                 isReversed: isWarmCoolReversed,
@@ -230,24 +213,9 @@ struct CCTLEDView: View {
                             sendHapticFeedback()
                         }
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.appSurfacePrimary)
-                    )
-                    .padding(.bottom, 20)
-
-//                    // Effects Horizontal Scroll
-//                    effectsScrollView
                 }
-                .padding(.horizontal)
-
-                // Bottom spacing for safe area
-                Spacer(minLength: 30)
-            }.padding()
+            }
         }
-        .background(Color.appCanvasPrimary)
-        .ignoresSafeArea()
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
@@ -283,15 +251,29 @@ struct CCTLEDView: View {
         .task(id: warmCoolPreferenceStorageKey) {
             loadWarmCoolPreference()
         }
+        .task(id: persistedStateStorageKey) {
+            loadPersistedUIState()
+        }
         .onChange(of: selectedColor) { _, newValue in
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             selectedColorHex = newValue.toHex()
+            persistUIState()
+        }
+        .onChange(of: selectedColorHex) { _, _ in
+            persistUIState()
+        }
+        .onChange(of: led1warmCold) { _, _ in
+            persistUIState()
+        }
+        .onChange(of: led2Brightness) { _, _ in
+            persistUIState()
+        }
+        .onChange(of: isOn) { _, _ in
+            persistUIState()
         }
         .onAppear {
-            pwmIntensityObj.connect()
-            print("connected connected")
-            
+            // The Socket.IO bridge stays connected at app scope; nothing to do here.
         }
     }
 
@@ -301,10 +283,68 @@ struct CCTLEDView: View {
         "\(warmCoolPreferenceDeviceID ?? "unknown")-\(warmCoolPreferenceChannelPosition)"
     }
 
+    private var persistedStateStorageKey: String {
+        "\(warmCoolPreferenceDeviceID ?? "unknown")-\(warmCoolPreferenceChannelPosition)"
+    }
+
+    private var rgbBrightnessStorageKey: String {
+        "cct-rgb-brightness-\(persistedStateStorageKey)"
+    }
+
+    private var selectedColorHexStorageKey: String {
+        "cct-selected-color-\(persistedStateStorageKey)"
+    }
+
+    private var warmColdStorageKey: String {
+        "cct-warm-cold-\(persistedStateStorageKey)"
+    }
+
+    private var brightnessStorageKey: String {
+        "cct-brightness-\(persistedStateStorageKey)"
+    }
+
+    private var lampStateStorageKey: String {
+        "cct-lamp-state-\(persistedStateStorageKey)"
+    }
+
     private func updateWarmCoolDirection(isReversed: Bool) {
         guard isWarmCoolReversed != isReversed else { return }
         isWarmCoolReversed = isReversed
         persistWarmCoolPreference()
+    }
+
+    private func loadPersistedUIState() {
+        let defaults = UserDefaults.standard
+
+        if defaults.object(forKey: rgbBrightnessStorageKey) != nil {
+            RGBBrightness = defaults.double(forKey: rgbBrightnessStorageKey)
+        }
+
+        if defaults.object(forKey: warmColdStorageKey) != nil {
+            led1warmCold = defaults.double(forKey: warmColdStorageKey)
+        }
+
+        if defaults.object(forKey: brightnessStorageKey) != nil {
+            led2Brightness = defaults.double(forKey: brightnessStorageKey)
+            brightness = (led2Brightness / 100.0) * 255.0
+        }
+
+        if defaults.object(forKey: lampStateStorageKey) != nil {
+            isOn = defaults.bool(forKey: lampStateStorageKey)
+        }
+
+        let storedHex = defaults.string(forKey: selectedColorHexStorageKey) ?? AppThemeDefaults.selectedColorHex
+        selectedColorHex = storedHex
+        selectedColor = Color(hex: storedHex)
+    }
+
+    private func persistUIState() {
+        let defaults = UserDefaults.standard
+        defaults.set(RGBBrightness, forKey: rgbBrightnessStorageKey)
+        defaults.set(selectedColorHex, forKey: selectedColorHexStorageKey)
+        defaults.set(led1warmCold, forKey: warmColdStorageKey)
+        defaults.set(led2Brightness, forKey: brightnessStorageKey)
+        defaults.set(isOn, forKey: lampStateStorageKey)
     }
 
     private func loadWarmCoolPreference() {
@@ -375,93 +415,52 @@ struct CCTLEDView: View {
         }
     }
 
-    private func sendColor() {
+    /// Channel position (1-based). Single-channel devices use 1.
+    private var channel: Int { chennelPosition ?? 1 }
+
+    /// Build a `.cct` LimiCommand from the current UI state.
+    private func currentCCTCommand(brightness: Int? = nil) -> LimiCommand {
         let levels = warmCoolLevels(for: led1warmCold)
-        let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
-
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(levels.warm),
-            String(levels.cool),
-            String(Int(brightnessValue))
-        ]
-
-        print("🔶 sendColor() -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(Int(brightnessValue))")
-        pwmIntensityObj.sendLightControl(message: byteArray)
+        let bri = brightness ?? Int(min(max(led2Brightness.rounded(), 0), 100))
+        return .cct(channel: channel, brightness: bri, ww: levels.warm, cw: levels.cool)
     }
 
+    /// Color slider drag — coalesce through ThrottledSender.
+    private func sendColor() {
+        let command = currentCCTCommand()
+        print("🔶 sendColor() -> \(command.commandPayload())")
+        throttle.update(command)
+    }
+
+    /// RGB color picker tap — one-shot send via the unified transport.
     func sendColorToLED(_ color: Color) {
         let uiColor = UIColor(color)
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
 
-        // Convert to 0-255 integer range
-        let redValue = Int(red * 255)
-        let greenValue = Int(green * 255)
-        let blueValue = Int(blue * 255)
-
-        // Use led2Brightness as current brightness value in 0...100
         let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
-
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(redValue),
-            String(greenValue),
-            String(blueValue),
-            String(brightnessValue)
-        ]
-
-        print("🔷 sendColorToLED() -> RGB=(\(redValue),\(greenValue),\(blueValue)) bri100=\(brightnessValue)")
-        sendMessage(message: byteArray)
+        let command: LimiCommand = .rgb(
+            channel: channel,
+            brightness: brightnessValue,
+            red: Int(red * 255),
+            green: Int(green * 255),
+            blue: Int(blue * 255)
+        )
+        print("🔷 sendColorToLED() -> \(command.commandPayload())")
+        throttle.sendOneShot(command)
     }
 
-    /// IMPORTANT: brightness is sent and stored in the device's 0...100 range.
+    /// Brightness slider drag — single throttled send per UI event (no
+    /// per-step stride loop; firmware spec says throttle, do not flood).
     func updateBrightness(_ brightness100: Double) {
         let clamped = min(max(brightness100, 0), 100)
         led2Brightness = clamped
 
-        let levels = warmCoolLevels(for: led1warmCold)
-        let targetBrightness = Int(clamped.rounded())
-        let startBrightness = lastSentBrightnessStep ?? targetBrightness
-        let step = startBrightness <= targetBrightness ? 1 : -1
-
-        for brightnessStep in stride(from: startBrightness, through: targetBrightness, by: step) {
-            sendBrightnessStep(brightnessStep, levels: levels)
-        }
-
-        lastSentBrightnessStep = targetBrightness
-    }
-
-    private func sendMessage(message: [String]) {
-        pwmIntensityObj.sendLightControl(message: message)
-    }
-
-    private func sendBrightnessStep(
-        _ brightnessStep: Int,
-        levels: (cool: Int, warm: Int)
-    ) {
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(levels.warm),
-            String(levels.cool),
-            String(brightnessStep)
-        ]
-
-        print("🚚 updateBrightness() -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(brightnessStep)")
+        let target = Int(clamped.rounded())
+        let command = currentCCTCommand(brightness: target)
         dragSentMessageCount += 1
-        pwmIntensityObj.sendLightControl(message: byteArray) { roundTrip, didReceiveAck in
-            guard isBrightnessDragActive || didReceiveAck else { return }
-
-            let roundTripMs = roundTrip * 1000
-            DispatchQueue.main.async {
-                guard didReceiveAck else { return }
-                dragAckCount += 1
-                dragAckTotalMs += roundTripMs
-            }
-        }
+        throttle.update(command)
+        lastSentBrightnessStep = target
     }
 
     private func beginBrightnessDragDiagnosticsIfNeeded() {
@@ -506,44 +505,33 @@ struct CCTLEDView: View {
     // MARK: - View Components
 
     private var powerToggleButton: some View {
-        HStack{
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Power")
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                    .foregroundColor(.appTextPrimary)
-                    .kerning(0.9)
-                    .lineSpacing(0)
-                    .lineLimit(1)
-                    .fixedSize()
+        DeviceControlSectionCard {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Power")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
 
-                Text("Turn OFF/ON")
-                    .foregroundColor(.appTextPrimary)
-                    .font(.system(size: 15, weight: .regular, design: .rounded))
-                    .kerning(0.75)
-                    .lineSpacing(0)
-                    .lineLimit(1)
-                    .fixedSize()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Turn OFF/ON")
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary.opacity(0.85))
 
-            Spacer()
+                    DeviceControlPathStatusView(display: pathDisplay)
+                }
 
-            HStack {
-                Spacer()
+                Spacer(minLength: 8)
 
                 Button(action: {
                     isOn.toggle()
                     print("🔌 User toggled power: \(isOn)")
-                    sendLampState() // not async
+                    sendLampState()
                 }) {
                     ZStack {
-                        // Background pill
                         Rectangle()
                             .fill(isOn ? Color.themeWhite : Color.gray.opacity(0.3))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
 
-                        // Inner dot
                         Circle()
                             .fill(Color.themeBlack)
                             .frame(width: 20, height: 20)
@@ -554,37 +542,19 @@ struct CCTLEDView: View {
                 .buttonStyle(PlainButtonStyle())
             }
         }
-        .padding()
-        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func sendLampState() {
         if isOn {
-            let levels = warmCoolLevels(for: led1warmCold)
-            let brightnessValue = Int(min(max(led2Brightness.rounded(), 0), 100))
-
-            let byteArray: [String] = [
-                String(chennalMac ?? ""),
-                String(chennelPosition ?? 1),
-                String(levels.warm),
-                String(levels.cool),
-                String(brightnessValue)
-            ]
-
-            print("💡 Lamp ON -> ww=\(levels.warm) cw=\(levels.cool) bri100=\(brightnessValue)")
-            sendMessage(message: byteArray)
+            // Restore last brightness/colour by sending a fresh CCT frame.
+            let command = currentCCTCommand()
+            print("💡 Lamp ON -> \(command.commandPayload())")
+            throttle.sendOneShot(command)
         } else {
-            // When lamp is off, send off command
-            let byteArray: [String] = [
-                String(chennalMac ?? ""),
-                String(chennelPosition ?? 1),
-                String(0),
-                String(0),
-                String(0),
-                String(0)
-            ]
-            print("💤 Lamp OFF")
-            sendMessage(message: byteArray)
+            // Spec-compliant power-off; firmware preserves last colour state.
+            let command: LimiCommand = .power(channel: channel, on: false)
+            print("💤 Lamp OFF -> \(command.commandPayload())")
+            throttle.sendOneShot(command)
         }
     }
 
@@ -780,6 +750,7 @@ struct CCTLEDView: View {
                 updateBrightness(brightness100)
             }
             .onEnded { _ in
+                throttle.flush()
                 finishBrightnessDragDiagnostics()
             }
     }

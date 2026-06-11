@@ -25,13 +25,8 @@ private enum SignInLoginScriptCopy {
 }
 
 struct SignInView: View {
-    @StateObject private var authManager = GoogleAuthManager()
+    @StateObject private var viewModel = SignInViewModel()
     @StateObject private var signInSpeech = SignInScreenSpeechSync()
-    @State private var isLoading = false
-    @State private var showHomeView = false
-    @State private var showLoginView = false
-    @State private var showPrivacyPolicy = false
-    @State private var appeared = false
     var body: some View {
         GeometryReader { geo in
             let horizontalInset: CGFloat = 24
@@ -71,26 +66,26 @@ struct SignInView: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .ignoresSafeArea(.all)
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 20)
+        .opacity(viewModel.appeared ? 1 : 0)
+        .offset(y: viewModel.appeared ? 0 : 20)
         .onAppear {
-            withAnimation(LimiMotion.gentle) { appeared = true }
+            withAnimation(LimiMotion.gentle) { viewModel.appeared = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 signInSpeech.speak()
             }
         }
         .onDisappear { signInSpeech.stop() }
-        .onChange(of: showHomeView) { _, open in if open { signInSpeech.stop() } }
-        .onChange(of: showLoginView) { _, open in if open { signInSpeech.stop() } }
-        .onChange(of: showPrivacyPolicy) { _, open in if open { signInSpeech.stop() } }
-        .fullScreenCover(isPresented: $showHomeView) {
+        .onChange(of: viewModel.showHomeView) { _, open in if open { signInSpeech.stop() } }
+        .onChange(of: viewModel.showLoginView) { _, open in if open { signInSpeech.stop() } }
+        .onChange(of: viewModel.showPrivacyPolicy) { _, open in if open { signInSpeech.stop() } }
+        .fullScreenCover(isPresented: $viewModel.showHomeView) {
             //HomeView()
             OnboardingFlowView()
         }
-        .fullScreenCover(isPresented: $showLoginView) {
+        .fullScreenCover(isPresented: $viewModel.showLoginView) {
             LoginSkipView()
         }
-        .fullScreenCover(isPresented: $showPrivacyPolicy) {
+        .fullScreenCover(isPresented: $viewModel.showPrivacyPolicy) {
             PrivacyPolicyView()
         }
         .trackScreen(
@@ -125,7 +120,7 @@ struct SignInView: View {
 
 
 
-            Button(action: { showLoginView = true }) {
+            Button(action: { viewModel.showEmailLogin() }) {
                 HStack(spacing: 8) {
                     Image(systemName: "envelope.fill")
                         .font(.system(size: 16, weight: .regular))
@@ -145,11 +140,7 @@ struct SignInView: View {
             .signInSpeechLoginHighlight(signInSpeech.loginSpeechHighlight, target: .email)
 
             Button(action: {
-                authManager.signInWithGoogle { success in
-                    if success {
-                        DispatchQueue.main.async { showHomeView = true }
-                    }
-                }
+                viewModel.signInWithGoogle()
             }) {
                 HStack(spacing: 8) {
                     Image("google")
@@ -172,7 +163,7 @@ struct SignInView: View {
             .padding(.top, 10)
 
             Button {
-                createInstallerUser()
+                viewModel.continueAsGuest()
             } label: {
                 Text("Continue as a Guest")
                     .font(LimiTypography.body)
@@ -208,7 +199,7 @@ struct SignInView: View {
                 }
                 Text("·")
                     .foregroundColor(Color.appTextQuiet.opacity(0.6))
-                Button(action: { showPrivacyPolicy = true }) {
+                Button(action: { viewModel.showPrivacy() }) {
                     Text("Privacy Policy")
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundColor(Color.appTextQuiet)
@@ -219,65 +210,6 @@ struct SignInView: View {
         }
     }
 
-    private func createInstallerUser() {
-        isLoading = true
-        guard let url = URL(string: APIConstants.LoginInstallerUser) else { return }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let body: [String: Any] = [:]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async { isLoading = false }
-
-            if let error = error {
-                print("API error:", error.localizedDescription)
-                return
-            }
-
-            if let http = response as? HTTPURLResponse {
-                print("HTTP Status:", http.statusCode)
-                print("Content-Type:", http.value(forHTTPHeaderField: "Content-Type") ?? "-")
-            }
-
-            guard let data = data, !data.isEmpty else {
-                print("No data received")
-                return
-            }
-
-            // Try Codable first
-            do {
-                let decoded = try JSONDecoder().decode(InstallerUserResponse.self, from: data)
-                print("Decoded success:", decoded.success)
-                if decoded.success, let token = decoded.data?.token, !token.isEmpty {
-                    if let username = decoded.data?.data, !username.isEmpty {
-                        print("Guest username:", username)
-                    }
-                    AuthManager.shared.saveToken(token)
-                    // Save role string from API message specifically for installer user
-                    let roleMessage = decoded.message ?? "Installer User created"
-                    AuthManager.shared.saveRole(roleMessage)
-                    print("Token saved:", token , roleMessage)
-                    DispatchQueue.main.async { showHomeView = true }
-                    return
-                }
-            } catch {
-                print("Codable decode error:", error.localizedDescription)
-            }
-
-            // Fallback diagnostics
-            if let raw = String(data: data, encoding: .utf8) { print("Raw response string:\n", raw) }
-            do {
-                let any = try JSONSerialization.jsonObject(with: data, options: [.allowFragments])
-                print("Loose JSON object:", any)
-            } catch {
-                print("JSONSerialization fallback error:", error.localizedDescription)
-            }
-        }.resume()
-    }
 }
 
 // MARK: - Speech sync: headline first, then login script (chained utterances)
@@ -622,14 +554,3 @@ private struct SignInTypingCursor: View {
 }
 
 // Same response model used in LoginView for installer user API
-private struct InstallerUserResponse: Decodable {
-    let success: Bool
-    let message: String?
-    let data: DataContainer?
-
-    struct DataContainer: Decodable {
-        // Backend sends { data: "guest", token: "..." }
-        let data: String?
-        let token: String?
-    }
-}

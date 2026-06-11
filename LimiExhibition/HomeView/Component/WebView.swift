@@ -128,11 +128,8 @@ struct WebViewScreen: View {
                 }
             }
             .navigationBarTitle("Shop", displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    LimiBackButton { showWebView = false }
-                }
-            }
+            .limiModalNavigationBar(title: "Shop", onClose: { showWebView = false })
         }
+        .limiModalSheetStyle()
     }
 }

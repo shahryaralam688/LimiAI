@@ -3,6 +3,8 @@ import UIKit
 import SDWebImageSwiftUI
 
 struct ProfileView: View {
+    var showsCloseButton: Bool = true
+
     @State private var showImagePicker = false
     @State private var selectedImage: UIImage? = nil
     @StateObject private var userDataManager = UserDataManager.shared
@@ -41,7 +43,7 @@ struct ProfileView: View {
             DeepSpaceBackground(showParticles: false)
 
             VStack(spacing: 0) {
-                LimiScreenHeader(title: "settings.title".localized) {
+                LimiScreenHeader(title: "settings.title".localized, showsCloseButton: showsCloseButton) {
                     dismiss()
                 }
                 .padding(.bottom, 8)
@@ -219,6 +221,9 @@ struct ProfileView: View {
         .sheet(isPresented: $showAIAppStore) { AIAppStoreView() }
         .sheet(isPresented: $showAIConnection) { AIConnectionsView() }
         .fullScreenCover(isPresented: $showloginView) { SignInView() }
+        .fullScreenCover(isPresented: $showGetStartScreen) {
+            GetStart()
+        }
         .fullScreenCover(isPresented: $showRoomPlanScreen) {
             RoomPlanContentView().environment(roomCaptureController)
         }

@@ -2,21 +2,18 @@ import SwiftUI
 import CoreBluetooth
 
 struct BLEScanView: View {
-    @StateObject private var bluetooth = BluetoothManager.shared
-    @State private var discovered: [(name: String, id: String)] = []
-    @State private var isNavigating = false
-    @State private var isScanning = false
-    @State private var statusText: String = "Preparing Bluetooth..."
+    @StateObject private var bluetooth = AddDeviceBluetoothAdapter()
+    @StateObject private var viewModel = BLEScanViewModel()
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                if isScanning {
+                if viewModel.isScanning {
                     ProgressView("Scanning for BLE devices...")
                         .progressViewStyle(.circular)
                 }
 
-                List(discovered, id: \.id) { device in
+                List(viewModel.discovered, id: \.id) { device in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(device.name)
                             .font(.headline)
@@ -26,69 +23,54 @@ struct BLEScanView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        bluetooth.stopScanning()
-                        isScanning = false
-                        statusText = "Connecting to \(device.name)..."
-                        bluetooth.connectToDevice(deviceId: device.id)
+                        viewModel.handleDeviceSelection(
+                            device,
+                            stopScan: { bluetooth.stopScanning() },
+                            connect: { bluetooth.connectToDevice(deviceId: $0) }
+                        )
                     }
                 }
                 .overlay {
-                    if discovered.isEmpty {
+                    if viewModel.discovered.isEmpty {
                         VStack(spacing: 8) {
                             Image(systemName: "dot.radiowaves.left.and.right")
                                 .font(.largeTitle)
                                 .foregroundStyle(.secondary)
-                            Text(statusText)
+                            Text(viewModel.statusText)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
-            .navigationDestination(isPresented: $isNavigating) {
+            .navigationDestination(isPresented: $viewModel.isNavigating) {
                 BLETestView()
             }
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                if bluetooth.isBluetoothOn {
+                viewModel.handleAppear(isBluetoothOn: bluetooth.isBluetoothOn) {
                     startScan()
-                } else {
-                    statusText = "Waiting for Bluetooth to power on..."
                 }
             }
             .onDisappear {
-                bluetooth.stopScanning()
-                isScanning = false
+                viewModel.handleDisappear {
+                    bluetooth.stopScanning()
+                }
             }
             .onChange(of: bluetooth.isBluetoothOn) { _, poweredOn in
-                if poweredOn {
+                viewModel.handleBluetoothStateChanged(poweredOn) {
                     startScan()
-                } else {
-                    statusText = "Bluetooth is off. Please enable it."
-                    isScanning = false
-                    discovered.removeAll()
                 }
             }
             .onChange(of: bluetooth.isConnected) { _, connected in
-                if connected {
-                    isNavigating = true
-                }
+                viewModel.handleConnectionChanged(connected)
             }
         }
     }
- private func startScan() {
-        guard bluetooth.isBluetoothOn else { return }
-        statusText = "Scanning for BLE devices..."
-        isScanning = true
-        bluetooth.startScanning { devices in
-            DispatchQueue.main.async {
-                self.discovered = devices
-                if devices.isEmpty {
-                    self.statusText = "No devices found yet..."
-                } else {
-                    self.statusText = "Tap a device to connect"
-                }
-            }
+
+    private func startScan() {
+        viewModel.startScan(isBluetoothOn: bluetooth.isBluetoothOn) { completion in
+            bluetooth.startScanning(completion: completion)
         }
     }
 }
@@ -96,4 +78,3 @@ struct BLEScanView: View {
 #Preview {
     NavigationStack { BLEScanView() }
 }
-

@@ -8,50 +8,61 @@ struct MultiChannelAdvancedView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                VStack(spacing: 8) {
-                    Text(device.deviceName)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
+            GeometryReader { geo in
+                let webHeight = min(max(geo.size.height * 0.42, 280), 480)
+                ScrollView {
+                VStack(spacing: 16) {
+                    VStack(spacing: 8) {
+                        Text(device.deviceName)
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundColor(.appTextPrimary)
 
-                    Text("Advanced device control")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(.appTextSecondary)
+                        Text("Advanced device control")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(.appTextSecondary)
 
-                    HStack(spacing: 6) {
-                        Text("Device ID:")
-                            .font(.caption)
-                            .foregroundColor(.themeWhite.opacity(0.5))
-                        Text(device.chennalMac)
-                            .font(.caption)
-                            .foregroundColor(.themeWhite.opacity(0.75))
+                        HStack(spacing: 6) {
+                            Text("Device ID:")
+                                .font(.caption)
+                                .foregroundColor(.themeWhite.opacity(0.5))
+                            Text(device.chennalMac)
+                                .font(.caption)
+                                .foregroundColor(.themeWhite.opacity(0.75))
+                        }
                     }
-                }
-                .padding(.top, 12)
+                    .padding(.top, 12)
 
-                channelSelectorCard
+                    channelSelectorCard
 
-                Group {
-                    if let token = AuthManager.shared.getToken(),
-                       let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
-                        LimiWebViewCon(url: url, macAddress: device.chennalMac)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    } else if let url = URL(string: AppURLs.Web.configuratorV2()) {
-                        LimiWebViewCon(url: url, macAddress: device.chennalMac)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    } else {
-                        unavailableState
+                    Group {
+                        if let token = AuthManager.shared.getToken(),
+                           let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
+                            LimiWebViewCon(url: url, macAddress: device.chennalMac)
+                                .frame(height: webHeight)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        } else if let url = URL(string: AppURLs.Web.configuratorV2()) {
+                            LimiWebViewCon(url: url, macAddress: device.chennalMac)
+                                .frame(height: webHeight)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        } else {
+                            unavailableState
+                        }
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 16)
+                .padding(.bottom, max(geo.safeAreaInsets.bottom, 16) + 12)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
+            .scrollIndicators(.visible)
+            .frame(width: geo.size.width, height: geo.size.height)
+            }
             .background(Color.appSurfaceDeep.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.appSurfaceDeep, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    LimiBackButton(icon: "xmark") { dismiss() }
+                ToolbarItem(placement: .cancellationAction) {
+                    LimiCloseToolbarButton { dismiss() }
                 }
 
                 ToolbarItem(placement: .principal) {
@@ -70,6 +81,7 @@ struct MultiChannelAdvancedView: View {
             }
             .sheet(isPresented: $showChannelSelection) {
                 ChannelSelectionView(device: device)
+                    .deviceControlSheetStyle()
             }
         }
     }
@@ -128,7 +140,8 @@ struct MultiChannelAdvancedView: View {
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundColor(.appTextPrimary)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 200)
         .background(
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color.appSurfacePrimary)

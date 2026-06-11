@@ -407,11 +407,11 @@ struct WLEDView: View {
     @State private var showToast: Bool = false
 
     // rainBow Color Bar Variable
-    @AppStorage("lampRGB") private var isOn: Bool = false
-    @AppStorage("RGBBrightness") private var RGBBrightness: Double = 50 // Device brightness 0...100
+    @State private var isOn: Bool = false
+    @State private var RGBBrightness: Double = 50 // Device brightness 0...100
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
-    @AppStorage("selectedColorHex") private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
-    @State private var selectedColor: Color = Color(hex: UserDefaults.standard.string(forKey: "selectedColorHex") ?? AppThemeDefaults.selectedColorHex)
+    @State private var selectedColorHex: String = AppThemeDefaults.selectedColorHex
+    @State private var selectedColor: Color = Color(hex: AppThemeDefaults.selectedColorHex)
     @State private var patternSpeed: Double = 50      // 0-100 UI
     @State private var patternIntensity: Double = 50  // 0-100 UI
     @State private var hasSelectedPattern: Bool = false
@@ -423,71 +423,87 @@ struct WLEDView: View {
     let chennalMac: String?
     let chennelPosition : Int?
 
-    let selectColorObj =  LightControllingSocket.shared
+    @StateObject private var throttle: ThrottledSender
+    @StateObject private var transportState: DeviceTransportState
+    @ObservedObject private var transportMediumPrefs = TransportMediumPreferenceStore.shared
+
     @State private var showSolidColor: Bool = true // State variable to toggle between sliders
+
+    init(chennalMac: String?, chennelPosition: Int?) {
+        self.chennalMac = chennalMac
+        self.chennelPosition = chennelPosition
+        let id = (chennalMac ?? "unknown").uppercased()
+        _throttle = StateObject(wrappedValue: ThrottledSender(deviceId: id))
+        _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: id))
+    }
 
     private var brightnessPercent: Double { (brightness / 255.0) * 100.0 }
 
+    private var persistedStateStorageKey: String {
+        let normalizedDeviceID = chennalMac?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let deviceID = (normalizedDeviceID?.isEmpty == false ? normalizedDeviceID! : "unknown")
+        return "\(deviceID)-\(chennelPosition ?? 1)"
+    }
+
+    private var pathDisplay: DeviceControlPathDisplay {
+        let normalized = chennalMac?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let id = (normalized.isEmpty ? "unknown" : normalized).uppercased()
+        return DeviceControlPathDisplay(deviceId: id, preference: transportMediumPrefs.preference)
+    }
+
+    private var lampStateStorageKey: String {
+        "rgb-lamp-state-\(persistedStateStorageKey)"
+    }
+
+    private var brightnessStorageKey: String {
+        "rgb-brightness-\(persistedStateStorageKey)"
+    }
+
+    private var selectedColorHexStorageKey: String {
+        "rgb-selected-color-\(persistedStateStorageKey)"
+    }
+
+    private func loadPersistedUIState() {
+        let defaults = UserDefaults.standard
+
+        if defaults.object(forKey: lampStateStorageKey) != nil {
+            isOn = defaults.bool(forKey: lampStateStorageKey)
+        }
+
+        if defaults.object(forKey: brightnessStorageKey) != nil {
+            RGBBrightness = defaults.double(forKey: brightnessStorageKey)
+            brightness = (RGBBrightness / 100.0) * 255.0
+        }
+
+        let storedHex = defaults.string(forKey: selectedColorHexStorageKey) ?? AppThemeDefaults.selectedColorHex
+        selectedColorHex = storedHex
+        selectedColor = Color(hex: storedHex)
+    }
+
+    private func persistUIState() {
+        let defaults = UserDefaults.standard
+        defaults.set(isOn, forKey: lampStateStorageKey)
+        defaults.set(RGBBrightness, forKey: brightnessStorageKey)
+        defaults.set(selectedColorHex, forKey: selectedColorHexStorageKey)
+    }
+
     
     var body: some View {
-        VStack(spacing: 8) {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Custom Title with safe area
-                    VStack(spacing: 12) {
-                        ZStack(alignment: .topTrailing) {
-                            // Content stays in place
-                            Group {
-                                if selectedTopTab == 0 {
-                                    StaticLightARViewContainer(macAddress: chennalMac)
-                                        .frame(height: 400)
-                                        .cornerRadius(16)
-                                        .clipped()
-                                } else {
-                                    if let token = AuthManager.shared.getToken(),
-                                       let url = URL(string: AppURLs.Web.configuratorV2(token: token)) {
-                                        LimiWebViewCon(url: url, macAddress: chennalMac)
-                                            .frame(height: 450)
-                                            .cornerRadius(16)
-                                            .clipped()
-                                        
-                                    }
-                                }
-                            }
+        DeviceControlScreenLayout { metrics in
+            VStack(spacing: metrics.sectionSpacing) {
+                DeviceControlPreviewHeader(
+                    macAddress: chennalMac,
+                    selectedTopTab: $selectedTopTab,
+                    showToast: $showToast,
+                    isOnline: isOnline,
+                    metrics: metrics
+                )
 
-                            // Buttons overlaid on top with padding, without shifting content
-                            HStack(spacing: 10) {
-                                Spacer()
-                                Button(action: {
-                                    if selectedTopTab == 0 {
-                                        if isOnline { selectedTopTab = 1 } else { showToast = true }
-                                    } else {
-                                        selectedTopTab = 0
-                                    }
-                                }) {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .foregroundColor(.appTextPrimary)
-                                        .frame(width: 36, height: 36)
-                                        .background((selectedTopTab == 1 ? Color.orbGlow4 : Color.gray.opacity(0.4)))
-                                        .clipShape(Circle())
-                                }
-                                
-                            }
-                            .padding(12)
-                        }
-                    }
-                    
-                    // Power Toggle Button
-                    powerToggleButton
-                    
-                    // Brightness Bar
-                    brightnessBar
-                    
-                    // Rainbow Color Bar
-//                    rainbowColorBar
-                    
-                    VStack {
+                powerToggleButton
+                brightnessBar
+
+                DeviceControlSectionCard {
+                    VStack(spacing: 12) {
                         HStack{
                             Text("Select Color")
                                 .font(.system(size: 18, weight: .bold, design: .rounded)) // Bold weight
@@ -559,31 +575,16 @@ struct WLEDView: View {
                                 .disabled(!isOn)
                                 .opacity(isOn ? 1.0 : 0.4)
                         }
-                        
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.appSurfacePrimary)
-                    )
-                    .padding(.bottom, 20)
-                    
-                    // Effects Horizontal Scroll
-                    effectsScrollView
-
-                    // Pattern Speed & Intensity Controls (only after a pattern is selected)
-                    if hasSelectedPattern {
-                        patternControls
                     }
                 }
-                .padding(.horizontal)
-                
-                // Bottom spacing for safe area
-                Spacer(minLength: 30)
-            }.padding()
+
+                effectsScrollView
+
+                if hasSelectedPattern {
+                    patternControls
+                }
+            }
         }
-        .background(Color.appCanvasPrimary)
-        .ignoresSafeArea()
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
@@ -618,15 +619,18 @@ struct WLEDView: View {
                 }
             }
         }
+        .task(id: persistedStateStorageKey) {
+            loadPersistedUIState()
+        }
         .onChange(of: selectedColor) { oldValue, newValue in
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             selectedColorHex = newValue.toHex()
+            persistUIState()
         }
 
         .onAppear {
-            print("appear")
-            selectColorObj.connect()
+            // Socket.IO bridge stays connected at app scope; nothing to do here.
             let monitor = NWPathMonitor()
             monitor.pathUpdateHandler = { path in
                 DispatchQueue.main.async {
@@ -651,56 +655,45 @@ struct WLEDView: View {
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             selectedColorHex = newValue.toHex()
+            persistUIState()
+        }
+        .onChange(of: selectedColorHex) { _, _ in
+            persistUIState()
+        }
+        .onChange(of: RGBBrightness) { _, _ in
+            persistUIState()
+        }
+        .onChange(of: isOn) { _, _ in
+            persistUIState()
         }
     }
     
-    func sendColorToLED(_ color: Color) {
-        let uiColor = UIColor(color)
-        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        // Convert to 0-255 integer range
-        let redValue = Int(red * 255)
-        let greenValue = Int(green * 255)
-        let blueValue = Int(blue * 255)
-        
-        let brightnessValue = Int(min(max(RGBBrightness.rounded(), 0), 100))
-        
-        // Convert all to strings for message array
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(redValue),
-            String(greenValue),
-            String(blueValue),
-            String(brightnessValue)
-        ]
-        
-        // Prepare and send combined info
-        sendMessage(message: byteArray)
+    /// Channel position (1-based). Single-channel devices use 1.
+    private var channel: Int { chennelPosition ?? 1 }
+
+    /// Build a `.rgb` LimiCommand for the current colour & brightness.
+    private func currentRGBCommand(brightness: Int? = nil, color: Color? = nil) -> LimiCommand {
+        let c = color ?? selectedColor
+        let rgb = currentRGBValues(from: c)
+        let bri = brightness ?? Int(min(max(RGBBrightness.rounded(), 0), 100))
+        return .rgb(channel: channel, brightness: bri, red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
+
+    /// Tap-driven color change → throttled one-shot.
+    func sendColorToLED(_ color: Color) {
+        let command = currentRGBCommand(color: color)
+        throttle.update(command)
+    }
+
+    /// Slider-driven brightness change → throttled, never per-step flooded.
     func updateBrightness(_ brightness100: Double, selectedColor: Color) {
         let clamped = min(max(brightness100, 0), 100)
         RGBBrightness = clamped
 
-        let targetBrightness = Int(clamped.rounded())
-        let startBrightness = lastSentBrightnessStep ?? targetBrightness
-        let step = startBrightness <= targetBrightness ? 1 : -1
-        let rgb = currentRGBValues(from: selectedColor)
-
-        for brightnessStep in stride(from: startBrightness, through: targetBrightness, by: step) {
-            sendBrightnessStep(
-                brightnessStep,
-                red: rgb.red,
-                green: rgb.green,
-                blue: rgb.blue
-            )
-        }
-
-        lastSentBrightnessStep = targetBrightness
-    }
-    private func sendMessage( message: [String]) {
-            selectColorObj.sendLightControlRGB( message: message) // Convert Data back to [UInt8]
+        let target = Int(clamped.rounded())
+        let command = currentRGBCommand(brightness: target, color: selectedColor)
+        throttle.update(command)
+        lastSentBrightnessStep = target
     }
 
     private func currentRGBValues(from color: Color) -> (red: Int, green: Int, blue: Int) {
@@ -717,19 +710,6 @@ struct WLEDView: View {
             blue: Int(blue * 255)
         )
     }
-
-    private func sendBrightnessStep(_ brightnessStep: Int, red: Int, green: Int, blue: Int) {
-        let byteArray: [String] = [
-            String(chennalMac ?? ""),
-            String(chennelPosition ?? 1),
-            String(red),
-            String(green),
-            String(blue),
-            String(brightnessStep)
-        ]
-
-        sendMessage(message: byteArray)
-    }
     // Function to map slider value to a color
     func getColorFromSlider(_ value: Double) -> Color {
         let hue = value / 100.0
@@ -741,33 +721,24 @@ struct WLEDView: View {
         generator.impactOccurred()
     }
     // MARK: - View Components
-    
+
     private var powerToggleButton: some View {
-        HStack{
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Power")
-                    .font(.system(size: 18, weight: .bold, design: .rounded)) // Bold weight
-                    .foregroundColor(.appTextPrimary)
-                    .kerning(0.9)        // 5% of 18px ≈ 0.9 pts
-                    .lineSpacing(0)      // line-height = 100%
-                    .lineLimit(1)        // prevent wrapping
-                    .fixedSize()         // keeps alignment tight
+        DeviceControlSectionCard {
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Power")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundColor(.appTextPrimary)
 
-                Text("Turn OFF/ON")
-                    .foregroundColor(.appTextPrimary)
-                    .font(.system(size: 15, weight: .regular, design: .rounded)) // Regular weight
-                    .kerning(0.75)     // 5% of 15px = 0.75
-                    .lineSpacing(0)    // line-height = 100%
-                    .lineLimit(1)
-                    .fixedSize()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading) // push whole VStack to the left
+                    Text("Turn OFF/ON")
+                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .foregroundColor(.appTextPrimary.opacity(0.85))
 
-            Spacer()
+                    DeviceControlPathStatusView(display: pathDisplay)
+                }
 
-            HStack {
-                Spacer()
-                
+                Spacer(minLength: 8)
+
                 Button(action: {
                     isOn.toggle()
                     print("🔌 User toggled power: \(isOn)")
@@ -776,27 +747,21 @@ struct WLEDView: View {
                     }
                 }) {
                     ZStack {
-                        // Background circle
                         Rectangle()
                             .fill(isOn ? Color.orbGlow4 : Color.gray.opacity(0.3))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
-                        
-                        // Inner dot
+
                         Circle()
                             .fill(Color.themeBlack)
                             .frame(width: 20, height: 20)
                             .offset(x: isOn ? 12 : -12, y: 0)
                             .animation(.easeInOut(duration: 0.2), value: isOn)
                     }
-                    
                 }
                 .buttonStyle(PlainButtonStyle())
-                
             }
         }
-        .padding()
-        .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: - Pattern Controls (Speed & Intensity)
@@ -818,7 +783,9 @@ struct WLEDView: View {
                         .foregroundColor(.appTextPrimary)
                 }
 
-                Slider(value: $patternSpeed, in: 0...100)
+                Slider(value: $patternSpeed, in: 0...100, onEditingChanged: { editing in
+                    if !editing { throttle.flush() }
+                })
                     .accentColor(.emerald)
                     .onChange(of: patternSpeed) { _, _ in
                         if hasSelectedPattern {
@@ -839,7 +806,9 @@ struct WLEDView: View {
                         .foregroundColor(.appTextPrimary)
                 }
 
-                Slider(value: $patternIntensity, in: 0...100)
+                Slider(value: $patternIntensity, in: 0...100, onEditingChanged: { editing in
+                    if !editing { throttle.flush() }
+                })
                     .accentColor(.emerald)
                     .onChange(of: patternIntensity) { _, _ in
                         if hasSelectedPattern {
@@ -853,67 +822,31 @@ struct WLEDView: View {
     }
 
     private func sendCurrentPattern(patternId: Int) {
-        guard let mac = chennalMac else { return }
-
-        // Convert selectedColor to RGB 0-255
-        let uiColor = UIColor(selectedColor)
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
-
-        let redValue = Int(r * 255)
-        let greenValue = Int(g * 255)
-        let blueValue = Int(b * 255)
-
-        // Map 0-100 UI sliders to 0-255 for socket
+        let rgb = currentRGBValues(from: selectedColor)
+        // Map 0–100 UI sliders to 0–255 wire range expected by firmware.
         let speed255 = Int((patternSpeed / 100.0) * 255.0)
         let intensity255 = Int((patternIntensity / 100.0) * 255.0)
 
-        LightControllingSocket.shared.sendPatternControl(
-            deviceId: mac,
-            channelPosition: chennelPosition ?? 1,
-            patternId: patternId,
-            red: redValue,
-            green: greenValue,
-            blue: blueValue,
+        let command: LimiCommand = .pattern(
+            channel: channel,
+            id: patternId,
             speed: speed255,
-            intensity: intensity255
+            intensity: intensity255,
+            color: [rgb.red, rgb.green, rgb.blue]
         )
+        throttle.update(command)
     }
-    
+
     private func sendLampState() {
         if isOn {
-            let uiColor = UIColor(selectedColor)
-            var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-            uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-            
-            // Convert RGB to 0-255 range
-            let redValue = Int(red * 255)
-            let greenValue = Int(green * 255)
-            let blueValue = Int(blue * 255)
-            let brightnessValue = Int(min(max(RGBBrightness.rounded(), 0), 100))
-            
-            let byteArray: [String] = [
-                String(chennalMac ?? ""),
-                String(chennelPosition ?? 1),
-                String(redValue),
-                String(greenValue),
-                String(blueValue),
-                String(brightnessValue)
-            ]
-            
-            sendMessage(message: byteArray)
+            let command = currentRGBCommand()
+            print("💡 Lamp ON -> \(command.commandPayload())")
+            throttle.sendOneShot(command)
         } else {
-            // When lamp is off, send off command
-            let byteArray: [String] = [
-                String(chennalMac ?? ""),
-                String(chennelPosition ?? 1),
-                String(0),
-                String(0),
-                String(0),
-                String(0)
-            ]
-            
-            sendMessage(message: byteArray)
+            // Spec-compliant power-off; firmware preserves last RGB state.
+            let command: LimiCommand = .power(channel: channel, on: false)
+            print("💤 Lamp OFF -> \(command.commandPayload())")
+            throttle.sendOneShot(command)
         }
     }
     
@@ -1112,6 +1045,9 @@ struct WLEDView: View {
                 let brightness100 = (newBrightness255 / 255.0) * 100.0
                 RGBBrightness = brightness100
                 updateBrightness(brightness100, selectedColor: selectedColor)
+            }
+            .onEnded { _ in
+                throttle.flush()
             }
     }
     

@@ -9,12 +9,11 @@ struct RequestSummaryView: View {
     let summary: String
     
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             // Top Header with rounded corners
             VStack(spacing: 0) {
                 HStack {
-                    LimiBackButton { dismiss() }
-                    
                     Spacer()
                     
                     Text("Request Summary")
@@ -139,6 +138,9 @@ struct RequestSummaryView: View {
             .padding(.top, 24)
         }
         .background(Color.appCanvasPrimary.ignoresSafeArea())
+        .limiModalNavigationBar(title: "Request Summary", onClose: { dismiss() })
+        }
+        .limiModalSheetStyle()
     }
 }
 

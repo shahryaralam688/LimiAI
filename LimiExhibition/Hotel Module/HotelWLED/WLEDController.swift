@@ -618,6 +618,7 @@ class WLEDDeviceController: ObservableObject {
 // MARK: - WLED Discovery View
 
 struct WLEDDiscoveryView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var discoveryManager = SSDPDiscoveryManager()
     @State private var selectedDevice: WLEDDevice?
     
@@ -638,7 +639,7 @@ struct WLEDDiscoveryView: View {
             }
             .background(Color.appCanvasHotel)
             .ignoresSafeArea(edges: .bottom)
-            .navigationBarHidden(true)
+            .limiModalNavigationBar(title: "WLED Discovery", onClose: { dismiss() })
             .onAppear {
                 discoveryManager.startDiscovery()
             }

@@ -637,12 +637,10 @@ struct DemoScanDevicesView: View {
     }
 
     var body: some View {
+        NavigationStack {
         VStack {
             VStack(alignment: .center, spacing:12){
                 HStack{
-                    LimiBackButton {
-                        if let onBack { onBack() } else { dismiss() }
-                    }
                     Spacer()
                     Text("Add Device")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -832,6 +830,10 @@ struct DemoScanDevicesView: View {
         }
         .fullScreenCover(isPresented: $showLiginSkip) {
             ConnectedDevicesView()
+        }
+        .limiModalNavigationBar(title: "Add Device", onClose: {
+            if let onBack { onBack() } else { dismiss() }
+        })
         }
         .trackScreen("DemoScanDevicesView", metadata: ["surface": "ble_wifi_device_scan"])
     }

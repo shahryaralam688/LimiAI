@@ -30,15 +30,11 @@ struct ModulerView: View {
         GridItem(.flexible(), spacing: 16)
     ]
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             // MARK: Header
             VStack {
                 HStack {
-                    LimiBackButton {
-                        onBack()
-                        dismiss()
-                    }
-                    
                     Text("Modules")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(.themeWhite)
@@ -274,6 +270,11 @@ struct ModulerView: View {
                 }
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: showToast)
             }
+        }
+        .limiModalNavigationBar(title: "Modules", onClose: {
+            onBack()
+            dismiss()
+        })
         }
         .trackScreen("ModulerView", metadata: ["surface": "home_modules"])
     }

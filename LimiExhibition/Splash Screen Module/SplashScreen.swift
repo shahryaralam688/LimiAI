@@ -56,7 +56,8 @@ struct SplashScreen: View {
             // Subtle ambient glow
             RadialGradient(
                 colors: [
-                    Color.orbGlow2.opacity(0.08),
+                    Color.appBrandSecondary.opacity(0.10),
+                    Color.appBrandPrimary.opacity(0.04),
                     Color.clear
                 ],
                 center: .center,
@@ -74,15 +75,15 @@ struct SplashScreen: View {
                     Image("logoSplash")
                         .resizable()
                         .renderingMode(.template)
-                        .foregroundColor(.orbGlow4)
+                        .foregroundColor(.appBrandPrimary)
                         .frame(width: 100, height: 84)
                         .blur(radius: 20)
-                        .opacity(logoOpacity * 0.4)
+                        .opacity(logoOpacity * 0.32)
 
                     Image("logoSplash")
                         .resizable()
                         .renderingMode(.template)
-                        .foregroundColor(.appBrandSecondary)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 100, height: 84)
                         .scaleEffect(logoScale)
                         .opacity(logoOpacity)
@@ -107,17 +108,17 @@ struct SplashScreen: View {
                 // Loader — orbiting dot
                 ZStack {
                     Circle()
-                        .stroke(Color.orbGlow4.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.appBorderPrimary.opacity(0.45), lineWidth: 1)
                         .frame(width: 44, height: 44)
 
                     Circle()
-                        .fill(Color.orbGlow4)
+                        .fill(Color.appBrandSecondary)
                         .frame(width: 6, height: 6)
                         .offset(x: 22)
                         .rotationEffect(.degrees(pulsePhase * 360))
 
                     Circle()
-                        .fill(Color.orbGlow4.opacity(0.3))
+                        .fill(Color.appBrandPrimary.opacity(0.35))
                         .frame(width: 6, height: 6)
                         .offset(x: 22)
                         .rotationEffect(.degrees(pulsePhase * 360))

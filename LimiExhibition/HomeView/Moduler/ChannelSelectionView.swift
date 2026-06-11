@@ -13,7 +13,7 @@ struct ChannelSelectionView: View {
     @State private var selectedChannel: ChannelInfo? = nil
     
     struct ChannelInfo: Identifiable {
-        let id: Int
+        let id: String
         let type: String
         let position: Int
     }
@@ -50,7 +50,7 @@ struct ChannelSelectionView: View {
                             let channelType = device.channelTypes[index]
                             Button(action: {
                                 selectedChannel = ChannelInfo(
-                                    id: index,
+                                    id: "\(device.chennalMac)-\(channelType)-\(index + 1)",
                                     type: channelType,
                                     position: index + 1
                                 )
@@ -121,8 +121,8 @@ struct ChannelSelectionView: View {
             .background(Color.appSurfaceDeep.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    LimiBackButton(icon: "xmark") { dismiss() }
+                ToolbarItem(placement: .cancellationAction) {
+                    LimiCloseToolbarButton { dismiss() }
                 }
 
                 ToolbarItem(placement: .principal) {
@@ -140,16 +140,24 @@ struct ChannelSelectionView: View {
                 }
             }
             .sheet(item: $selectedChannel) { channel in
-                if channel.type == "CCT" {
-                    CCTLEDView(
-                        chennalMac: device.chennalMac,
-                        chennelPosition: channel.position
-                    )
-                } else {
-                    WLEDView(
-                        chennalMac: device.chennalMac,
-                        chennelPosition: channel.position
-                    )
+                DeviceControlNavigationShell(
+                    title: "Channel \(channel.position)",
+                    subtitle: channel.type,
+                    onClose: { selectedChannel = nil }
+                ) {
+                    if channel.type == "CCT" {
+                        CCTLEDView(
+                            chennalMac: device.chennalMac,
+                            chennelPosition: channel.position
+                        )
+                        .id("cct-\(device.chennalMac)-\(channel.position)")
+                    } else {
+                        WLEDView(
+                            chennalMac: device.chennalMac,
+                            chennelPosition: channel.position
+                        )
+                        .id("rgb-\(device.chennalMac)-\(channel.position)")
+                    }
                 }
             }
         }

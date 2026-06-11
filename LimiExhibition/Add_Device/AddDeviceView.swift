@@ -1,46 +1,25 @@
 import SwiftUI
 
 struct AddDeviceView: View {
-    @State private var currentScreen: Screen = .addDevices
-    @State private var scanProgress: Double = 0
-    @State private var isAnimating = false
-    @State private var showBackButton = true // Track back button visibility
-
-    enum Screen {
-        case addDevices
-        case scanning
-    }
+    @StateObject private var viewModel = AddDeviceViewModel()
     
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.charlestonGreen.edgesIgnoringSafeArea(.all)
 
-                if currentScreen == .addDevices {
+                if viewModel.currentScreen == .addDevices {
                     AddDevicesView(onOptionSelected: { option in
-                        if option == .nearby {
-                            withAnimation {
-                                currentScreen = .scanning
-                                startScanningAnimation()
-                            }
-                        }
+                        viewModel.handleOptionSelected(option)
                     })
                     .padding(.top, 10)
                 } else {
-                    ScanningView(
-                        progress: scanProgress,
-                        isAnimating: isAnimating,
-                        onBack: {
-                            withAnimation {
-                                currentScreen = .addDevices
-                            }
-                        }
-                    )
+                    BLEStarterView()
                 }
                 
                 VStack {
                     HStack {
-                        if showBackButton {
+                        if viewModel.showBackButton {
                             LimiBackButton {
                                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                    let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
@@ -61,34 +40,11 @@ struct AddDeviceView: View {
             .preferredColorScheme(.dark)
             .trackScreen("AddDeviceView")
             .onAppear {
-                // Set the visibility of the back button based on the current screen
-                updateBackButtonVisibility()
+                viewModel.syncNavigationState()
             }
-            .onChange(of: currentScreen) { _, _ in
-                // Update back button visibility whenever the screen changes
-                updateBackButtonVisibility()
+            .onChange(of: viewModel.currentScreen) { _, _ in
+                viewModel.syncNavigationState()
             }
-        }
-    }
-    
-    private func startScanningAnimation() {
-        isAnimating = true
-        scanProgress = 0
-        
-        withAnimation(.easeInOut(duration: 5)) {
-            scanProgress = 0.18
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            withAnimation(.easeInOut(duration: 15)) {
-                scanProgress = 1.0
-            }
-        }
-    }
-    
-    private func updateBackButtonVisibility() {
-        withAnimation {
-            showBackButton = (currentScreen == .addDevices)
         }
     }
 }
