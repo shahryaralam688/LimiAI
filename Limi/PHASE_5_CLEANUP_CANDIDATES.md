@@ -30,22 +30,22 @@ Because of that:
 
 ## A. Safe To Remove Later After Confirmation
 
-These files currently look isolated, unreferenced, or commented-out, with low expected product risk. They should still be removed in a small batch followed by a build.
+**Batch 1 status (Phase 6 — June 2026): removed.** All 12 Swift sources were already absent from `LimiExhibition/`; empty `ModulerHomeView/`, `AIHomeView/`, and `Auth Manager/` folders cleaned. Build verified.
 
-| Path | Reason | Risk |
-|---|---|---|
-| `Limi/LimiExhibition/Splash Screen Module/LocationStorage.swift` | Entire file is commented-out legacy `LocationStorageView` code | Low |
-| `Limi/LimiExhibition/Auth Manager/TestingSignIn.swift` | Appears to be a standalone auth test view with no active references found | Low |
-| `Limi/LimiExhibition/AIHomeView/AIHomeView.swift` | Standalone prototype shell, no inbound usage found | Low |
-| `Limi/LimiExhibition/AI ChatBot/VoiceChatBoot.swift` | Legacy voice/chat boot screen with no active references found | Low |
-| `Limi/LimiExhibition/AI ChatBot/AnimationResponce.swift` | No active references found | Low |
-| `Limi/LimiExhibition/AnimationVideoView.swift` | Standalone wrapper/controller with no active references found | Low |
-| `Limi/LimiExhibition/HomeView/Component/BackgroundView.swift` | No active references found; likely replaced by `DeepSpaceBackground` in design system | Low |
-| `Limi/LimiExhibition/HubHomeView/SmartHomeApp.swift` | Old standalone app shell artifact | Low |
-| `Limi/LimiExhibition/HubHomeView/SocketTesting.swift` | Testing artifact, no active references found | Low |
-| `Limi/LimiExhibition/ModulerHomeView/ModulerHomeView.swift` | No active references found | Low |
-| `Limi/LimiExhibition/Location Module/LocationUsageExample.swift` | Example/demo utility view, no active product flow usage | Low |
-| `Limi/LimiExhibition/RoomPlan/Room_PlanApp.swift` | Old standalone `App` entry, not used as current main app shell | Low |
+| Path | Reason | Risk | Status |
+|---|---|---|---|
+| `Limi/LimiExhibition/Splash Screen Module/LocationStorage.swift` | Entire file is commented-out legacy `LocationStorageView` code | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/Auth Manager/TestingSignIn.swift` | Appears to be a standalone auth test view with no active references found | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/AIHomeView/AIHomeView.swift` | Standalone prototype shell, no inbound usage found | Low | **Removed** (already absent; empty dir + asset catalog cleaned) |
+| `Limi/LimiExhibition/AI ChatBot/VoiceChatBoot.swift` | Legacy voice/chat boot screen with no active references found | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/AI ChatBot/AnimationResponce.swift` | No active references found | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/AnimationVideoView.swift` | Standalone wrapper/controller with no active references found | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/HomeView/Component/BackgroundView.swift` | No active references found; likely replaced by `DeepSpaceBackground` in design system | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/HubHomeView/SmartHomeApp.swift` | Old standalone app shell artifact | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/HubHomeView/SocketTesting.swift` | Testing artifact, no active references found | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/ModulerHomeView/ModulerHomeView.swift` | No active references found | Low | **Removed** (already absent; empty dir cleaned) |
+| `Limi/LimiExhibition/Location Module/LocationUsageExample.swift` | Example/demo utility view, no active product flow usage | Low | **Removed** (already absent) |
+| `Limi/LimiExhibition/RoomPlan/Room_PlanApp.swift` | Old standalone `App` entry, not used as current main app shell | Low | **Removed** (already absent) |
 
 ## B. Likely Unused
 
@@ -53,8 +53,8 @@ These files are strong candidates for removal, but they overlap with active doma
 
 | Path | Reason | Risk |
 |---|---|---|
-| `Limi/LimiExhibition/Login Screen/Apple.swift` | Separate Apple auth implementation duplicates Apple sign-in already embedded in `LoginView.swift` and `AuthManger.swift` | Medium |
-| `Limi/LimiExhibition/House Sign In Module/TemporaryAddDeviceView.swift` | Large standalone alternate sign-in/add-device flow with no active references found | Medium |
+| `Limi/LimiExhibition/Login Screen/Apple.swift` | Separate Apple auth implementation duplicates Apple sign-in already embedded in `LoginView.swift` and `AuthManger.swift` | Medium | **Removed** (already absent; canonical path is `GoogleAuthManager.signInWithApple` → `AppleLoginAPI.exchange`) |
+| `Limi/LimiExhibition/House Sign In Module/TemporaryAddDeviceView.swift` | Large standalone alternate sign-in/add-device flow with no active references found | Medium | **Removed** (already absent; empty `House Sign In Module/` folder deleted June 2026) |
 
 ## C. Likely Deprecated Or Duplicate
 
@@ -62,7 +62,7 @@ These files are not necessarily dead, but they show overlap with newer flows or 
 
 | Path | Reason | Risk |
 |---|---|---|
-| `Limi/LimiExhibition/Add_Device/ScanningView.swift` | File explicitly labels its own flow deprecated and points users toward `DemoScanDevicesView` | Medium |
+| `Limi/LimiExhibition/Add_Device/ScanningView.swift` | File explicitly labels its own flow deprecated and points users toward `DemoScanDevicesView` | Medium | **Removed** (already absent; active flow uses `DemoScanDevicesView`) |
 | `Limi/LimiExhibition/Login Screen/Apple.swift` | Duplicate Apple sign-in path | Medium |
 | `Limi/LimiExhibition/Splash Screen Module/LocationStorage.swift` | Commented duplicate of current location onboarding/storage UI | Low |
 
@@ -176,9 +176,11 @@ Delete in the smallest-risk batches first.
 
 ### Batch 2: Duplicate/legacy flows
 
-- `Login Screen/Apple.swift`
-- `Add_Device/ScanningView.swift`
-- `House Sign In Module/TemporaryAddDeviceView.swift`
+**Status (Phase 14 — June 2026): removed.** All three Swift sources were already absent; empty `House Sign In Module/` folder deleted. Device scan flow uses `DemoScanDevicesView`; Apple Sign-In uses `GoogleAuthManager.signInWithApple` → `AppleLoginAPI.exchange`.
+
+- `Login Screen/Apple.swift` — **removed**
+- `Add_Device/ScanningView.swift` — **removed**
+- `House Sign In Module/TemporaryAddDeviceView.swift` — **removed**
 
 ### Batch 3: Folder-level consolidation after validation
 

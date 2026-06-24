@@ -223,45 +223,41 @@ class GoogleAuthManager: NSObject, ObservableObject {
     }
 
     private func sendTokenToBackend(_ token: String, serverAuthCode: String? = nil, grantedScopes: [String]? = nil) {
-        guard let url = URL(string: APIConstants.loginGoogle) else { return }
         print("[Backend] 🔵 sendTokenToBackend() called")
-        print("[Backend] URL: \(url.absoluteString)")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Request body – send the REAL Google ID token, optional serverAuthCode, and granted scopes we received
+        print("[Backend] URL: \(APIConstants.loginGoogle)")
+
         let payload: [String: Any] = [
             "id_token": token,
             "server_auth_code": serverAuthCode as Any
-//            "granted_scopes": grantedScopes ?? []
         ]
         print("[Backend] Sending id_token to backend (truncated): \(String(token.prefix(50)))...")
         print("[Backend] server_auth_code: \(serverAuthCode ?? "nil")")
         print("[Backend] Granted scopes: \(grantedScopes ?? [])")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: payload, options: [])
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
+
+        LimiHTTPClient.postJSON(
+            urlString: APIConstants.loginGoogle,
+            body: payload,
+            auth: .none
+        ) { data, response, error in
             print("[Backend] ⏹ Backend response received")
             if let error = error {
                 print("[Backend] Error: \(error)")
                 return
             }
-            
-            if let http = response as? HTTPURLResponse {
+
+            if let http = response {
                 print("[Backend] Status code: \(http.statusCode)")
             }
-            
+
             guard let data = data else {
                 print("[Backend] No data returned")
                 return
             }
-            
+
             if let raw = String(data: data, encoding: .utf8) {
                 print("[Backend] Raw response: \(raw)")
             }
-            
-            // Parse JSON to extract token
+
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let dataField = json["data"] as? [String: Any],
@@ -278,7 +274,7 @@ class GoogleAuthManager: NSObject, ObservableObject {
                 print("[Backend] JSON parsing error: \(error)")
             }
             print("[Backend] 🔵 sendTokenToBackend() finished")
-        }.resume()
+        }
     }
 
     
@@ -298,14 +294,12 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
     
     func signInWithApple(completion: ((Bool) -> Void)? = nil) {
         let request = ASAuthorizationAppleIDProvider().createRequest()
-        // Request same scopes as the SwiftUI SignInWithAppleButton
-        request.requestedScopes = [.fullName, .email]
-        
+        request.requestedScopes = []
+
         let authController = ASAuthorizationController(authorizationRequests: [request])
         authController.delegate = self
         authController.presentationContextProvider = self
         authController.performRequests()
-        // github
         self.appleSignInCompletion = completion
     }
     
@@ -322,8 +316,10 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
             let userId = appleIDCredential.user
             let identityToken = appleIDCredential.identityToken.flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
+            #if DEBUG
             print("[AppleAuth] Apple user id: \(userId)")
-            print("[AppleAuth] identityToken prefix (50): \(String(identityToken.prefix(50)))...")
+            print("[AppleAuth] identityToken received (length: \(identityToken.count))")
+            #endif
             
             DispatchQueue.main.async {
                 self.isSignedIn = true

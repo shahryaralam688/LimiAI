@@ -5,6 +5,7 @@
 //  Created by Shahrukh Ahmed on 28/10/2025.
 //
 
+import Combine
 import Foundation
 import SocketIO
 
@@ -13,6 +14,10 @@ class LightControllingSocket: ObservableObject {
 
     private var manager: SocketManager
     private var socket: SocketIOClient
+    private var lastConnectAuthToken: String?
+    private var wantsConnection = false
+    private var authCancellable: AnyCancellable?
+    private var authSessionCancellable: AnyCancellable?
 
     /// Side-channel taps that get notified whenever a `device_status` event
     /// arrives. Used by SocketIOMQTTBridge to surface MQTT presence into
@@ -23,57 +28,115 @@ class LightControllingSocket: ObservableObject {
     var isConnected: Bool { socket.status == .connected }
 
     private init() {
-        // Initialize socket manager with the provided URL
-        let token = AuthManager.shared.getToken() ?? ""
-        guard let url = URL(string: APIConstants.baseURL) else {
-            fatalError("Invalid socket URL")
-        }
+        let token = Self.currentConnectAuthToken()
+        lastConnectAuthToken = token
+        (manager, socket) = Self.makeManagerAndSocket(authToken: token)
+        setupSocketEvents()
+        observeAuthChanges()
+    }
 
-        // Pass auth token as connect parameter so it appears on all /socket.io requests
-        manager = SocketManager(
+    /// Raw JWT for Socket.IO connect param `auth` (not HTTP `Authorization` — see `LimiAPIAuthPolicy`).
+    private static func currentConnectAuthToken() -> String {
+        AuthManager.shared.getToken() ?? ""
+    }
+
+    private static func makeManagerAndSocket(authToken: String) -> (SocketManager, SocketIOClient) {
+        let url = AppURLs.Realtime.socketIOURL
+        let manager = SocketManager(
             socketURL: url,
             config: [
                 .log(true),
                 .compress,
-                .connectParams(["auth": token])
+                .connectParams(["auth": authToken]),
             ]
         )
-        socket = manager.defaultSocket
-        
+        return (manager, manager.defaultSocket)
+    }
+
+    private func observeAuthChanges() {
+        authCancellable = AuthManager.shared.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isAuthenticated in
+                guard let self else { return }
+                if isAuthenticated {
+                    if self.wantsConnection {
+                        self.refreshSocketWithCurrentAuth(andConnect: true)
+                    }
+                } else {
+                    self.wantsConnection = false
+                    self.socket.disconnect()
+                }
+            }
+
+        authSessionCancellable = NotificationCenter.default
+            .publisher(for: .limiAuthSessionDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let token = Self.currentConnectAuthToken()
+                if LightControllingSocketAuthPolicy.shouldForceDisconnect(token: token) {
+                    self.wantsConnection = false
+                    self.socket.disconnect()
+                    return
+                }
+                guard self.wantsConnection else { return }
+                self.refreshSocketWithCurrentAuth(andConnect: true)
+            }
+    }
+
+    private func refreshSocketWithCurrentAuth(andConnect: Bool) {
+        let token = Self.currentConnectAuthToken()
+        if LightControllingSocketAuthPolicy.shouldRebuildSocket(
+            lastToken: lastConnectAuthToken,
+            currentToken: token
+        ) {
+            rebuildSocket(authToken: token)
+        }
+        if andConnect {
+            socket.connect()
+        }
+    }
+
+    private func rebuildSocket(authToken: String) {
+        socket.disconnect()
+        socket.removeAllHandlers()
+
+        (manager, socket) = Self.makeManagerAndSocket(authToken: authToken)
+        lastConnectAuthToken = authToken
         setupSocketEvents()
     }
-    
+
     private func setupSocketEvents() {
         // Listen for connection
         socket.on(clientEvent: .connect) { data, ack in
             print("Socket connected successfully")
         }
-        
+
         // Listen for disconnection
         socket.on(clientEvent: .disconnect) { data, ack in
             print("Socket disconnected")
         }
-        
+
         // Listen for server_hello event
         socket.on("server_hello") { data, ack in
             print("Received server_hello event: \(data)")
         }
-        
+
         // Listen for light control responses
         socket.on("light_controll_response") { data, ack in
             print("Received light control response: \(data)")
         }
-        
+
         // Listen for any general responses
         socket.on("response") { data, ack in
             print("Received general response: \(data)")
         }
-        
+
         // Listen for acknowledgments or status updates
         socket.on("status") { data, ack in
             print("Received status update: \(data)")
         }
-        
+
         socket.on("device_status") { [weak self] data, ack in
             guard let raw = data.first else {
                 print("Received device_status with no payload: \(data)")
@@ -106,24 +169,27 @@ class LightControllingSocket: ObservableObject {
             print("Socket error: \(data)")
         }
     }
-    
+
     func connect() {
-        socket.connect()
+        wantsConnection = true
+        refreshSocketWithCurrentAuth(andConnect: true)
     }
-    
+
     func disconnect() {
+        wantsConnection = false
         socket.disconnect()
     }
+
     func sendLightControlOnOff(message: [String]) {
         guard message.count >= 2 else {
             print("⚠️ Invalid message format: \(message)")
             return
         }
-        
+
         let deviceId = message[0].uppercased()
         let onoff = String(message[1])
 
-        
+
         let lightData: [String: Any] = [
             "deviceId": deviceId,
             "command": [
@@ -131,11 +197,11 @@ class LightControllingSocket: ObservableObject {
                 ]
 
         ]
-        
+
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
 //            ??print("✅ Light control acknowledgment received: \(data)")
         }
-        
+
         print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControl(
@@ -150,13 +216,13 @@ class LightControllingSocket: ObservableObject {
             print("⚠️ Socket not connected (status = \(socket.status)), skipping light_controll emit")
             return
         }
-        
+
         let deviceId = message[0].uppercased()
         let channelPosition = Int(message[1]) ?? 1
         let red = Int(message[2]) ?? 0
         let green = Int(message[3]) ?? 0
         let blue = Int(message[4]) ?? 0
-        
+
         let lightData: [String: Any] = [
             "deviceId": deviceId,
             "command": [
@@ -174,7 +240,7 @@ class LightControllingSocket: ObservableObject {
 //            print("✅ Light control acknowledgment received: \(data)")
             acknowledgment?(roundTrip, didReceiveAck)
         }
-        
+
         print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControlRGB(message: [String]) {
@@ -186,14 +252,14 @@ class LightControllingSocket: ObservableObject {
             print("⚠️ Socket not connected (status = \(socket.status)), skipping light_controll RGB emit")
             return
         }
-        
+
         let deviceId = message[0].uppercased()
         let channelPosition = Int(message[1]) ?? 1
         let red = Int(message[2]) ?? 0
         let green = Int(message[3]) ?? 0
         let blue = Int(message[4]) ?? 0
         let brightness = Int(message[5]) ?? 0
-        
+
         let lightData: [String: Any] = [
             "deviceId": deviceId,
             "command": [
@@ -204,11 +270,11 @@ class LightControllingSocket: ObservableObject {
                 "brightness": brightness
             ]
         ]
-        
+
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
 //            print("✅ Light control acknowledgment received: \(data)")
         }
-        
+
         print("📤 Sent light control data: \(lightData)")
     }
     func sendSampleData() {
@@ -219,10 +285,10 @@ class LightControllingSocket: ObservableObject {
             "20",           // green
             "200"           // blue
         ]
-        
+
         sendLightControl(message: byteArray)
     }
-    
+
     // MARK: - Pattern Control (RGB Effects)
     /// Send a pattern command to the device.
     /// Pattern `id`, RGB color, speed and intensity are provided by the caller.
@@ -282,7 +348,7 @@ class LightControllingSocket: ObservableObject {
             print("Received custom event '\(eventName)': \(data)")
         }
     }
-    
+
     // Method to listen for all events (useful for debugging)
     func listenForAllEvents() {
         socket.onAny { event in
@@ -314,5 +380,17 @@ class LightControllingSocket: ObservableObject {
         socket.emitWithAck(event, payload).timingOut(after: timeoutSeconds) { data in
             completion(data)
         }
+    }
+}
+
+// MARK: - Auth refresh policy (Phase M — unit-testable)
+
+enum LightControllingSocketAuthPolicy {
+    static func shouldRebuildSocket(lastToken: String?, currentToken: String) -> Bool {
+        lastToken != currentToken
+    }
+
+    static func shouldForceDisconnect(token: String) -> Bool {
+        token.isEmpty
     }
 }

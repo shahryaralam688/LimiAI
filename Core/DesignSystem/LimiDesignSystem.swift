@@ -15,6 +15,8 @@ enum LimiSpacing {
     static let sectionGap: CGFloat = 24
     static let itemGap: CGFloat = 16
     static let innerPadding: CGFloat = 14
+    /// Bottom inset so scroll content clears the global floating voice orb.
+    static let floatingOrbClearance: CGFloat = 100
 }
 
 enum LimiTypography {
@@ -420,23 +422,6 @@ extension AnyTransition {
 
 // MARK: - Unified Button System
 
-/// Standard back / dismiss button — 40×40 raised neumorphic rounded square
-struct LimiBackButton: View {
-    var icon: String = "chevron.left"
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.appTextPrimary)
-                .frame(width: 40, height: 40)
-                .neuCard(cornerRadius: 12)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 /// Circular icon button — 44×44 raised neumorphic circle with press state
 struct LimiIconButton: View {
     let icon: String
@@ -649,70 +634,6 @@ struct LimiScreenHeader: View {
         .padding(.horizontal, LimiSpacing.screenHorizontal)
         .padding(.top, LimiSpacing.screenTop)
         .padding(.bottom, 12)
-    }
-}
-
-// MARK: - Native iOS Navigation Chrome
-
-/// Native Close action for modal presentations (sheets and fullScreenCovers).
-struct LimiCloseToolbarButton: View {
-    var title: String = "Close"
-    var action: () -> Void
-
-    var body: some View {
-        Button(title, action: action)
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
-            .foregroundColor(.orbGlow4)
-            .accessibilityLabel("Close")
-    }
-}
-
-extension View {
-    /// Native modal navigation bar: Close in the cancellation slot and optional inline title.
-    func limiModalNavigationBar(
-        title: String = "",
-        displayMode: NavigationBarItem.TitleDisplayMode = .inline,
-        showsCloseButton: Bool = true,
-        onClose: @escaping () -> Void
-    ) -> some View {
-        self
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(displayMode)
-            .toolbar {
-                if showsCloseButton {
-                    ToolbarItem(placement: .cancellationAction) {
-                        LimiCloseToolbarButton(action: onClose)
-                    }
-                }
-            }
-            .toolbarBackground(Color.appCanvasPrimary, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-    }
-
-    /// Standard sheet presentation chrome aligned with DeviceControlNavigationShell.
-    func limiModalSheetStyle() -> some View {
-        presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(20)
-            .presentationBackground(Color.appCanvasPrimary)
-    }
-}
-
-/// Reusable modal shell: NavigationStack with native Close toolbar.
-struct LimiModalNavigationShell<Content: View>: View {
-    let title: String
-    var displayMode: NavigationBarItem.TitleDisplayMode = .inline
-    let onClose: () -> Void
-    @ViewBuilder var content: () -> Content
-
-    var body: some View {
-        NavigationStack {
-            content()
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .background(Color.appCanvasPrimary)
-                .limiModalNavigationBar(title: title, displayMode: displayMode, onClose: onClose)
-        }
-        .limiModalSheetStyle()
     }
 }
 

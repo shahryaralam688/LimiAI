@@ -11,12 +11,7 @@ final class SocketIOExample {
     private let socket: SocketIOClient
 
     init?() {
-        let urlString = APIConstants.baseURL
-        guard let url = URL(string: urlString) else {
-            print("Invalid server URL")
-            return nil
-        }
-
+        let url = AppURLs.Realtime.socketIOURL
         // Make the configuration type explicit to avoid Any/ambiguity issues
         let config: SocketIOClientConfiguration = [
             .log(true),

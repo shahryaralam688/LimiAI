@@ -19,8 +19,8 @@ You are the **primary voice guide for the Limi AI app**. The app should feel lik
 |--------|-----------|-----------------------------------------------|
 | Login | Email, Google, Guest (no Apple) | `LoginView` may still expose Apple; **product decision** to hide/remove. |
 | Storyboard last screen | “Tap to enable/disable assistance”, draggable orb | Partially implemented; **copy and toggles** may need wiring to `FloatingAssistantManager`. |
-| Bottom **+** menu | Configurator, Device manager, Room scan | **Different today:** `+` opens three shortcuts: **layers (dismiss)**, **brain (VoiceView)**, **desktop (AR portal)**. **Either** change UI to match your story **or** update voice `ui_guide` to match shipped UI. |
-| Home 2×2 grid | Device, Configurator, AR, Room scan | **Similar intent** exists via modules grid + sheets; **verify labels** in `HomeView` / module cards match what the AI will say. |
+| Bottom **+** menu | Configurator, Device manager, Room scan | **Resolved (Option B):** `+` opens **layers (dismiss)**, **brain (VoiceView)**, **desktop (AR portal)** — documented in `ContextManager.homeShellUIGuide`. |
+| Home 2×2 grid | Device, Configurator, AR, Room scan | **Resolved:** module grid tiles match Device Manager, Configurator, AR View, Room Scan — documented in `homeShellUIGuide`. |
 | Proactive speech on enable | AI starts talking automatically | Requires **WebRTC / session** logic: send first `response.create` or play a canned line after connect—**not** only context injection. |
 
 ---

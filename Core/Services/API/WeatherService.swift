@@ -7,7 +7,7 @@ import CoreLocation
 class WeatherService: ObservableObject {
     static let shared = WeatherService()
 
-    private let baseURL = "https://api.open-meteo.com/v1/forecast"
+    private let baseURL = AppURLs.External.openMeteoForecast
 
     private var cachedData: WeatherData?
     private var cacheTimestamp: Date?

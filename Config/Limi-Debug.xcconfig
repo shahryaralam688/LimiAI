@@ -1,0 +1,4 @@
+// Debug builds — development API (URLs only; no secrets).
+// Use https:/$()/ so xcconfig does not treat `//` as a comment.
+#include? "../Pods/Target Support Files/Pods-Limi/Pods-Limi.debug.xcconfig"
+LIMI_API_BASE_URL = https:/$()/dev.api.limitless-lighting.co.uk/

@@ -17,6 +17,10 @@
 		105F48302FA4E929008A89D8 /* ManagerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F472F2FA4E929008A89D8 /* ManagerAPI.swift */; };
 		105F48312FA4E929008A89D8 /* WeatherData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47302FA4E929008A89D8 /* WeatherData.swift */; };
 		105F48322FA4E929008A89D8 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47312FA4E929008A89D8 /* WeatherService.swift */; };
+		105F48332FA4E929008A89D8 /* LimiHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47322FA4E929008A89D8 /* LimiHTTPClient.swift */; };
+		105F48342FA4E929008A89D8 /* LimiDeviceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47332FA4E929008A89D8 /* LimiDeviceAPI.swift */; };
+		105F48352FA4E929008A89D8 /* LimiConfiguratorAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47342FA4E929008A89D8 /* LimiConfiguratorAPI.swift */; };
+		105F48362FA4E929008A89D8 /* LimiAPIAuthPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47352FA4E929008A89D8 /* LimiAPIAuthPolicy.swift */; };
 		105F48452FA4E929008A89D8 /* AuthManger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47472FA4E929008A89D8 /* AuthManger.swift */; };
 		105F48472FA4E929008A89D8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474A2FA4E929008A89D8 /* Color.swift */; };
 		105F48482FA4E929008A89D8 /* LimiDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */; };
@@ -41,7 +45,40 @@
 		10AB0000000000000000B00A /* LimiTransportError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00A /* LimiTransportError.swift */; };
 		10AB0000000000000000B00B /* ThrottledSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00B /* ThrottledSender.swift */; };
 		10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00C /* TransportMediumPreference.swift */; };
+		10ADDT012FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADDT002FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift */; };
+		10AICHT012FA4E929008A89D8 /* VoiceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AICHT002FA4E929008A89D8 /* VoiceViewModelTests.swift */; };
+		10APP0112FA4E929008A89D8 /* DependencyProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */; };
+		10APP0122FA4E929008A89D8 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0022FA4E929008A89D8 /* AppEnvironment.swift */; };
+		10APPT012FA4E929008A89D8 /* AppEnvironmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */; };
+		10ART012FA4E929008A89D8 /* ARSessionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ART002FA4E929008A89D8 /* ARSessionViewModelTests.swift */; };
+		10AUTH0112FA4E929008A89D8 /* AuthRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */; };
 		10B43B762EF922970040610A /* SwiftLAME in Frameworks */ = {isa = PBXBuildFile; productRef = 10B43B752EF922970040610A /* SwiftLAME */; };
+		10BCB0112FA4E929008A89D8 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */; };
+		10BCB0122FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */; };
+		10BCB0132FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */; };
+		10BCB0142FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0042FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift */; };
+		10BCB0152FA4E929008A89D8 /* BluetoothDeviceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0052FA4E929008A89D8 /* BluetoothDeviceState.swift */; };
+		10BCB0162FA4E929008A89D8 /* ContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0062FA4E929008A89D8 /* ContextManager.swift */; };
+		10BCB0172FA4E929008A89D8 /* GlobalVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */; };
+		10BCB0182FA4E929008A89D8 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0082FA4E929008A89D8 /* AppRouter.swift */; };
+		10BCB0192FA4E929008A89D8 /* HomeRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0092FA4E929008A89D8 /* HomeRoute.swift */; };
+		10HOMET012FA4E929008A89D8 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10HOMET002FA4E929008A89D8 /* HomeViewModelTests.swift */; };
+		10NAPP112FA4E929008A89D8 /* LimiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NAPP012FA4E929008A89D8 /* LimiApp.swift */; };
+		10NAPP122FA4E929008A89D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NAPP022FA4E929008A89D8 /* AppDelegate.swift */; };
+		10NET0112FA4E929008A89D8 /* BLEDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0012FA4E929008A89D8 /* BLEDevice.swift */; };
+		10NET0122FA4E929008A89D8 /* PingPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0022FA4E929008A89D8 /* PingPoller.swift */; };
+		10NET0132FA4E929008A89D8 /* BonjourServiceBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0032FA4E929008A89D8 /* BonjourServiceBrowser.swift */; };
+		10PH13A02FA4E929008A89D8 /* LimiAPIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PH13A01FA4E929008A89D8 /* LimiAPIError.swift */; };
+		10PH13B01FA4E929008A89D8 /* LimiHTTPClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PH13B03FA4E929008A89D8 /* LimiHTTPClientTests.swift */; };
+		10PH13B02FA4E929008A89D8 /* LimiURLProtocolStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PH13B04FA4E929008A89D8 /* LimiURLProtocolStub.swift */; };
+		10PHMT0112FA4E929008A89D8 /* AuthManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PHMT0012FA4E929008A89D8 /* AuthManagerTests.swift */; };
+		10PHMT0122FA4E929008A89D8 /* LimiAPIErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PHMT0022FA4E929008A89D8 /* LimiAPIErrorTests.swift */; };
+		10PHMT0132FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PHMT0032FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift */; };
+		10RPMT012FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10RPMT002FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift */; };
+		10RPMT0132FA4E929008A89D8 /* RoomCaptureViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10RPMT0032FA4E929008A89D8 /* RoomCaptureViewModelTests.swift */; };
+		10SHD0112FA4E929008A89D8 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */; };
+		10SHD0122FA4E929008A89D8 /* RainbowSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */; };
+		10SHD0132FA4E929008A89D8 /* LimiModalChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */; };
 		9A5AFD7B2DDC35EC00B785BE /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */; };
 		9A6A3D622E8BC3FC00924422 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 9A6A3D612E8BC3FC00924422 /* SocketIO */; };
 		9A6D930C2E574609009B2808 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ABD247C2DA57617003A5A22 /* ARKit.framework */; };
@@ -98,12 +135,26 @@
 		};
 /* End PBXBuildRule section */
 
+/* Begin PBXContainerItemProxy section */
+		10PH13D04FA4E929008A89D8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9ADA720C2D6DD6D80044A7CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9ADA72132D6DD6D80044A7CF;
+			remoteInfo = Limi;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		105F47242FA4E929008A89D8 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		105F472E2FA4E929008A89D8 /* AuthResponseParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthResponseParsing.swift; sourceTree = "<group>"; };
 		105F472F2FA4E929008A89D8 /* ManagerAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerAPI.swift; sourceTree = "<group>"; };
 		105F47302FA4E929008A89D8 /* WeatherData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherData.swift; sourceTree = "<group>"; };
 		105F47312FA4E929008A89D8 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		105F47322FA4E929008A89D8 /* LimiHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiHTTPClient.swift; sourceTree = "<group>"; };
+		105F47332FA4E929008A89D8 /* LimiDeviceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiDeviceAPI.swift; sourceTree = "<group>"; };
+		105F47342FA4E929008A89D8 /* LimiConfiguratorAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiConfiguratorAPI.swift; sourceTree = "<group>"; };
+		105F47352FA4E929008A89D8 /* LimiAPIAuthPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiAPIAuthPolicy.swift; sourceTree = "<group>"; };
 		105F47472FA4E929008A89D8 /* AuthManger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManger.swift; sourceTree = "<group>"; };
 		105F474A2FA4E929008A89D8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiDesignSystem.swift; sourceTree = "<group>"; };
@@ -128,6 +179,76 @@
 		10AB0000000000000000C00A /* LimiTransportError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiTransportError.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C00B /* ThrottledSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThrottledSender.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C00C /* TransportMediumPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportMediumPreference.swift; sourceTree = "<group>"; };
+		10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceCoordinator.swift; sourceTree = "<group>"; };
+		10ADD0022FA4E929008A89D8 /* DemoScanDevicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanDevicesViewModel.swift; sourceTree = "<group>"; };
+		10ADD0032FA4E929008A89D8 /* DemoScanBluetoothAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanBluetoothAdapter.swift; sourceTree = "<group>"; };
+		10ADD0042FA4E929008A89D8 /* AnimatedSearchButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedSearchButton.swift; sourceTree = "<group>"; };
+		10ADD0052FA4E929008A89D8 /* DevicesButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesButton.swift; sourceTree = "<group>"; };
+		10ADDT002FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanDevicesViewModelTests.swift; sourceTree = "<group>"; };
+		10AICH0012FA4E929008A89D8 /* VoiceChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceChatModels.swift; sourceTree = "<group>"; };
+		10AICH0022FA4E929008A89D8 /* VoiceBackendEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBackendEnvironment.swift; sourceTree = "<group>"; };
+		10AICH0032FA4E929008A89D8 /* VoiceSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSessionService.swift; sourceTree = "<group>"; };
+		10AICH0042FA4E929008A89D8 /* VoiceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceViewModel.swift; sourceTree = "<group>"; };
+		10AICH0052FA4E929008A89D8 /* VoiceChatBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceChatBubbles.swift; sourceTree = "<group>"; };
+		10AICH0062FA4E929008A89D8 /* VoicePresenceLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicePresenceLayout.swift; sourceTree = "<group>"; };
+		10AICH0072FA4E929008A89D8 /* VoiceChatModeLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceChatModeLayout.swift; sourceTree = "<group>"; };
+		10AICHT002FA4E929008A89D8 /* VoiceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceViewModelTests.swift; sourceTree = "<group>"; };
+		10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyProtocols.swift; sourceTree = "<group>"; };
+		10APP0022FA4E929008A89D8 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironmentTests.swift; sourceTree = "<group>"; };
+		10AR0012FA4E929008A89D8 /* ARSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionViewModel.swift; sourceTree = "<group>"; };
+		10ART002FA4E929008A89D8 /* ARSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionViewModelTests.swift; sourceTree = "<group>"; };
+		10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRoute.swift; sourceTree = "<group>"; };
+		10AUTH0022FA4E929008A89D8 /* GetStartViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetStartViewModel.swift; sourceTree = "<group>"; };
+		10AUTH0032FA4E929008A89D8 /* InstallerLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallerLoginService.swift; sourceTree = "<group>"; };
+		10AUTH0042FA4E929008A89D8 /* InstallerLoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallerLoginResponse.swift; sourceTree = "<group>"; };
+		10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BluetoothManager+BackgroundScan.swift"; sourceTree = "<group>"; };
+		10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BluetoothManager+GATTWrite.swift"; sourceTree = "<group>"; };
+		10BCB0042FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BluetoothManager+WifiProvisioning.swift"; sourceTree = "<group>"; };
+		10BCB0052FA4E929008A89D8 /* BluetoothDeviceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothDeviceState.swift; sourceTree = "<group>"; };
+		10BCB0062FA4E929008A89D8 /* ContextManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextManager.swift; sourceTree = "<group>"; };
+		10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalVariables.swift; sourceTree = "<group>"; };
+		10BCB0082FA4E929008A89D8 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		10BCB0092FA4E929008A89D8 /* HomeRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRoute.swift; sourceTree = "<group>"; };
+		10CFG0012FA4E929008A89D8 /* LightConfigModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightConfigModels.swift; sourceTree = "<group>"; };
+		10CFG0022FA4E929008A89D8 /* ConfiguratorDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguratorDownloadService.swift; sourceTree = "<group>"; };
+		10CFG0032FA4E929008A89D8 /* ConfiguratorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguratorViewModel.swift; sourceTree = "<group>"; };
+		10HOME0012FA4E929008A89D8 /* HomeRuntimeAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRuntimeAdapters.swift; sourceTree = "<group>"; };
+		10HOME0022FA4E929008A89D8 /* WeatherWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherWidgetView.swift; sourceTree = "<group>"; };
+		10HOME0032FA4E929008A89D8 /* WeatherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherViewModel.swift; sourceTree = "<group>"; };
+		10HOME0042FA4E929008A89D8 /* EnhancedBottomNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedBottomNavigationView.swift; sourceTree = "<group>"; };
+		10HOME0052FA4E929008A89D8 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		10HOME0062FA4E929008A89D8 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
+		10HOMET002FA4E929008A89D8 /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		10NAPP012FA4E929008A89D8 /* LimiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiApp.swift; sourceTree = "<group>"; };
+		10NAPP022FA4E929008A89D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		10NET0012FA4E929008A89D8 /* BLEDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDevice.swift; sourceTree = "<group>"; };
+		10NET0022FA4E929008A89D8 /* PingPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingPoller.swift; sourceTree = "<group>"; };
+		10NET0032FA4E929008A89D8 /* BonjourServiceBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourServiceBrowser.swift; sourceTree = "<group>"; };
+		10PH13A01FA4E929008A89D8 /* LimiAPIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiAPIError.swift; sourceTree = "<group>"; };
+		10PH13B03FA4E929008A89D8 /* LimiHTTPClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiHTTPClientTests.swift; sourceTree = "<group>"; };
+		10PH13B04FA4E929008A89D8 /* LimiURLProtocolStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiURLProtocolStub.swift; sourceTree = "<group>"; };
+		10PH13D03FA4E929008A89D8 /* LimiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LimiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		10PH9D012FA4E929008A89D8 /* Limi-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Limi-Debug.xcconfig"; sourceTree = "<group>"; };
+		10PH9D022FA4E929008A89D8 /* Limi-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Limi-Release.xcconfig"; sourceTree = "<group>"; };
+		10PHMT0012FA4E929008A89D8 /* AuthManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManagerTests.swift; sourceTree = "<group>"; };
+		10PHMT0022FA4E929008A89D8 /* LimiAPIErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiAPIErrorTests.swift; sourceTree = "<group>"; };
+		10PHMT0032FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguratorModelStoreTests.swift; sourceTree = "<group>"; };
+		10RPM0012FA4E929008A89D8 /* RoomPlanUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanUploadService.swift; sourceTree = "<group>"; };
+		10RPM0022FA4E929008A89D8 /* RoomCaptureViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCaptureViewModel.swift; sourceTree = "<group>"; };
+		10RPM0032FA4E929008A89D8 /* RoomPlanListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanListViewModel.swift; sourceTree = "<group>"; };
+		10RPMT002FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanUploadServiceTests.swift; sourceTree = "<group>"; };
+		10RPMT0032FA4E929008A89D8 /* RoomCaptureViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCaptureViewModelTests.swift; sourceTree = "<group>"; };
+		10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
+		10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainbowSlider.swift; sourceTree = "<group>"; };
+		10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiModalChrome.swift; sourceTree = "<group>"; };
+		10WLED0012FA4E929008A89D8 /* WLEDHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDHTTPClient.swift; sourceTree = "<group>"; };
+		10WLED0022FA4E929008A89D8 /* HotelRoomBluetoothAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotelRoomBluetoothAdapter.swift; sourceTree = "<group>"; };
+		10WLED0032FA4E929008A89D8 /* WLEDDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDDiscoveryViewModel.swift; sourceTree = "<group>"; };
+		10WLED0042FA4E929008A89D8 /* WLEDDeviceControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDDeviceControlViewModel.swift; sourceTree = "<group>"; };
+		10WLED0052FA4E929008A89D8 /* WLEDControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDControlViewModel.swift; sourceTree = "<group>"; };
+		10WLED0062FA4E929008A89D8 /* HubChannelControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubChannelControlViewModel.swift; sourceTree = "<group>"; };
 		26CAF47D956ADE8C97D67273 /* Pods-Limi.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.release.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.release.xcconfig"; sourceTree = "<group>"; };
 		41A8537098400FD0063056FC /* Pods-Limi.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.debug.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.debug.xcconfig"; sourceTree = "<group>"; };
 		9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
@@ -170,7 +291,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		105185162F050D9D001A2404 /* Exceptions for "LimiExhibition" folder in "Limi" target */ = {
+		105185162F050D9D001A2404 /* Exceptions for "Features" folder in "Limi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -180,12 +301,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9A6EFC5C2D8BB14500272B02 /* LimiExhibition */ = {
+		9A6EFC5C2D8BB14500272B02 /* Features */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				105185162F050D9D001A2404 /* Exceptions for "LimiExhibition" folder in "Limi" target */,
+				105185162F050D9D001A2404 /* Exceptions for "Features" folder in "Limi" target */,
 			);
-			path = LimiExhibition;
+			path = Features;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -220,8 +341,10 @@
 		105F48DC2FA56AA9008A89D8 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				10NET0A02FA4E929008A89D8 /* Models */,
 				105F48DD2FA56AA9008A89D8 /* Services */,
 				105F48DE2FA56AA9008A89D8 /* Managers */,
+				10BCB0B02FA4E929008A89D8 /* Utilities */,
 				105F48DF2FA56AA9008A89D8 /* DesignSystem */,
 			);
 			path = Core;
@@ -233,6 +356,7 @@
 				105F48E02FA56AAD008A89D8 /* API */,
 				105F48E12FA56AAD008A89D8 /* Networking */,
 				105F48E22FA56C9B008A89D8 /* Auth */,
+				10BCB0A02FA4E929008A89D8 /* Bluetooth */,
 				105F48E32FA56D77008A89D8 /* Location */,
 				105F48E42FA56F24008A89D8 /* WebSocket */,
 				10AB0000000000000000A000 /* Transport */,
@@ -244,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				105F47512FA4E929008A89D8 /* LanguageSettings.swift */,
+				10BCB0062FA4E929008A89D8 /* ContextManager.swift */,
 				105F476A2FA4E929008A89D8 /* FloatingAssistantManager.swift */,
 				105F476B2FA4E929008A89D8 /* FloatingRootViewController.swift */,
 				105F476C2FA4E929008A89D8 /* FloatingWindow.swift */,
@@ -265,6 +390,11 @@
 			isa = PBXGroup;
 			children = (
 				105F472F2FA4E929008A89D8 /* ManagerAPI.swift */,
+				105F47322FA4E929008A89D8 /* LimiHTTPClient.swift */,
+				105F47332FA4E929008A89D8 /* LimiDeviceAPI.swift */,
+				105F47342FA4E929008A89D8 /* LimiConfiguratorAPI.swift */,
+				105F47352FA4E929008A89D8 /* LimiAPIAuthPolicy.swift */,
+				10PH13A01FA4E929008A89D8 /* LimiAPIError.swift */,
 				105F47302FA4E929008A89D8 /* WeatherData.swift */,
 				105F47312FA4E929008A89D8 /* WeatherService.swift */,
 			);
@@ -275,6 +405,8 @@
 			isa = PBXGroup;
 			children = (
 				105F47532FA4E929008A89D8 /* NetworkMonitor.swift */,
+				10NET0022FA4E929008A89D8 /* PingPoller.swift */,
+				10NET0032FA4E929008A89D8 /* BonjourServiceBrowser.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -325,6 +457,344 @@
 			path = Transport;
 			sourceTree = "<group>";
 		};
+		10ADD0A02FA4E929008A89D8 /* Features/AddDevice */ = {
+			isa = PBXGroup;
+			children = (
+				10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */,
+				10ADD0B02FA4E929008A89D8 /* ViewModels */,
+				10ADD0C02FA4E929008A89D8 /* Services */,
+				10ADD0D02FA4E929008A89D8 /* Components */,
+			);
+			path = Features/AddDevice;
+			sourceTree = "<group>";
+		};
+		10ADD0B02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10ADD0022FA4E929008A89D8 /* DemoScanDevicesViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10ADD0C02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10ADD0032FA4E929008A89D8 /* DemoScanBluetoothAdapter.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10ADD0D02FA4E929008A89D8 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				10ADD0042FA4E929008A89D8 /* AnimatedSearchButton.swift */,
+				10ADD0052FA4E929008A89D8 /* DevicesButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		10AICH0A02FA4E929008A89D8 /* Features/AIChat */ = {
+			isa = PBXGroup;
+			children = (
+				10AICH0022FA4E929008A89D8 /* VoiceBackendEnvironment.swift */,
+				10AICH0C02FA4E929008A89D8 /* Models */,
+				10AICH0D02FA4E929008A89D8 /* Services */,
+				10AICH0E02FA4E929008A89D8 /* ViewModels */,
+				10AICH0B02FA4E929008A89D8 /* Components */,
+			);
+			path = Features/AIChat;
+			sourceTree = "<group>";
+		};
+		10AICH0B02FA4E929008A89D8 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				10AICH0052FA4E929008A89D8 /* VoiceChatBubbles.swift */,
+				10AICH0062FA4E929008A89D8 /* VoicePresenceLayout.swift */,
+				10AICH0072FA4E929008A89D8 /* VoiceChatModeLayout.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		10AICH0C02FA4E929008A89D8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				10AICH0012FA4E929008A89D8 /* VoiceChatModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		10AICH0D02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10AICH0032FA4E929008A89D8 /* VoiceSessionService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10AICH0E02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10AICH0042FA4E929008A89D8 /* VoiceViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10AR0A02FA4E929008A89D8 /* Features/ARSession */ = {
+			isa = PBXGroup;
+			children = (
+				10AR0E02FA4E929008A89D8 /* ViewModels */,
+			);
+			path = Features/ARSession;
+			sourceTree = "<group>";
+		};
+		10AR0E02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10AR0012FA4E929008A89D8 /* ARSessionViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10AUTH0A02FA4E929008A89D8 /* Features/Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				10AUTH0B02FA4E929008A89D8 /* ViewModels */,
+				10AUTH0C02FA4E929008A89D8 /* Services */,
+				10AUTH0D02FA4E929008A89D8 /* Models */,
+			);
+			path = Features/Authentication;
+			sourceTree = "<group>";
+		};
+		10AUTH0B02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10AUTH0022FA4E929008A89D8 /* GetStartViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10AUTH0C02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10AUTH0032FA4E929008A89D8 /* InstallerLoginService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10AUTH0D02FA4E929008A89D8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				10AUTH0042FA4E929008A89D8 /* InstallerLoginResponse.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		10BCB0A02FA4E929008A89D8 /* Bluetooth */ = {
+			isa = PBXGroup;
+			children = (
+				10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */,
+				10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */,
+				10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */,
+				10BCB0042FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift */,
+				10BCB0052FA4E929008A89D8 /* BluetoothDeviceState.swift */,
+			);
+			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		10BCB0B02FA4E929008A89D8 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		10BCB0C02FA4E929008A89D8 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				10NAPP012FA4E929008A89D8 /* LimiApp.swift */,
+				10NAPP022FA4E929008A89D8 /* AppDelegate.swift */,
+				10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */,
+				10APP0022FA4E929008A89D8 /* AppEnvironment.swift */,
+				10BCB0082FA4E929008A89D8 /* AppRouter.swift */,
+				10BCB0092FA4E929008A89D8 /* HomeRoute.swift */,
+				10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		10CFG0A02FA4E929008A89D8 /* Features/Configurator */ = {
+			isa = PBXGroup;
+			children = (
+				10CFG0C02FA4E929008A89D8 /* Models */,
+				10CFG0D02FA4E929008A89D8 /* Services */,
+				10CFG0E02FA4E929008A89D8 /* ViewModels */,
+			);
+			path = Features/Configurator;
+			sourceTree = "<group>";
+		};
+		10CFG0C02FA4E929008A89D8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				10CFG0012FA4E929008A89D8 /* LightConfigModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		10CFG0D02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10CFG0022FA4E929008A89D8 /* ConfiguratorDownloadService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10CFG0E02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10CFG0032FA4E929008A89D8 /* ConfiguratorViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10HOME0A02FA4E929008A89D8 /* Features/Home */ = {
+			isa = PBXGroup;
+			children = (
+				10HOME0012FA4E929008A89D8 /* HomeRuntimeAdapters.swift */,
+				10HOME0B02FA4E929008A89D8 /* Components */,
+			);
+			path = Features/Home;
+			sourceTree = "<group>";
+		};
+		10HOME0B02FA4E929008A89D8 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				10HOME0022FA4E929008A89D8 /* WeatherWidgetView.swift */,
+				10HOME0032FA4E929008A89D8 /* WeatherViewModel.swift */,
+				10HOME0042FA4E929008A89D8 /* EnhancedBottomNavigationView.swift */,
+				10HOME0052FA4E929008A89D8 /* WebView.swift */,
+				10HOME0062FA4E929008A89D8 /* ProfileEditView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		10NET0A02FA4E929008A89D8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				10NET0012FA4E929008A89D8 /* BLEDevice.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		10PH13B05FA4E929008A89D8 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				10PH13B03FA4E929008A89D8 /* LimiHTTPClientTests.swift */,
+				10PH13B04FA4E929008A89D8 /* LimiURLProtocolStub.swift */,
+				10HOMET002FA4E929008A89D8 /* HomeViewModelTests.swift */,
+				10ADDT002FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift */,
+				10AICHT002FA4E929008A89D8 /* VoiceViewModelTests.swift */,
+				10ART002FA4E929008A89D8 /* ARSessionViewModelTests.swift */,
+				10RPMT002FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift */,
+				10RPMT0032FA4E929008A89D8 /* RoomCaptureViewModelTests.swift */,
+				10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */,
+				10PHMT0012FA4E929008A89D8 /* AuthManagerTests.swift */,
+				10PHMT0022FA4E929008A89D8 /* LimiAPIErrorTests.swift */,
+				10PHMT0032FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		10PH9D032FA4E929008A89D8 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				10PH9D012FA4E929008A89D8 /* Limi-Debug.xcconfig */,
+				10PH9D022FA4E929008A89D8 /* Limi-Release.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		10RPM0A02FA4E929008A89D8 /* Features/RoomPlan3D */ = {
+			isa = PBXGroup;
+			children = (
+				10RPM0D02FA4E929008A89D8 /* Services */,
+				10RPM0E02FA4E929008A89D8 /* ViewModels */,
+			);
+			path = Features/RoomPlan3D;
+			sourceTree = "<group>";
+		};
+		10RPM0D02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10RPM0012FA4E929008A89D8 /* RoomPlanUploadService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10RPM0E02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10RPM0022FA4E929008A89D8 /* RoomCaptureViewModel.swift */,
+				10RPM0032FA4E929008A89D8 /* RoomPlanListViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		10SHD0A02FA4E929008A89D8 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				10SHD0B02FA4E929008A89D8 /* Components */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		10SHD0B02FA4E929008A89D8 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */,
+				10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */,
+				10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		10WLED0A02FA4E929008A89D8 /* Features/Hotel */ = {
+			isa = PBXGroup;
+			children = (
+				10WLED0B02FA4E929008A89D8 /* WLED */,
+			);
+			path = Features/Hotel;
+			sourceTree = "<group>";
+		};
+		10WLED0B02FA4E929008A89D8 /* WLED */ = {
+			isa = PBXGroup;
+			children = (
+				10WLED0C02FA4E929008A89D8 /* Services */,
+				10WLED0D02FA4E929008A89D8 /* ViewModels */,
+			);
+			path = WLED;
+			sourceTree = "<group>";
+		};
+		10WLED0C02FA4E929008A89D8 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10WLED0012FA4E929008A89D8 /* WLEDHTTPClient.swift */,
+				10WLED0022FA4E929008A89D8 /* HotelRoomBluetoothAdapter.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		10WLED0D02FA4E929008A89D8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				10WLED0032FA4E929008A89D8 /* WLEDDiscoveryViewModel.swift */,
+				10WLED0042FA4E929008A89D8 /* WLEDDeviceControlViewModel.swift */,
+				10WLED0052FA4E929008A89D8 /* WLEDControlViewModel.swift */,
+				10WLED0062FA4E929008A89D8 /* HubChannelControlViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		9ABD247B2DA57617003A5A22 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -351,13 +821,25 @@
 			children = (
 				9A8310452DA135A300D84901 /* Limi.entitlements */,
 				9ACC85E62D731F23009F2DD5 /* README.md */,
+				10PH9D032FA4E929008A89D8 /* Config */,
 				9ADA72EB2D6DD73C0044A7CF /* Font */,
 				9ADA72152D6DD6D80044A7CF /* Products */,
 				9ABFFE462D6F26F500FCA582 /* Objects */,
-				9A6EFC5C2D8BB14500272B02 /* LimiExhibition */,
+				9A6EFC5C2D8BB14500272B02 /* Features */,
 				9ABD247B2DA57617003A5A22 /* Frameworks */,
 				E22F056FBE6961045C6938A3 /* Pods */,
 				105F48DC2FA56AA9008A89D8 /* Core */,
+				10BCB0C02FA4E929008A89D8 /* App */,
+				10AUTH0A02FA4E929008A89D8 /* Features/Authentication */,
+				10HOME0A02FA4E929008A89D8 /* Features/Home */,
+				10ADD0A02FA4E929008A89D8 /* Features/AddDevice */,
+				10WLED0A02FA4E929008A89D8 /* Features/Hotel */,
+				10AICH0A02FA4E929008A89D8 /* Features/AIChat */,
+				10CFG0A02FA4E929008A89D8 /* Features/Configurator */,
+				10AR0A02FA4E929008A89D8 /* Features/ARSession */,
+				10RPM0A02FA4E929008A89D8 /* Features/RoomPlan3D */,
+				10SHD0A02FA4E929008A89D8 /* Shared */,
+				10PH13B05FA4E929008A89D8 /* Tests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -365,6 +847,7 @@
 			isa = PBXGroup;
 			children = (
 				9ADA72142D6DD6D80044A7CF /* LIMI AI.app */,
+				10PH13D03FA4E929008A89D8 /* LimiTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -415,6 +898,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		10PH13D01FA4E929008A89D8 /* LimiTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10PH13F01FA4E929008A89D8 /* Build configuration list for PBXNativeTarget "LimiTests" */;
+			buildPhases = (
+				10PH13D02FA4E929008A89D8 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				10PH13D05FA4E929008A89D8 /* PBXTargetDependency */,
+			);
+			name = LimiTests;
+			productName = LimiTests;
+			productReference = 10PH13D03FA4E929008A89D8 /* LimiTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		9ADA72132D6DD6D80044A7CF /* Limi */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9ADA72222D6DD6D90044A7CF /* Build configuration list for PBXNativeTarget "Limi" */;
@@ -432,7 +931,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				9A6EFC5C2D8BB14500272B02 /* LimiExhibition */,
+				9A6EFC5C2D8BB14500272B02 /* Features */,
 			);
 			name = Limi;
 			packageProductDependencies = (
@@ -505,6 +1004,7 @@
 			projectRoot = "";
 			targets = (
 				9ADA72132D6DD6D80044A7CF /* Limi */,
+				10PH13D01FA4E929008A89D8 /* LimiTests */,
 			);
 		};
 /* End PBXProject section */
@@ -614,15 +1114,40 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		10PH13D02FA4E929008A89D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10PH13B01FA4E929008A89D8 /* LimiHTTPClientTests.swift in Sources */,
+				10PH13B02FA4E929008A89D8 /* LimiURLProtocolStub.swift in Sources */,
+				10HOMET012FA4E929008A89D8 /* HomeViewModelTests.swift in Sources */,
+				10ADDT012FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift in Sources */,
+				10AICHT012FA4E929008A89D8 /* VoiceViewModelTests.swift in Sources */,
+				10ART012FA4E929008A89D8 /* ARSessionViewModelTests.swift in Sources */,
+				10RPMT012FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift in Sources */,
+				10RPMT0132FA4E929008A89D8 /* RoomCaptureViewModelTests.swift in Sources */,
+				10APPT012FA4E929008A89D8 /* AppEnvironmentTests.swift in Sources */,
+				10PHMT0112FA4E929008A89D8 /* AuthManagerTests.swift in Sources */,
+				10PHMT0122FA4E929008A89D8 /* LimiAPIErrorTests.swift in Sources */,
+				10PHMT0132FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9ADA72102D6DD6D80044A7CF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				10NAPP112FA4E929008A89D8 /* LimiApp.swift in Sources */,
+				10NAPP122FA4E929008A89D8 /* AppDelegate.swift in Sources */,
 				105F48272FA4E929008A89D8 /* LocationManager.swift in Sources */,
 				105F482F2FA4E929008A89D8 /* AuthResponseParsing.swift in Sources */,
 				105F48302FA4E929008A89D8 /* ManagerAPI.swift in Sources */,
 				105F48312FA4E929008A89D8 /* WeatherData.swift in Sources */,
 				105F48322FA4E929008A89D8 /* WeatherService.swift in Sources */,
+				105F48332FA4E929008A89D8 /* LimiHTTPClient.swift in Sources */,
+				105F48342FA4E929008A89D8 /* LimiDeviceAPI.swift in Sources */,
+				105F48352FA4E929008A89D8 /* LimiConfiguratorAPI.swift in Sources */,
+				105F48362FA4E929008A89D8 /* LimiAPIAuthPolicy.swift in Sources */,
 				105F48452FA4E929008A89D8 /* AuthManger.swift in Sources */,
 				105F48472FA4E929008A89D8 /* Color.swift in Sources */,
 				105F48482FA4E929008A89D8 /* LimiDesignSystem.swift in Sources */,
@@ -647,12 +1172,77 @@
 				10AB0000000000000000B00A /* LimiTransportError.swift in Sources */,
 				10AB0000000000000000B00B /* ThrottledSender.swift in Sources */,
 				10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */,
+				10PH13A02FA4E929008A89D8 /* LimiAPIError.swift in Sources */,
+				10BCB0112FA4E929008A89D8 /* BluetoothManager.swift in Sources */,
+				10BCB0122FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift in Sources */,
+				10BCB0132FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift in Sources */,
+				10BCB0142FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift in Sources */,
+				10BCB0152FA4E929008A89D8 /* BluetoothDeviceState.swift in Sources */,
+				10BCB0162FA4E929008A89D8 /* ContextManager.swift in Sources */,
+				10BCB0172FA4E929008A89D8 /* GlobalVariables.swift in Sources */,
+				10BCB0182FA4E929008A89D8 /* AppRouter.swift in Sources */,
+				10APP0112FA4E929008A89D8 /* DependencyProtocols.swift in Sources */,
+				10APP0122FA4E929008A89D8 /* AppEnvironment.swift in Sources */,
+				10BCB0192FA4E929008A89D8 /* HomeRoute.swift in Sources */,
+				10AUTH0112FA4E929008A89D8 /* AuthRoute.swift in Sources */,
+				10NET0112FA4E929008A89D8 /* BLEDevice.swift in Sources */,
+				10NET0122FA4E929008A89D8 /* PingPoller.swift in Sources */,
+				10NET0132FA4E929008A89D8 /* BonjourServiceBrowser.swift in Sources */,
+				10SHD0112FA4E929008A89D8 /* VisualEffectBlur.swift in Sources */,
+				10SHD0122FA4E929008A89D8 /* RainbowSlider.swift in Sources */,
+				10SHD0132FA4E929008A89D8 /* LimiModalChrome.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		10PH13D05FA4E929008A89D8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9ADA72132D6DD6D80044A7CF /* Limi */;
+			targetProxy = 10PH13D04FA4E929008A89D8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		10PH13E01FA4E929008A89D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Y39JJ6B8MN;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = osi.shahryar.LimitLess.Exhibition.v1.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LIMI AI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LIMI AI";
+			};
+			name = Debug;
+		};
+		10PH13E02FA4E929008A89D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Y39JJ6B8MN;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = osi.shahryar.LimitLess.Exhibition.v1.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LIMI AI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LIMI AI";
+			};
+			name = Release;
+		};
 		9ADA72202D6DD6D90044A7CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -778,7 +1368,7 @@
 		};
 		9ADA72232D6DD6D90044A7CF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 41A8537098400FD0063056FC /* Pods-Limi.debug.xcconfig */;
+			baseConfigurationReference = 10PH9D012FA4E929008A89D8 /* Limi-Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -787,12 +1377,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 49;
-				DEVELOPMENT_ASSET_PATHS = "\"LimiExhibition/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
 				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = LimiExhibition/Info.plist;
+				INFOPLIST_FILE = Features/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LIMI;
 				INFOPLIST_KEY_NFCReaderUsageDescription = "This app needs access to NFC to scan tags.";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth to connect to devices";
@@ -823,7 +1413,7 @@
 		};
 		9ADA72242D6DD6D90044A7CF /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26CAF47D956ADE8C97D67273 /* Pods-Limi.release.xcconfig */;
+			baseConfigurationReference = 10PH9D022FA4E929008A89D8 /* Limi-Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -832,12 +1422,12 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 49;
-				DEVELOPMENT_ASSET_PATHS = "\"LimiExhibition/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
 				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = LimiExhibition/Info.plist;
+				INFOPLIST_FILE = Features/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = LIMI;
 				INFOPLIST_KEY_NFCReaderUsageDescription = "This app needs access to NFC to scan tags.";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth to connect to devices";
@@ -869,6 +1459,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		10PH13F01FA4E929008A89D8 /* Build configuration list for PBXNativeTarget "LimiTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10PH13E01FA4E929008A89D8 /* Debug */,
+				10PH13E02FA4E929008A89D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9ADA720F2D6DD6D80044A7CF /* Build configuration list for PBXProject "Limi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

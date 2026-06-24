@@ -18,7 +18,7 @@ enum AuthResponseParsing {
     }
 }
 
-/// Shared Apple ↔ backend exchange used by `AppleLoginView`, `GoogleAuthManager` (Sign in with Apple path), and UIKit delegates.
+/// Shared Apple ↔ backend exchange used by `GoogleAuthManager.signInWithApple()`.
 enum AppleLoginAPI {
     enum ExchangeError: LocalizedError {
         case missingURL
@@ -46,27 +46,19 @@ enum AppleLoginAPI {
             DispatchQueue.main.async { completion(.failure(ExchangeError.emptyIdentityToken)) }
             return
         }
-        guard let url = URL(string: APIConstants.loginApple) else {
-            DispatchQueue.main.async { completion(.failure(ExchangeError.missingURL)) }
-            return
-        }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let body: [String: String] = [
-            "identity_token": identityToken,
-            "user": appleUserId
-        ]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        LimiHTTPClient.postJSON(
+            urlString: APIConstants.loginApple,
+            body: [
+                "identity_token": identityToken,
+                "user": appleUserId
+            ],
+            auth: .none
+        ) { data, response, error in
             if let error {
                 DispatchQueue.main.async { completion(.failure(error)) }
                 return
             }
-            let status = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let status = response?.statusCode ?? -1
             guard (200 ... 299).contains(status) else {
                 DispatchQueue.main.async { completion(.failure(ExchangeError.invalidHTTPStatus(status))) }
                 return
@@ -75,9 +67,9 @@ enum AppleLoginAPI {
                 DispatchQueue.main.async { completion(.failure(ExchangeError.noTokenInBody)) }
                 return
             }
-            AuthManager.shared.saveToken(token, updateAuthState: false)
+            AuthManager.shared.saveToken(token, updateAuthState: true)
             AuthManager.shared.clearRole()
             DispatchQueue.main.async { completion(.success(())) }
-        }.resume()
+        }
     }
 }

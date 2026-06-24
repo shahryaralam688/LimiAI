@@ -2,7 +2,7 @@
 //  DeviceWebSocketClient.swift
 //  Limi
 //
-//  One LAN WebSocket per device → ws://<device-ip>/ws.
+//  One LAN WebSocket per device → AppURLs.Device.webSocketURL(ip:).
 //  Detects HTTP 503 mqtt_active on the upgrade response and translates it to
 //  LimiTransportError.mqttActive. Does NOT auto-retry on 503 (per spec).
 //
@@ -102,7 +102,7 @@ public final class DeviceWebSocketClient: NSObject {
     private func connectIfNeeded(_ connection: Connection) async throws {
         if let existing = connection.task, existing.state == .running { return }
 
-        guard let url = URL(string: "ws://\(connection.ipAddress)/ws") else {
+        guard let url = AppURLs.Device.webSocketURL(ip: connection.ipAddress) else {
             throw LimiTransportError.missingDeviceIP
         }
 

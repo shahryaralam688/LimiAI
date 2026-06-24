@@ -14,7 +14,7 @@ final class FloatingAssistantManager {
     private var isPersonalizeFlowActive = false
 
     let voiceClient = WebRTCVoiceClient(
-        backendBaseURL: URL(string: "https://dev.api.limitless-lighting.co.uk/")!
+        backendBaseURL: LimiAPIConfiguration.baseURLValue
     )
 
     private init() {}
