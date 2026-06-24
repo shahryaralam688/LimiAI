@@ -21,6 +21,7 @@ struct VoicePendantMemoryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            aiSummaryEntry
             searchBar
             filterChips
             timeline
@@ -56,6 +57,48 @@ struct VoicePendantMemoryView: View {
             summaryDetailSheet(summary)
         }
         .trackScreen("VoicePendantMemoryView", metadata: ["pendant": viewModel.pendant.id])
+    }
+
+    // MARK: - AI Summary entry
+
+    private var aiSummaryEntry: some View {
+        NavigationLink {
+            VoicePendantAISummaryView(pendant: viewModel.pendant)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.orbGlow4)
+                    .frame(width: 40, height: 40)
+                    .background(Color.orbGlow4.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("AI Summary")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.themeWhite)
+                    Text("Day / Week / Month — AI-generated overview")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color.appTextTertiary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Color.appTextMuted)
+            }
+            .padding(14)
+            .background(Color.appSurfaceSecondaryAlt)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.orbGlow4.opacity(0.4), lineWidth: 1)
+            )
+            .cornerRadius(16)
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
     }
 
     // MARK: - Search

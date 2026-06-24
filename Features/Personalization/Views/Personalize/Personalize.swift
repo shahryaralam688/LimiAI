@@ -53,26 +53,29 @@ struct OnboardingData: Codable {
 // MARK: - ViewModel
 
 final class OnboardingViewModel: ObservableObject {
-    @Published var name: String = "" {
-        didSet { save() }
-    }
+    /// Committed when the user leaves the name step — not on every keystroke.
+    @Published var name: String = ""
 
     @Published var selectedUseCase: UseCase? = nil {
-        didSet { save() }
+        didSet { persistIfNeeded() }
     }
 
     @Published var selectedGoals: Set<Goal> = [] {
-        didSet { save() }
+        didSet { persistIfNeeded() }
     }
 
     @Published var bluetoothAllowed: Bool? = nil {
-        didSet { save() }
+        didSet { persistIfNeeded() }
     }
 
     private let storageKey = "onboarding_data"
+    private var isHydratingFromStorage = false
+    private var saveWorkItem: DispatchWorkItem?
 
     init() {
+        isHydratingFromStorage = true
         load()
+        isHydratingFromStorage = false
     }
 
     private func load() {
@@ -85,16 +88,35 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
-    private func save() {
+    private func persistIfNeeded() {
+        guard !isHydratingFromStorage else { return }
+        saveWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.saveNow()
+        }
+        saveWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
+    }
+
+    func commitName(_ value: String) {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard name != trimmed else { return }
+        name = trimmed
+        persistIfNeeded()
+    }
+
+    private func saveNow() {
         let model = OnboardingData(
             name: name,
             useCase: selectedUseCase,
             goals: Array(selectedGoals),
             bluetoothAllowed: bluetoothAllowed
         )
-
-        if let data = try? JSONEncoder().encode(model) {
-            UserDefaults.standard.set(data, forKey: storageKey)
+        let storageKey = storageKey
+        DispatchQueue.global(qos: .utility).async {
+            if let data = try? JSONEncoder().encode(model) {
+                UserDefaults.standard.set(data, forKey: storageKey)
+            }
         }
     }
 
@@ -142,16 +164,21 @@ struct OnboardingFlowView: View {
     @State private var isCompleting = false
     /// Step 1: user confirms the typed name before Continue (pairs with voice “say yes when it’s correct”).
     @State private var nameStepConfirmed = false
+    /// Voice / AI fills this; NameStepView reads it without re-rendering the whole flow on each keystroke.
+    @State private var voiceSuggestedName: String?
     /// Steps 2–3: brief AI-selection pulse (white border + scale) when `personalize_set_field` updates a row.
     @State private var pulseUseCaseRaw: String?
     @State private var pulseGoalRaws: Set<String> = []
     @State private var pulseUseCaseGeneration = 0
     @State private var pulseGoalsGeneration = 0
+    @State private var proactiveTurnGeneration = 0
+    @State private var contextSyncGeneration = 0
+    @State private var contentReady = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                DeepSpaceBackground(showParticles: true)
+                DeepSpaceBackground(showParticles: false)
 
                 VStack(spacing: 0) {
                     if step <= 3 {
@@ -164,9 +191,12 @@ struct OnboardingFlowView: View {
                         switch step {
                         case 1:
                             NameStepView(
-                                name: $viewModel.name,
+                                initialName: viewModel.name,
+                                voiceSuggestedName: voiceSuggestedName,
                                 nameConfirmed: $nameStepConfirmed,
-                                onContinue: {
+                                onContinue: { committedName in
+                                    viewModel.commitName(committedName)
+                                    voiceSuggestedName = nil
                                     withAnimation(LimiMotion.smooth) { step += 1 }
                                 }
                             )
@@ -204,10 +234,8 @@ struct OnboardingFlowView: View {
                             )
                         }
                     }
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transition(.opacity)
+                    .opacity(contentReady ? 1 : 0)
                 }
                 .padding(.horizontal, 24)
             }
@@ -220,17 +248,19 @@ struct OnboardingFlowView: View {
         }
         .onAppear {
             FloatingAssistantManager.shared.setPersonalizeFlowActive(true)
-            syncPersonalizeContext()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                startPersonalizeVoiceIfNeeded()
+            withAnimation(LimiMotion.gentle) {
+                contentReady = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
-                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
-                FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
+            scheduleContextSync(delay: 0.05)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                startPersonalizeVoiceIfNeeded()
+                scheduleProactiveAssistantTurn(delay: 0.35)
             }
         }
         .onDisappear {
             FloatingAssistantManager.shared.setPersonalizeFlowActive(false)
+            contextSyncGeneration += 1
+            proactiveTurnGeneration += 1
         }
         .onChange(of: showHomeView) { _, isShowingHome in
             if isShowingHome { FloatingAssistantManager.shared.setPersonalizeFlowActive(false) }
@@ -246,11 +276,8 @@ struct OnboardingFlowView: View {
             pulseGoalsGeneration += 1
             pulseUseCaseRaw = nil
             pulseGoalRaws = []
-            syncPersonalizeContext()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
-                FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
-            }
+            scheduleContextSync(delay: 0.05)
+            scheduleProactiveAssistantTurn(delay: 0.55)
         }
         .onReceive(NotificationCenter.default.publisher(for: .limiPersonalizeToolUpdate)) { note in
             applyPersonalizeTool(note: note)
@@ -259,12 +286,32 @@ struct OnboardingFlowView: View {
 
     /// Keep realtime voice session active while Personalize is visible (orb “on” when connected).
     private func startPersonalizeVoiceIfNeeded() {
+        guard AuthManager.shared.authorizationHeaderValue() != nil else { return }
         let voice = FloatingAssistantManager.shared.voiceClient
         switch voice.state {
         case .disconnected, .error:
             voice.start()
         case .connecting, .connected:
             break
+        }
+    }
+
+    private func scheduleContextSync(delay: TimeInterval) {
+        contextSyncGeneration += 1
+        let generation = contextSyncGeneration
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            guard generation == contextSyncGeneration else { return }
+            syncPersonalizeContext()
+        }
+    }
+
+    private func scheduleProactiveAssistantTurn(delay: TimeInterval) {
+        proactiveTurnGeneration += 1
+        let generation = proactiveTurnGeneration
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            guard generation == proactiveTurnGeneration else { return }
+            guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
+            FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
         }
     }
 
@@ -306,7 +353,7 @@ struct OnboardingFlowView: View {
         guard !value.isEmpty else { return }
         switch field.lowercased() {
         case "name":
-            viewModel.name = value
+            voiceSuggestedName = value
             nameStepConfirmed = true
         case "use_case", "usecase":
             if let uc = Self.matchUseCase(from: value) {
@@ -484,13 +531,16 @@ struct OnboardingHeader: View {
 // MARK: - Step 1: Name
 
 struct NameStepView: View {
-    @Binding var name: String
+    let initialName: String
+    let voiceSuggestedName: String?
     @Binding var nameConfirmed: Bool
-    var onContinue: () -> Void
+    var onContinue: (String) -> Void
+
+    @State private var draftName: String = ""
     @FocusState private var isFocused: Bool
 
     private var trimmedName: String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines)
+        draftName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var body: some View {
@@ -507,7 +557,7 @@ struct NameStepView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            TextField("", text: $name, prompt: Text("Your name").foregroundColor(.appTextPlaceholder))
+            TextField("", text: $draftName, prompt: Text("Your name").foregroundColor(.appTextPlaceholder))
                 .textInputAutocapitalization(.words)
                 .disableAutocorrection(true)
                 .foregroundColor(.appTextPrimary)
@@ -534,13 +584,27 @@ struct NameStepView: View {
             PrimaryButton(
                 title: "Continue",
                 isEnabled: !trimmedName.isEmpty && nameConfirmed,
-                action: onContinue
+                action: { onContinue(trimmedName) }
             )
         }
         .padding(.bottom, 32)
-        .onAppear { isFocused = true }
-        .onChange(of: name) { _, _ in
+        .onAppear {
+            if draftName.isEmpty {
+                draftName = initialName
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                isFocused = true
+            }
+        }
+        .onChange(of: draftName) { _, _ in
             if trimmedName.isEmpty { nameConfirmed = false }
+        }
+        .onChange(of: voiceSuggestedName) { _, suggested in
+            guard let suggested else { return }
+            let trimmed = suggested.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return }
+            draftName = trimmed
+            nameConfirmed = true
         }
     }
 }

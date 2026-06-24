@@ -48,43 +48,78 @@ struct VoicePendantDetailView: View {
     // MARK: - AI Voice
 
     private var talkToLimiButton: some View {
-        Button {
-            showVoiceAI = true
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "waveform")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
-                    .frame(width: 40, height: 40)
-                    .background(Color.orbGlow4.opacity(0.12))
-                    .clipShape(Circle())
+        VStack(spacing: 12) {
+            Button {
+                showVoiceAI = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "waveform")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
+                        .frame(width: 40, height: 40)
+                        .background(Color.orbGlow4.opacity(0.12))
+                        .clipShape(Circle())
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Talk to Limi")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
-                    Text("Start a voice conversation with your AI assistant")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(Color.appTextTertiary)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Talk to Limi")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.themeWhite)
+                        Text("Start a voice conversation with your AI assistant")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color.appTextTertiary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
                 }
-
-                Spacer()
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
+                .padding(14)
+                .frame(maxWidth: .infinity)
+                .background(Color.appSurfaceSecondaryAlt)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.orbGlow4.opacity(0.4), lineWidth: 1)
+                )
+                .cornerRadius(16)
             }
-            .padding(14)
-            .frame(maxWidth: .infinity)
-            .background(Color.appSurfaceSecondaryAlt)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.orbGlow4.opacity(0.4), lineWidth: 1)
-            )
-            .cornerRadius(16)
+            .buttonStyle(.plain)
+            .accessibilityLabel("Talk to Limi AI assistant")
+
+            NavigationLink {
+                CloudConversationView(pendant: pendant)
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.orbGlow4)
+                        .frame(width: 40, height: 40)
+                        .background(Color.orbGlow4.opacity(0.12))
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Chat with Limi")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.themeWhite)
+                        Text("Type a multi-turn conversation with the cloud AI")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color.appTextTertiary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color.appTextMuted)
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity)
+                .background(Color.appSurfaceSecondaryAlt)
+                .cornerRadius(16)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Talk to Limi AI assistant")
     }
 
     // MARK: - Overview
