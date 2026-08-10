@@ -24,7 +24,7 @@ struct IntegrateNewAIView: View {
                                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                                     .fill(
                                         LinearGradient(
-                                            colors: [.orbGlow1.opacity(0.15), .orbGlow4.opacity(0.1)],
+                                            colors: [.brandAction.opacity(0.15), .brandAction.opacity(0.1)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -36,15 +36,15 @@ struct IntegrateNewAIView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 28, height: 28)
-                                    .foregroundColor(.orbGlow4)
+                                    .foregroundColor(.brandAction)
                             }
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Limi assistant")
-                                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                                    .font(LimiTypography.title2)
                                     .foregroundColor(.appTextPrimary)
                                 Text("Built for your space")
-                                    .font(.system(size: 14, weight: .regular))
+                                    .font(LimiTypography.subheadline)
                                     .foregroundColor(.appTextSecondary)
                             }
                             Spacer()
@@ -56,7 +56,7 @@ struct IntegrateNewAIView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             LimiSectionHeader(title: "About")
                             Text("Limi helps you adjust your environment, answer questions about your setup, and keep briefings relevant to you — without sending you to another product.")
-                                .font(.system(size: 15, weight: .regular))
+                                .font(LimiTypography.body)
                                 .foregroundColor(.appTextSecondary)
                                 .lineSpacing(5)
                         }

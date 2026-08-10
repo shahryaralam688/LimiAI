@@ -62,8 +62,8 @@ struct CardView: View {
                 showAlert = true
             }) {
                 Text("Ch-\(cardNumber)")
-                    .font(.title)
-                    .foregroundColor(.themeBlack)
+                    .font(LimiTypography.title)
+                    .foregroundColor(.appTextPrimary)
                     .opacity(buttonOpacity)
                     .animation(isAnimating ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .none, value: buttonOpacity)
             }
@@ -81,9 +81,9 @@ struct CardView: View {
 
         }
         .frame(width: (UIScreen.main.bounds.width - 60) / 4, height: 100) // Responsive width
-        .background(Color.alabaster)
-        .cornerRadius(10)
-        .shadow(radius: 5)
+        .background(Color.appSurfacePrimary)
+        .cornerRadius(LimiRadius.small)
+        .shadow(color: Color.appShadowMedium, radius: 5)
         
         NavigationLink(destination: destinationView, isActive: Binding(
             get: { selectedMode != nil },

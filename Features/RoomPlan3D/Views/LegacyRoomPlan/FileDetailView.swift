@@ -57,7 +57,7 @@ struct FileDetailView: View {
     var body: some View {
         VStack {
             Text(fileName)
-                .font(.title)
+                .font(LimiTypography.title)
                 .padding()
             
             Spacer()
@@ -68,11 +68,11 @@ struct FileDetailView: View {
                 }) {
                     VStack {
                         Image(systemName: "cube.transparent")
-                            .font(.system(size: 30))
+                            .font(LimiTypography.title2)
                         Text("View 3D Model")
                     }
                     .padding()
-                    .background(Color.blue.opacity(0.1))
+                    .background(Color.appInfo.opacity(0.1))
                     .cornerRadius(10)
                 }
                 
@@ -81,11 +81,11 @@ struct FileDetailView: View {
                 }) {
                     VStack {
                         Image(systemName: "ruler")
-                            .font(.system(size: 30))
+                            .font(LimiTypography.title2)
                         Text("Analyze Dimensions")
                     }
                     .padding()
-                    .background(Color.green.opacity(0.1))
+                    .background(Color.appSuccess.opacity(0.1))
                     .cornerRadius(10)
                 }
             }

@@ -143,20 +143,20 @@ private struct HomeViewContent: View {
                             Spacer()
                             VStack(spacing: 14) {
                                 Text("Found New Device")
-                                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                                    .font(LimiTypography.title3)
                                     .foregroundColor(.appTextPrimary)
 
                                 Text(device.name)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.orbGlow4)
+                                    .font(LimiTypography.callout)
+                                    .foregroundColor(.brandHighlight)
                                     .padding(.vertical, 4)
                                     .padding(.horizontal, 10)
                                     .background(
-                                        Capsule().fill(Color.orbGlow4.opacity(0.12))
+                                        Capsule().fill(Color.brandHighlight.opacity(0.12))
                                     )
 
                                 Text(device.id)
-                                    .font(.system(size: 11))
+                                    .font(LimiTypography.caption2)
                                     .foregroundColor(.appTextMuted)
 
                                 HStack(spacing: 12) {
@@ -187,7 +187,7 @@ private struct HomeViewContent: View {
                     // MARK: - Module Action Menu Popup
                     if viewModel.showModuleActionMenu, let module = viewModel.selectedModuleForAction {
                         ZStack {
-                            Color.black.opacity(0.5)
+                            Color.appOverlayScrim
                                 .ignoresSafeArea()
                                 .onTapGesture {
                                     viewModel.dismissModuleActionMenu()
@@ -197,17 +197,17 @@ private struct HomeViewContent: View {
                             VStack(spacing: 0) {
                                 VStack(spacing: 6) {
                                     Text(module.title)
-                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .font(LimiTypography.button)
                                         .foregroundColor(.appTextPrimary)
                                     Text("What would you like to do?")
-                                        .font(.system(size: 13))
+                                        .font(LimiTypography.footnote)
                                         .foregroundColor(.appTextSecondary)
                                 }
                                 .padding(.top, 20)
                                 .padding(.bottom, 14)
 
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.06))
+                                    .fill(Color.appGlassFillMedium)
                                     .frame(height: 1)
 
                                 Button(action: {
@@ -219,10 +219,10 @@ private struct HomeViewContent: View {
                                 }) {
                                     HStack(spacing: 12) {
                                         Image(systemName: "trash")
-                                            .font(.system(size: 16))
+                                            .font(LimiTypography.body)
                                             .foregroundColor(.appDanger)
                                         Text("Uninstall")
-                                            .font(.system(size: 15, weight: .semibold))
+                                            .font(LimiTypography.callout)
                                             .foregroundColor(.appDanger)
                                         Spacer()
                                     }
@@ -231,7 +231,7 @@ private struct HomeViewContent: View {
                                 }
 
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.06))
+                                    .fill(Color.appGlassFillMedium)
                                     .frame(height: 1)
 
                                 Button(action: {
@@ -240,10 +240,10 @@ private struct HomeViewContent: View {
                                 }) {
                                     HStack(spacing: 12) {
                                         Image(systemName: "xmark")
-                                            .font(.system(size: 16))
+                                            .font(LimiTypography.body)
                                             .foregroundColor(.appTextSecondary)
                                         Text("Cancel")
-                                            .font(.system(size: 15, weight: .medium))
+                                            .font(LimiTypography.callout)
                                             .foregroundColor(.appTextSecondary)
                                         Spacer()
                                     }
@@ -374,16 +374,16 @@ private struct HomeViewContent: View {
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Image(systemName: "square.grid.2x2")
-                .font(.system(size: 32, weight: .light))
+                .font(LimiTypography.title2)
                 .foregroundColor(.appTextMuted)
 
             Text("home.empty.title".localized)
-                .font(.system(size: 16, weight: .medium))
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextSecondary)
                 .multilineTextAlignment(.center)
 
             Text("home.empty.subtitle".localized)
-                .font(.system(size: 14))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(.appTextMuted)
                 .multilineTextAlignment(.center)
 
@@ -395,7 +395,7 @@ private struct HomeViewContent: View {
         }
         .padding(24)
         .padding(.vertical, 20)
-        .glassCard(cornerRadius: 20, strokeOpacity: 0.06, fillOpacity: 0.04)
+        .glassCard(cornerRadius: LimiCard.radiusLarge, strokeOpacity: 0.06, fillOpacity: 0.04)
         .padding(.horizontal, 16)
     }
 
@@ -410,18 +410,18 @@ private struct HomeViewContent: View {
                         HStack {
                             Image(module.icon)
                                 .renderingMode(.template)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.orbGlow4)
+                                .font(LimiTypography.button)
+                                .foregroundColor(.brandHighlight)
                             Spacer()
                         }
                         Spacer()
                         Text(module.title)
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextPrimary)
 
                         HStack {
                             Text("settings.title".localized)
-                                .font(.system(size: 12, weight: .medium))
+                                .font(LimiTypography.caption)
                                 .foregroundColor(.appTextSecondary)
                             Spacer()
                             Button(action: {
@@ -429,14 +429,14 @@ private struct HomeViewContent: View {
                             }) {
                                 Image(systemName: "ellipsis")
                                     .rotationEffect(.degrees(90))
-                                    .font(.system(size: 14, weight: .medium))
+                                    .font(LimiTypography.callout)
                                     .foregroundColor(.appTextMuted)
                             }
                         }
                     }
-                    .frame(minHeight: 110)
+                    .frame(minHeight: LimiCard.moduleMinHeight)
                     .padding(14)
-                    .glassCard(cornerRadius: 16, fillOpacity: 0.05)
+                    .limiHomeCard(cornerRadius: LimiCard.radius)
                     .scaleEffect(isModuleEditMode ? 0.97 : 1.0)
                     .rotationEffect(.degrees(isModuleEditMode ? -1.5 : 0))
                     .animation(
@@ -461,8 +461,8 @@ private struct HomeViewContent: View {
                                     .fill(Color.appDanger)
                                     .frame(width: 22, height: 22)
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.white)
+                                    .font(LimiTypography.caption2)
+                                    .foregroundColor(.appTextPrimary)
                             }
                         }
                         .buttonStyle(.plain)
@@ -499,7 +499,7 @@ private struct HomeViewContent: View {
 //                        .resizable()
 //                        .scaledToFit()
 //                        .frame(width: 22, height: 22)
-//                        .foregroundColor(Color.themeWhite)
+//                        .foregroundColor(.appTextPrimary)
 //
 //                    Circle()
 //                        .stroke(Color.themeWhite, lineWidth: 1.4)
@@ -531,12 +531,12 @@ private struct HomeViewContent: View {
 
             VStack(spacing: 12) {
                 Text("Hey, Limi here!")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
 
                 Text("Tap to chat")
-                    .font(.system(size: 15))
-                    .foregroundColor(Color.themeWhite.opacity(0.65))
+                    .font(LimiTypography.body)
+                    .foregroundColor(Color.appTextPrimary.opacity(0.65))
 //                OrbView(intensity: $orbIntensity, currentVolume: $orbVolume)
 //                    .frame(width: 160, height: 160)
 

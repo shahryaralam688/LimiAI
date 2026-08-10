@@ -14,7 +14,6 @@ struct ProfileView: View {
     @State private var showConfigurator = false
     @State private var showIFrameView = false
     @State private var navigateToLIMI = false
-    @State private var showGetStartScreen = false
     @State private var showWebSiteView = false
     @State private var showRoomPlanScreen = false
     @Environment(\.dismiss) private var dismiss
@@ -32,10 +31,6 @@ struct ProfileView: View {
 
     @StateObject private var roomCaptureController = RoomCaptureController()
 
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
-    @AppStorage("demoEmail") var demoEmail: String = "umer.asif@terralumen.co.uk"
-
     var body: some View {
         let imageURL = URL(string: userDataManager.userData?.profilePicture?.url ?? "")
 
@@ -52,18 +47,18 @@ struct ProfileView: View {
                 HStack(spacing: 12) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.orbGlow2.opacity(0.08))
+                            .fill(Color.brandHighlight.opacity(0.08))
                             .frame(width: 36, height: 36)
                         Image(systemName: "globe")
-                            .foregroundColor(.orbGlow3)
+                            .foregroundColor(.brandHighlight)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("settings.language".localized)
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextPrimary)
                         Text(LanguageSettings.currentLanguage() == .zhHant ? AppLanguage.zhHant.displayName : AppLanguage.en.displayName)
-                            .font(.system(size: 12))
+                            .font(LimiTypography.caption)
                             .foregroundColor(.appTextSecondary)
                     }
 
@@ -72,7 +67,7 @@ struct ProfileView: View {
                     Button { showLanguageSelector = true } label: {
                         Image(systemName: "chevron.right")
                             .foregroundColor(.appTextMuted)
-                            .font(.system(size: 14))
+                            .font(LimiTypography.subheadline)
                     }
                 }
                 .padding(14)
@@ -93,11 +88,11 @@ struct ProfileView: View {
                                 img.resizable().scaledToFill()
                             } placeholder: {
                                 Circle()
-                                    .fill(Color.orbGlow1.opacity(0.15))
+                                    .fill(Color.brandHighlight.opacity(0.15))
                                     .overlay(
                                         Image(systemName: "person.fill")
-                                            .foregroundColor(.orbGlow4)
-                                            .font(.system(size: 32))
+                                            .foregroundColor(.brandHighlight)
+                                            .font(LimiTypography.title2)
                                     )
                             }
                             .resizable()
@@ -105,14 +100,14 @@ struct ProfileView: View {
                             .frame(width: 88, height: 88)
                             .clipShape(Circle())
                             .overlay(
-                                Circle().stroke(Color.orbGlow4.opacity(0.3), lineWidth: 2)
+                                Circle().stroke(Color.brandHighlight.opacity(0.3), lineWidth: 2)
                             )
-                            .shadow(color: Color.orbGlow1.opacity(0.2), radius: 16)
+                            .shadow(color: Color.brandHighlight.opacity(0.2), radius: 16)
                         }
 
                         let displayName = userDataManager.userData?.username?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "User"
                         Text(displayName)
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .font(LimiTypography.button)
                             .foregroundColor(.appTextPrimary)
                     }
                     .padding(.top, 20)
@@ -175,18 +170,15 @@ struct ProfileView: View {
                         if role != "Installer User created" {
                             Button(action: {
                                 AuthManager.shared.clearToken()
+                                AuthManager.shared.clearRole()
                                 BluetoothManager.shared.disconnectAllDevices()
-                                hasCompletedOnboarding = false
-                                hasLaunchedBefore = false
-                                demoEmail = ""
-                                showGetStartScreen = true
                             }) {
                                 HStack(spacing: 10) {
                                     Image(systemName: "rectangle.portrait.and.arrow.right")
                                         .foregroundColor(.appDanger)
                                     Text("profile.logout".localized)
                                         .foregroundColor(.appDanger)
-                                        .font(.system(size: 15, weight: .semibold))
+                                        .font(LimiTypography.callout)
                                     Spacer()
                                 }
                                 .padding(16)
@@ -206,7 +198,7 @@ struct ProfileView: View {
                     ZStack {
                         Color.appCanvasPrimary.opacity(0.6).ignoresSafeArea()
                         ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .brandAction))
                             .scaleEffect(1.25)
                     }
                 }
@@ -221,31 +213,28 @@ struct ProfileView: View {
         .sheet(isPresented: $showAIAppStore) { AIAppStoreView() }
         .sheet(isPresented: $showAIConnection) { AIConnectionsView() }
         .fullScreenCover(isPresented: $showloginView) { SignInView() }
-        .fullScreenCover(isPresented: $showGetStartScreen) {
-            GetStart()
-        }
         .fullScreenCover(isPresented: $showRoomPlanScreen) {
             RoomPlanContentView().environment(roomCaptureController)
         }
         .overlay(
             ZStack {
                 if showLoginToast {
-                    Color.themeBlack.opacity(0.5)
+                    Color.appOverlayScrim
                         .ignoresSafeArea()
                         .onTapGesture { showLoginToast = false }
 
                     VStack(spacing: 16) {
                         Text("Please Login First")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .font(LimiTypography.button)
                             .foregroundColor(.appTextPrimary)
                         Text("Please login before using this feature")
-                            .font(.system(size: 14))
+                            .font(LimiTypography.subheadline)
                             .foregroundColor(.appTextSecondary)
                             .multilineTextAlignment(.center)
                         HStack(spacing: 12) {
                             Button(action: { showLoginToast = false }) {
                                 Text("Close")
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(LimiTypography.callout)
                                     .foregroundColor(.appTextPrimary)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
@@ -256,13 +245,13 @@ struct ProfileView: View {
                                 showloginView = true
                             }) {
                                 Text("Login")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .font(LimiTypography.callout)
+                                    .foregroundColor(.appTextPrimary)
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
                                     .background(
                                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                            .fill(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
+                                            .fill(LimiGradients.cta)
                                     )
                             }
                         }
@@ -319,21 +308,21 @@ private struct ProfileRow: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 20, height: 20)
-                        .foregroundColor(.orbGlow3)
+                        .foregroundColor(.brandHighlight)
                 } else {
                     Image(icon)
                         .resizable()
                         .renderingMode(.template)
                         .scaledToFit()
                         .frame(width: 20, height: 20)
-                        .foregroundColor(.orbGlow3)
+                        .foregroundColor(.brandHighlight)
                 }
                 Text(title)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(LimiTypography.caption)
                     .foregroundColor(.appTextMuted)
             }
             .padding(.horizontal, 16)

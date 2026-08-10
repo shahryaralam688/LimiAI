@@ -43,7 +43,7 @@ struct ProductDetailView: View {
                             Image(systemName: "cube.transparent")
                             Text("AR View")
                                 .bold()
-                                .font(.system(size: 13))
+                                .font(LimiTypography.footnote)
             
                         }
                     }).tint(.themeBlack)

@@ -240,12 +240,12 @@ struct DefaultHomeWelcomeCoordinator: HomeWelcomeCoordinating {
         User name: \(n). Where they use Limi: \(u). Their selected goals: \(g).
 
         Deliver ONE coherent spoken response in order (single turn, conversational):
-        1) Warm welcome using their name.
-        2) Short Limi AI intro tied to their context — smart lighting, control, and spatial / home features at a high level (not a lecture).
-        3) Brief Home UI orientation using the `ui_guide` metadata: module grid for Device Manager / Configurator / AR / Room Scan; bottom bar tabs; center + opens layers (close), brain (voice), desktop (AR portal) — never describe Configurator or Room Scan on the + button.
-        4) Close by asking what they would like to do next.
+        1) Warm welcome using their name — make them feel seen and at home.
+        2) Brief, friendly Limi intro tied to their context — lighting, comfort, and home features at a human level (not a product lecture).
+        3) Gentle Home orientation using the `ui_guide` metadata: module grid for Device Manager / Configurator / AR / Room Scan; bottom bar tabs; center + opens layers (close), brain (voice), desktop (AR portal) — never describe Configurator or Room Scan on the + button.
+        4) Close warmly by asking what they'd like to do first.
 
-        Match the user’s spoken language when possible; otherwise English. Calm, premium, concise.
+        Match the user's spoken language when possible; otherwise English. Warm, premium, concise — like a thoughtful companion, not a manual.
         """
     }
 }

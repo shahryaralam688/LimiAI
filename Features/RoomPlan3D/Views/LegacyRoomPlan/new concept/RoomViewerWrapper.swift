@@ -31,8 +31,8 @@
 //                        showModelMenu = true
 //                    }) {
 //                        Image(systemName: "plus.circle.fill")
-//                            .font(.system(size: 25))
-//                            .foregroundColor(.blue)
+//                            .font(LimiTypography.title2)
+//                            .foregroundColor(.appInfo)
 //                            .background(Color.themeWhite.opacity(0.8))
 //                            .clipShape(Circle())
 //                    }
@@ -43,7 +43,7 @@
 //                        Text("Reset")
 //                            .padding(10)
 //                            .background(Color.themeBlack.opacity(0.6))
-//                            .foregroundColor(.themeWhite)
+//                            .foregroundColor(.appTextPrimary)
 //                            .cornerRadius(8)
 //                    }
 //                    
@@ -59,15 +59,15 @@
 //                    }
 //                    .padding(10)
 //                    .background(Color.green.opacity(0.6))
-//                    .foregroundColor(.themeWhite)
+//                    .foregroundColor(.appTextPrimary)
 //                    .cornerRadius(8)
 //                    
 //                    Button(action: {
 //                        presentationMode.wrappedValue.dismiss()
 //                    }) {
 //                        Image(systemName: "xmark.circle.fill")
-//                            .font(.system(size: 30))
-//                            .foregroundColor(.themeWhite)
+//                            .font(LimiTypography.title2)
+//                            .foregroundColor(.appTextPrimary)
 //                    }
 //                }
 //                .padding()
@@ -82,8 +82,8 @@
 //                    
 //                    VStack(spacing: 20) {
 //                        Text("Select 3D Model")
-//                            .font(.headline)
-//                            .foregroundColor(.themeWhite)
+//                            .font(LimiTypography.headline)
+//                            .foregroundColor(.appTextPrimary)
 //                        
 //                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
 //                            ForEach(availableModels, id: \.name) { model in
@@ -92,15 +92,15 @@
 //                                }) {
 //                                    VStack {
 //                                        Image(systemName: model.icon)
-//                                            .font(.system(size: 40))
-//                                            .foregroundColor(.blue)
+//                                            .font(LimiTypography.title2)
+//                                            .foregroundColor(.appInfo)
 //                                            .frame(width: 80, height: 60)
 //                                            .background(Color.themeWhite.opacity(0.2))
 //                                            .cornerRadius(10)
 //                                        
 //                                        Text(model.displayName)
-//                                            .font(.caption)
-//                                            .foregroundColor(.themeWhite)
+//                                            .font(LimiTypography.caption)
+//                                            .foregroundColor(.appTextPrimary)
 //                                    }
 //                                }
 //                            }
@@ -109,7 +109,7 @@
 //                        Button("Cancel") {
 //                            showModelMenu = false
 //                        }
-//                        .foregroundColor(.red)
+//                        .foregroundColor(.appDanger)
 //                        .padding()
 //                    }
 //                    .padding()
@@ -128,12 +128,12 @@
 //                    
 //                    VStack(spacing: 20) {
 //                        Text("Select \(selectedMaterialType) Texture")
-//                            .font(.headline)
-//                            .foregroundColor(.themeWhite)
+//                            .font(LimiTypography.headline)
+//                            .foregroundColor(.appTextPrimary)
 //                        
 //                        Text("Material: \(selectedMaterialName)")
-//                            .font(.subheadline)
-//                            .foregroundColor(.gray)
+//                            .font(LimiTypography.subheadline)
+//                            .foregroundColor(.appTextMuted)
 //                        
 //                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 15) {
 //                            ForEach(getAvailableTextures(), id: \.self) { textureName in
@@ -156,8 +156,8 @@
 //                                        }
 //                                        
 //                                        Text(getTextureDisplayName(textureName))
-//                                            .font(.caption)
-//                                            .foregroundColor(.themeWhite)
+//                                            .font(LimiTypography.caption)
+//                                            .foregroundColor(.appTextPrimary)
 //                                    }
 //                                }
 //                            }
@@ -166,7 +166,7 @@
 //                        Button("Cancel") {
 //                            showTextureMenu = false
 //                        }
-//                        .foregroundColor(.red)
+//                        .foregroundColor(.appDanger)
 //                        .padding()
 //                    }
 //                    .padding()

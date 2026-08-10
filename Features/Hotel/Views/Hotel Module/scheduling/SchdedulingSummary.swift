@@ -46,7 +46,7 @@ struct SchedulingSummaryView: View {
                 Spacer()
                 
                 Text("Schedule Summary")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(LimiTypography.button)
                     .foregroundColor(.appTextPrimary)
                 
                 Spacer()
@@ -78,8 +78,8 @@ struct SchedulingSummaryView: View {
             chipLabel(text: "Routine Name")
             
             TextField("e.g. Morning Routine", text: $schedule.type)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.button)
+                .foregroundColor(.appTextPrimary)
                 .padding(.vertical, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -99,7 +99,7 @@ struct SchedulingSummaryView: View {
                 displayedComponents: [.hourAndMinute]
             )
             .labelsHidden()
-            .tint(Color.orbGlow4)
+            .tint(Color.brandAction)
             .colorScheme(.dark)
             
             chipLabel(text: "Description")
@@ -109,8 +109,8 @@ struct SchedulingSummaryView: View {
                 text: $schedule.notes,
                 axis: .vertical
             )
-            .font(.system(size: 16, weight: .regular))
-            .foregroundColor(.themeWhite)
+            .font(LimiTypography.body)
+            .foregroundColor(.appTextPrimary)
             .lineLimit(3)
             .padding(.vertical, 4)
         }
@@ -127,10 +127,10 @@ struct SchedulingSummaryView: View {
             
             Toggle(isOn: $schedule.isCompleted) {
                 Text(schedule.isCompleted ? "Marked as completed" : "This routine will run as scheduled")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextPrimary)
             }
-            .tint(Color.orbGlow4)
+            .tint(Color.brandAction)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -151,7 +151,7 @@ struct SchedulingSummaryView: View {
     
     private func chipLabel(text: String) -> some View {
         Text(text)
-            .font(.system(size: 13, weight: .medium))
+            .font(LimiTypography.footnote)
             .foregroundColor(.appTextPrimary)
             .padding(.vertical, 3)
             .padding(.horizontal, 10)

@@ -102,15 +102,25 @@ class GoogleAuthManager: NSObject, ObservableObject {
                 self?.userEmail = user.profile?.email ?? ""
                 self?.userName = user.profile?.name ?? ""
                 self?.userProfileImage = user.profile?.imageURL(withDimension: 200)?.absoluteString ?? ""
-                if let idToken = user.idToken?.tokenString {
-                    print("[GoogleAuth] Sending idToken + serverAuthCode to backend from signInWithGoogle()")
-                    self?.sendTokenToBackend(idToken, serverAuthCode: serverAuthCode, grantedScopes: user.grantedScopes)
-                } else {
+                guard let idToken = user.idToken?.tokenString, !idToken.isEmpty else {
                     print("No idToken available")
+                    completion?(false)
+                    return
                 }
-                
-                print("Successfully signed in: \(self?.userEmail ?? "")")
-                completion?(true)
+
+                print("[GoogleAuth] Sending idToken + serverAuthCode to backend from signInWithGoogle()")
+                self?.sendTokenToBackend(
+                    idToken,
+                    serverAuthCode: serverAuthCode,
+                    grantedScopes: user.grantedScopes
+                ) { success in
+                    if success {
+                        print("Successfully signed in: \(self?.userEmail ?? "")")
+                    } else {
+                        print("[GoogleAuth] Backend token exchange failed after Google sign-in")
+                    }
+                    completion?(success)
+                }
             }
         }
     }
@@ -222,7 +232,12 @@ class GoogleAuthManager: NSObject, ObservableObject {
         return base
     }
 
-    private func sendTokenToBackend(_ token: String, serverAuthCode: String? = nil, grantedScopes: [String]? = nil) {
+    private func sendTokenToBackend(
+        _ token: String,
+        serverAuthCode: String? = nil,
+        grantedScopes: [String]? = nil,
+        completion: ((Bool) -> Void)? = nil
+    ) {
         print("[Backend] 🔵 sendTokenToBackend() called")
         print("[Backend] URL: \(APIConstants.loginGoogle)")
 
@@ -239,41 +254,48 @@ class GoogleAuthManager: NSObject, ObservableObject {
             body: payload,
             auth: .none
         ) { data, response, error in
-            print("[Backend] ⏹ Backend response received")
-            if let error = error {
-                print("[Backend] Error: \(error)")
-                return
-            }
-
-            if let http = response {
-                print("[Backend] Status code: \(http.statusCode)")
-            }
-
-            guard let data = data else {
-                print("[Backend] No data returned")
-                return
-            }
-
-            if let raw = String(data: data, encoding: .utf8) {
-                print("[Backend] Raw response: \(raw)")
-            }
-
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let dataField = json["data"] as? [String: Any],
-                   let token = dataField["token"] as? String {
-                    print("[Backend] Full JSON: \(json)")
-                    print("[Backend] Extracted Token: \(token)")
-                    // Option A: defer setting global isAuthenticated until onboarding completes
-                    AuthManager.shared.saveToken(token, updateAuthState: false)
-                    AuthManager.shared.clearRole()
-                } else {
-                    print("[Backend] Token not found in response JSON.")
+            DispatchQueue.main.async {
+                print("[Backend] ⏹ Backend response received")
+                if let error = error {
+                    print("[Backend] Error: \(error)")
+                    completion?(false)
+                    return
                 }
-            } catch {
-                print("[Backend] JSON parsing error: \(error)")
+
+                if let http = response {
+                    print("[Backend] Status code: \(http.statusCode)")
+                }
+
+                guard let data = data else {
+                    print("[Backend] No data returned")
+                    completion?(false)
+                    return
+                }
+
+                if let raw = String(data: data, encoding: .utf8) {
+                    print("[Backend] Raw response: \(raw)")
+                }
+
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let dataField = json["data"] as? [String: Any],
+                       let sessionToken = dataField["token"] as? String {
+                        print("[Backend] Full JSON: \(json)")
+                        print("[Backend] Extracted Token: \(sessionToken)")
+                        // Defer isAuthenticated until SignIn / Personalize completes.
+                        AuthManager.shared.saveToken(sessionToken, updateAuthState: false)
+                        AuthManager.shared.clearRole()
+                        completion?(true)
+                    } else {
+                        print("[Backend] Token not found in response JSON.")
+                        completion?(false)
+                    }
+                } catch {
+                    print("[Backend] JSON parsing error: \(error)")
+                    completion?(false)
+                }
+                print("[Backend] 🔵 sendTokenToBackend() finished")
             }
-            print("[Backend] 🔵 sendTokenToBackend() finished")
         }
     }
 

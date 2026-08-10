@@ -16,9 +16,9 @@ struct BLEScanView: View {
                 List(viewModel.discovered, id: \.id) { device in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(device.name)
-                            .font(.headline)
+                            .font(LimiTypography.headline)
                         Text(device.id)
-                            .font(.caption)
+                            .font(LimiTypography.caption)
                             .foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
@@ -34,10 +34,10 @@ struct BLEScanView: View {
                     if viewModel.discovered.isEmpty {
                         VStack(spacing: 8) {
                             Image(systemName: "dot.radiowaves.left.and.right")
-                                .font(.largeTitle)
+                                .font(LimiTypography.largeTitle)
                                 .foregroundStyle(.secondary)
                             Text(viewModel.statusText)
-                                .font(.subheadline)
+                                .font(LimiTypography.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -77,4 +77,79 @@ struct BLEScanView: View {
 
 #Preview {
     NavigationStack { BLEScanView() }
+}
+
+struct BLETestView: View {
+    @StateObject private var viewModel = BLETestViewModel()
+    private let grid = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Text("Test Controls")
+                .font(LimiTypography.title2)
+                .bold()
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Bar 1 (Cool/Warm)")
+                    Spacer()
+                    Text(String(format: "%.0f", viewModel.slider1 * 100))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+                Slider(value: $viewModel.slider1, in: 0...1, step: 0.01)
+                    .onChange(of: viewModel.slider1) { _, newValue in
+                        viewModel.sendValue(index: 1, value: newValue)
+                    }
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Bar 2 (Cool/Warm)")
+                    Spacer()
+                    Text(String(format: "%.0f", viewModel.slider2 * 100))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+                Slider(value: $viewModel.slider2, in: 0...1, step: 0.01)
+                    .onChange(of: viewModel.slider2) { _, newValue in
+                        viewModel.sendValue(index: 2, value: newValue)
+                    }
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Solid Colors")
+                    .font(LimiTypography.headline)
+                LazyVGrid(columns: grid, spacing: 12) {
+                    ForEach(viewModel.presets) { preset in
+                        Button(action: {
+                            viewModel.sendPreset(preset)
+                        }) {
+                            VStack(spacing: 6) {
+                                Circle()
+                                    .fill(preset.color)
+                                    .frame(width: 36, height: 36)
+                                Text(preset.name)
+                                    .font(LimiTypography.caption)
+                                    .foregroundColor(.appTextPrimary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color(uiColor: .secondarySystemBackground))
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Test View")
+        .onAppear {
+            viewModel.handleAppear()
+        }
+    }
 }

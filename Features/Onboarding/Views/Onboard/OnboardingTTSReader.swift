@@ -6,31 +6,31 @@ import AVFoundation
 enum OnboardingStoryboardCopy {
     static func headline(_ page: Int) -> String {
         switch page {
-        case 0: return "Hey! I'm Limi — your ambient AI assistant."
-        case 1: return "Talk to me naturally — I understand context."
-        case 2: return "I go wherever you need me."
+        case 0: return "Hi, I'm Limi — your AI companion for everyday life."
+        case 1: return "Talk to me like you would a friend — I'll follow along."
+        case 2: return "I'm always close when you need me."
         default: return ""
         }
     }
 
     static func detail(_ page: Int) -> String {
         switch page {
-        case 0: return "I live inside your space, always ready to help. No app switching, no searching — just ask."
-        case 1: return "\"Turn the lights warm\" or \"Set a morning routine\" — I handle your lights, schedules, and environment intelligently."
-        case 2: return "Drag me to any edge of your screen. I stay tucked away until you tap. Your space, your rules."
+        case 0: return "I'm here in your space whenever you need me — no menus, no hunting around. Just ask."
+        case 1: return "Say something like \"Turn the lights warm\" or \"Set a morning routine\" — I'll take care of the mood, the timing, and the little details."
+        case 2: return "Move me anywhere on your screen — I'll stay quietly nearby until you tap. Your space, thoughtfully yours."
         default: return ""
         }
     }
 
     /// Spoken after the card copy on pages 0–2; keep in sync with `SequentialSpeechAlignedCard` swipe line.
-    static let swipeInstruction = "Swipe to go to the next screen."
+    static let swipeInstruction = "Swipe when you're ready for the next step."
 
     // MARK: Page 3 (static UI; copy used for TTS only)
 
-    static let page3Subtitle = "The operating system for your physical space"
+    static let page3Subtitle = "The AI-Native Operating System for your physical space"
 
     /// Full narration for page 3 — matches title, subtitle, and instruction rows on the last screen (no UI animation).
-    static let page3Speech = "Your AI, Always Ready. The operating system for your physical space. Tap to start a conversation. Tap again to end the session. Drag to reposition anywhere. When you're ready, tap Activate Limi AI to continue."
+    static let page3Speech = "Ready whenever you are. The AI-Native Operating System for your physical space. Tap to say hello. Tap again when you're done chatting. Drag to move me anywhere you like. When you're ready, tap Let's begin to continue."
 }
 
 // MARK: - Speech ↔ UI sync (system TTS only)

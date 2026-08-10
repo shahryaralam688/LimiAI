@@ -18,7 +18,7 @@ struct ConversationBubbleView: View {
             if isUser { Spacer(minLength: 50) }
 
             Text(message)
-                .font(.system(size: 15, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(isUser ? .white : .appTextPrimary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -26,17 +26,13 @@ struct ConversationBubbleView: View {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(
                             isUser
-                            ? AnyShapeStyle(LinearGradient(
-                                colors: [.orbGlow4, .orbGlow1],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                            : AnyShapeStyle(Color.white.opacity(0.06))
+                            ? AnyShapeStyle(LimiGradients.cta)
+                            : AnyShapeStyle(Color.appGlassFillMedium)
                         )
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(Color.white.opacity(isUser ? 0.08 : 0.04), lineWidth: 0.5)
+                        .stroke(Color.appGlassStroke.opacity(isUser ? 1 : 0.5), lineWidth: 0.5)
                 )
 
             if !isUser { Spacer(minLength: 50) }
@@ -59,19 +55,19 @@ struct ChatInputBar: View {
         HStack(spacing: 8) {
             TextField("", text: $text, prompt: Text("Message Limi...").foregroundColor(.appTextPlaceholder))
                 .textFieldStyle(.plain)
-                .font(.system(size: 16))
+                .font(LimiTypography.body)
                 .foregroundColor(.appTextPrimary)
                 .padding(.leading, 14)
                 .padding(.vertical, 12)
 
             Button(action: handleSend) {
                 Image(systemName: "arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                     .frame(width: 36, height: 36)
                     .background(
                         Circle().fill(
-                            LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            LimiGradients.cta
                         )
                     )
             }
@@ -82,7 +78,7 @@ struct ChatInputBar: View {
         .frame(height: 50)
         .padding(6)
         .glassCard(cornerRadius: 28, fillOpacity: 0.06)
-        .shadow(color: Color.orbGlow1.opacity(0.06), radius: 16, y: 4)
+        .shadow(color: Color.brandAction.opacity(0.06), radius: 16, y: 4)
         .submitLabel(.send)
         .onSubmit(handleSend)
     }
@@ -104,7 +100,7 @@ struct ChatBubbleView: View {
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                 Text(message.isTyping ? "Thinking\(typingDots)" : message.content)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -112,13 +108,13 @@ struct ChatBubbleView: View {
                         RoundedRectangle(cornerRadius: 20, style: .continuous)
                             .fill(
                                 message.isUser
-                                ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                : AnyShapeStyle(Color.white.opacity(0.06))
+                                ? AnyShapeStyle(LimiGradients.cta)
+                                : AnyShapeStyle(Color.appGlassFillMedium)
                             )
                     )
 
                 Text(formatTime(message.timestamp))
-                    .font(.system(size: 11, weight: .medium))
+                    .font(LimiTypography.caption2)
                     .foregroundColor(.appTextMuted)
                     .padding(.horizontal, 4)
             }

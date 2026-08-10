@@ -35,7 +35,7 @@ struct EnhancedFloatingButton: View {
         }) {
             ZStack {
                 Circle()
-                    .fill(Color.eton.opacity(0.3))
+                    .fill(Color.brandHighlight.opacity(0.3))
                     .frame(width: 70, height: 70)
                     .blur(radius: 5)
                     .opacity(glowOpacity)
@@ -45,7 +45,7 @@ struct EnhancedFloatingButton: View {
                 Circle()
                     .stroke(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.eton.opacity(0.7), Color.eton.opacity(0.1)]),
+                            gradient: Gradient(colors: [Color.brandHighlight.opacity(0.7), Color.brandHighlight.opacity(0.1)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -62,25 +62,27 @@ struct EnhancedFloatingButton: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.eton, Color.eton.opacity(0.8)]),
+                            gradient: Gradient(colors: [Color.brandAction, Color.brandAction.opacity(0.8)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 60, height: 60)
-                    .shadow(color: Color.eton.opacity(0.3), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.brandAction.opacity(0.3), radius: 8, x: 0, y: 4)
                     .scaleEffect(isAnimating ? 0.9 : 1.0)
                 
                 Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title)
+                    .foregroundColor(.appTextPrimary)
                     .scaleEffect(isAnimating ? 0.8 : 1.0)
                     .rotationEffect(.degrees(isAnimating ? 90 : 0))
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimating)
             }
         }
         .sheet(isPresented: $showDemoView) {
-            AddDeviceCoordinator.destination(for: .deviceScan)
+            AddDeviceFlowView(onFinished: { _ in
+                showDemoView = false
+            })
         }
         .padding()
     }
@@ -102,7 +104,7 @@ struct WifiFloatingButton: View {
         }) {
             ZStack {
                 Circle()
-                    .fill(Color.eton.opacity(0.3))
+                    .fill(Color.brandHighlight.opacity(0.3))
                     .frame(width: 70, height: 70)
                     .blur(radius: 5)
                     .opacity(glowOpacity)
@@ -112,7 +114,7 @@ struct WifiFloatingButton: View {
                 Circle()
                     .stroke(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.eton.opacity(0.7), Color.eton.opacity(0.1)]),
+                            gradient: Gradient(colors: [Color.brandHighlight.opacity(0.7), Color.brandHighlight.opacity(0.1)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -129,25 +131,27 @@ struct WifiFloatingButton: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.eton, Color.eton.opacity(0.8)]),
+                            gradient: Gradient(colors: [Color.brandAction, Color.brandAction.opacity(0.8)]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 60, height: 60)
-                    .shadow(color: Color.eton.opacity(0.3), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.brandAction.opacity(0.3), radius: 8, x: 0, y: 4)
                     .scaleEffect(isAnimating ? 0.9 : 1.0)
                 
                 Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title)
+                    .foregroundColor(.appTextPrimary)
                     .scaleEffect(isAnimating ? 0.8 : 1.0)
                     .rotationEffect(.degrees(isAnimating ? 90 : 0))
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimating)
             }
         }
         .sheet(isPresented: $showDemoView) {
-            AddDeviceCoordinator.destination(for: .deviceScan)
+            AddDeviceFlowView(onFinished: { _ in
+                showDemoView = false
+            })
         }
         .padding()
     }

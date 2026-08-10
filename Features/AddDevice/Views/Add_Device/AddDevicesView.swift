@@ -10,37 +10,25 @@ enum ConnectionOption {
 struct AddDevicesView: View {
     var onOptionSelected: (ConnectionOption) -> Void
     @State private var animateOptions = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            
-            // Animated title
             VStack(alignment: .leading, spacing: 8) {
                 Text("Add your devices")
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(.appTextInverse)
+                    .font(LimiTypography.largeTitle)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.top, 20)
-                
+
                 Text("Select the method of adding the device")
-                    .font(.system(size: 16))
-                    .foregroundColor(.charlestonGreen.opacity(0.8))
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextSecondary)
                     .padding(.bottom, 16)
             }
             .opacity(animateOptions ? 1 : 0)
             .offset(y: animateOptions ? 0 : 20)
             .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1), value: animateOptions)
-            
-            // Connection options with staggered animation
+
             VStack(spacing: 16) {
-//                ConnectionOptionCard(
-//                    icon: "qrcode",
-//                    title: "Scan QR Code",
-//                    description: "Quickly connect by scanning the device QR code",
-//                    delay: 0.2,
-//                    isAnimated: animateOptions,
-//                    action: { onOptionSelected(.qrCode) }
-//                )
-                
                 ConnectionOptionCard(
                     icon: "wave.3.right",
                     title: "Nearby Devices",
@@ -49,50 +37,28 @@ struct AddDevicesView: View {
                     isAnimated: animateOptions,
                     action: { onOptionSelected(.nearby) }
                 )
-                
-//                ConnectionOptionCard(
-//                    icon: "keyboard",
-//                    title: "Manual Setup",
-//                    description: "Enter device details manually for connection",
-//                    delay: 0.4,
-//                    isAnimated: animateOptions,
-//                    action: { onOptionSelected(.manual) }
-//                )
             }
-            
+
             Spacer()
-            
-            // Bottom tip with animation
-            HStack {
+
+            HStack(spacing: 10) {
                 Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.emerald)
-                
+                    .foregroundColor(.brandHighlight)
                 Text("Tip: Nearby scanning works best when you're within 10 feet of the device")
-                    .font(.caption)
-                    .foregroundColor(.charlestonGreen.opacity(0.7))
+                    .font(LimiTypography.caption)
+                    .foregroundColor(.appTextSecondary)
             }
-            .padding()
-            .background(Color.charlestonGreen.opacity(0.2))
-            .cornerRadius(12)
+            .padding(LimiSpacing.innerPadding)
+            .glassCard(cornerRadius: LimiRadius.small)
             .opacity(animateOptions ? 1 : 0)
             .offset(y: animateOptions ? 0 : 20)
             .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.5), value: animateOptions)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, LimiSpacing.screenHorizontal)
         .padding(.bottom, 24)
-        .background(
-            RoundedRectangle(cornerRadius: 30)
-                .fill(Color.alabaster.opacity(0.9))
-                .shadow(color: Color.themeBlack.opacity(0.1), radius: 20, x: 0, y: 10)
-        )
-        .padding(.horizontal, 16)
-        .padding(.vertical, 20)
         .onAppear {
-            // Trigger animations when view appears
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation {
-                    animateOptions = true
-                }
+                withAnimation { animateOptions = true }
             }
         }
     }
@@ -105,69 +71,48 @@ struct ConnectionOptionCard: View {
     let delay: Double
     let isAnimated: Bool
     let action: () -> Void
-    
+
     @State private var isPressed = false
-    
+
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-                isPressed = true
-            }
-            
-            // Reset press state after a short delay
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { isPressed = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                withAnimation {
-                    isPressed = false
-                }
-                
-                // Trigger the action after the animation
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    action()
-                }
+                withAnimation { isPressed = false }
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { action() }
         }) {
             HStack(spacing: 16) {
-                // Icon with gradient background
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [Color.charlestonGreen.opacity(0.7), Color.charlestonGreen.opacity(0.4)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .fill(LimiGradients.ctaVertical)
                         .frame(width: 50, height: 50)
-                    
                     Image(systemName: icon)
-                        .font(.system(size: 22))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.appTextInverse)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.appTextInverse)
-                    
+                        .font(LimiTypography.button)
+                        .foregroundColor(.appTextPrimary)
                     Text(description)
-                        .font(.system(size: 14))
-                        .foregroundColor(.charlestonGreen.opacity(0.7))
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(.appTextSecondary)
                         .lineLimit(2)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.appTextInverse)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.brandHighlight)
             }
-            .padding()
-            .background(Color.themeWhite)
-            .cornerRadius(16)
-            .shadow(color: Color.charlestonGreen.opacity(0.05), radius: 10, x: 0, y: 5)
+            .padding(LimiSpacing.innerPadding)
+            .glassCard(cornerRadius: LimiRadius.medium)
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
         .opacity(isAnimated ? 1 : 0)
         .offset(x: isAnimated ? 0 : -20)
         .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(delay), value: isAnimated)

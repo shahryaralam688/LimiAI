@@ -87,62 +87,36 @@ struct HubFoundPopupView: View {
 
     var body: some View {
         ZStack {
-            Color.themeBlack.opacity(0.35)
+            Color.appOverlayScrimLight
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 14) {
                 Text(title)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title3)
+                    .foregroundColor(.appTextPrimary)
 
                 VStack(spacing: 6) {
                     Text(deviceName)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                     Text(deviceId)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.themeWhite.opacity(0.8))
+                        .font(LimiTypography.footnote)
+                        .foregroundColor(.appTextSecondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
 
                 HStack(spacing: 12) {
-                    Button(action: onDismiss) {
-                        Text("Dismiss")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color.themeWhite.opacity(0.12))
-                            .foregroundColor(.themeWhite)
-                            .cornerRadius(10)
-                    }
-
-                    Button(action: onConnect) {
-                        Text("Connect")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(LinearGradient(
-                                colors: [Color.blue, Color.purple],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            .foregroundColor(.themeWhite)
-                            .cornerRadius(10)
-                    }
+                    LimiSecondaryButton(title: "Dismiss", height: 46, action: onDismiss)
+                    LimiPrimaryButton(title: "Connect", height: 46, action: onConnect)
                 }
             }
             .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(Color.themeBlack.opacity(0.35))
-                    )
-            )
+            .glassCard(cornerRadius: 18)
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color.themeWhite.opacity(0.15), lineWidth: 1)
+                    .strokeBorder(Color.appGlassStrokeLight, lineWidth: 1)
             )
             .padding(.horizontal, 28)
             .transition(.scale.combined(with: .opacity))

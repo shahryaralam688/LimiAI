@@ -10,7 +10,7 @@ struct LimiBackButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextPrimary)
                 .frame(width: 40, height: 40)
                 .neuCard(cornerRadius: 12)
@@ -28,7 +28,7 @@ struct LimiModuleSubtitle: View {
     var body: some View {
         HStack {
             Text(text)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextTertiary)
             Spacer()
         }
@@ -45,8 +45,8 @@ struct LimiCloseToolbarButton: View {
 
     var body: some View {
         Button(title, action: action)
-            .font(.system(size: 16, weight: .semibold, design: .rounded))
-            .foregroundColor(.orbGlow4)
+            .font(LimiTypography.callout)
+            .foregroundColor(.brandHighlight)
             .accessibilityLabel("Close")
     }
 }

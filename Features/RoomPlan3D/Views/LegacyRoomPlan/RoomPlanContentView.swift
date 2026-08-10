@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  RoomPlanContentView.swift
 //  ForReal Demo
 //
 //  Created by Vatsal Patel  on 8/17/24.
@@ -11,6 +11,9 @@ struct RoomPlanContentView: View {
     @Environment(RoomCaptureController.self) private var captureController
     @Environment(\.dismiss) private var dismiss
     @State private var listViewModel = RoomPlanListViewModel()
+    @State private var showUnsupportedScanAlert = false
+
+    private var canStartNewScan: Bool { RoomPlanCapability.isCaptureSupported }
 
     var body: some View {
         NavigationStack {
@@ -43,20 +46,7 @@ struct RoomPlanContentView: View {
                 }
 
                 if listViewModel.files.isEmpty {
-                    VStack {
-                        Image("ARLogo")
-                            .resizable()
-                            .frame(width: 120, height: 24)
-                        Image("roomImage3")
-                            .resizable()
-                            .frame(width: 250, height: 250)
-                        Text("You have no existing scans")
-                        Text("Make a new scan!")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, LimiSpacing.floatingOrbClearance + 20)
+                    emptyState
                 }
             }
             .navigationTitle("Room Scans")
@@ -66,13 +56,18 @@ struct RoomPlanContentView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: ScanNewRoomView()) {
-                        Image(systemName: "plus")
-                            .foregroundStyle(Color.appTextPrimary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Color.appCanvasPrimary)
-                            .cornerRadius(8)
+                    if canStartNewScan {
+                        NavigationLink(destination: ScanNewRoomView()) {
+                            plusGlyph
+                        }
+                        .accessibilityLabel("Start new room scan")
+                    } else {
+                        Button {
+                            showUnsupportedScanAlert = true
+                        } label: {
+                            plusGlyph
+                        }
+                        .accessibilityLabel("Start new room scan unavailable")
                     }
                 }
 
@@ -88,7 +83,54 @@ struct RoomPlanContentView: View {
             } message: {
                 Text("Dimensions for \(listViewModel.analyzingFile ?? "room") have been printed to the Xcode console.")
             }
-            .trackScreen("RoomPlanContentView", metadata: ["surface": "room_scan_list"])
+            .alert(
+                RoomPlanCapability.unsupportedTitle,
+                isPresented: $showUnsupportedScanAlert
+            ) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(RoomPlanCapability.unsupportedMessage)
+            }
+            .trackScreen(
+                "RoomPlanContentView",
+                metadata: [
+                    "surface": "room_scan_list",
+                    "roomplan_capture_supported": canStartNewScan ? "true" : "false"
+                ]
+            )
+        }
+    }
+
+    private var plusGlyph: some View {
+        Image(systemName: "plus")
+            .foregroundStyle(Color.appTextPrimary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Color.appCanvasPrimary)
+            .cornerRadius(8)
+            .opacity(canStartNewScan ? 1 : 0.45)
+    }
+
+    @ViewBuilder
+    private var emptyState: some View {
+        if canStartNewScan {
+            VStack {
+                Image("ARLogo")
+                    .resizable()
+                    .frame(width: 120, height: 24)
+                Image("roomImage3")
+                    .resizable()
+                    .frame(width: 250, height: 250)
+                Text("You have no existing scans")
+                Text("Tap + to scan a room with your Pro camera")
+            }
+            .font(LimiTypography.headline)
+            .foregroundColor(.appTextSecondary)
+            .multilineTextAlignment(.center)
+            .padding(.bottom, LimiSpacing.floatingOrbClearance + 20)
+        } else {
+            RoomPlanUnsupportedView()
+                .padding(.bottom, LimiSpacing.floatingOrbClearance)
         }
     }
 }

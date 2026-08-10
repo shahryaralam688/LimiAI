@@ -37,7 +37,7 @@ struct VoicePendantAISummaryView: View {
                     viewModel.refresh()
                 } label: {
                     Image(systemName: "arrow.clockwise")
-                        .foregroundColor(.orbGlow4)
+                        .foregroundColor(.brandAction)
                         .rotationEffect(.degrees(viewModel.isLoading ? 360 : 0))
                         .animation(viewModel.isLoading
                                    ? .linear(duration: 1).repeatForever(autoreverses: false)
@@ -82,25 +82,25 @@ struct VoicePendantAISummaryView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                     .scaleEffect(0.8)
                 Text("Updating summary…")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(LimiTypography.caption)
                     .foregroundColor(Color.appTextMuted)
             }
         } else if viewModel.isFromCache {
             Label("Showing last saved summary (offline)", systemImage: "wifi.slash")
-                .font(.system(size: 12, weight: .medium))
+                .font(LimiTypography.caption)
                 .foregroundColor(Color.appTextMuted)
         }
 
         VPSectionCard("Overview") {
             Text(summary.overview.isEmpty ? "No overview available." : summary.overview)
-                .font(.system(size: 15, weight: .regular))
+                .font(LimiTypography.body)
                 .foregroundColor(Color.appTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
 
         if !summary.keyPoints.isEmpty {
             VPSectionCard("Key Points") {
-                bulletList(summary.keyPoints, icon: "circle.fill", tint: .orbGlow4)
+                bulletList(summary.keyPoints, icon: "circle.fill", tint: .brandAction)
             }
         }
 
@@ -117,7 +117,7 @@ struct VoicePendantAISummaryView: View {
         }
 
         Text("Generated \(generatedString(summary.generatedAt))")
-            .font(.system(size: 11, weight: .regular))
+            .font(LimiTypography.caption2)
             .foregroundColor(Color.appTextMuted)
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.top, 4)
@@ -132,8 +132,8 @@ struct VoicePendantAISummaryView: View {
                         .foregroundColor(tint)
                         .padding(.top, icon == "circle.fill" ? 6 : 1)
                     Text(item)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(.appTextPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
                 }
@@ -145,11 +145,11 @@ struct VoicePendantAISummaryView: View {
         FlowLayout(spacing: 8) {
             ForEach(topics, id: \.self) { topic in
                 Text(topic)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.caption)
+                    .foregroundColor(.brandAction)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color.orbGlow4.opacity(0.12))
+                    .background(Color.brandHighlight.opacity(0.12))
                     .clipShape(Capsule())
             }
         }
@@ -161,7 +161,7 @@ struct VoicePendantAISummaryView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                 .scaleEffect(1.2)
             Text("Generating AI summary…")
-                .font(.system(size: 14, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(Color.appTextSecondary)
         }
         .frame(maxWidth: .infinity, minHeight: 220)
@@ -170,26 +170,26 @@ struct VoicePendantAISummaryView: View {
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "doc.text.magnifyingglass")
-                .font(.system(size: 36, weight: .semibold))
+                .font(LimiTypography.title2)
                 .foregroundColor(Color.appTextMuted)
             Text("No summary yet")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
             Text("Tap refresh to generate an AI summary of your conversations.")
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
                 .multilineTextAlignment(.center)
             Button {
                 viewModel.refresh()
             } label: {
                 Text("Generate Summary")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.brandAction)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 360)
-                            .stroke(Color.orbGlow4, lineWidth: 1.5)
+                            .stroke(Color.brandAction, lineWidth: 1.5)
                     )
             }
             .padding(.top, 4)
@@ -201,19 +201,18 @@ struct VoicePendantAISummaryView: View {
     private func errorBanner(_ message: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
+                .foregroundColor(.appWarning)
             Text(message)
-                .font(.system(size: 12, weight: .medium))
+                .font(LimiTypography.caption)
                 .foregroundColor(Color.appTextSecondary)
                 .lineLimit(3)
             Spacer()
             Button("Retry") { viewModel.refresh() }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.caption)
+                .foregroundColor(.brandAction)
         }
         .padding(12)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(12)
+        .limiPanel(cornerRadius: 12)
     }
 
     private func generatedString(_ date: Date) -> String {

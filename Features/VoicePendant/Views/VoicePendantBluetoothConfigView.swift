@@ -87,7 +87,7 @@ struct VoicePendantBluetoothConfigView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                         .scaleEffect(1.2)
                     Text("Scanning…")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                         .foregroundColor(Color.appTextSecondary)
                     Spacer()
                 }
@@ -112,25 +112,24 @@ struct VoicePendantBluetoothConfigView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "wave.3.right.circle.fill")
-                    .font(.system(size: 30, weight: .regular))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.brandAction)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(device.name.isEmpty ? "Unknown device" : device.name)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.appTextPrimary)
                     Text(device.id)
-                        .font(.system(size: 11, weight: .regular))
+                        .font(LimiTypography.caption2)
                         .foregroundColor(Color.appTextMuted)
                         .lineLimit(1)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(Color.appTextMuted)
             }
             .padding(14)
-            .background(Color.appSurfaceSecondaryAlt)
-            .cornerRadius(16)
+            .limiPanel(cornerRadius: 16)
         }
         .buttonStyle(.plain)
     }
@@ -144,10 +143,10 @@ struct VoicePendantBluetoothConfigView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                 .scaleEffect(1.4)
             Text("Connecting to \(viewModel.selectedDevice?.name ?? "pendant")…")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
             Text("Pairing over Bluetooth")
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
             Spacer()
         }
@@ -171,7 +170,7 @@ struct VoicePendantBluetoothConfigView: View {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                     Text("Reading networks from pendant…")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                         .foregroundColor(Color.appTextSecondary)
                     Spacer()
                 }
@@ -184,7 +183,7 @@ struct VoicePendantBluetoothConfigView: View {
                         }
                         if viewModel.wifiNetworks.isEmpty {
                             Text("No networks found. Move closer to your router and refresh.")
-                                .font(.system(size: 14, weight: .regular))
+                                .font(LimiTypography.subheadline)
                                 .foregroundColor(Color.appTextMuted)
                                 .multilineTextAlignment(.center)
                                 .padding(.top, 40)
@@ -193,7 +192,7 @@ struct VoicePendantBluetoothConfigView: View {
                             viewModel.loadWifiList()
                         } label: {
                             Label("Refresh networks", systemImage: "arrow.clockwise")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(LimiTypography.callout)
                                 .foregroundColor(Color.appBorderSoft)
                         }
                         .padding(.top, 8)
@@ -211,19 +210,18 @@ struct VoicePendantBluetoothConfigView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "wifi")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.appTextPrimary)
                 Text(ssid)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(LimiTypography.caption)
                     .foregroundColor(Color.appTextMuted)
             }
             .padding(14)
-            .background(Color.appSurfaceSecondaryAlt)
-            .cornerRadius(16)
+            .limiPanel(cornerRadius: 16)
         }
         .buttonStyle(.plain)
     }
@@ -241,10 +239,9 @@ struct VoicePendantBluetoothConfigView: View {
             VStack(spacing: 16) {
                 SecureField("Wi-Fi password", text: $viewModel.passwordInput)
                     .textFieldStyle(.plain)
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
                     .padding(14)
-                    .background(Color.appSurfaceSecondaryAlt)
-                    .cornerRadius(14)
+                    .limiPanel(cornerRadius: 14)
 
                 LimiPrimaryButton(title: "Connect Pendant") {
                     viewModel.provision()
@@ -254,7 +251,7 @@ struct VoicePendantBluetoothConfigView: View {
                     viewModel.backToWifiList()
                 } label: {
                     Text("Choose a different network")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                         .foregroundColor(Color.appTextSecondary)
                 }
             }
@@ -273,10 +270,10 @@ struct VoicePendantBluetoothConfigView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                 .scaleEffect(1.4)
             Text("Sending Wi-Fi to pendant…")
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.themeWhite)
-            Text("Joining “\(ssid)”")
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
+            Text("Joining “\(ssid)”. This can take up to 45 seconds.")
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
             Spacer()
         }
@@ -290,17 +287,17 @@ struct VoicePendantBluetoothConfigView: View {
         VStack(spacing: 20) {
             Spacer()
             ZStack {
-                Circle().fill(Color.emerald.opacity(0.12)).frame(width: 120, height: 120)
+                Circle().fill(Color.brandAction.opacity(0.12)).frame(width: 120, height: 120)
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64, weight: .regular))
+                    .font(LimiTypography.title2)
                     .foregroundColor(.emerald)
             }
             VStack(spacing: 8) {
                 Text("Pendant configured")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title3)
+                    .foregroundColor(.appTextPrimary)
                 Text("\(viewModel.connectedDeviceName ?? viewModel.selectedDevice?.name ?? "Your pendant") is now joining “\(ssid)”. It will appear in your pendant list once it's online.")
-                    .font(.system(size: 14, weight: .regular))
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(Color.appTextSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -322,17 +319,17 @@ struct VoicePendantBluetoothConfigView: View {
     private func stepHeader(icon: String, title: String, subtitle: String) -> some View {
         VStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 30, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.title2)
+                .foregroundColor(.brandAction)
                 .frame(width: 64, height: 64)
-                .background(Color.orbGlow4.opacity(0.12))
+                .background(Color.brandHighlight.opacity(0.12))
                 .clipShape(Circle())
             Text(title)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.button)
+                .foregroundColor(.appTextPrimary)
                 .multilineTextAlignment(.center)
             Text(subtitle)
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
                 .multilineTextAlignment(.center)
         }
@@ -344,15 +341,14 @@ struct VoicePendantBluetoothConfigView: View {
     private func infoBanner(icon: String, text: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .foregroundColor(.orange)
+                .foregroundColor(.appWarning)
             Text(text)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.footnote)
+                .foregroundColor(.appTextPrimary)
             Spacer()
         }
         .padding(12)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(12)
+        .limiPanel(cornerRadius: 12)
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }

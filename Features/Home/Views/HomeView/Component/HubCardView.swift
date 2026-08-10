@@ -93,8 +93,8 @@ struct HubCardView: View {
                             showAlert = true
                         }) {
                             Text(selectedMode.map { "Mode: \($0)" } ?? "Mode")
-                                .font(.title)
-                                .foregroundColor(.themeBlack)
+                                .font(LimiTypography.title)
+                                .foregroundColor(.appTextPrimary)
                                 .opacity(buttonOpacity)
                                 .animation(isAnimating ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .none, value: buttonOpacity)
                         }

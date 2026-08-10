@@ -39,21 +39,21 @@ struct HeaderView: View {
             }) {
                 ZStack {
                     Circle()
-                        .fill(Color.orbGlow4.opacity(0.15))
+                        .fill(Color.brandHighlight.opacity(0.15))
                         .frame(width: 46, height: 46)
                         .blur(radius: 4)
                         .opacity(isSidebarOpen ? 0.6 : 0)
 
                     Circle()
-                        .fill(Color.white.opacity(0.06))
+                        .fill(Color.appGlassFillMedium)
                         .frame(width: 42, height: 42)
                         .overlay(
                             Circle()
-                                .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                                .stroke(Color.appGlassStroke, lineWidth: 0.5)
                         )
 
                     Image(systemName: isSidebarOpen ? "xmark" : "line.horizontal.3")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(LimiTypography.headline)
                         .foregroundColor(.appTextPrimary)
                 }
                 .rotationEffect(.degrees(isSidebarOpen ? 90 : 0))
@@ -68,7 +68,7 @@ struct HeaderView: View {
                 Color.appCanvasPrimary
 
                 LinearGradient(
-                    colors: [Color.orbGlow2.opacity(0.04), Color.clear],
+                    colors: [Color.brandActionDark.opacity(0.04), Color.clear],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )

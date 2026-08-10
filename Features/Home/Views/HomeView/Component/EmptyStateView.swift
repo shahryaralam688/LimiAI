@@ -17,15 +17,15 @@ struct EmptyStateView: View {
             ZStack {
                 ForEach(0..<3, id: \.self) { i in
                     Circle()
-                        .stroke(Color.eton.opacity(0.1), lineWidth: 2)
+                        .stroke(Color.brandHighlight.opacity(0.1), lineWidth: 2)
                         .frame(width: 120 + CGFloat(i * 30), height: 120 + CGFloat(i * 30))
                         .scaleEffect(isLoaded ? 1.0 : 0.8)
                         .opacity(isLoaded ? 1 : 0)
                         .animation(.easeInOut(duration: 1.0).delay(0.3 + Double(i) * 0.1), value: isLoaded)
                 }
                 Image(systemName: "house.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.eton)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.brandHighlight)
                     .opacity(isLoaded ? 1 : 0)
                     .scaleEffect(isLoaded ? 1 : 0.5)
                     .rotationEffect(isLoaded ? .degrees(0) : .degrees(-30))
@@ -36,14 +36,14 @@ struct EmptyStateView: View {
             
             VStack(spacing: 10) {
                 Text("No devices linked yet")
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextInverse)
                     .opacity(isLoaded ? 1 : 0)
                     .animation(.easeIn.delay(0.6), value: isLoaded)
                 
                 Text("Tap + to add your first device")
-                    .font(.subheadline)
-                    .foregroundColor(.gray.opacity(0.8))
+                    .font(LimiTypography.subheadline)
+                    .foregroundColor(.appTextMuted)
                     .opacity(isLoaded ? 1 : 0)
                     .animation(.easeIn.delay(0.8), value: isLoaded)
                     .padding(.bottom, 10)
@@ -53,18 +53,18 @@ struct EmptyStateView: View {
                 }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 16))
+                            .font(LimiTypography.body)
                         Text("Add Device")
                             .fontWeight(.medium)
                     }
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 20)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.eton)
+                            .fill(Color.brandAction)
                     )
-                    .shadow(color: Color.eton.opacity(0.3), radius: 5, x: 0, y: 3)
+                    .shadow(color: Color.brandAction.opacity(0.3), radius: 5, x: 0, y: 3)
                 }
                 .zIndex(10) // Ensure button is above other elements
                 .allowsHitTesting(true) // Explicitly enable hit testing

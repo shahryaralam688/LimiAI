@@ -17,6 +17,7 @@ struct ConnectedDevicesView: View {
     
     // MARK: - Bonjour Integration
     @ObservedObject private var bonjourBrowser = BonjourServiceBrowser.shared
+    @ObservedObject private var pendantTypeStore = DevicePendantTypeStore.shared
     private let allowedNames: Set<String> = ["1 CH-HUB", "4 CH-HUB", "8 CH-HUB", "16 CH-HUB", "Mini Controller", "LIMI Device"]
     @State private var allocatedWifiDeviceIds: Set<String> = []
     @State private var banpurUploadedDeviceIds: Set<String> = []
@@ -132,8 +133,8 @@ struct ConnectedDevicesView: View {
                 VStack{
                     HStack{
                         Text("Connected Space")
-                            .font(.system(size: 18, weight: .medium, design: .rounded))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
                             .multilineTextAlignment(.center)
                             .lineSpacing(18 * 0.2)
                             .tracking(-0.15 / 18)
@@ -146,21 +147,21 @@ struct ConnectedDevicesView: View {
                     let role = AuthManager.shared.getRole()
                     if role == "Installer User created" {
                         Text("Please log in to view your Wi-Fi devices.")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.appTextMuted)
                             .padding()
                     } else {
                         if wifiDevices.isEmpty {
                             VStack {
                                 VStack(spacing: 16) {
                                     Text("You haven’t added any devices yet")
-                                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        .font(LimiTypography.headline)
                                         .foregroundColor(Color.appTextSecondary)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(16 * 0.4)
                                         .kerning(0)
                                     
                                     Text("Tap the button below to add devices")
-                                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                                        .font(LimiTypography.subheadline)
                                         .foregroundColor(Color.appTextMuted)
                                         .multilineTextAlignment(.center)
                                         .lineSpacing(14 * 0.4)
@@ -212,6 +213,9 @@ struct ConnectedDevicesView: View {
                                         .contentShape(Rectangle())
                                         .onTapGesture {
                                             guard renameTargetDevice == nil else { return }
+                                            // Offline / disconnected devices stay visible for rename,
+                                            // but must not open the control sheet.
+                                            guard device.isOnline else { return }
                                             selectedWifiDevice = device
                                         }
                                     }
@@ -343,7 +347,9 @@ struct ConnectedDevicesView: View {
             HomeView()
         }
         .fullScreenCover(isPresented: $isShowingDevice) {
-            AddDeviceCoordinator.destination(for: .deviceScan)
+            AddDeviceFlowView(onFinished: { _ in
+                isShowingDevice = false
+            })
         }
         .alert(
             "Rename Device",
@@ -408,12 +414,23 @@ struct ConnectedDevicesView: View {
             .uppercased()
         let channelType = normalizedChannelType == "RGB" ? "RGB" : "CCT"
         let channelPosition = 1
+        let pendantModel = PendantModelCatalog.bundledName(forDeviceId: device.chennalMac)
+        // pendantTypeStore observation refreshes the model when device_status arrives.
+        let _ = pendantTypeStore.pendantTypesByDeviceId
         if channelType == "CCT" {
-            CCTLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
-                .id("cct-\(device.chennalMac)-\(channelPosition)")
+            CCTLEDPreviewView(
+                chennalMac: device.chennalMac,
+                chennelPosition: channelPosition,
+                bundledName: pendantModel
+            )
+                .id("cct-\(device.chennalMac)-\(channelPosition)-\(pendantModel)")
         } else {
-            WLEDView(chennalMac: device.chennalMac, chennelPosition: channelPosition)
-                .id("rgb-\(device.chennalMac)-\(channelPosition)")
+            RGBLEDPreviewView(
+                chennalMac: device.chennalMac,
+                chennelPosition: channelPosition,
+                bundledName: pendantModel
+            )
+                .id("rgb-\(device.chennalMac)-\(channelPosition)-\(pendantModel)")
         }
     }
 
@@ -553,15 +570,15 @@ struct WifiDeviceSpace: View {
         VStack {
             HStack {
                 Image(systemName: "house.fill")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
                 Button(action: onRename) {
                     Image(systemName: "pencil")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 28, height: 28)
-                        .background(Color.themeBlack.opacity(0.25))
+                        .background(Color.appOverlayScrimLight)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -570,8 +587,7 @@ struct WifiDeviceSpace: View {
 
             HStack {
                 Text(displayName)
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                 Spacer()
             }
@@ -579,26 +595,24 @@ struct WifiDeviceSpace: View {
 
             HStack {
                 Text(channelSummary)
-                    .font(.headline)
-                    .fontWeight(.semibold)
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
 
                 Spacer()
                 Circle()
-                    .fill(isOnline ? Color.emerald : Color.gray)
+                    .fill(isOnline ? Color.brandAction : Color.appBorderPrimary)
                     .frame(width: 8, height: 8)
                 Text(isOnline ? "Online" : "Disconnected")
-                    .font(.caption)
-                    .foregroundColor(isOnline ? .green : .gray)
+                    .font(LimiTypography.caption)
+                    .foregroundColor(isOnline ? Color.appSuccess : Color.appTextMuted)
 
             }
             .padding(.horizontal, 10)
         }
         .frame(height: 165.5)
-        .background(Color.appSurfacePrimary)
-        .cornerRadius(16)
-        .shadow(color: Color.themeBlack.opacity(0.1), radius: 5, x: 0, y: 2)
-        .opacity(isOnline ? 1.0 : 0.7)
+        .limiPanel(cornerRadius: 16)
+        .shadow(color: Color.appShadowMedium, radius: 5, x: 0, y: 2)
+        .opacity(isOnline ? 1.0 : 0.45)
         .onAppear { logResolvedDevice() }
         .onReceive(bonjourBrowser.$discoveredWiFiDevices) { _ in
             logResolvedDevice()

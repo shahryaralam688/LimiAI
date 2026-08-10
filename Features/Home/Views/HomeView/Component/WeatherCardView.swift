@@ -18,33 +18,37 @@ struct WeatherCardView: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color(hex: "2E5BFF"), Color(hex: "56A0F5"), Color(hex: "87CEEB")],
+                        colors: [
+                            Color.appWeatherClearTop,
+                            Color.appWeatherClearMid,
+                            Color.appWeatherClearBottom
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                        .stroke(Color.appGlassStrokeLight, lineWidth: 0.5)
                 )
 
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 6) {
                         Image(systemName: "location.fill")
-                            .font(.system(size: 12))
+                            .font(LimiTypography.caption)
                         Text("\(city), \(country)")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(LimiTypography.callout)
                     }
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Color.appTextPrimary.opacity(0.8))
 
                     HStack(alignment: .top, spacing: 0) {
                         Text("\(temperature)")
-                            .font(.system(size: 68, weight: .thin, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary)
                         Text("°")
-                            .font(.system(size: 32, weight: .thin))
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(LimiTypography.title2)
+                            .foregroundColor(Color.appTextPrimary.opacity(0.8))
                             .padding(.top, 6)
                     }
 
@@ -52,17 +56,17 @@ struct WeatherCardView: View {
                         Label("\(windSpeedKmh) km/h", systemImage: "wind")
                         Label("\(humidityPercent)%", systemImage: "humidity.fill")
                     }
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
+                    .font(LimiTypography.footnote)
+                    .foregroundColor(Color.appTextPrimary.opacity(0.7))
 
                     HStack {
                         Text("H:\(high)° L:\(low)°")
-                            .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(LimiTypography.footnote)
+                            .foregroundColor(Color.appTextPrimary.opacity(0.6))
                         Spacer()
                         Text(lastUpdated)
-                            .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.5))
+                            .font(LimiTypography.caption)
+                            .foregroundColor(Color.appTextPrimary.opacity(0.5))
                     }
                 }
                 .padding(20)
@@ -71,26 +75,26 @@ struct WeatherCardView: View {
 
                 VStack {
                     Image(systemName: conditionIcon)
-                        .font(.system(size: 44, weight: .light))
+                        .font(LimiTypography.title2)
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [.yellow, .orange.opacity(0.7)],
+                                colors: [Color.appWarmGlow, Color.appOrange.opacity(0.7)],
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
                         )
-                        .shadow(color: .yellow.opacity(0.3), radius: 12, y: 4)
+                        .shadow(color: Color.appWarmGlow.opacity(0.3), radius: 12, y: 4)
 
                     Text(condition)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                        .font(LimiTypography.callout)
+                        .foregroundColor(Color.appTextPrimary.opacity(0.7))
                         .padding(.top, 8)
                 }
                 .padding(.trailing, 24)
             }
         }
         .frame(height: 220)
-        .shadow(color: Color(hex: "2E5BFF").opacity(0.25), radius: 20, y: 10)
+        .shadow(color: Color.brandAction.opacity(0.25), radius: 20, y: 10)
     }
 
     private var conditionIcon: String {

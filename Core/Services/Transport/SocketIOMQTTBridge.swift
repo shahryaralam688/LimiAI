@@ -20,6 +20,9 @@ public final class SocketIOMQTTBridge: NSObject, MQTTClient {
     /// Event name backend listens for. Must match LightControllingSocket today.
     private let commandEvent = "light_controll"
 
+    /// Room/group control — separate from single-device `light_controll`.
+    private let groupCommandEvent = "group_light_control"
+
     /// Separate event so reset is never mixed with command (per spec).
     private let resetEvent = "device_reset"
 
@@ -42,6 +45,13 @@ public final class SocketIOMQTTBridge: NSObject, MQTTClient {
             throw LimiTransportError.badCommand
         }
         try await emit(event: commandEvent, payload: json)
+    }
+
+    public func publishGroupCommand(_ payload: Data) async throws {
+        guard let json = try JSONSerialization.jsonObject(with: payload) as? [String: Any] else {
+            throw LimiTransportError.badCommand
+        }
+        try await emit(event: groupCommandEvent, payload: json)
     }
 
     public func publishReset(deviceId: String) async throws {
@@ -73,7 +83,9 @@ public final class SocketIOMQTTBridge: NSObject, MQTTClient {
         registered = true
         LightControllingSocket.shared.registerPresenceHandler { [weak self] deviceId, status in
             guard let self else { return }
-            let connected = (status.lowercased() == "online" || status.lowercased() == "connected")
+            // Ignore ack-only device_status payloads (no real on/off status).
+            guard LimiDeviceNaming.isDefinitePresenceStatus(status) else { return }
+            let connected = LimiDeviceNaming.isOnlinePresenceStatus(status)
             self.presenceSubject.send(MQTTPresenceUpdate(deviceId: deviceId, connected: connected))
         }
     }

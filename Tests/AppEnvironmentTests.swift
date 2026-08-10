@@ -25,22 +25,4 @@ final class AppEnvironmentTests: XCTestCase {
         XCTAssertEqual(http.performedRequests.count, 1)
         XCTAssertEqual(http.performedRequests.first?.url?.absoluteString, "https://example.com")
     }
-
-    func testGetStartViewModelUsesMockInstallerLogin() {
-        var login = MockInstallerLoginService()
-        login.result = .success(())
-        var env = AppEnvironment.mock
-        env.installerLogin = login
-
-        let viewModel = GetStartViewModel(environment: env)
-        let expectation = expectation(description: "installer login")
-
-        viewModel.continueWithRole(GetStart.Role.deafOrHardOfHearing)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertEqual(viewModel.activeAuthRoute, .installerHome)
-            expectation.fulfill()
-        }
-
-        wait(for: [expectation], timeout: 1.0)
-    }
 }

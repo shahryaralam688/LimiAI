@@ -1,0 +1,187 @@
+77fea121ecb3aa3585145f404b28dacfd7b1a29f	not-for-merge	branch 'animated-image-view-dealloc-fix' of https://github.com/Flipboard/FLAnimatedImage
+706528bc0f2d2fec292630747ed54d77db6922e8	not-for-merge	branch 'cocoalumberjack-logging-integration' of https://github.com/Flipboard/FLAnimatedImage
+7578d66579df3aa3a7bd2f7412a8395dd9a4e9d5	not-for-merge	branch 'colin/invert-instances' of https://github.com/Flipboard/FLAnimatedImage
+11793a193cd5453004fcae3f61328cc7115adfe8	not-for-merge	branch 'colin/smart-invert-colors' of https://github.com/Flipboard/FLAnimatedImage
+f7602994fbeda1cc027a586eaf36263009f840bf	not-for-merge	branch 'debug-info' of https://github.com/Flipboard/FLAnimatedImage
+4c6ec8e169062c5bf824c2fe151abf63bd019819	not-for-merge	branch 'drop-ios5-compatibility' of https://github.com/Flipboard/FLAnimatedImage
+33e77465460e844ea93b805302a2158ed74544da	not-for-merge	branch 'dynamic-memory-category' of https://github.com/Flipboard/FLAnimatedImage
+4f053fbb43f6e68271ddfe58cacd3cef7e06fbbf	not-for-merge	branch 'features/reverse-playback' of https://github.com/Flipboard/FLAnimatedImage
+58d70ad9bdfce4b555f3b9b1607e274fbb19f5cb	not-for-merge	branch 'main' of https://github.com/Flipboard/FLAnimatedImage
+d4f07b6f164d53c1212c3e54d6460738b1981e9f	not-for-merge	branch 'master' of https://github.com/Flipboard/FLAnimatedImage
+84ed326b823dddd555582e0e6295feb9691832fe	not-for-merge	branch 'orientation-issue' of https://github.com/Flipboard/FLAnimatedImage
+c89fad29d4d41452edd45157ff92e225a7ce2f51	not-for-merge	branch 'perf-scrub' of https://github.com/Flipboard/FLAnimatedImage
+298492f696fa753e11fb39c7ba05eae993344b34	not-for-merge	branch 'readme-fixes' of https://github.com/Flipboard/FLAnimatedImage
+911baaa1df4deeebe572e636bd32ea415463c72e	not-for-merge	branch 'scrolling-playback' of https://github.com/Flipboard/FLAnimatedImage
+454c75c9c72eb0b59114903b8b9257ef0ae50ace	not-for-merge	branch 'stricter-default-ddlogging' of https://github.com/Flipboard/FLAnimatedImage
+824545cf761f0649332f26cfc3beaa719c44cbea	not-for-merge	branch 'tim/fix-demo-project-framework-device-crash' of https://github.com/Flipboard/FLAnimatedImage
+b46cc40d00ee630ccdbb85fbdc0f47e9e2785a10	not-for-merge	branch 'uiimage-subclass' of https://github.com/Flipboard/FLAnimatedImage
+2980df3ebcee37f4a2b81065ab69ca0c39773b44	not-for-merge	branch 'undeclared-byte_size-fix' of https://github.com/Flipboard/FLAnimatedImage
+4d6935b02492848c0a369431a5219c2c6f4d7b57	not-for-merge	'refs/pull/101/head' of https://github.com/Flipboard/FLAnimatedImage
+82a85af4af49de842d6b9f11600753ce10144bd4	not-for-merge	'refs/pull/101/merge' of https://github.com/Flipboard/FLAnimatedImage
+89d5f2ab77c03b43d015026e33f0229cad25a2b9	not-for-merge	'refs/pull/102/head' of https://github.com/Flipboard/FLAnimatedImage
+26b00f08c8266901ec280a4b6bece78ccfd49fc2	not-for-merge	'refs/pull/104/head' of https://github.com/Flipboard/FLAnimatedImage
+b23d5696c15742d06f0ecff172d1ae77cc91fbe2	not-for-merge	'refs/pull/105/head' of https://github.com/Flipboard/FLAnimatedImage
+666cf5430f2ef0a860a143bc646c3189c9bd46ce	not-for-merge	'refs/pull/106/head' of https://github.com/Flipboard/FLAnimatedImage
+70784e50958827fa2a8778e694c4bcf30eb70ef1	not-for-merge	'refs/pull/106/merge' of https://github.com/Flipboard/FLAnimatedImage
+c6b362b8850198220b904d0d70242c56ffcd0e66	not-for-merge	'refs/pull/110/head' of https://github.com/Flipboard/FLAnimatedImage
+a1596413134aa5b1d58304b13f7036a869452b2a	not-for-merge	'refs/pull/111/head' of https://github.com/Flipboard/FLAnimatedImage
+8c4ed867d59c997237eacfb018907b41b8fd8bda	not-for-merge	'refs/pull/113/head' of https://github.com/Flipboard/FLAnimatedImage
+63d0c6860ebe1edfac818b06b371be4aee2fa2ab	not-for-merge	'refs/pull/117/head' of https://github.com/Flipboard/FLAnimatedImage
+aad6137669d0706b137624c3b26ccd5475096ac2	not-for-merge	'refs/pull/119/head' of https://github.com/Flipboard/FLAnimatedImage
+9a1402cacc659e92613420e8a2016341145f2d34	not-for-merge	'refs/pull/12/head' of https://github.com/Flipboard/FLAnimatedImage
+4764b267b67d7154a5ab3ba45b6cc487f899aa31	not-for-merge	'refs/pull/12/merge' of https://github.com/Flipboard/FLAnimatedImage
+608aa41931df6a18368e219af2563661d75674ba	not-for-merge	'refs/pull/122/head' of https://github.com/Flipboard/FLAnimatedImage
+32b571c73666824d15590623b523ef32713760b2	not-for-merge	'refs/pull/124/head' of https://github.com/Flipboard/FLAnimatedImage
+098c93eace78ba2666bb48683c44a489f0f363e5	not-for-merge	'refs/pull/125/head' of https://github.com/Flipboard/FLAnimatedImage
+f05018eb18e0ec2b892c82e54d7c580948143039	not-for-merge	'refs/pull/126/head' of https://github.com/Flipboard/FLAnimatedImage
+b8b84b7585e55c0904cd6facb40cda5cfa529f8c	not-for-merge	'refs/pull/127/head' of https://github.com/Flipboard/FLAnimatedImage
+e2f1747dae524ebf1603fe4b8feac729b9027096	not-for-merge	'refs/pull/128/head' of https://github.com/Flipboard/FLAnimatedImage
+8d8028092574c500c7d447c1bf3f59f70c6cf61d	not-for-merge	'refs/pull/128/merge' of https://github.com/Flipboard/FLAnimatedImage
+2c42c6ee38398fcd418b7cb7f219ecceee08cdd3	not-for-merge	'refs/pull/13/head' of https://github.com/Flipboard/FLAnimatedImage
+b18e2b8c49cfb71fcbcda1402006eb19346d0684	not-for-merge	'refs/pull/130/head' of https://github.com/Flipboard/FLAnimatedImage
+e3fe83c5d30b9ffc1190763bb525d3b0445d9b52	not-for-merge	'refs/pull/133/head' of https://github.com/Flipboard/FLAnimatedImage
+65ca4a5fdfee249b20fbf0b622fb8e239d816692	not-for-merge	'refs/pull/136/head' of https://github.com/Flipboard/FLAnimatedImage
+d374fcd422b74e61c7e59599a711be7b3756d369	not-for-merge	'refs/pull/138/head' of https://github.com/Flipboard/FLAnimatedImage
+d72a3610ffa33f66d402c1f97ab014ef186c61a7	not-for-merge	'refs/pull/140/head' of https://github.com/Flipboard/FLAnimatedImage
+b7277a409dc4c61379cb5d7cd44321e59fcd4648	not-for-merge	'refs/pull/143/head' of https://github.com/Flipboard/FLAnimatedImage
+7c164cac10c185c177be2f5997eab0a3412a1de5	not-for-merge	'refs/pull/143/merge' of https://github.com/Flipboard/FLAnimatedImage
+634974a89e1216e9822081abe73e390c5af46dc5	not-for-merge	'refs/pull/147/head' of https://github.com/Flipboard/FLAnimatedImage
+4e43193e98a96001747a0ca98556eac3cbc72d8c	not-for-merge	'refs/pull/150/head' of https://github.com/Flipboard/FLAnimatedImage
+794a3c63d9c7afa8f7f5cc5857b547270f7b68d2	not-for-merge	'refs/pull/150/merge' of https://github.com/Flipboard/FLAnimatedImage
+1f238e6fa715091f1468dc58823564e33c7f1605	not-for-merge	'refs/pull/151/head' of https://github.com/Flipboard/FLAnimatedImage
+3192f388d8be687867b7a3e0561dc0e46f7d211c	not-for-merge	'refs/pull/155/head' of https://github.com/Flipboard/FLAnimatedImage
+e501d8ed52f45464609e505cfa3082e795687927	not-for-merge	'refs/pull/155/merge' of https://github.com/Flipboard/FLAnimatedImage
+0bcb6e317c9efc8faeb460687fc824daaba5e704	not-for-merge	'refs/pull/167/head' of https://github.com/Flipboard/FLAnimatedImage
+5eb1b4829af9e3ad6b0f1504556443c28ea99cd0	not-for-merge	'refs/pull/169/head' of https://github.com/Flipboard/FLAnimatedImage
+f04ed430e5ddaba78bd70920cfd397e60a7b4e87	not-for-merge	'refs/pull/172/head' of https://github.com/Flipboard/FLAnimatedImage
+82592074497d68958234c2f62a2fad696febddae	not-for-merge	'refs/pull/172/merge' of https://github.com/Flipboard/FLAnimatedImage
+0459e72494da973e108bf070befd13715df2f4e2	not-for-merge	'refs/pull/174/head' of https://github.com/Flipboard/FLAnimatedImage
+e05af4937c7ff8005f2accb70ac351dba0935a34	not-for-merge	'refs/pull/177/head' of https://github.com/Flipboard/FLAnimatedImage
+26d869b5dc4fb5e81f7082546817c317712dddf7	not-for-merge	'refs/pull/177/merge' of https://github.com/Flipboard/FLAnimatedImage
+8fd90b2c571a061f48eb7a2004fea0366851dd38	not-for-merge	'refs/pull/18/head' of https://github.com/Flipboard/FLAnimatedImage
+a173363af29a3c42e95975e12a3d9cd578d42cf3	not-for-merge	'refs/pull/18/merge' of https://github.com/Flipboard/FLAnimatedImage
+c940bc6627b88d784fc83a5232c265f4b9465335	not-for-merge	'refs/pull/180/head' of https://github.com/Flipboard/FLAnimatedImage
+fca9cef3beb30ca49afba1c42cfd37d20d68beda	not-for-merge	'refs/pull/180/merge' of https://github.com/Flipboard/FLAnimatedImage
+11793a193cd5453004fcae3f61328cc7115adfe8	not-for-merge	'refs/pull/186/head' of https://github.com/Flipboard/FLAnimatedImage
+7578d66579df3aa3a7bd2f7412a8395dd9a4e9d5	not-for-merge	'refs/pull/187/head' of https://github.com/Flipboard/FLAnimatedImage
+0cc5f18ad361dc8f590f63694b34db0e50368df2	not-for-merge	'refs/pull/189/head' of https://github.com/Flipboard/FLAnimatedImage
+6b0d4438b6f8af90ed6b68abfdebe7fe58bb18fb	not-for-merge	'refs/pull/191/head' of https://github.com/Flipboard/FLAnimatedImage
+8769c4549b9b3b287e68980a8b73851bd0e76e4b	not-for-merge	'refs/pull/192/head' of https://github.com/Flipboard/FLAnimatedImage
+02bbdb266abcfa2cd9bf71369476a5aff53ab766	not-for-merge	'refs/pull/193/head' of https://github.com/Flipboard/FLAnimatedImage
+33e77465460e844ea93b805302a2158ed74544da	not-for-merge	'refs/pull/195/head' of https://github.com/Flipboard/FLAnimatedImage
+d29820bf5fc3e6424a4e47bdbee28ce21e296299	not-for-merge	'refs/pull/196/head' of https://github.com/Flipboard/FLAnimatedImage
+33b053514f427da0073217ca76d5fd49e065cc53	not-for-merge	'refs/pull/196/merge' of https://github.com/Flipboard/FLAnimatedImage
+d29820bf5fc3e6424a4e47bdbee28ce21e296299	not-for-merge	'refs/pull/197/head' of https://github.com/Flipboard/FLAnimatedImage
+c055a4e0eceba774e005f16028475e89532693db	not-for-merge	'refs/pull/197/merge' of https://github.com/Flipboard/FLAnimatedImage
+2f2ee16603ab140d497d7ab92c93101191257d47	not-for-merge	'refs/pull/198/head' of https://github.com/Flipboard/FLAnimatedImage
+298492f696fa753e11fb39c7ba05eae993344b34	not-for-merge	'refs/pull/201/head' of https://github.com/Flipboard/FLAnimatedImage
+f1601623213cef684d4f456b6fc67f072c5b9bc1	not-for-merge	'refs/pull/203/head' of https://github.com/Flipboard/FLAnimatedImage
+baa78d9811caaca07f69c1761d422958f1e2e30f	not-for-merge	'refs/pull/206/head' of https://github.com/Flipboard/FLAnimatedImage
+1ffc570754aabf39604b5ca1aeaf4cdf628c5fd5	not-for-merge	'refs/pull/21/head' of https://github.com/Flipboard/FLAnimatedImage
+ff0c64722c8dbb42c06a1812b47f1fc3d0e29831	not-for-merge	'refs/pull/212/head' of https://github.com/Flipboard/FLAnimatedImage
+6395077c1ca9a2c3087905c77f18f979840627fb	not-for-merge	'refs/pull/212/merge' of https://github.com/Flipboard/FLAnimatedImage
+3c05ef3456514f92c8307b37235a88cbbf0c96da	not-for-merge	'refs/pull/213/head' of https://github.com/Flipboard/FLAnimatedImage
+0eca26f59b6bf03677fe2295c421b519fbddceb0	not-for-merge	'refs/pull/215/head' of https://github.com/Flipboard/FLAnimatedImage
+7e22a9b2e830ff4a3349f1d8225a1ad9f9e4eb71	not-for-merge	'refs/pull/218/head' of https://github.com/Flipboard/FLAnimatedImage
+2980df3ebcee37f4a2b81065ab69ca0c39773b44	not-for-merge	'refs/pull/22/head' of https://github.com/Flipboard/FLAnimatedImage
+6d745689ddb1e353c8b9a005af33b084c3597d31	not-for-merge	'refs/pull/221/head' of https://github.com/Flipboard/FLAnimatedImage
+84ed326b823dddd555582e0e6295feb9691832fe	not-for-merge	'refs/pull/224/head' of https://github.com/Flipboard/FLAnimatedImage
+6efcd4db27b4257bdb1d92aa0cc9fb0f6ce97744	not-for-merge	'refs/pull/227/head' of https://github.com/Flipboard/FLAnimatedImage
+93d716be4635b9f9d5ba1a81ebdb94e34f013106	not-for-merge	'refs/pull/227/merge' of https://github.com/Flipboard/FLAnimatedImage
+99cb2f051d886e93ab103081a891ca64cc1ec231	not-for-merge	'refs/pull/229/head' of https://github.com/Flipboard/FLAnimatedImage
+93b5ebfd7402309418575923aa36f654d530c01c	not-for-merge	'refs/pull/231/head' of https://github.com/Flipboard/FLAnimatedImage
+48ea2e2eef26f1f2d41b6894eec153f7f01250bb	not-for-merge	'refs/pull/233/head' of https://github.com/Flipboard/FLAnimatedImage
+4eb2a6b5518eb4f0c8073f79fb46855a384e6669	not-for-merge	'refs/pull/234/head' of https://github.com/Flipboard/FLAnimatedImage
+bb51cbf400bfb1a42810c475e5c2a90a827dfc26	not-for-merge	'refs/pull/235/head' of https://github.com/Flipboard/FLAnimatedImage
+735182f4446f69a680e48ca6e41781dbb12db274	not-for-merge	'refs/pull/236/head' of https://github.com/Flipboard/FLAnimatedImage
+f64729ce6a34ed465f06afd06f771a4ea730a543	not-for-merge	'refs/pull/237/head' of https://github.com/Flipboard/FLAnimatedImage
+b9db5565c6d7cd49ae41d011afa0794b359ca506	not-for-merge	'refs/pull/239/head' of https://github.com/Flipboard/FLAnimatedImage
+77fea121ecb3aa3585145f404b28dacfd7b1a29f	not-for-merge	'refs/pull/24/head' of https://github.com/Flipboard/FLAnimatedImage
+eefdfabd5ac7d7b6483d50566e27a3965a24c5de	not-for-merge	'refs/pull/243/head' of https://github.com/Flipboard/FLAnimatedImage
+74502937cf557903fb3d3918071db6b04ac57ae6	not-for-merge	'refs/pull/244/head' of https://github.com/Flipboard/FLAnimatedImage
+554f766a74c9a2b98f6dd8a9de6ad31956f26032	not-for-merge	'refs/pull/245/head' of https://github.com/Flipboard/FLAnimatedImage
+6de292e4618f657393a16af370e317a01e098278	not-for-merge	'refs/pull/249/head' of https://github.com/Flipboard/FLAnimatedImage
+f7602994fbeda1cc027a586eaf36263009f840bf	not-for-merge	'refs/pull/25/head' of https://github.com/Flipboard/FLAnimatedImage
+0b589369c8f7c5be6d9abc1eae1a2d6808e8b4a7	not-for-merge	'refs/pull/250/head' of https://github.com/Flipboard/FLAnimatedImage
+fea7f0ad2e54c4654ddfd604f01e51f465b48e0c	not-for-merge	'refs/pull/252/head' of https://github.com/Flipboard/FLAnimatedImage
+142265daa843e07cd345891b63704a9e7507d893	not-for-merge	'refs/pull/254/head' of https://github.com/Flipboard/FLAnimatedImage
+46402a3ee1fef0fdf211e7f0fd69d0e193694521	not-for-merge	'refs/pull/256/head' of https://github.com/Flipboard/FLAnimatedImage
+e810f2eb17b507b8599dc32ff248a39e362a7dd8	not-for-merge	'refs/pull/261/head' of https://github.com/Flipboard/FLAnimatedImage
+55966e2d7b14085b24c0da1a481b72fe72631bde	not-for-merge	'refs/pull/265/head' of https://github.com/Flipboard/FLAnimatedImage
+15bcec4e6f67d52b6df4b4195abe40eb67138262	not-for-merge	'refs/pull/265/merge' of https://github.com/Flipboard/FLAnimatedImage
+3f28b6b376aabf466e922c9d15d779d1440789e5	not-for-merge	'refs/pull/266/head' of https://github.com/Flipboard/FLAnimatedImage
+aeca4fe65931ca62352cb6022f03ef02693a7890	not-for-merge	'refs/pull/266/merge' of https://github.com/Flipboard/FLAnimatedImage
+fbd953a39708a01d6a06f75a0255524f09b3fc58	not-for-merge	'refs/pull/272/head' of https://github.com/Flipboard/FLAnimatedImage
+6c7551554d34d4edb6770b65dc5019b43b0aafff	not-for-merge	'refs/pull/272/merge' of https://github.com/Flipboard/FLAnimatedImage
+955bfa7684753a63184ea6c9c5e6b04a24d8a5d4	not-for-merge	'refs/pull/273/head' of https://github.com/Flipboard/FLAnimatedImage
+3c830acb7c7cede3fa48901ca1c58f6050342470	not-for-merge	'refs/pull/273/merge' of https://github.com/Flipboard/FLAnimatedImage
+301a8658d979fd340295144d6d5d75f33b08da1c	not-for-merge	'refs/pull/277/head' of https://github.com/Flipboard/FLAnimatedImage
+94628f60ab68a485397e38b7f2b7bd42d632fc0c	not-for-merge	'refs/pull/28/head' of https://github.com/Flipboard/FLAnimatedImage
+83c17c5116ad4f8eabbc8a781264c9130478a564	not-for-merge	'refs/pull/28/merge' of https://github.com/Flipboard/FLAnimatedImage
+46c45cbe86c07a84f940024f6f0ef571104e2f0b	not-for-merge	'refs/pull/30/head' of https://github.com/Flipboard/FLAnimatedImage
+678c074cd1302760502ee5b9c363baabc2baec4a	not-for-merge	'refs/pull/30/merge' of https://github.com/Flipboard/FLAnimatedImage
+911baaa1df4deeebe572e636bd32ea415463c72e	not-for-merge	'refs/pull/31/head' of https://github.com/Flipboard/FLAnimatedImage
+a5cb47715f4c5f3aee05913589e85a9d30ec9a96	not-for-merge	'refs/pull/32/head' of https://github.com/Flipboard/FLAnimatedImage
+42455117a13faa7b4366763a9b54282175048b2e	not-for-merge	'refs/pull/34/head' of https://github.com/Flipboard/FLAnimatedImage
+ffb5a50bd281cdc6b90523fb9fec9dc7c3241b94	not-for-merge	'refs/pull/35/head' of https://github.com/Flipboard/FLAnimatedImage
+8c11c0c0893624d0f0eecf3e73bd66386a8ce2fa	not-for-merge	'refs/pull/35/merge' of https://github.com/Flipboard/FLAnimatedImage
+1aa496ffb2e121c1a1b2187cbda9ba6b5b6200f7	not-for-merge	'refs/pull/37/head' of https://github.com/Flipboard/FLAnimatedImage
+a1b8821baf911b7383164f71db0eb1ed0267cc21	not-for-merge	'refs/pull/38/head' of https://github.com/Flipboard/FLAnimatedImage
+8aeb5bfbb6b07538bc8d006eb7c9cabf7ac068d3	not-for-merge	'refs/pull/39/head' of https://github.com/Flipboard/FLAnimatedImage
+48e1a55feacea5f52964de12bda3c93d588a9512	not-for-merge	'refs/pull/41/head' of https://github.com/Flipboard/FLAnimatedImage
+95caf56036c9695556f6d50a8e67b51dadd25044	not-for-merge	'refs/pull/41/merge' of https://github.com/Flipboard/FLAnimatedImage
+706528bc0f2d2fec292630747ed54d77db6922e8	not-for-merge	'refs/pull/42/head' of https://github.com/Flipboard/FLAnimatedImage
+f76b5e36a4f9fd493acd4c7885aff8067aca4620	not-for-merge	'refs/pull/43/head' of https://github.com/Flipboard/FLAnimatedImage
+6a104823e223d705f10b6e7fa4eb709c64c28c51	not-for-merge	'refs/pull/43/merge' of https://github.com/Flipboard/FLAnimatedImage
+4ed14954309b15aa6a63aa7072c4b2fab8e7be8a	not-for-merge	'refs/pull/45/head' of https://github.com/Flipboard/FLAnimatedImage
+ae445c4bae2ef6c87e56ca4a125c324e5ca9087a	not-for-merge	'refs/pull/51/head' of https://github.com/Flipboard/FLAnimatedImage
+5ce9bdae22d516f165ceabe34083fffe9c9dbf92	not-for-merge	'refs/pull/55/head' of https://github.com/Flipboard/FLAnimatedImage
+650d44ba1a1fafbfed9f443fd9ca8c2ea7073f87	not-for-merge	'refs/pull/55/merge' of https://github.com/Flipboard/FLAnimatedImage
+958cef3fbf91f77a35d775ef4e46328022fc3e7c	not-for-merge	'refs/pull/58/head' of https://github.com/Flipboard/FLAnimatedImage
+ac182fc6941253577f82016f713c34397bb20e0b	not-for-merge	'refs/pull/60/head' of https://github.com/Flipboard/FLAnimatedImage
+b5017de6fef5833c955bb5ce05ecb4796d5d5a96	not-for-merge	'refs/pull/60/merge' of https://github.com/Flipboard/FLAnimatedImage
+4c6ec8e169062c5bf824c2fe151abf63bd019819	not-for-merge	'refs/pull/61/head' of https://github.com/Flipboard/FLAnimatedImage
+b1c339b3d45c9fb654db3e6945e39067f4e34663	not-for-merge	'refs/pull/63/head' of https://github.com/Flipboard/FLAnimatedImage
+edce09a9967bfdaf735791062ea9e20da1872df1	not-for-merge	'refs/pull/66/head' of https://github.com/Flipboard/FLAnimatedImage
+49263eedb16d6e9810a74a43e7ab51c7d3615660	not-for-merge	'refs/pull/70/head' of https://github.com/Flipboard/FLAnimatedImage
+f119c35b3183c65af42f8b6c002269085b862e57	not-for-merge	'refs/pull/70/merge' of https://github.com/Flipboard/FLAnimatedImage
+5ae8dd7d854dd41eb26818cfbdc5821dbe1f677d	not-for-merge	'refs/pull/74/head' of https://github.com/Flipboard/FLAnimatedImage
+d6151391ff63c902eb113bbbcc7fb09a0547a4ff	not-for-merge	'refs/pull/74/merge' of https://github.com/Flipboard/FLAnimatedImage
+5dbb5516ac4f5e4c8102dab03d09eb7193dbe67e	not-for-merge	'refs/pull/77/head' of https://github.com/Flipboard/FLAnimatedImage
+a802ed729864a84a46ac0e406d2bf92e596d9f75	not-for-merge	'refs/pull/78/head' of https://github.com/Flipboard/FLAnimatedImage
+3dfeba5cd295086608171613c6ecd7fc226d3e59	not-for-merge	'refs/pull/79/head' of https://github.com/Flipboard/FLAnimatedImage
+62231ac2f079c0d8e1a45d7e56a8b35644e93f12	not-for-merge	'refs/pull/81/head' of https://github.com/Flipboard/FLAnimatedImage
+c380781faa2cdcc71b3ef28a07226128914be0e3	not-for-merge	'refs/pull/85/head' of https://github.com/Flipboard/FLAnimatedImage
+6eb0297151706fc90d323c3dbab287e28fcb2d8f	not-for-merge	'refs/pull/85/merge' of https://github.com/Flipboard/FLAnimatedImage
+0cc5f18ad361dc8f590f63694b34db0e50368df2	not-for-merge	'refs/pull/86/head' of https://github.com/Flipboard/FLAnimatedImage
+5700069b8474d1bec10e00fc8598401a9dd795a8	not-for-merge	'refs/pull/86/merge' of https://github.com/Flipboard/FLAnimatedImage
+f509e4567f51f7db8e2f41e112c487ecfd4eaccd	not-for-merge	'refs/pull/88/head' of https://github.com/Flipboard/FLAnimatedImage
+9964c4434fa6f983ab638f70912cc95ae0b0d30a	not-for-merge	'refs/pull/9/head' of https://github.com/Flipboard/FLAnimatedImage
+f508b8f1521be22a78c69f6b2589fbec065b86b4	not-for-merge	'refs/pull/90/head' of https://github.com/Flipboard/FLAnimatedImage
+9d35a42b37729f8b24a802c8539f7cc3c311c8e5	not-for-merge	'refs/pull/90/merge' of https://github.com/Flipboard/FLAnimatedImage
+f2959074e9147814451a24f01d711440dd75bef6	not-for-merge	'refs/pull/92/head' of https://github.com/Flipboard/FLAnimatedImage
+c22b52e4674d94b596046fa5439d8895105f7d52	not-for-merge	'refs/pull/94/head' of https://github.com/Flipboard/FLAnimatedImage
+e67ed9595f242dca2d584b2e2576cf1733e6bcc0	not-for-merge	'refs/pull/94/merge' of https://github.com/Flipboard/FLAnimatedImage
+d94e00d293772c9fca4dfb5987b0b5ba9bc42df4	not-for-merge	'refs/pull/95/head' of https://github.com/Flipboard/FLAnimatedImage
+74177884baa0ac33ca4ff4a1a4eca909d42f231a	not-for-merge	'refs/pull/95/merge' of https://github.com/Flipboard/FLAnimatedImage
+f18841575bc3d90bdce735d09443160cdc4abbb3	not-for-merge	'refs/pull/96/head' of https://github.com/Flipboard/FLAnimatedImage
+f46ff4b4cbc129fab0d8c0f05146a02811513190	not-for-merge	'refs/pull/97/head' of https://github.com/Flipboard/FLAnimatedImage
+f754a4a80dd081c421fd5975da249abe9fd65ab5	not-for-merge	'refs/pull/97/merge' of https://github.com/Flipboard/FLAnimatedImage
+f44733519e051635027050c77317077f9425f524	not-for-merge	tag '1.0.0' of https://github.com/Flipboard/FLAnimatedImage
+9e9f4c515eaa74f834f9054adbaedf346f39bcae	not-for-merge	tag '1.0.1' of https://github.com/Flipboard/FLAnimatedImage
+454317a0785eb8bea3902a624e82b5a077ab4afb	not-for-merge	tag '1.0.10' of https://github.com/Flipboard/FLAnimatedImage
+ece8d244f85f21c48209e4c4cc1acfb4f31462b8	not-for-merge	tag '1.0.11' of https://github.com/Flipboard/FLAnimatedImage
+3a70b65d4065529d93b08e1761ebcdfc1d44bb2e	not-for-merge	tag '1.0.12' of https://github.com/Flipboard/FLAnimatedImage
+2c04c1abf16cb20b24b69692f356ec6db11a6fea	not-for-merge	tag '1.0.13' of https://github.com/Flipboard/FLAnimatedImage
+16fe62b540f63294cfdfdcd04ebcd9e2c093819c	not-for-merge	tag '1.0.14' of https://github.com/Flipboard/FLAnimatedImage
+c746bc2694a0eb945a3ca598990a3b4ff940b644	not-for-merge	tag '1.0.15' of https://github.com/Flipboard/FLAnimatedImage
+cdaab4d0cfd2c365c2f4d017d9a7b33b871e4a16	not-for-merge	tag '1.0.16' of https://github.com/Flipboard/FLAnimatedImage
+d4f07b6f164d53c1212c3e54d6460738b1981e9f	not-for-merge	tag '1.0.17' of https://github.com/Flipboard/FLAnimatedImage
+87ddc7a243b2f9c3a2ac541e8564224011019a36	not-for-merge	tag '1.0.2' of https://github.com/Flipboard/FLAnimatedImage
+a6c6a52ecabc2097fca0ab114bf1d9f1713e0807	not-for-merge	tag '1.0.3' of https://github.com/Flipboard/FLAnimatedImage
+8061906f093bbce092213d98335a418663d15b1f	not-for-merge	tag '1.0.4' of https://github.com/Flipboard/FLAnimatedImage
+a3b866d81ad5d526711b134cf63bb6d5bb1f6f5f	not-for-merge	tag '1.0.5' of https://github.com/Flipboard/FLAnimatedImage
+8c6e0db36a7b5f14e28ac014788c48fb9a38f321	not-for-merge	tag '1.0.6' of https://github.com/Flipboard/FLAnimatedImage
+62510bfaaada08147c7f8d4b76a8f6afa582772e	not-for-merge	tag '1.0.7' of https://github.com/Flipboard/FLAnimatedImage
+e3f8f72f2190cc51ab06870717f2b0ffaf175233	not-for-merge	tag '1.0.8' of https://github.com/Flipboard/FLAnimatedImage
+b713af846fdb22ef92fbeea0eac4563b2cbc7709	not-for-merge	tag '1.0.9' of https://github.com/Flipboard/FLAnimatedImage

@@ -7,7 +7,7 @@ final class WLEDDeviceControlViewModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published var brightness: Double = 128
     @Published var isOn = false
-    @Published var selectedColor = Color.red
+    @Published var selectedColor = Color.appDanger
 
     let device: WLEDDevice
     private let controller: WLEDDeviceController

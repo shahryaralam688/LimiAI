@@ -48,15 +48,15 @@ struct LoginView: View {
                         VStack(spacing: 0) {
                             // Title
                             Text("Sign In")
-                                .font(.system(size: 28, weight: .bold, design: .rounded)) // font-family: Poppins; weight: 700 (Bold)
+                                .font(LimiTypography.largeTitle) // font-family: Poppins; weight: 700 (Bold)
                                 .multilineTextAlignment(.center)          // text-align: center
                                 .lineSpacing(8)                           // 38px line height - 30px font size = 8px spacing
                                 .kerning(-0.3)                            // letter-spacing: -1%
                                 .foregroundColor(.appTextPrimary)
                             
                             // Subtitle
-                            Text("Please Sign in to secure your data and for personalization")
-                                .font(.system(size: 16, weight: .regular, design: .rounded)) // font-family + weight/style
+                            Text("Sign in to keep your space personal and secure.")
+                                .font(LimiTypography.body) // font-family + weight/style
                                 .multilineTextAlignment(.center)             // text-align: center
                                 .foregroundColor(.appTextPrimary)
                                 .lineSpacing(9.6)                            // 160% of 16px = 25.6 → 25.6 - 16 = ~9.6
@@ -69,7 +69,7 @@ struct LoginView: View {
                     // Email Label
                     HStack {
                         Text("Email Address")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(LimiTypography.title3)
                             .foregroundColor(.appTextPrimary)
                         Spacer()
                     }
@@ -87,12 +87,12 @@ struct LoginView: View {
                         ZStack(alignment: .leading) {
                             if viewModel.email.isEmpty {
                                 Text("you@example.com")
-                                    .font(.system(size: 16, weight: .regular, design: .rounded))
+                                    .font(LimiTypography.body)
                                     .foregroundColor(.appTextPrimary) // ← placeholder (suggestion) text color
                                     
                             }
                             TextField("", text: $viewModel.email)
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .font(LimiTypography.body)
                                 .foregroundColor(.appTextPrimary)
                                 .keyboardType(.emailAddress)
                                 .autocapitalization(.none)
@@ -136,7 +136,7 @@ struct LoginView: View {
                                 } else {
                                     HStack(spacing: 8) {
                                         Text("Sign in")
-                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                            .font(LimiTypography.button)
                                             .foregroundColor(.appTextInverse)
                                         Image("Monotone arrow right")
                                             .resizable()
@@ -170,15 +170,14 @@ struct LoginView: View {
                     }) {
                         HStack(spacing: 8) {
                             Image(systemName: "apple.logo")
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(LimiTypography.title3)
                             Text("Sign in with Apple")
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .font(LimiTypography.button)
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.appTextInverse)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(Color.white)
-                        .cornerRadius(22)
+                        .limiPanel(cornerRadius: 22)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 15)
@@ -202,7 +201,7 @@ struct LoginView: View {
                                         .scaledToFit()
                                     Text("Continue with Google")
                                     
-                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .font(LimiTypography.button)
                                         .foregroundColor(.appTextPrimary)
                                 }
                                 Spacer()

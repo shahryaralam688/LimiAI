@@ -29,7 +29,7 @@ struct CustomTopBar: View {
             }label: {
                 Image(systemName: "xmark")
                     .foregroundStyle(.primary)
-                    .font(.title2)
+                    .font(LimiTypography.title2)
                     .frame(width: 40, height: 30)
                     .padding(7)
                     .background(.thinMaterial)
@@ -48,7 +48,7 @@ struct CustomTopBar: View {
                         isARMode = true
                 }label: {
                     Text("AR")
-                        .font(.footnote)
+                        .font(LimiTypography.footnote)
                         .frame(width: 70, height: 30)
                         .padding(7)
                         .background(isARMode ? .themeWhite : Color.clear)
@@ -56,14 +56,14 @@ struct CustomTopBar: View {
                 }
                 .foregroundStyle(isARMode ? .blue : .primary)
                 .buttonStyle(FlatButtonStyle())
-                .font(.callout)
+                .font(LimiTypography.callout)
                 
                 //Right side of custom Picker (Object)
                 Button{
                         isARMode = false
                 }label: {
                     Text("Object")
-                        .font(.footnote)
+                        .font(LimiTypography.footnote)
                         .frame(width: 55, height: 30)
                         .padding(.horizontal, 10)
                         .padding(7)
@@ -73,7 +73,7 @@ struct CustomTopBar: View {
                 }
                 .buttonStyle(FlatButtonStyle())
                 .foregroundStyle(!isARMode ? Color.alabaster : .primary)
-                .font(.callout)
+                .font(LimiTypography.callout)
                 
             }
             .padding(2)

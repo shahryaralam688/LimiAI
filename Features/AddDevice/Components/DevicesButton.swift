@@ -9,61 +9,66 @@ struct DevicesButton: View {
     let ipAddress: String?
     var reachability: BLEDevice.Reachability = .offline
 
+    private var isReachable: Bool { reachability == .online }
+
     var body: some View {
-        HStack(spacing: 16) {
-            // Status indicator + icon
+        HStack(spacing: LimiSpacing.itemGap) {
             VStack(spacing: 6) {
                 Circle()
-                    .fill(reachability == .online ? Color.appBrandPrimary : Color.gray)
+                    .fill(isReachable ? Color.brandAction : Color.appBorderPrimary)
                     .frame(width: 12, height: 12)
                 VStack(spacing: 4) {
                     Image(systemName: deviceType == .bluetooth ? "lamp.table.fill" : "wifi")
-                        .font(.system(size: deviceType == .bluetooth ? 24 : 20, weight: .medium))
-                        .foregroundColor(deviceType == .bluetooth ? Color.themeWhite : (reachability == .online ? .themeWhite : .red))
-                    Text(deviceType == .bluetooth ? "BLE" : (reachability == .online ? "Online" : "Offline"))
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(reachability == .online ? .themeWhite : .red)
+                        .font(.system(size: deviceType == .bluetooth ? LimiIconSize.deviceRow : LimiIconSize.inline, weight: .medium))
+                        .foregroundColor(isReachable ? Color.appTextPrimary : Color.appDanger)
+                    Text(deviceType == .bluetooth ? "BLE" : (isReachable ? "Online" : "Offline"))
+                        .font(LimiTypography.caption2)
+                        .foregroundColor(isReachable ? Color.appTextSecondary : Color.appDanger)
                 }
             }
             Spacer()
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(deviceName ?? "Unknown Device")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.caption)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.themeBlack)
-                        .cornerRadius(4)
+                        .background(Color.appSurfaceDark)
+                        .cornerRadius(LimiRadius.small / 3)
                     Spacer()
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(searchDeviceUUID ?? "XTP-1245")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.appTextPrimary)
                     if deviceType == .wifi, let ip = ipAddress {
                         Text("IP: \(ip)")
-                            .font(.system(size: 12, weight: .regular, design: .rounded))
-                            .foregroundColor(Color.orbGlow4.opacity(0.8))
+                            .font(LimiTypography.caption)
+                            .foregroundColor(Color.brandHighlight.opacity(0.8))
                     }
                 }
                 Button(action: {
                     if let name = deviceName, let id = searchDeviceUUID { onConnect(name, id) }
                 }) {
-                    Text(isConnected ?  "Connected" : (reachability == .online ?"Connect" : "Disconnected"))
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(reachability == .online ? Color.alabaster : Color.charlestonGreen )
+                    Text(isConnected ? "Connected" : (isReachable ? "Connect" : "Disconnected"))
+                        .font(LimiTypography.headline)
+                        .foregroundColor(isReachable ? Color.appTextInverse : Color.appTextDisabled)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(isConnected ? (reachability == .online ? Color.clear : Color.gray) : (reachability == .online ? Color.appBrandPrimary : Color.gray))
-                        .cornerRadius(8)
+                        .background(
+                            isConnected
+                                ? (isReachable ? Color.clear : Color.appBorderPrimary)
+                                : (isReachable ? Color.brandAction : Color.appBorderPrimary)
+                        )
+                        .cornerRadius(LimiRadius.small)
                 }
-                .disabled(reachability == .offline)
+                .disabled(!isReachable)
             }
             Spacer()
         }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.appSurfacePrimary))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.appBorderQuaternary, lineWidth: 1))
+        .padding(LimiSpacing.innerPadding)
+        .background(RoundedRectangle(cornerRadius: LimiRadius.small).fill(Color.appSurfacePrimary))
+        .overlay(RoundedRectangle(cornerRadius: LimiRadius.small).stroke(Color.appBorderQuaternary, lineWidth: 1))
     }
 }

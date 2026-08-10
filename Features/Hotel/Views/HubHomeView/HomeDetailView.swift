@@ -17,7 +17,7 @@ struct HomeDetailView: View {
 
     var body: some View {
         ZStack {
-            Color.alabaster
+            Color.appCanvasPrimary
                 .ignoresSafeArea()
             
             if hub.name == "LIMI-CONTROLLER" {
@@ -94,7 +94,7 @@ struct HomeDetailView: View {
                         Spacer()
                     }
                 }
-                .background(Color.eton)
+                .background(Color.appCanvasPrimary)
                 .navigationBarHidden(true)
                 .navigationTitle(hub.name)
                 .navigationBarTitleDisplayMode(.inline)
@@ -113,7 +113,7 @@ struct ControllerButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
+                .font(LimiTypography.callout)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 10)
                 .foregroundColor(isSelected ? .appCanvasPrimary : .appTextPrimary)
@@ -121,13 +121,13 @@ struct ControllerButton: View {
                     Capsule(style: .continuous)
                         .fill(
                             isSelected
-                            ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
-                            : AnyShapeStyle(Color.white.opacity(0.06))
+                            ? AnyShapeStyle(LimiGradients.cta)
+                            : AnyShapeStyle(Color.appGlassFillMedium)
                         )
                 )
                 .overlay(
                     Capsule(style: .continuous)
-                        .stroke(Color.white.opacity(isSelected ? 0 : 0.1), lineWidth: 0.5)
+                        .stroke(Color.appGlassFillStrong.opacity(isSelected ? 0 : 1), lineWidth: 0.5)
                 )
         }
         .disabled(isDisabled)

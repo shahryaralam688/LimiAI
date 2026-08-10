@@ -108,12 +108,12 @@ struct LocationStorageView: View {
             }
             
             VStack(spacing: 12) {
-                Text("Enable Location")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                Text("Share your location")
+                    .font(LimiTypography.largeTitle)
                     .foregroundColor(.appTextPrimary)
                 
-                Text("We need your location to provide personalized lighting experiences and weather information.")
-                    .font(.system(size: 16, weight: .medium, design: .default))
+                Text("This helps me tailor your lighting and weather to where you are — only when it feels right for you.")
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
@@ -130,22 +130,22 @@ struct LocationStorageView: View {
                         Image(systemName: "location.fill")
                             .foregroundColor(.appBrandSecondary)
                         Text("Current Location")
-                            .font(.system(size: 18, weight: .semibold, design: .default))
+                            .font(LimiTypography.button)
                             .foregroundColor(.appTextPrimary)
                     }
                     
                     VStack(spacing: 6) {
                         Text("Latitude: \(location.coordinate.latitude, specifier: "%.4f")")
-                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .font(LimiTypography.footnote)
                             .foregroundColor(.appTextMuted)
                         Text("Longitude: \(location.coordinate.longitude, specifier: "%.4f")")
-                            .font(.system(size: 13, weight: .medium, design: .monospaced))
+                            .font(LimiTypography.footnote)
                             .foregroundColor(.appTextMuted)
                     }
                     
                     if let address = storageManager.currentAddress {
                         Text(address)
-                            .font(.system(size: 15, weight: .medium, design: .default))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
@@ -193,9 +193,9 @@ struct LocationStorageView: View {
             }) {
                 HStack(spacing: 12) {
                     Image(systemName: "location.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Turn on Location")
-                        .font(.system(size: 18, weight: .semibold, design: .default))
+                        .font(LimiTypography.button)
+                    Text("Share location")
+                        .font(LimiTypography.button)
                 }
                 .foregroundColor(.appTextInverse)
                 .frame(maxWidth: .infinity)
@@ -209,7 +209,7 @@ struct LocationStorageView: View {
                                     LinearGradient(
                                         colors: [
                                             Color.themeWhite.opacity(0.22),
-                                            Color.themeWhite.opacity(0.06),
+                                            Color.appGlassFillMedium,
                                             Color.clear
                                         ],
                                         startPoint: .top,
@@ -231,7 +231,7 @@ struct LocationStorageView: View {
             if showSkipButton {
                 Button(action: skipAndContinue) {
                     Text("Not now")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                        .font(LimiTypography.headline)
                         .foregroundColor(.appTextMuted)
                 }
                 .buttonStyle(.plain)

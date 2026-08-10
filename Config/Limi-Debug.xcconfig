@@ -2,3 +2,6 @@
 // Use https:/$()/ so xcconfig does not treat `//` as a comment.
 #include? "../Pods/Target Support Files/Pods-Limi/Pods-Limi.debug.xcconfig"
 LIMI_API_BASE_URL = https:/$()/dev.api.limitless-lighting.co.uk/
+// Use the stable default toolchain path; CocoaPods' TOOLCHAIN_DIR can point at a
+// transient Metal cryptex mount that triggers "search path not found" warnings.
+LIBRARY_SEARCH_PATHS = /usr/lib/swift "$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME)"

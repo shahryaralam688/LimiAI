@@ -27,7 +27,10 @@ struct CloudConversationView: View {
         .background(Color.appCanvasPrimary.ignoresSafeArea())
         .navigationTitle("Chat with Limi")
         .navigationBarTitleDisplayMode(.inline)
-        .fullScreenCover(isPresented: $showVoiceAI) { VoiceView() }
+        .fullScreenCover(isPresented: $showVoiceAI) {
+            // Same main App AI (WebRTC) as Home / Hotel — not pendant WebSocket voice.
+            VoiceView()
+        }
         .trackScreen("CloudConversationView")
     }
 
@@ -82,16 +85,16 @@ struct CloudConversationView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                 } else {
                     Text(message.text)
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(isUser ? Color.appCanvasPrimary : .themeWhite)
+                        .font(LimiTypography.body)
+                        .foregroundColor(isUser ? Color.appCanvasPrimary : .appTextPrimary)
                         .padding(.vertical, 10)
                         .padding(.horizontal, 14)
-                        .background(isUser ? Color.orbGlow4 : Color.appSurfaceSecondaryAlt)
+                        .background(isUser ? Color.brandAction : Color.appSurfaceSecondaryAlt)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .textSelection(.enabled)
 
                     Text(timeString(message.createdAt))
-                        .font(.system(size: 10, weight: .regular))
+                        .font(LimiTypography.caption2)
                         .foregroundColor(Color.appTextMuted)
                 }
             }
@@ -104,13 +107,13 @@ struct CloudConversationView: View {
         VStack(spacing: 14) {
             Spacer()
             Image(systemName: "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 40, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.title2)
+                .foregroundColor(.brandHighlight)
             Text("Start a conversation")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.button)
+                .foregroundColor(.appTextPrimary)
             Text("Ask Limi anything — type below or tap the mic to talk. Your conversation continues across messages.")
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextMuted)
                 .multilineTextAlignment(.center)
             Spacer()
@@ -126,15 +129,15 @@ struct CloudConversationView: View {
             if let error = viewModel.errorMessage {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(.appWarning)
                     Text(error)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextSecondary)
                         .lineLimit(2)
                     Spacer()
                     Button("Retry") { viewModel.retryLast() }
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.caption)
+                        .foregroundColor(.brandAction)
                 }
                 .padding(.horizontal, 16)
             }
@@ -145,10 +148,10 @@ struct CloudConversationView: View {
                     showVoiceAI = true
                 } label: {
                     Image(systemName: "mic.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.brandAction)
                         .frame(width: 40, height: 40)
-                        .background(Color.orbGlow4.opacity(0.12))
+                        .background(Color.brandHighlight.opacity(0.12))
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Talk to Limi")
@@ -156,7 +159,7 @@ struct CloudConversationView: View {
                 HStack(spacing: 8) {
                     TextField("Message Limi…", text: $viewModel.draft, axis: .vertical)
                         .textFieldStyle(.plain)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                         .lineLimit(1...4)
                         .focused($inputFocused)
                         .onSubmit { viewModel.sendDraft() }
@@ -165,8 +168,8 @@ struct CloudConversationView: View {
                         viewModel.sendDraft()
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 26, weight: .semibold))
-                            .foregroundColor(viewModel.canSend ? .orbGlow4 : Color.appTextMuted)
+                            .font(LimiTypography.title2)
+                            .foregroundColor(viewModel.canSend ? .brandAction : Color.appTextMuted)
                     }
                     .disabled(!viewModel.canSend)
                     .accessibilityLabel("Send")

@@ -52,13 +52,13 @@ struct VoicePendantSettingsView: View {
                 labeledField("Name") {
                     TextField("Pendant name", text: s.displayName)
                         .textFieldStyle(.plain)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 }
                 divider
                 labeledField("Room") {
                     TextField("Room", text: s.room)
                         .textFieldStyle(.plain)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 }
             }
         }
@@ -82,7 +82,7 @@ struct VoicePendantSettingsView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .tint(.orbGlow4)
+                    .tint(.brandAction)
                 }
             }
         }
@@ -108,7 +108,7 @@ struct VoicePendantSettingsView: View {
     private func labeledField<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextSecondary)
             Spacer()
             content()
@@ -120,16 +120,16 @@ struct VoicePendantSettingsView: View {
     private func settingLabel(_ title: String, _ subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
             Text(subtitle)
-                .font(.system(size: 12, weight: .regular))
+                .font(LimiTypography.caption)
                 .foregroundColor(Color.appTextTertiary)
         }
     }
 
     private var divider: some View {
-        Rectangle().fill(Color.themeWhite.opacity(0.06)).frame(height: 1)
+        Rectangle().fill(Color.appGlassFillMedium).frame(height: 1)
     }
 
     private var loadingState: some View {

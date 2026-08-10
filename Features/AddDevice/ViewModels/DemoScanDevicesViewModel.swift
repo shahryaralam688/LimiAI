@@ -7,6 +7,8 @@ final class DemoScanDevicesViewModel: ObservableObject {
     @Published private(set) var shouldShowContinue = false
 
     @Published var showAddWifi = false
+    /// Signals a unified add-device flow to push the Wi-Fi list step (no nested modal).
+    @Published private(set) var wifiProvisioningRequested = false
     @Published var selectedName: String?
     @Published var selectedId: String?
     @Published var selectedChannelMac = ""
@@ -25,6 +27,7 @@ final class DemoScanDevicesViewModel: ObservableObject {
     private var bleDisconnectedRecently = Set<String>()
     private var cancellables: Set<AnyCancellable> = []
     private var presenceTimer: AnyCancellable?
+    private var scanRefreshTimer: AnyCancellable?
 
     private let bleCycleInterval: TimeInterval = 5.0
     private let bleGreyAfterCycles = 2
@@ -58,6 +61,9 @@ final class DemoScanDevicesViewModel: ObservableObject {
         presenceTimer = Timer.publish(every: bleCycleInterval, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.updateBLEPresence() }
+        scanRefreshTimer = Timer.publish(every: 12, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in self?.ble.refreshScan() }
         rebuildDeviceList()
     }
 
@@ -100,6 +106,8 @@ final class DemoScanDevicesViewModel: ObservableObject {
         bonjour.stopBrowsing()
         presenceTimer?.cancel()
         presenceTimer = nil
+        scanRefreshTimer?.cancel()
+        scanRefreshTimer = nil
     }
 
     func handleDisconnectedDeviceID(_ id: String?) {
@@ -118,14 +126,33 @@ final class DemoScanDevicesViewModel: ObservableObject {
                 self.ssidNameArray = list
                 self.isConnectingToBLE = false
                 self.showAddWifi = true
+                self.wifiProvisioningRequested = true
             }
         }
+    }
+
+    func acknowledgeWifiProvisioningNavigation() {
+        wifiProvisioningRequested = false
+    }
+
+    func resetProvisioningSession() {
+        isConnectingToBLE = false
+        wifiProvisioningRequested = false
+        showAddWifi = false
+        ssidNameArray = []
     }
 
     func connectBLEDevice(name: String, id: String) {
         selectedName = name
         selectedId = id
         ssidNameArray = []
+
+        if ble.isDeviceConnected(uuid: id) {
+            isConnectingToBLE = true
+            handleBLEConnected()
+            return
+        }
+
         isConnectingToBLE = true
         bonjour.removeCompletelyMatching(bleName: name, bleId: id)
         ble.selectAndConnect(name: name, uuidString: id)
@@ -149,6 +176,7 @@ final class DemoScanDevicesViewModel: ObservableObject {
             selectedName = device.name
             selectedId = device.uuid
             showAddWifi = true
+            wifiProvisioningRequested = true
         }
     }
 

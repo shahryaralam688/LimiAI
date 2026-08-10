@@ -77,14 +77,19 @@ final class SignInViewModel: ObservableObject {
     @Published var showLoginView = false
     @Published var showPrivacyPolicy = false
     @Published var appeared = false
+    @Published var signInErrorMessage: String?
+    @Published private(set) var postLoginShowsHomeDirectly = false
 
+    private let managesPostLoginNavigation: Bool
     private let googleSignInPerformer: GoogleSignInPerforming
     private let installerUserCreator: InstallerUserCreating
 
     init(
+        managesPostLoginNavigation: Bool = true,
         googleSignInPerformer: GoogleSignInPerforming = DefaultGoogleSignInPerformer(),
         installerUserCreator: InstallerUserCreating = DefaultInstallerUserCreator()
     ) {
+        self.managesPostLoginNavigation = managesPostLoginNavigation
         self.googleSignInPerformer = googleSignInPerformer
         self.installerUserCreator = installerUserCreator
     }
@@ -98,10 +103,17 @@ final class SignInViewModel: ObservableObject {
     }
 
     func signInWithGoogle() {
+        signInErrorMessage = nil
+        isLoading = true
         googleSignInPerformer.signIn { [weak self] success in
-            guard success else { return }
             DispatchQueue.main.async {
-                self?.showHomeView = true
+                guard let self else { return }
+                self.isLoading = false
+                guard success else {
+                    self.signInErrorMessage = "Google sign-in failed. Please try again."
+                    return
+                }
+                self.handleSuccessfulSignIn()
             }
         }
     }
@@ -112,10 +124,43 @@ final class SignInViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self?.isLoading = false
                 if case .success = result {
-                    self?.showHomeView = true
+                    self?.handleSuccessfulSignIn()
                 }
             }
         }
+    }
+
+    private func handleSuccessfulSignIn() {
+        guard AuthManager.shared.getToken() != nil else {
+            signInErrorMessage = "Could not start your session. Please try again."
+            return
+        }
+
+        let personalizeCompleted = isPersonalizeCompleted()
+        postLoginShowsHomeDirectly = personalizeCompleted
+
+        if personalizeCompleted {
+            AuthManager.shared.isAuthenticated = true
+        }
+
+        if !managesPostLoginNavigation, personalizeCompleted {
+            return
+        }
+
+        showHomeView = true
+    }
+
+    private func isPersonalizeCompleted() -> Bool {
+        if UserDefaults.standard.bool(forKey: "hasCompletedPersonalize") {
+            return true
+        }
+        guard let data = UserDefaults.standard.data(forKey: "onboarding_data"),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              json["bluetoothAllowed"] != nil else {
+            return false
+        }
+        UserDefaults.standard.set(true, forKey: "hasCompletedPersonalize")
+        return true
     }
 }
 

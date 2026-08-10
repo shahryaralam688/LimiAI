@@ -8,7 +8,7 @@ import Foundation
 
 enum LimiAPIConfiguration {
     private static let devFallback = "https://dev.api.limitless-lighting.co.uk/"
-    private static let productionFallback = "https://api.limitless-lighting.co.uk/"
+    private static let productionFallback = "https://dev.api.limitless-lighting.co.uk/"
 
     /// Resolved from `LIMI_API_BASE_URL` in Info.plist (set per build configuration in `Config/*.xcconfig`).
     static let baseURL: String = resolvedBaseURL()
@@ -66,6 +66,7 @@ struct APIConstants {
     // AI Voice Assistant — session: Bearer; webhook: raw JWT (see LimiAPIAuthPolicy)
     static let webHook = baseURL + "limi-ai/webhook"
     static let limiAISession = baseURL + "limi-ai/session"
+    static let limiAIDailySummaries = baseURL + "limi-ai/daily-summaries"
 
     // Device — Bearer JWT
     static let deviceUser = baseURL + "client/devices/device_user" // add a device configurations

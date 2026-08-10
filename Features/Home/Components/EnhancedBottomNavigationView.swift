@@ -54,7 +54,7 @@ struct EnhancedBottomNavigationView: View {
         ZStack(alignment: .bottom) {
             // Dim overlay
             if isFABOpen {
-                Color.black.opacity(0.5)
+                Color.appOverlayScrim
                     .ignoresSafeArea()
                     .onTapGesture { closeFAB() }
                     .transition(.opacity)
@@ -112,7 +112,7 @@ struct EnhancedBottomNavigationView: View {
         .overlay(alignment: .top) {
             if showLidarToast {
                 Text("This device does not support LiDAR-based AR.")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
@@ -167,7 +167,7 @@ struct EnhancedBottomNavigationView: View {
                 Capsule(style: .continuous)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.white.opacity(0.1), Color.white.opacity(0.03)],
+                            colors: [Color.appGlassFillStrong, Color.appGlassFill],
                             startPoint: .top,
                             endPoint: .bottom
                         ),
@@ -176,8 +176,8 @@ struct EnhancedBottomNavigationView: View {
             )
             .frame(height: 64)
             .padding(.horizontal, 20)
-            .shadow(color: Color.orbGlow1.opacity(0.06), radius: 24, y: -4)
-            .shadow(color: Color.black.opacity(0.3), radius: 12, y: 4)
+            .shadow(color: Color.brandAction.opacity(0.06), radius: 24, y: -4)
+            .shadow(color: Color.appShadowMedium, radius: 12, y: 4)
     }
 
     // MARK: - FAB Button
@@ -190,7 +190,7 @@ struct EnhancedBottomNavigationView: View {
                     .fill(
                         RadialGradient(
                             colors: [
-                                Color.orbGlow1.opacity(isFABOpen ? 0.5 : 0.2),
+                                Color.brandAction.opacity(isFABOpen ? 0.5 : 0.2),
                                 Color.clear
                             ],
                             center: .center,
@@ -206,7 +206,7 @@ struct EnhancedBottomNavigationView: View {
                         LinearGradient(
                             colors: isFABOpen
                                 ? [Color.appSurfaceTertiary, Color.appSurfaceSecondary]
-                                : [.orbGlow4, .orbGlow1],
+                                : [.brandAction, .brandActionDark],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -216,18 +216,18 @@ struct EnhancedBottomNavigationView: View {
                         Circle()
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.white.opacity(0.2), Color.clear],
+                                    colors: [Color.appGlassStrokeStrong, Color.clear],
                                     startPoint: .topLeading,
                                     endPoint: .center
                                 )
                             )
                     )
-                    .shadow(color: (isFABOpen ? Color.white : Color.orbGlow1).opacity(0.4), radius: 14, y: 3)
+                    .shadow(color: (isFABOpen ? Color.appTextMuted : Color.brandAction).opacity(0.4), radius: 14, y: 3)
 
                 // + / × icon with smooth rotation
                 Image(systemName: "plus")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(isFABOpen ? .appTextPrimary : .appTextInverse)
                     .rotationEffect(.degrees(isFABOpen ? 45 : 0))
             }
         }
@@ -278,7 +278,7 @@ struct EnhancedBottomNavigationView: View {
                                 Circle()
                                     .fill(
                                         LinearGradient(
-                                            colors: [Color.white.opacity(0.07), Color.clear],
+                                            colors: [Color.appGlassFillMedium, Color.clear],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
@@ -286,14 +286,14 @@ struct EnhancedBottomNavigationView: View {
                             )
                             .overlay(
                                 Circle()
-                                    .stroke(Color.white.opacity(0.08), lineWidth: 0.5)
+                                    .stroke(Color.appGlassStroke, lineWidth: 0.5)
                             )
-                            .shadow(color: Color.white.opacity(0.05), radius: 6, x: -3, y: -3)
-                            .shadow(color: Color.black.opacity(0.6), radius: 8, x: 4, y: 4)
+                            .shadow(color: Color.appGlassFill, radius: 6, x: -3, y: -3)
+                            .shadow(color: Color.appShadowStrong, radius: 8, x: 4, y: 4)
 
                         Image(systemName: item.icon)
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.85))
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary.opacity(0.85))
                             .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
                     }
                 }
@@ -335,12 +335,12 @@ struct EnhancedBottomNavigationView: View {
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: selectedTab == index ? .semibold : .regular))
-                    .foregroundColor(selectedTab == index ? .orbGlow4 : .appTextMuted)
+                    .font(.system(size: LimiIconSize.tabBar, weight: selectedTab == index ? .semibold : .regular))
+                    .foregroundColor(selectedTab == index ? .brandHighlight : .appTextMuted)
                     .frame(height: 22)
                 Text(title)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(selectedTab == index ? .appTextPrimary : .appTextMuted)
+                    .font(LimiTypography.caption2)
+                    .foregroundColor(selectedTab == index ? .brandHighlight : .appTextMuted)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 48)

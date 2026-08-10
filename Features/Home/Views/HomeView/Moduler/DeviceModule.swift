@@ -13,7 +13,7 @@
 //        HStack{
 //            Text("Connected Space")
 //                .font(.custom("Poppins-Medium", size: 18))
-//                .foregroundColor(.themeWhite)
+//                .foregroundColor(.appTextPrimary)
 //                .multilineTextAlignment(.center)
 //                .lineSpacing(18 * 0.2)
 //                .tracking(-0.15 / 18)
@@ -23,7 +23,7 @@
 //        let role = AuthManager.shared.getRole()
 //        if role == "Installer User created" {
 //            Text("Please log in to view your Wi-Fi devices.")
-//                .foregroundColor(.gray)
+//                .foregroundColor(.appTextMuted)
 //                .padding()
 //        } else {
 //            if wifiDevices.isEmpty {
@@ -54,11 +54,11 @@
 //                                    .font(.custom("Poppins-Medium", size: 14))
 //                                    .foregroundColor(Color.charlestonGreen)
 //                            }
-//                            .font(.system(size: 17, weight: .semibold))
+//                            .font(LimiTypography.button)
 //                            .padding(.vertical, 14)
 //                            .padding(.horizontal, 20)
-//                            .background(Color.emerald)
-//                            .foregroundColor(.themeBlack)
+//                            .background(Color.brandAction)
+//                            .foregroundColor(.appTextPrimary)
 //                            .cornerRadius(12)
 //                        }
 //                    }

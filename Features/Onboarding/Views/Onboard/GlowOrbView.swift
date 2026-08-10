@@ -10,7 +10,7 @@ struct GlowOrbView: View {
         ZStack {
             // Soft green halo
             Circle()
-                .fill(Color(#colorLiteral(red: 0.23, green: 0.78, blue: 0.54, alpha: 1)).opacity(0.35))
+                .fill(Color.brandAction.opacity(0.35))
                 .frame(width: 220, height: 220)
                 .blur(radius: 40)
                 .scaleEffect(pulse ? 1.08 : 0.95)
@@ -36,7 +36,7 @@ struct GlowOrbView: View {
                     Circle()
                         .stroke(
                             LinearGradient(
-                                colors: [Color.yellow.opacity(0.9), Color.orange.opacity(0.8)],
+                                colors: [Color.appWarmGlow.opacity(0.9), Color.appOrange.opacity(0.8)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -44,8 +44,8 @@ struct GlowOrbView: View {
                         )
                         .blur(radius: 0.3)
                 )
-                .shadow(color: .themeWhite.opacity(0.9), radius: 12)
-                .shadow(color: Color.green.opacity(0.35), radius: 28)
+                .shadow(color: .appTextPrimary.opacity(0.9), radius: 12)
+                .shadow(color: Color.brandAction.opacity(0.35), radius: 28)
                 .scaleEffect(pulse ? 1.06 : 0.98)
 
             // Rotating spectral sweep for extra life
@@ -181,7 +181,7 @@ private struct EllipticalOrbitingCircle: View {
 
             Image(systemName: icon)
                 .font(.system(size: size * 0.4, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
         }
         .rotationEffect(.degrees(internalSpin))
         .onAppear {
@@ -203,16 +203,16 @@ private struct AngularSweep: View {
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: [
-                        .init(color: .themeWhite.opacity(0.0), location: 0.00),
-                        .init(color: .themeWhite.opacity(0.15), location: 0.08),
-                        .init(color: .themeWhite.opacity(0.35), location: 0.12),
-                        .init(color: .themeWhite.opacity(0.0), location: 0.18),
-                        .init(color: Color.emerald.opacity(0.25), location: 0.28),
-                        .init(color: Color.eton.opacity(0.25), location: 0.35),
-                        .init(color: .themeWhite.opacity(0.0), location: 0.45),
-                        .init(color: .themeWhite.opacity(0.2), location: 0.52),
-                        .init(color: .themeWhite.opacity(0.0), location: 0.60),
-                        .init(color: .themeWhite.opacity(0.0), location: 1.00)
+                        .init(color: .appTextPrimary.opacity(0.0), location: 0.00),
+                        .init(color: .appTextPrimary.opacity(0.15), location: 0.08),
+                        .init(color: .appTextPrimary.opacity(0.35), location: 0.12),
+                        .init(color: .appTextPrimary.opacity(0.0), location: 0.18),
+                        .init(color: Color.brandAction.opacity(0.25), location: 0.28),
+                        .init(color: Color.brandHighlight.opacity(0.25), location: 0.35),
+                        .init(color: .appTextPrimary.opacity(0.0), location: 0.45),
+                        .init(color: .appTextPrimary.opacity(0.2), location: 0.52),
+                        .init(color: .appTextPrimary.opacity(0.0), location: 0.60),
+                        .init(color: .appTextPrimary.opacity(0.0), location: 1.00)
                     ]),
                     center: .center
                 ),

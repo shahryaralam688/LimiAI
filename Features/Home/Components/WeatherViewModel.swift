@@ -31,7 +31,7 @@ final class WeatherViewModel: ObservableObject {
 
     var gradientColors: [Color] {
         guard let data = weatherData else {
-            return [Color(hex: "0B0B0F"), Color(hex: "1A1A3E"), Color(hex: "0B0B0F")]
+            return [Color.appCanvasPrimary, Color.appCanvasStrong, Color.appCanvasPrimary]
         }
         return data.gradientColors.map { $0.color }
     }

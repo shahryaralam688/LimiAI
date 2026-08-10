@@ -13,21 +13,20 @@ final class HotelRoomDevicesViewModel: ObservableObject {
     @Published var selectedHub: Hub?
     @Published private(set) var isBluetoothOn = false
 
-    private let bluetooth: HotelRoomBluetoothControlling
+    private let bluetooth: HotelRoomBluetoothAdapter
 
     var connectedDeviceItems: [DeviceItem] {
         bluetooth.connectedDeviceItems
     }
 
-    init(bluetooth: HotelRoomBluetoothControlling = HotelRoomBluetoothAdapter()) {
+    init(bluetooth: HotelRoomBluetoothAdapter = HotelRoomBluetoothAdapter()) {
         self.bluetooth = bluetooth
         self.isBluetoothOn = bluetooth.isBluetoothOn
         wireObservers()
     }
 
     private func wireObservers() {
-        guard let adapter = bluetooth as? HotelRoomBluetoothAdapter else { return }
-        adapter.$isBluetoothOn
+        bluetooth.$isBluetoothOn
             .receive(on: DispatchQueue.main)
             .assign(to: &$isBluetoothOn)
     }

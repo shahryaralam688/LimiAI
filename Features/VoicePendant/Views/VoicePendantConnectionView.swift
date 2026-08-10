@@ -34,7 +34,7 @@ struct VoicePendantConnectionView: View {
                 actionButton
                 if let errorMessage {
                     Text(errorMessage)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appDanger)
                         .multilineTextAlignment(.center)
                 }
@@ -60,13 +60,13 @@ struct VoicePendantConnectionView: View {
                     .stroke(ringColor.opacity(0.5), lineWidth: 2)
                     .frame(width: 120, height: 120)
                 Image(systemName: status == .online ? "link.circle.fill" : "link.circle")
-                    .font(.system(size: 54, weight: .regular))
+                    .font(LimiTypography.title2)
                     .foregroundColor(ringColor)
             }
             VPStatusPill(status: status)
             Text(status == .online ? "Your pendant is connected and ready."
                                    : "This pendant isn't connected yet.")
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextSecondary)
                 .multilineTextAlignment(.center)
         }
@@ -91,7 +91,7 @@ struct VoicePendantConnectionView: View {
                     HStack(spacing: 12) {
                         stepIcon(for: index)
                         Text(step)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(LimiTypography.callout)
                             .foregroundColor(index <= stepIndex || status == .online ? .themeWhite : Color.appTextMuted)
                         Spacer()
                     }
@@ -106,7 +106,7 @@ struct VoicePendantConnectionView: View {
         let active = isConnecting && index == stepIndex
         ZStack {
             Circle()
-                .fill(done ? Color.emerald.opacity(0.15) : Color.appSurfacePrimary)
+                .fill(done ? Color.brandAction.opacity(0.15) : Color.appSurfacePrimary)
                 .frame(width: 28, height: 28)
             if active {
                 ProgressView()
@@ -137,18 +137,18 @@ struct VoicePendantConnectionView: View {
     private func detailRow(_ label: String, _ value: String) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextSecondary)
             Spacer()
             Text(value)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
         }
         .padding(.vertical, 12)
     }
 
     private var divider: some View {
-        Rectangle().fill(Color.themeWhite.opacity(0.06)).frame(height: 1)
+        Rectangle().fill(Color.appGlassFillMedium).frame(height: 1)
     }
 
     // MARK: - Action
@@ -165,7 +165,7 @@ struct VoicePendantConnectionView: View {
             }
         } else {
             Text("Pendant is offline. Power it on to connect.")
-                .font(.system(size: 13, weight: .medium))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)

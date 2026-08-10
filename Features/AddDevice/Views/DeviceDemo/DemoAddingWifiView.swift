@@ -1,173 +1,240 @@
 //
-//  DemoAddDevicesView.swift
+//  DemoAddingWifiView.swift
 //  Limi
 //
 //  Created by Shahrukh Ahmed on 26/10/2025.
 //
 
 import SwiftUI
+
 struct DemoAddingWifiView: View {
-    // back to Onboarding last page
     var onBack: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     let deviceName: String
     let deviceId: String
     let wifiSSID: String
 
-    @State private var wifiPassword: String = ""
-    @ObservedObject private var ble = BluetoothManager.shared
-    @State private var isProvisioning: Bool = false
-    @State private var resultMessage: String = ""
-    @State private var resultStatus: String = ""
-    @State private var showWifiConected = false
+    private enum Step: Equatable {
+        case enterPassword
+        case provisioning(phase: String)
+        case success
+        case failure(message: String)
+    }
 
+    @State private var wifiPassword: String = ""
+    @State private var isPasswordVisible = false
+    @State private var step: Step = .enterPassword
+    @State private var showConnectedDevicesAfterSuccess = false
 
     var body: some View {
         NavigationStack {
+            Group {
+                switch step {
+                case .enterPassword:
+                    passwordEntryContent
+                case .provisioning(let phase):
+                    provisioningContent(phase: phase)
+                case .success:
+                    DemoConnectedWifiView(
+                        deviceName: deviceName,
+                        onContinue: { showConnectedDevicesAfterSuccess = true }
+                    )
+                case .failure(let message):
+                    failureContent(message: message)
+                }
+            }
+            .background(Color.appCanvasPrimary)
+            .limiModalNavigationBar(title: "Add Device", onClose: {
+                WiFiProvisioningCoordinator.shared.cancel()
+                if let onBack {
+                    onBack()
+                } else {
+                    dismiss()
+                }
+            })
+        }
+        .fullScreenCover(isPresented: $showConnectedDevicesAfterSuccess) {
+            ConnectedDevicesView()
+        }
+        .onDisappear {
+            if case .success = step { return }
+            WiFiProvisioningCoordinator.shared.cancel()
+        }
+    }
+
+    private var passwordEntryContent: some View {
         VStack(spacing: 0) {
             LimiModuleSubtitle(text: "Enter the password for your Wi-Fi network")
-            
-            VStack(spacing: 16){
-                HStack{
+
+            VStack(spacing: 16) {
+                HStack {
                     Text("Wifi Password")
-                        .font(.system(size: 20, weight: .medium, design: .rounded))   // 500 weight = Medium
-                        .foregroundColor(.appTextPrimary)      // matches #C9C4BD
-                        .multilineTextAlignment(.center)             // aligns text centrally
-                        .lineSpacing(0)                              // 100% line height = no extra spacing
-                        .kerning(0)// letter-spacing: 0px
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.appTextPrimary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(0)
+                        .kerning(0)
                     Spacer()
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 8)
-                HStack{
-                    ZStack(alignment: .leading) {
-                        Text(wifiSSID)
-                            .font(.system(size: 25, weight: .medium, design: .rounded))
-                            .foregroundColor(.appTextPrimary) // ✅ Placeholder color
-                            .kerning(-0.048)
 
-                    }
-                    .padding(.horizontal, 16)
-                }
-
-
-                .padding(.bottom, 34)
-                HStack{
-                    ZStack(alignment: .leading) {
-                        if wifiPassword.isEmpty {
-                            Text("Enter your Wi-Fi password")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundColor(Color.appTextPlaceholder) // ✅ Placeholder color
-                                .kerning(-0.048)
-                        }
-                        
-                        TextField("", text: $wifiPassword)
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.appTextSoft) // Active text color (slightly brighter)
-                            .kerning(-0.048)
-                            .lineSpacing(0)
-                            .textInputAutocapitalization(.never)
-                            .disableAutocorrection(true)
-                    }
-                    .padding(.horizontal, 16)
-                    
-
-                    Spacer()
-                    Image(systemName: "eye")
+                HStack {
+                    Text(wifiSSID)
+                        .font(LimiTypography.title2)
                         .foregroundColor(.appTextPrimary)
+                        .kerning(-0.048)
                         .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 34)
 
+                HStack {
+                    Group {
+                        if isPasswordVisible {
+                            TextField("", text: $wifiPassword)
+                        } else {
+                            SecureField("", text: $wifiPassword)
+                        }
+                    }
+                    .font(LimiTypography.headline)
+                    .foregroundColor(Color.appTextSoft)
+                    .kerning(-0.048)
+                    .lineSpacing(0)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+                    .padding(.leading, 16)
+
+                    Button {
+                        isPasswordVisible.toggle()
+                    } label: {
+                        Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                            .foregroundColor(.appTextPrimary)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 16)
+                    .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
                 }
                 .background(
                     Rectangle()
-                        .fill(Color.appSurfacePrimary) // gray background
+                        .fill(Color.appSurfacePrimary)
                         .cornerRadius(20)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
                 )
                 .padding(.horizontal, 16)
 
-                
-
-                            
-                VStack{
+                VStack {
                     Text("Connect Your Device to Wi-Fi")
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))  // 600 weight = SemiBold
-                        .foregroundColor(Color.appTextSecondary)        // matches background color spec
-                        .multilineTextAlignment(.center)               // text-align: center
-                        .lineSpacing(20 * 0.4)                         // line-height: 140%
-                        .kerning(0)                                    // letter-spacing: 0%
+                        .font(LimiTypography.title3)
+                        .foregroundColor(Color.appTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(20 * 0.4)
+                        .kerning(0)
 
                     Text("Enter your Wi-Fi password to link your device securely. This allows Limi to stay connected, sync with your other devices, and respond instantly — all within your private network.")
-                        .font(.system(size: 14, weight: .regular, design: .rounded)) // font-family + weight + size
-                        .foregroundColor(Color.appTextMuted)     // text color
-                        .multilineTextAlignment(.center)            // text-align: center
-                        .lineSpacing(4)                             // for line-height: 140%
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(Color.appTextMuted)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
                         .padding(.horizontal)
-
                 }
                 .background(
                     Rectangle()
-                    .fill(Color.appSurfacePrimary) // gray background
-                    .cornerRadius(20)
-                    .frame(height: 148)
+                        .fill(Color.appSurfacePrimary)
+                        .cornerRadius(20)
+                        .frame(height: 148)
                 )
                 .frame(maxWidth: .infinity)
                 .frame(height: 148)
                 .padding(.horizontal, 16)
                 .padding(.top, 27)
-
             }
+
             Spacer()
-            // Add devices Button
-            LimiPrimaryButton(title: isProvisioning ? "Connecting…" : (ble.isConnected ? "Connected" : "Add Your First Device")) {
-                guard !wifiSSID.isEmpty else { resultStatus = "error"; resultMessage = "SSID is required"; return }
-                isProvisioning = true
-                resultMessage = ""
-                resultStatus = ""
-                BluetoothManager.shared.provisionWifi(ssid: wifiSSID, password: wifiPassword) { res in
-                    DispatchQueue.main.async {
-                        self.isProvisioning = false
-                        self.resultStatus = res.status
-                        self.resultMessage = res.message
-                    }
-                }
 
-                showWifiConected = true
+            LimiPrimaryButton(title: "Connect Device") {
+                startProvisioning()
             }
-            .disabled(isProvisioning)
-            .animation(LimiMotion.quick, value: isProvisioning)
-            .animation(LimiMotion.quick, value: ble.isConnected)
+            .disabled(wifiPassword.isEmpty)
             .padding(.horizontal, 16)
             .padding(.bottom, 12)
             .limiFloatingOrbClearance()
+        }
+    }
 
-            if !resultMessage.isEmpty {
-                Text(resultMessage)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(resultStatus == "success" ? .green : (resultStatus == "warning" ? .yellow : .red))
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 15)
+    private func provisioningContent(phase: String) -> some View {
+        VStack(spacing: 20) {
+            Spacer()
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
+                .scaleEffect(1.5)
+            Text("Connecting to Wi-Fi")
+                .font(LimiTypography.title3)
+                .foregroundColor(.appTextPrimary)
+            Text(phase)
+                .font(LimiTypography.subheadline)
+                .foregroundColor(.appTextMuted)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer()
+        }
+        .limiFloatingOrbClearance()
+    }
+
+    private func failureContent(message: String) -> some View {
+        VStack(spacing: 20) {
+            Spacer()
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: LimiIconSize.hero))
+                .foregroundColor(.appTextMuted)
+            Text("Couldn't Connect")
+                .font(LimiTypography.title2)
+                .foregroundColor(.appTextPrimary)
+            Text(message)
+                .font(LimiTypography.subheadline)
+                .foregroundColor(.appTextMuted)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer()
+            LimiPrimaryButton(title: "Try Again") {
+                step = .enterPassword
             }
-//            .padding(.bottom, 12)
-//            .padding(.horizontal, 16)
-            
+            .padding(.horizontal, 16)
+            .padding(.bottom, 12)
+            .limiFloatingOrbClearance()
         }
-        .background(Color.appCanvasPrimary)
-        .fullScreenCover(isPresented: $showWifiConected) {
-            DemoConnectedWifiView(deviceName: deviceName ?? "")
-        }
-        .limiModalNavigationBar(title: "Add Device", onClose: {
-            if let onBack {
-                onBack()
-            } else {
-                dismiss()
+    }
+
+    private func startProvisioning() {
+        guard !wifiSSID.isEmpty else { return }
+        step = .provisioning(phase: "Sending Wi-Fi credentials…")
+
+        WiFiProvisioningCoordinator.shared.provisionAndVerify(
+            deviceName: deviceName,
+            bleDeviceId: deviceId,
+            ssid: wifiSSID,
+            password: wifiPassword,
+            onPhaseUpdate: { phase in
+                step = .provisioning(phase: phase)
+            },
+            completion: { result in
+                switch result {
+                case .success(let outcome):
+                    SelectedDevicesStorage.shared.addOrUpdate(name: deviceName, uuid: deviceId)
+                    ConfiguredBLEDeviceStore.shared.remember(
+                        hardwareId: outcome.deviceId,
+                        blePeripheralUUID: deviceId,
+                        displayName: outcome.deviceName.isEmpty ? deviceName : outcome.deviceName
+                    )
+                    step = .success
+                case .failure(let failure):
+                    step = .failure(message: failure.userMessage)
+                }
             }
-        })
-        }
+        )
     }
 }
 
 #Preview {
-    DemoAddingWifiView(deviceName: "abc", deviceId: "xyz",  wifiSSID : "abc" )
+    DemoAddingWifiView(deviceName: "abc", deviceId: "xyz", wifiSSID: "abc")
 }

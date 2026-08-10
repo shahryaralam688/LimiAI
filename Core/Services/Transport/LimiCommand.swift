@@ -42,6 +42,9 @@ public enum LimiCommand: Equatable {
 // MARK: - JSON encoding (MQTT + WebSocket)
 
 extension LimiCommand {
+    /// Static group id used by room/group control. Backend treats this as a fan-out hint.
+    public static let defaultGroupID = "group1"
+
     /// Builds the wire-shape `{"deviceId": "...", "command": {...}}` envelope
     /// expected by both `device/<id>/command` (MQTT) and `ws://<ip>/ws` (WebSocket).
     public func toJSON(deviceId: String) -> Data {
@@ -50,6 +53,28 @@ extension LimiCommand {
             "command": commandPayload()
         ]
         // .sortedKeys is stable; firmware ignores key order but it makes logs readable.
+        return (try? JSONSerialization.data(withJSONObject: envelope, options: [.sortedKeys])) ?? Data()
+    }
+
+    /// Builds a single group envelope for room control:
+    /// `{"GroupID":"group1","deviceIds":[...],"command":{...}}`.
+    /// Backend extracts `command` and publishes it over MQTT to each device id.
+    public func toGroupJSON(
+        groupId: String = LimiCommand.defaultGroupID,
+        deviceIds: [String]
+    ) -> Data {
+        let normalizedIds = deviceIds
+            .map { $0.uppercased() }
+            .filter { !$0.isEmpty }
+        // Preserve order, drop duplicates so the backend does not double-publish.
+        var seen = Set<String>()
+        let uniqueIds = normalizedIds.filter { seen.insert($0).inserted }
+
+        let envelope: [String: Any] = [
+            "GroupID": groupId,
+            "deviceIds": uniqueIds,
+            "command": commandPayload()
+        ]
         return (try? JSONSerialization.data(withJSONObject: envelope, options: [.sortedKeys])) ?? Data()
     }
 

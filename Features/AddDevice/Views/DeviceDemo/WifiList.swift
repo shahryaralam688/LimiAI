@@ -45,7 +45,7 @@ struct WifiList: View {
                     ForEach(Array(wifiList.enumerated()), id: \.offset) { index, ssid in
                         HStack(spacing: 12) {
                             Text(ssid)
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                .font(LimiTypography.button)
                                 .foregroundColor(.appTextPrimary)
                                 .lineSpacing(0) // Adjust if needed for line-height
                                 .kerning(-0.5) // letter-spacing

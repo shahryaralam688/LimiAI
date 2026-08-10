@@ -31,7 +31,7 @@ struct DeviceSearchSheet: View {
             Rectangle()
                 .frame(width: 40, height: 5)
                 .cornerRadius(2.5)
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(.appTextMuted.opacity(0.5))
                 .padding(.top, 10)
             
             Text("Add Device")
@@ -80,7 +80,7 @@ struct DeviceSearchSheet: View {
                             }) {
                                 HStack {
                                     Image(systemName: "lightbulb")
-                                        .foregroundColor(.eton)
+                                        .foregroundColor(.brandHighlight)
                                         .padding(.trailing, 5)
                                     
                                     Text(device)
@@ -92,8 +92,7 @@ struct DeviceSearchSheet: View {
                                         .foregroundColor(.emerald)
                                 }
                                 .padding()
-                                .background(Color.themeWhite)
-                                .cornerRadius(10)
+                                .limiPanel(cornerRadius: 10)
                                 .shadow(color: Color.themeBlack.opacity(0.1), radius: 3, x: 0, y: 1)
                             }
                         }
@@ -112,7 +111,7 @@ struct DeviceSearchSheet: View {
                     .fontWeight(.medium)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color.gray.opacity(0.2))
+                    .background(Color.appBorderPrimary.opacity(0.35))
                     .foregroundColor(.appTextInverse)
                     .cornerRadius(10)
             }

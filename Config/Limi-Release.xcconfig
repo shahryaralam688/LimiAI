@@ -1,4 +1,10 @@
-// Release builds — production API (URLs only; no secrets).
+// Release builds — TEMPORARILY pointed at the dev API while production
+// (api.limitless-lighting.co.uk) is down (502). Restore the production URL
+// before App Store release:
+// LIMI_API_BASE_URL = https:/$()/api.limitless-lighting.co.uk/
 // Use https:/$()/ so xcconfig does not treat `//` as a comment.
 #include? "../Pods/Target Support Files/Pods-Limi/Pods-Limi.release.xcconfig"
-LIMI_API_BASE_URL = https:/$()/api.limitless-lighting.co.uk/
+LIMI_API_BASE_URL = https:/$()/dev.api.limitless-lighting.co.uk/
+// Use the stable default toolchain path; CocoaPods' TOOLCHAIN_DIR can point at a
+// transient Metal cryptex mount that triggers "search path not found" warnings.
+LIBRARY_SEARCH_PATHS = /usr/lib/swift "$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME)"

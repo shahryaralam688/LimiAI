@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+
 // MARK: - Demo Hubs List Component
 struct DemoHubsListView: View {
     var isLoaded: Bool
     @ObservedObject var bluetoothManager: HomeBluetoothAdapter
     var searchText: String
-    
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             LazyVGrid(columns: [
@@ -24,12 +25,8 @@ struct DemoHubsListView: View {
             }
             .padding()
         }
-        .onAppear {
-            // Any setup needed for demo hubs
-        }
-
     }
-    
+
     private var filteredDemoHubs: [Hub] {
         let text = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !text.isEmpty else { return bluetoothManager.demoStoredHubs }

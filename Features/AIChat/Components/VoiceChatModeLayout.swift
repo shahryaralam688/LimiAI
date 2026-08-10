@@ -21,7 +21,7 @@ struct VoiceChatModeLayout: View {
             }
             Spacer()
             Text("Limi")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .font(LimiTypography.button)
                 .foregroundColor(.appTextPrimary)
             Spacer()
             Circle()
@@ -63,10 +63,10 @@ struct VoiceChatModeLayout: View {
                 if viewModel.isRecordingFromChat {
                     HStack(spacing: 8) {
                         Image(systemName: "waveform.circle.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.orbGlow4)
+                            .font(LimiTypography.title3)
+                            .foregroundColor(.brandAction)
                         Text("Recording...")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextPrimary)
                     }
                     .padding(.horizontal, 16)
@@ -82,7 +82,7 @@ struct VoiceChatModeLayout: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
                     .foregroundColor(.appTextPrimary)
-                    .font(.system(size: 16))
+                    .font(LimiTypography.body)
                     .glassCard(cornerRadius: 24, fillOpacity: 0.06)
                 }
 
@@ -91,16 +91,12 @@ struct VoiceChatModeLayout: View {
                     ZStack {
                         Circle()
                             .fill(
-                                LinearGradient(
-                                    colors: [.orbGlow4, .orbGlow1],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                                LimiGradients.cta
                             )
                             .frame(width: 44, height: 44)
                         Image(systemName: showMic ? (viewModel.isRecordingFromChat ? "stop.fill" : "mic.fill") : "arrow.up")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(LimiTypography.button)
+                            .foregroundColor(.appTextPrimary)
                     }
                 }
             }

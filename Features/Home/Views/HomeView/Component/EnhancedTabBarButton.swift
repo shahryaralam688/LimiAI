@@ -37,7 +37,7 @@ struct EnhancedTabBarButton: View {
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .foregroundColor(.themeWhite)
+                            .foregroundColor(.appTextPrimary)
                             .frame(width: 22, height: 22)
                             .blur(radius: 4)
                             .opacity(glowOpacity)
@@ -56,15 +56,15 @@ struct EnhancedTabBarButton: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(isSelected ? .themeWhite : .gray.opacity(0.7))
+                        .foregroundColor(isSelected ? .appTextPrimary : .appTextMuted.opacity(0.7))
                         .frame(width: 22, height: 22)
                         .scaleEffect(bounceAnimation && isSelected ? 1.2 : 1.0)
                 }
                 
                 // Title with animation
                 Text(title)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(isSelected ? .themeWhite : .gray.opacity(0.7))
+                    .font(LimiTypography.caption2)
+                    .foregroundColor(isSelected ? .appTextPrimary : .appTextMuted.opacity(0.7))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
@@ -74,13 +74,13 @@ struct EnhancedTabBarButton: View {
                     if isSelected {
                         // Pill indicator
                         Capsule()
-                            .fill(Color.themeWhite.opacity(0.2))
+                            .fill(Color.appGlassFillStrong)
                             .frame(width: 25, height: 3)
                             .offset(y: 16)
                         
                         // Dot indicator
                         Circle()
-                            .fill(Color.themeWhite)
+                            .fill(Color.brandHighlight)
                             .frame(width: 4, height: 4)
                             .offset(y: 16)
                     }

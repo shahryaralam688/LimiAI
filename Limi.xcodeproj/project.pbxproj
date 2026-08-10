@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		021667969900281E04448B95 /* Poppins-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E32D6DD73C0044A7CF /* Poppins-LightItalic.ttf */; };
+		066F241CB4D8A9D27AEF6F9B /* Poppins-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E02D6DD73C0044A7CF /* Poppins-ExtraLightItalic.ttf */; };
+		08DFB1BB86640D0B568E613C /* GlobalVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */; };
+		09183BE2E7E0BAC41D2C9F90 /* SocketIOExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47A12FA4E929008A89D8 /* SocketIOExample.swift */; };
+		0EFA3688B83205913E34685B /* FloatingAssistantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476A2FA4E929008A89D8 /* FloatingAssistantManager.swift */; };
 		1042906B2F0004EE003BB7B4 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1042906A2F0004EE003BB7B4 /* AppAuth */; };
 		1042906D2F0004EE003BB7B4 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1042906C2F0004EE003BB7B4 /* AppAuthCore */; };
 		1042906F2F0004EE003BB7B4 /* AppAuthTV in Frameworks */ = {isa = PBXBuildFile; productRef = 1042906E2F0004EE003BB7B4 /* AppAuthTV */; };
@@ -45,13 +50,24 @@
 		10AB0000000000000000B00A /* LimiTransportError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00A /* LimiTransportError.swift */; };
 		10AB0000000000000000B00B /* ThrottledSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00B /* ThrottledSender.swift */; };
 		10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00C /* TransportMediumPreference.swift */; };
+		10AB0000000000000000B00D /* CloudOfflineLocalSwitchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00D /* CloudOfflineLocalSwitchCoordinator.swift */; };
+		10AB0000000000000000B00E /* CloudOfflineLocalSwitchAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00E /* CloudOfflineLocalSwitchAlert.swift */; };
+		10AB0000000000000000B00F /* CloudPresenceMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00F /* CloudPresenceMemory.swift */; };
+		10AB0000000000000000B10D /* CloudOfflineLocalSwitchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00D /* CloudOfflineLocalSwitchCoordinator.swift */; };
+		10AB0000000000000000B10E /* CloudOfflineLocalSwitchAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00E /* CloudOfflineLocalSwitchAlert.swift */; };
+		10AB0000000000000000B10F /* CloudPresenceMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00F /* CloudPresenceMemory.swift */; };
+		10AB0000000000000000B010 /* ConfiguredBLEDeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C010 /* ConfiguredBLEDeviceStore.swift */; };
+		10AB0000000000000000B011 /* BLECloudFallbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C011 /* BLECloudFallbackService.swift */; };
+		10AB0000000000000000B110 /* ConfiguredBLEDeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C010 /* ConfiguredBLEDeviceStore.swift */; };
+		10AB0000000000000000B111 /* BLECloudFallbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C011 /* BLECloudFallbackService.swift */; };
+		10ADD0182FA4E929008A89D8 /* AddDeviceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */; };
 		10ADDT012FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADDT002FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift */; };
 		10AICHT012FA4E929008A89D8 /* VoiceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AICHT002FA4E929008A89D8 /* VoiceViewModelTests.swift */; };
 		10APP0112FA4E929008A89D8 /* DependencyProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */; };
 		10APP0122FA4E929008A89D8 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0022FA4E929008A89D8 /* AppEnvironment.swift */; };
 		10APPT012FA4E929008A89D8 /* AppEnvironmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */; };
+		10CASE012FA4E929008A89D8 /* TransportCaseLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10CASE002FA4E929008A89D8 /* TransportCaseLogicTests.swift */; };
 		10ART012FA4E929008A89D8 /* ARSessionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ART002FA4E929008A89D8 /* ARSessionViewModelTests.swift */; };
-		10AUTH0112FA4E929008A89D8 /* AuthRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */; };
 		10B43B762EF922970040610A /* SwiftLAME in Frameworks */ = {isa = PBXBuildFile; productRef = 10B43B752EF922970040610A /* SwiftLAME */; };
 		10BCB0112FA4E929008A89D8 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */; };
 		10BCB0122FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */; };
@@ -62,7 +78,11 @@
 		10BCB0172FA4E929008A89D8 /* GlobalVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */; };
 		10BCB0182FA4E929008A89D8 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0082FA4E929008A89D8 /* AppRouter.swift */; };
 		10BCB0192FA4E929008A89D8 /* HomeRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0092FA4E929008A89D8 /* HomeRoute.swift */; };
+		10CARD0112FA4E929008A89D8 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10CARD0012FA4E929008A89D8 /* Card.swift */; };
+		10PEND0112FA4E929008A89D8 /* PendantModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PEND0012FA4E929008A89D8 /* PendantModelCatalog.swift */; };
+		10PEND0212FA4E929008A89D8 /* PendantModelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PEND0012FA4E929008A89D8 /* PendantModelCatalog.swift */; };
 		10HOMET012FA4E929008A89D8 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10HOMET002FA4E929008A89D8 /* HomeViewModelTests.swift */; };
+		10LIMN0112FA4E929008A89D8 /* LimiDeviceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10LIMN0012FA4E929008A89D8 /* LimiDeviceNaming.swift */; };
 		10NAPP112FA4E929008A89D8 /* LimiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NAPP012FA4E929008A89D8 /* LimiApp.swift */; };
 		10NAPP122FA4E929008A89D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NAPP022FA4E929008A89D8 /* AppDelegate.swift */; };
 		10NET0112FA4E929008A89D8 /* BLEDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0012FA4E929008A89D8 /* BLEDevice.swift */; };
@@ -79,6 +99,96 @@
 		10SHD0112FA4E929008A89D8 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */; };
 		10SHD0122FA4E929008A89D8 /* RainbowSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */; };
 		10SHD0132FA4E929008A89D8 /* LimiModalChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */; };
+		10WIFP0112FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10WIFP0012FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift */; };
+		144B460D5657CDF9C75F7790 /* LimiDeviceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10LIMN0012FA4E929008A89D8 /* LimiDeviceNaming.swift */; };
+		146F228B2B7DE6ACADEF8946 /* BluetoothManager+GATTWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */; };
+		160208298260B5F976F9C5C9 /* DeviceTransportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C003 /* DeviceTransportState.swift */; };
+		17E1F52113CE54C6D9BBC632 /* Amenti-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D42D6DD73C0044A7CF /* Amenti-Light.otf */; };
+		1869F184FD05E1F75CE0F7F6 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10CARD0012FA4E929008A89D8 /* Card.swift */; };
+		1895B4B355FD496A15745B18 /* DeviceHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D822FD4946E318EDF8E2244 /* DeviceHomeView.swift */; };
+		A1ROOM0112FA4E929008A89D8 /* RoomControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */; };
+		A1ROOM0122FA4E929008A89D8 /* RoomControlViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */; };
+		A1DEVUX0122FA4E929008A89D8 /* DeviceAppUX.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */; };
+		A1SMOVR0122FA4E929008A89D8 /* DeviceSmartHomeOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */; };
+		A1HOMUI0122FA4E929008A89D8 /* DeviceHomeUITheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */; };
+		A1H1TOK0122FA4E929008A89D8 /* HomeUI1Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1TOK0022FA4E929008A89D8 /* HomeUI1Tokens.swift */; };
+		A1H1ACV0122FA4E929008A89D8 /* HomeUI1AnimatedCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1ACV0022FA4E929008A89D8 /* HomeUI1AnimatedCanvas.swift */; };
+		A1H1ELV0122FA4E929008A89D8 /* HomeUI1Elevation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1ELV0022FA4E929008A89D8 /* HomeUI1Elevation.swift */; };
+		A1H1CMP0122FA4E929008A89D8 /* HomeUI1Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1CMP0022FA4E929008A89D8 /* HomeUI1Components.swift */; };
+		A1H1CHR0122FA4E929008A89D8 /* HomeUI1OverviewChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1CHR0022FA4E929008A89D8 /* HomeUI1OverviewChrome.swift */; };
+		A1H1PD0122FA4E929008A89D8 /* HomeUI1PendantIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1PD0022FA4E929008A89D8 /* HomeUI1PendantIcon.swift */; };
+		A1H1BB0122FA4E929008A89D8 /* HomeUI1BottomBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1BB0022FA4E929008A89D8 /* HomeUI1BottomBar.swift */; };
+		A1H1CTL0122FA4E929008A89D8 /* HomeUI1ControlChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H1CTL0022FA4E929008A89D8 /* HomeUI1ControlChrome.swift */; };
+		A1H2TOK0122FA4E929008A89D8 /* HomeUI2Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H2TOK0022FA4E929008A89D8 /* HomeUI2Tokens.swift */; };
+		A1H2CMP0122FA4E929008A89D8 /* HomeUI2Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H2CMP0022FA4E929008A89D8 /* HomeUI2Components.swift */; };
+		A1H2VW0122FA4E929008A89D8 /* HomeUI2HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H2VW0022FA4E929008A89D8 /* HomeUI2HomeView.swift */; };
+		A1H3TOK0122FA4E929008A89D8 /* HomeUI3Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H3TOK0022FA4E929008A89D8 /* HomeUI3Tokens.swift */; };
+		A1H3VW0122FA4E929008A89D8 /* HomeUI3HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H3VW0022FA4E929008A89D8 /* HomeUI3HomeView.swift */; };
+		A1H4TOK0122FA4E929008A89D8 /* HomeUI4Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H4TOK0022FA4E929008A89D8 /* HomeUI4Tokens.swift */; };
+		A1H4VW0122FA4E929008A89D8 /* HomeUI4HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H4VW0022FA4E929008A89D8 /* HomeUI4HomeView.swift */; };
+		A1H5TOK0122FA4E929008A89D8 /* HomeUI5Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H5TOK0022FA4E929008A89D8 /* HomeUI5Tokens.swift */; };
+		A1H5VW0122FA4E929008A89D8 /* HomeUI5HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H5VW0022FA4E929008A89D8 /* HomeUI5HomeView.swift */; };
+		A1REMEM0122FA4E929008A89D8 /* RememberedLimiDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */; };
+		1A6BD64AFDBDA9568E5D435B /* info.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D72D6DD73C0044A7CF /* info.txt */; };
+		1DF8ED2086DE7BF1A06F5B40 /* SocketIOMQTTBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C006 /* SocketIOMQTTBridge.swift */; };
+		207A6D3CD23B2FF8A7F91B37 /* DependencyProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */; };
+		2731E7EC6A9E5C66CB2845C7 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */; };
+		2A1EB0561AEE23C648CCCB92 /* LimiDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474B2FA4E929008A89D8 /* LimiDesignSystem.swift */; };
+		2C5E1007CFE845CB1DD4102A /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D82D6DD73C0044A7CF /* OFL.txt */; };
+		2DFE71C6C14E0480A3730D25 /* DeviceControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C848654544461EA113B1105F /* DeviceControlView.swift */; };
+		2E9B11D3F0A4C58217D6B402 /* DeviceProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E402A7B4C9F8235A6E7301 /* DeviceProfileView.swift */; };
+		2F5F4D8EEDD1CC8DA7EA4C60 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 54F1E9587437242129902D8E /* GoogleSignInSwift */; };
+		2FEC18A8DBB3D1B3719882E2 /* SwiftLAME in Frameworks */ = {isa = PBXBuildFile; productRef = 7733AE3A9690D95CD328EAD0 /* SwiftLAME */; };
+		32DE53792470E35C30E70FC3 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0082FA4E929008A89D8 /* AppRouter.swift */; };
+		354C79444254CE469E458D72 /* Bulbs.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9ABFFE4F2D6F38BC00FCA582 /* Bulbs.usdz */; };
+		35C26BA0472B3635667B2FCD /* DeviceAddFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4656334143A2B67C5B96E6 /* DeviceAddFlowView.swift */; };
+		3824C006512F312C0F1F62C7 /* Amenti-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D02D6DD73C0044A7CF /* Amenti-Black.ttf */; };
+		387D8E0230C521CC88DB108B /* WiFiProvisioningCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10WIFP0012FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift */; };
+		39BBD06EFB53F276E9F8F58A /* Poppins-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DC2D6DD73C0044A7CF /* Poppins-BoldItalic.ttf */; };
+		3A2858A5A6B250FB4FD1DB1A /* Amenti-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D22D6DD73C0044A7CF /* Amenti-Medium.ttf */; };
+		3E78666C82A25F155B01D37E /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D92D6DD73C0044A7CF /* Poppins-Black.ttf */; };
+		3EBBD2F429E43C3A4971F77E /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47312FA4E929008A89D8 /* WeatherService.swift */; };
+		3F6BEC0F6A2541DB8CA1080E /* HomeRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0092FA4E929008A89D8 /* HomeRoute.swift */; };
+		3FAC22E4A1B5D69328E7C503 /* DeviceRooms.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F513B8C5DA09346B7F8412 /* DeviceRooms.swift */; };
+		3FFE57C47FB8C482973BEF96 /* Poppins-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E92D6DD73C0044A7CF /* Poppins-Thin.ttf */; };
+		411C360CA788958C50F8B8CC /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */; };
+		412A406E5B0343BA7BAA3F9F /* Amenti-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D52D6DD73C0044A7CF /* Amenti-Thin.otf */; };
+		4823D653C9D632851D349520 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9ACC85E62D731F23009F2DD5 /* README.md */; };
+		495715AA06455221D0A50829 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47532FA4E929008A89D8 /* NetworkMonitor.swift */; };
+		4A223C0359D16D515B774BEB /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 56C89AF19D9D644CA4C57CBD /* WebRTC */; };
+		4ABD33F5B2C6E7A439F8D614 /* DeviceSchedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A624C9D6EB1A457C8F9523 /* DeviceSchedules.swift */; };
+		52D1C6F74DE862499077B576 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 528F142C7DA965FCA2DF204A /* Foundation.framework */; };
+		53DE8563CC5ED9907B4E3D2E /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 24DD33E28A29E590C12684B3 /* SDWebImageSwiftUI */; };
+		55104C717D471AB7B76802E7 /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E22D6DD73C0044A7CF /* Poppins-Light.ttf */; };
+		59F5B8AE62FE0D83F5B8088D /* LimiConfiguratorAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47342FA4E929008A89D8 /* LimiConfiguratorAPI.swift */; };
+		5BCE44A6C3D7F8B54AA9E725 /* DeviceSchedulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B735DAE7FC2B568D9FA634 /* DeviceSchedulesView.swift */; };
+		5C82CC9BDCDEDEF5B783C0F0 /* Poppins-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DE2D6DD73C0044A7CF /* Poppins-ExtraBoldItalic.ttf */; };
+		61C9C123A6159B2A6AD1DFB2 /* DeviceWebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C007 /* DeviceWebSocketClient.swift */; };
+		626B84928952F12C7E6F2A4D /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E42D6DD73C0044A7CF /* Poppins-Medium.ttf */; };
+		631BFD85CC6877B8B53B73DF /* WeatherData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47302FA4E929008A89D8 /* WeatherData.swift */; };
+		64B717455EE217A119498473 /* LightControllingSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47EF2FA4E929008A89D8 /* LightControllingSocket.swift */; };
+		69F539B883327473B740E4B4 /* Poppins-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DA2D6DD73C0044A7CF /* Poppins-BlackItalic.ttf */; };
+		6A135B803AC3D1A5AF2DDA4D /* DeviceTransportRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C004 /* DeviceTransportRegistry.swift */; };
+		6A27B7DEF101D69396DF55F1 /* LimiAPIAuthPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47352FA4E929008A89D8 /* LimiAPIAuthPolicy.swift */; };
+		6CF9052B077CD47C32B12E2B /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 67AB4CD1B7E92B552292F940 /* AppAuth */; };
+		6EEB73A9AD185AC9332CCDF7 /* DeviceSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA5C4580A420566968812B /* DeviceSignInView.swift */; };
+		734C43065BB0A67AAA181175 /* BluetoothManager+BackgroundScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */; };
+		741A74FF599F4F5D068E0B2B /* Poppins-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DF2D6DD73C0044A7CF /* Poppins-ExtraLight.ttf */; };
+		7710693A4319044020056129 /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DB2D6DD73C0044A7CF /* Poppins-Bold.ttf */; };
+		7AA2D07A64AFDAC367B78589 /* LimiModalChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */; };
+		7EEB3A57565941CA26065351 /* Amenti-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D12D6DD73C0044A7CF /* Amenti-Bold.ttf */; };
+		7F28632C48C9834DF13FC3C7 /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E72D6DD73C0044A7CF /* Poppins-SemiBold.ttf */; };
+		80251DC25FA334E2ACB0EC75 /* ThrottledSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00B /* ThrottledSender.swift */; };
+		80F05F97A8646D1E722F3B04 /* BluetoothManager+WifiProvisioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0042FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift */; };
+		82BFA108A8657469096252BC /* LimiAPIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10PH13A01FA4E929008A89D8 /* LimiAPIError.swift */; };
+		83317AF548E163442DD4C401 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DD2D6DD73C0044A7CF /* Poppins-ExtraBold.ttf */; };
+		85ED9A9ACA47238CC77C85D0 /* BLEDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0012FA4E929008A89D8 /* BLEDevice.swift */; };
+		88DC3C527B8216F9428038C4 /* Poppins-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E82D6DD73C0044A7CF /* Poppins-SemiBoldItalic.ttf */; };
+		8C8AC2B6C9A864BC85827017 /* LimiTransportError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00A /* LimiTransportError.swift */; };
+		8FA5425263C12491DF988E74 /* ManagerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F472F2FA4E929008A89D8 /* ManagerAPI.swift */; };
+		9393FC7FF4E48346F44A96F9 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AF3A3AA2DA58E8E004EADAA /* Metal.framework */; };
+		98265A892E2FBBDF750F06CF /* TransportMediumPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00C /* TransportMediumPreference.swift */; };
+		99291EDE634577BECF9C4099 /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 01D1DB7DEC49573113830E27 /* FLAnimatedImage */; };
 		9A5AFD7B2DDC35EC00B785BE /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */; };
 		9A6A3D622E8BC3FC00924422 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 9A6A3D612E8BC3FC00924422 /* SocketIO */; };
 		9A6D930C2E574609009B2808 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ABD247C2DA57617003A5A22 /* ARKit.framework */; };
@@ -88,6 +198,7 @@
 		9A9D0CE62DD30B6900A8C1B3 /* FocusEntity in Frameworks */ = {isa = PBXBuildFile; productRef = 9A9D0CE52DD30B6900A8C1B3 /* FocusEntity */; };
 		9ABFFE3B2D6F20AF00FCA582 /* modela.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9ABFFE3A2D6F20AF00FCA582 /* modela.usdz */; };
 		9ABFFE502D6F38BC00FCA582 /* Bulbs.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9ABFFE4F2D6F38BC00FCA582 /* Bulbs.usdz */; };
+		9AC7485E655897F97B374CE9 /* BonjourServiceBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0032FA4E929008A89D8 /* BonjourServiceBrowser.swift */; };
 		9ACC85E72D731F33009F2DD5 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9ACC85E62D731F23009F2DD5 /* README.md */; };
 		9ADA72EC2D6DD73C0044A7CF /* Amenti-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D22D6DD73C0044A7CF /* Amenti-Medium.ttf */; };
 		9ADA72ED2D6DD73C0044A7CF /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E22D6DD73C0044A7CF /* Poppins-Light.ttf */; };
@@ -105,7 +216,6 @@
 		9ADA72F92D6DD73C0044A7CF /* Poppins-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DE2D6DD73C0044A7CF /* Poppins-ExtraBoldItalic.ttf */; };
 		9ADA72FA2D6DD73C0044A7CF /* Poppins-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E32D6DD73C0044A7CF /* Poppins-LightItalic.ttf */; };
 		9ADA72FB2D6DD73C0044A7CF /* Poppins-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DA2D6DD73C0044A7CF /* Poppins-BlackItalic.ttf */; };
-		9ADA72FC2D6DD73C0044A7CF /* Amenti-Vf.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D62D6DD73C0044A7CF /* Amenti-Vf.ttf */; };
 		9ADA72FD2D6DD73C0044A7CF /* Poppins-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E12D6DD73C0044A7CF /* Poppins-Italic.ttf */; };
 		9ADA72FE2D6DD73C0044A7CF /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DD2D6DD73C0044A7CF /* Poppins-ExtraBold.ttf */; };
 		9ADA72FF2D6DD73C0044A7CF /* Poppins-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E02D6DD73C0044A7CF /* Poppins-ExtraLightItalic.ttf */; };
@@ -116,13 +226,71 @@
 		9ADA73042D6DD73C0044A7CF /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D82D6DD73C0044A7CF /* OFL.txt */; };
 		9ADA73052D6DD73C0044A7CF /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72DB2D6DD73C0044A7CF /* Poppins-Bold.ttf */; };
 		9ADA73062D6DD73C0044A7CF /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E42D6DD73C0044A7CF /* Poppins-Medium.ttf */; };
+		A1NUNI00122FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */; };
+		A1NUNI00222FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */; };
+		A1NUNI10122FA4E929008A89D8 /* Nunito-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */; };
+		A1NUNI10222FA4E929008A89D8 /* Nunito-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */; };
+		A1NUNI20122FA4E929008A89D8 /* Nunito-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */; };
+		A1NUNI20222FA4E929008A89D8 /* Nunito-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */; };
+		A1NUNI30122FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */; };
+		A1NUNI30222FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */; };
 		9AF2B1BC2D7D59A1003D366D /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 9AF2B1BB2D7D59A1003D366D /* FLAnimatedImage */; };
 		9AF3A3AB2DA58E8E004EADAA /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AF3A3AA2DA58E8E004EADAA /* Metal.framework */; };
+		9D762012343DDA95CBC621D0 /* FloatingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476C2FA4E929008A89D8 /* FloatingWindow.swift */; };
+		9F1E0416F8C7D3FC22BCAFD9 /* AddDeviceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */; };
+		A22B37CA4D85EB5EDD721C71 /* ContextManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0062FA4E929008A89D8 /* ContextManager.swift */; };
+		A32C9E9247E11DE2FB2D7E5A /* FloatingRootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476B2FA4E929008A89D8 /* FloatingRootViewController.swift */; };
+		A601F9D83A4C26B6C1D60944 /* Door.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C002 /* Door.swift */; };
+		A7DA47817FFD20BB7376F402 /* AuthResponseParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F472E2FA4E929008A89D8 /* AuthResponseParsing.swift */; };
+		A9F914429F62696029BC8F00 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10APP0022FA4E929008A89D8 /* AppEnvironment.swift */; };
+		AA18874CA719140CBABC73A1 /* FocusEntity in Frameworks */ = {isa = PBXBuildFile; productRef = D0D43B317FEA7A67D472BA4E /* FocusEntity */; };
+		AC8B0827883828CA507D89CB /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E62D6DD73C0044A7CF /* Poppins-Regular.ttf */; };
+		AEA144273060F69231615130 /* LimiHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47322FA4E929008A89D8 /* LimiHTTPClient.swift */; };
+		AF5B020A17FAA8FEA5E7AFF8 /* RainbowSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */; };
+		AFD287C321B4A326C650909D /* Amenti-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D32D6DD73C0044A7CF /* Amenti-Regular.otf */; };
+		B306DAEE197DE03EB0717F31 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = F5F27A95CA4BDAA8762774F3 /* AppAuthCore */; };
+		B7324436EF569760BEBC7DCB /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B670412EDF242A9B2F560A59 /* GoogleSignIn */; };
+		BCA911ADCDA9E0707311CEC6 /* BLELightWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C008 /* BLELightWriter.swift */; };
+		BDA927383B0FEBF3DA95C4E2 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9ABD247C2DA57617003A5A22 /* ARKit.framework */; };
+		C102B2B688B02FCC361D896A /* MQTTClientProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C005 /* MQTTClientProtocol.swift */; };
+		C4BB07973D2D28F202E736CB /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474A2FA4E929008A89D8 /* Color.swift */; };
+		C4E5F361A72F7410BF9430AC /* AppAuthTV in Frameworks */ = {isa = PBXBuildFile; productRef = F5CEEBA28E8B6151CBC688E7 /* AppAuthTV */; };
+		C70A0DA034D3FD1EDB133255 /* LimiDeviceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45A1CC5B599EB90513649B13 /* LimiDeviceApp.swift */; };
+		CAF219737E48ED1486767C6A /* modela.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9ABFFE3A2D6F20AF00FCA582 /* modela.usdz */; };
+		CC0731BC91348F538872BFF5 /* LimiDeviceAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47332FA4E929008A89D8 /* LimiDeviceAPI.swift */; };
+		CCB1A4135352483356A3777F /* Poppins-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E12D6DD73C0044A7CF /* Poppins-Italic.ttf */; };
+		D0A9CC242E63DC4ADA9279A3 /* DeviceRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80413A32D3ADCC17168D484D /* DeviceRootView.swift */; };
+		D2E701FED25B465529E23F16 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47FD2FA4E929008A89D8 /* AuthManager.swift */; };
+		D320A11E30AC7390600205FF /* LimiTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C009 /* LimiTransport.swift */; };
+		D5A33F3136BE18A8D9DE7004 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A6D930F2E5746AC009B2808 /* RealityKit.framework */; };
+		D7A1BC8F51B543C1D5E03441 /* NeumorphicSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F474C2FA4E929008A89D8 /* NeumorphicSystem.swift */; };
+		D7CE00AD7738EBB4C80CD072 /* AuthManger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47472FA4E929008A89D8 /* AuthManger.swift */; };
+		DC78A9D55353FF827A169CAC /* LanguageSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47512FA4E929008A89D8 /* LanguageSettings.swift */; };
+		E4DE16AD2564F438FC44059F /* PingPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NET0022FA4E929008A89D8 /* PingPoller.swift */; };
+		E86A606A60686BD45109DE7F /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F47242FA4E929008A89D8 /* LocationManager.swift */; };
+		EF6A1F2D6DFED7C1BB87478F /* Poppins-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72EA2D6DD73C0044A7CF /* Poppins-ThinItalic.ttf */; };
 		F0D4FABE48D85AE338C5F153 /* Pods_Limi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B57549563DDD14E44449F681 /* Pods_Limi.framework */; };
+		F31B763B9D4326047F1BF591 /* LimiCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C001 /* LimiCommand.swift */; };
+		F4C8E35C5E441A78C4247CF0 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */; };
+		F912FE4841D13C4D9538197B /* Poppins-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72E52D6DD73C0044A7CF /* Poppins-MediumItalic.ttf */; };
+		FDAC4B94A4D593897D42235A /* BluetoothDeviceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0052FA4E929008A89D8 /* BluetoothDeviceState.swift */; };
+		FE214F7F0DCE15B07CD33942 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10NAPP022FA4E929008A89D8 /* AppDelegate.swift */; };
+		FEE46BAC113F1042F1292E19 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = E18D6C7A6A3DBD71218AED20 /* SocketIO */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
 		9A5167052E30FB660054AE83 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = folder.rkassets;
+			inputFiles = (
+			);
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "# realitytool\n";
+		};
+		D7E1CE22E08C20D9B8C26760 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			fileType = folder.rkassets;
@@ -179,6 +347,11 @@
 		10AB0000000000000000C00A /* LimiTransportError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiTransportError.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C00B /* ThrottledSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThrottledSender.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C00C /* TransportMediumPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportMediumPreference.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00D /* CloudOfflineLocalSwitchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudOfflineLocalSwitchCoordinator.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00E /* CloudOfflineLocalSwitchAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudOfflineLocalSwitchAlert.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C00F /* CloudPresenceMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudPresenceMemory.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C010 /* ConfiguredBLEDeviceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguredBLEDeviceStore.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C011 /* BLECloudFallbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLECloudFallbackService.swift; sourceTree = "<group>"; };
 		10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceCoordinator.swift; sourceTree = "<group>"; };
 		10ADD0022FA4E929008A89D8 /* DemoScanDevicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanDevicesViewModel.swift; sourceTree = "<group>"; };
 		10ADD0032FA4E929008A89D8 /* DemoScanBluetoothAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanBluetoothAdapter.swift; sourceTree = "<group>"; };
@@ -196,10 +369,9 @@
 		10APP0012FA4E929008A89D8 /* DependencyProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyProtocols.swift; sourceTree = "<group>"; };
 		10APP0022FA4E929008A89D8 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironmentTests.swift; sourceTree = "<group>"; };
+		10CASE002FA4E929008A89D8 /* TransportCaseLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportCaseLogicTests.swift; sourceTree = "<group>"; };
 		10AR0012FA4E929008A89D8 /* ARSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionViewModel.swift; sourceTree = "<group>"; };
 		10ART002FA4E929008A89D8 /* ARSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionViewModelTests.swift; sourceTree = "<group>"; };
-		10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRoute.swift; sourceTree = "<group>"; };
-		10AUTH0022FA4E929008A89D8 /* GetStartViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetStartViewModel.swift; sourceTree = "<group>"; };
 		10AUTH0032FA4E929008A89D8 /* InstallerLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallerLoginService.swift; sourceTree = "<group>"; };
 		10AUTH0042FA4E929008A89D8 /* InstallerLoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallerLoginResponse.swift; sourceTree = "<group>"; };
 		10BCB0012FA4E929008A89D8 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
@@ -211,6 +383,8 @@
 		10BCB0072FA4E929008A89D8 /* GlobalVariables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalVariables.swift; sourceTree = "<group>"; };
 		10BCB0082FA4E929008A89D8 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		10BCB0092FA4E929008A89D8 /* HomeRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRoute.swift; sourceTree = "<group>"; };
+		10CARD0012FA4E929008A89D8 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		10PEND0012FA4E929008A89D8 /* PendantModelCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendantModelCatalog.swift; sourceTree = "<group>"; };
 		10CFG0012FA4E929008A89D8 /* LightConfigModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightConfigModels.swift; sourceTree = "<group>"; };
 		10CFG0022FA4E929008A89D8 /* ConfiguratorDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguratorDownloadService.swift; sourceTree = "<group>"; };
 		10CFG0032FA4E929008A89D8 /* ConfiguratorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfiguratorViewModel.swift; sourceTree = "<group>"; };
@@ -221,6 +395,7 @@
 		10HOME0052FA4E929008A89D8 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		10HOME0062FA4E929008A89D8 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		10HOMET002FA4E929008A89D8 /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		10LIMN0012FA4E929008A89D8 /* LimiDeviceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiDeviceNaming.swift; sourceTree = "<group>"; };
 		10NAPP012FA4E929008A89D8 /* LimiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiApp.swift; sourceTree = "<group>"; };
 		10NAPP022FA4E929008A89D8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		10NET0012FA4E929008A89D8 /* BLEDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEDevice.swift; sourceTree = "<group>"; };
@@ -243,6 +418,7 @@
 		10SHD0012FA4E929008A89D8 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
 		10SHD0022FA4E929008A89D8 /* RainbowSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainbowSlider.swift; sourceTree = "<group>"; };
 		10SHD0032FA4E929008A89D8 /* LimiModalChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimiModalChrome.swift; sourceTree = "<group>"; };
+		10WIFP0012FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiProvisioningCoordinator.swift; sourceTree = "<group>"; };
 		10WLED0012FA4E929008A89D8 /* WLEDHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDHTTPClient.swift; sourceTree = "<group>"; };
 		10WLED0022FA4E929008A89D8 /* HotelRoomBluetoothAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotelRoomBluetoothAdapter.swift; sourceTree = "<group>"; };
 		10WLED0032FA4E929008A89D8 /* WLEDDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDDiscoveryViewModel.swift; sourceTree = "<group>"; };
@@ -250,7 +426,37 @@
 		10WLED0052FA4E929008A89D8 /* WLEDControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WLEDControlViewModel.swift; sourceTree = "<group>"; };
 		10WLED0062FA4E929008A89D8 /* HubChannelControlViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubChannelControlViewModel.swift; sourceTree = "<group>"; };
 		26CAF47D956ADE8C97D67273 /* Pods-Limi.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.release.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.release.xcconfig"; sourceTree = "<group>"; };
+		2DB91D6593FF7BB0CB177147 /* LimiAIDevice-Debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "LimiAIDevice-Debug.xcconfig"; sourceTree = "<group>"; };
 		41A8537098400FD0063056FC /* Pods-Limi.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Limi.debug.xcconfig"; path = "Target Support Files/Pods-Limi/Pods-Limi.debug.xcconfig"; sourceTree = "<group>"; };
+		45A1CC5B599EB90513649B13 /* LimiDeviceApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LimiDeviceApp.swift; sourceTree = "<group>"; };
+		528F142C7DA965FCA2DF204A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		5D822FD4946E318EDF8E2244 /* DeviceHomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceHomeView.swift; sourceTree = "<group>"; };
+		A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomControlView.swift; sourceTree = "<group>"; };
+		A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomControlViewModel.swift; sourceTree = "<group>"; };
+		A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceAppUX.swift; sourceTree = "<group>"; };
+		A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSmartHomeOverview.swift; sourceTree = "<group>"; };
+		A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceHomeUITheme.swift; sourceTree = "<group>"; };
+		A1H1TOK0022FA4E929008A89D8 /* HomeUI1Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1Tokens.swift; sourceTree = "<group>"; };
+		A1H1ACV0022FA4E929008A89D8 /* HomeUI1AnimatedCanvas.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1AnimatedCanvas.swift; sourceTree = "<group>"; };
+		A1H1ELV0022FA4E929008A89D8 /* HomeUI1Elevation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1Elevation.swift; sourceTree = "<group>"; };
+		A1H1CMP0022FA4E929008A89D8 /* HomeUI1Components.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1Components.swift; sourceTree = "<group>"; };
+		A1H1CHR0022FA4E929008A89D8 /* HomeUI1OverviewChrome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1OverviewChrome.swift; sourceTree = "<group>"; };
+		A1H1PD0022FA4E929008A89D8 /* HomeUI1PendantIcon.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1PendantIcon.swift; sourceTree = "<group>"; };
+		A1H1BB0022FA4E929008A89D8 /* HomeUI1BottomBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1BottomBar.swift; sourceTree = "<group>"; };
+		A1H1CTL0022FA4E929008A89D8 /* HomeUI1ControlChrome.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI1ControlChrome.swift; sourceTree = "<group>"; };
+		A1H2TOK0022FA4E929008A89D8 /* HomeUI2Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI2Tokens.swift; sourceTree = "<group>"; };
+		A1H2CMP0022FA4E929008A89D8 /* HomeUI2Components.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI2Components.swift; sourceTree = "<group>"; };
+		A1H2VW0022FA4E929008A89D8 /* HomeUI2HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI2HomeView.swift; sourceTree = "<group>"; };
+		A1H3TOK0022FA4E929008A89D8 /* HomeUI3Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI3Tokens.swift; sourceTree = "<group>"; };
+		A1H3VW0022FA4E929008A89D8 /* HomeUI3HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI3HomeView.swift; sourceTree = "<group>"; };
+		A1H4TOK0022FA4E929008A89D8 /* HomeUI4Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI4Tokens.swift; sourceTree = "<group>"; };
+		A1H4VW0022FA4E929008A89D8 /* HomeUI4HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI4HomeView.swift; sourceTree = "<group>"; };
+		A1H5TOK0022FA4E929008A89D8 /* HomeUI5Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI5Tokens.swift; sourceTree = "<group>"; };
+		A1H5VW0022FA4E929008A89D8 /* HomeUI5HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI5HomeView.swift; sourceTree = "<group>"; };
+		A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RememberedLimiDevice.swift; sourceTree = "<group>"; };
+		7A4656334143A2B67C5B96E6 /* DeviceAddFlowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceAddFlowView.swift; sourceTree = "<group>"; };
+		80413A32D3ADCC17168D484D /* DeviceRootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceRootView.swift; sourceTree = "<group>"; };
+		85AC56BB9C7C745112E21242 /* LIMI AI Device.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LIMI AI Device.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A5AFD7A2DDC35EC00B785BE /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
 		9A6D930F2E5746AC009B2808 /* RealityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealityKit.framework; path = System/Library/Frameworks/RealityKit.framework; sourceTree = SDKROOT; };
 		9A8310452DA135A300D84901 /* Limi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Limi.entitlements; sourceTree = "<group>"; };
@@ -265,7 +471,6 @@
 		9ADA72D32D6DD73C0044A7CF /* Amenti-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Amenti-Regular.otf"; sourceTree = "<group>"; };
 		9ADA72D42D6DD73C0044A7CF /* Amenti-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Amenti-Light.otf"; sourceTree = "<group>"; };
 		9ADA72D52D6DD73C0044A7CF /* Amenti-Thin.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Amenti-Thin.otf"; sourceTree = "<group>"; };
-		9ADA72D62D6DD73C0044A7CF /* Amenti-Vf.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Amenti-Vf.ttf"; sourceTree = "<group>"; };
 		9ADA72D72D6DD73C0044A7CF /* info.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = info.txt; sourceTree = "<group>"; };
 		9ADA72D82D6DD73C0044A7CF /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		9ADA72D92D6DD73C0044A7CF /* Poppins-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Black.ttf"; sourceTree = "<group>"; };
@@ -282,21 +487,42 @@
 		9ADA72E42D6DD73C0044A7CF /* Poppins-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Medium.ttf"; sourceTree = "<group>"; };
 		9ADA72E52D6DD73C0044A7CF /* Poppins-MediumItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-MediumItalic.ttf"; sourceTree = "<group>"; };
 		9ADA72E62D6DD73C0044A7CF /* Poppins-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Regular.ttf"; sourceTree = "<group>"; };
+		A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
+		A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-SemiBold.ttf"; sourceTree = "<group>"; };
+		A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Bold.ttf"; sourceTree = "<group>"; };
+		A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
 		9ADA72E72D6DD73C0044A7CF /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-SemiBold.ttf"; sourceTree = "<group>"; };
 		9ADA72E82D6DD73C0044A7CF /* Poppins-SemiBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		9ADA72E92D6DD73C0044A7CF /* Poppins-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Thin.ttf"; sourceTree = "<group>"; };
 		9ADA72EA2D6DD73C0044A7CF /* Poppins-ThinItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-ThinItalic.ttf"; sourceTree = "<group>"; };
 		9AF3A3AA2DA58E8E004EADAA /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		A61C6C5FC5CEC81C5118D7B4 /* LimiAIDevice-Release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "LimiAIDevice-Release.xcconfig"; sourceTree = "<group>"; };
 		B57549563DDD14E44449F681 /* Pods_Limi.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Limi.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5BA5C4580A420566968812B /* DeviceSignInView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSignInView.swift; sourceTree = "<group>"; };
+		C848654544461EA113B1105F /* DeviceControlView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceControlView.swift; sourceTree = "<group>"; };
+		D1E402A7B4C9F8235A6E7301 /* DeviceProfileView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceProfileView.swift; sourceTree = "<group>"; };
+		D2F513B8C5DA09346B7F8412 /* DeviceRooms.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceRooms.swift; sourceTree = "<group>"; };
+		E3A624C9D6EB1A457C8F9523 /* DeviceSchedules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSchedules.swift; sourceTree = "<group>"; };
+		E4B735DAE7FC2B568D9FA634 /* DeviceSchedulesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSchedulesView.swift; sourceTree = "<group>"; };
+		F78A99DEE9067BA863E5A98A /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		105185162F050D9D001A2404 /* Exceptions for "Features" folder in "Limi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AddDevice/AddDeviceCoordinator.swift,
 				Info.plist,
 			);
 			target = 9ADA72132D6DD6D80044A7CF /* Limi */;
+		};
+		5FDC3B8D7F3DD79D9FEA5183 /* Exceptions for "Features" folder in "LimiAIDevice" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AddDevice/AddDeviceCoordinator.swift,
+				Info.plist,
+			);
+			target = 61333C4572670E7EF6A5A3B6 /* LimiAIDevice */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -305,6 +531,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				105185162F050D9D001A2404 /* Exceptions for "Features" folder in "Limi" target */,
+				5FDC3B8D7F3DD79D9FEA5183 /* Exceptions for "Features" folder in "LimiAIDevice" target */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -332,6 +559,29 @@
 				1042906B2F0004EE003BB7B4 /* AppAuth in Frameworks */,
 				F0D4FABE48D85AE338C5F153 /* Pods_Limi.framework in Frameworks */,
 				1042906D2F0004EE003BB7B4 /* AppAuthCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ABA63687766928C2B2592A26 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				52D1C6F74DE862499077B576 /* Foundation.framework in Frameworks */,
+				D5A33F3136BE18A8D9DE7004 /* RealityKit.framework in Frameworks */,
+				BDA927383B0FEBF3DA95C4E2 /* ARKit.framework in Frameworks */,
+				411C360CA788958C50F8B8CC /* RoomPlan.framework in Frameworks */,
+				9393FC7FF4E48346F44A96F9 /* Metal.framework in Frameworks */,
+				99291EDE634577BECF9C4099 /* FLAnimatedImage in Frameworks */,
+				53DE8563CC5ED9907B4E3D2E /* SDWebImageSwiftUI in Frameworks */,
+				AA18874CA719140CBABC73A1 /* FocusEntity in Frameworks */,
+				4A223C0359D16D515B774BEB /* WebRTC in Frameworks */,
+				FEE46BAC113F1042F1292E19 /* SocketIO in Frameworks */,
+				B7324436EF569760BEBC7DCB /* GoogleSignIn in Frameworks */,
+				2F5F4D8EEDD1CC8DA7EA4C60 /* GoogleSignInSwift in Frameworks */,
+				2FEC18A8DBB3D1B3719882E2 /* SwiftLAME in Frameworks */,
+				6CF9052B077CD47C32B12E2B /* AppAuth in Frameworks */,
+				B306DAEE197DE03EB0717F31 /* AppAuthCore in Frameworks */,
+				C4E5F361A72F7410BF9430AC /* AppAuthTV in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,6 +703,11 @@
 				10AB0000000000000000C00A /* LimiTransportError.swift */,
 				10AB0000000000000000C00B /* ThrottledSender.swift */,
 				10AB0000000000000000C00C /* TransportMediumPreference.swift */,
+				10AB0000000000000000C00D /* CloudOfflineLocalSwitchCoordinator.swift */,
+				10AB0000000000000000C00E /* CloudOfflineLocalSwitchAlert.swift */,
+				10AB0000000000000000C00F /* CloudPresenceMemory.swift */,
+				10AB0000000000000000C010 /* ConfiguredBLEDeviceStore.swift */,
+				10AB0000000000000000C011 /* BLECloudFallbackService.swift */,
 			);
 			path = Transport;
 			sourceTree = "<group>";
@@ -568,7 +823,6 @@
 		10AUTH0B02FA4E929008A89D8 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				10AUTH0022FA4E929008A89D8 /* GetStartViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -596,6 +850,7 @@
 				10BCB0022FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift */,
 				10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */,
 				10BCB0042FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift */,
+				10WIFP0012FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift */,
 				10BCB0052FA4E929008A89D8 /* BluetoothDeviceState.swift */,
 			);
 			path = Bluetooth;
@@ -618,7 +873,6 @@
 				10APP0022FA4E929008A89D8 /* AppEnvironment.swift */,
 				10BCB0082FA4E929008A89D8 /* AppRouter.swift */,
 				10BCB0092FA4E929008A89D8 /* HomeRoute.swift */,
-				10AUTH0012FA4E929008A89D8 /* AuthRoute.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -682,6 +936,9 @@
 			isa = PBXGroup;
 			children = (
 				10NET0012FA4E929008A89D8 /* BLEDevice.swift */,
+				10LIMN0012FA4E929008A89D8 /* LimiDeviceNaming.swift */,
+				10CARD0012FA4E929008A89D8 /* Card.swift */,
+				10PEND0012FA4E929008A89D8 /* PendantModelCatalog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -698,6 +955,7 @@
 				10RPMT002FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift */,
 				10RPMT0032FA4E929008A89D8 /* RoomCaptureViewModelTests.swift */,
 				10APPT002FA4E929008A89D8 /* AppEnvironmentTests.swift */,
+				10CASE002FA4E929008A89D8 /* TransportCaseLogicTests.swift */,
 				10PHMT0012FA4E929008A89D8 /* AuthManagerTests.swift */,
 				10PHMT0022FA4E929008A89D8 /* LimiAPIErrorTests.swift */,
 				10PHMT0032FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift */,
@@ -710,6 +968,8 @@
 			children = (
 				10PH9D012FA4E929008A89D8 /* Limi-Debug.xcconfig */,
 				10PH9D022FA4E929008A89D8 /* Limi-Release.xcconfig */,
+				2DB91D6593FF7BB0CB177147 /* LimiAIDevice-Debug.xcconfig */,
+				A61C6C5FC5CEC81C5118D7B4 /* LimiAIDevice-Release.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -795,6 +1055,185 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+
+		A1HUIG0022FA4E929008A89D8 /* HomeUI */ = {
+			isa = PBXGroup;
+			children = (
+				A1HUI10022FA4E929008A89D8 /* HomeUI1_SmartOverview */,
+				A1HUI20022FA4E929008A89D8 /* HomeUI2_DarkEmerald */,
+				A1HUI30022FA4E929008A89D8 /* HomeUI3_CleanList */,
+				A1HUI40022FA4E929008A89D8 /* HomeUI4_TwoColumnGrid */,
+				A1HUI50022FA4E929008A89D8 /* HomeUI5_MinimalTiles */,
+			);
+			path = HomeUI;
+			sourceTree = "<group>";
+		};
+		A1HUI10022FA4E929008A89D8 /* HomeUI1_SmartOverview */ = {
+			isa = PBXGroup;
+			children = (
+				A1H1DS022FA4E929008A89D8 /* DesignSystem */,
+				A1H1VW022FA4E929008A89D8 /* Views */,
+			);
+			path = HomeUI1_SmartOverview;
+			sourceTree = "<group>";
+		};
+		A1H1DS022FA4E929008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A1H1TOK0022FA4E929008A89D8 /* HomeUI1Tokens.swift */,
+				A1H1ELV0022FA4E929008A89D8 /* HomeUI1Elevation.swift */,
+				A1H1CMP0022FA4E929008A89D8 /* HomeUI1Components.swift */,
+				A1H1ACV0022FA4E929008A89D8 /* HomeUI1AnimatedCanvas.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A1H1VW022FA4E929008A89D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1H1CHR0022FA4E929008A89D8 /* HomeUI1OverviewChrome.swift */,
+				A1H1PD0022FA4E929008A89D8 /* HomeUI1PendantIcon.swift */,
+				A1H1BB0022FA4E929008A89D8 /* HomeUI1BottomBar.swift */,
+				A1H1CTL0022FA4E929008A89D8 /* HomeUI1ControlChrome.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1HUI20022FA4E929008A89D8 /* HomeUI2_DarkEmerald */ = {
+			isa = PBXGroup;
+			children = (
+				A1H2DS022FA4E929008A89D8 /* DesignSystem */,
+				A1H2VW022FA4E929008A89D8 /* Views */,
+			);
+			path = HomeUI2_DarkEmerald;
+			sourceTree = "<group>";
+		};
+		A1H2DS022FA4E929008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A1H2TOK0022FA4E929008A89D8 /* HomeUI2Tokens.swift */,
+				A1H2CMP0022FA4E929008A89D8 /* HomeUI2Components.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A1H2VW022FA4E929008A89D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1H2VW0022FA4E929008A89D8 /* HomeUI2HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1HUI30022FA4E929008A89D8 /* HomeUI3_CleanList */ = {
+			isa = PBXGroup;
+			children = (
+				A1H3DS022FA4E929008A89D8 /* DesignSystem */,
+				A1H3VW022FA4E929008A89D8 /* Views */,
+			);
+			path = HomeUI3_CleanList;
+			sourceTree = "<group>";
+		};
+		A1H3DS022FA4E929008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A1H3TOK0022FA4E929008A89D8 /* HomeUI3Tokens.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A1H3VW022FA4E929008A89D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1H3VW0022FA4E929008A89D8 /* HomeUI3HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1HUI40022FA4E929008A89D8 /* HomeUI4_TwoColumnGrid */ = {
+			isa = PBXGroup;
+			children = (
+				A1H4DS022FA4E929008A89D8 /* DesignSystem */,
+				A1H4VW022FA4E929008A89D8 /* Views */,
+			);
+			path = HomeUI4_TwoColumnGrid;
+			sourceTree = "<group>";
+		};
+		A1H4DS022FA4E929008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A1H4TOK0022FA4E929008A89D8 /* HomeUI4Tokens.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A1H4VW022FA4E929008A89D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1H4VW0022FA4E929008A89D8 /* HomeUI4HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1HUI50022FA4E929008A89D8 /* HomeUI5_MinimalTiles */ = {
+			isa = PBXGroup;
+			children = (
+				A1H5DS022FA4E929008A89D8 /* DesignSystem */,
+				A1H5VW022FA4E929008A89D8 /* Views */,
+			);
+			path = HomeUI5_MinimalTiles;
+			sourceTree = "<group>";
+		};
+		A1H5DS022FA4E929008A89D8 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				A1H5TOK0022FA4E929008A89D8 /* HomeUI5Tokens.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A1H5VW022FA4E929008A89D8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1H5VW0022FA4E929008A89D8 /* HomeUI5HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+
+		5374171019702492ABD38ACF /* DeviceApp */ = {
+			isa = PBXGroup;
+			children = (
+				45A1CC5B599EB90513649B13 /* LimiDeviceApp.swift */,
+				80413A32D3ADCC17168D484D /* DeviceRootView.swift */,
+				B5BA5C4580A420566968812B /* DeviceSignInView.swift */,
+				5D822FD4946E318EDF8E2244 /* DeviceHomeView.swift */,
+				A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */,
+				A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */,
+				A1HUIG0022FA4E929008A89D8 /* HomeUI */,
+				A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */,
+				A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */,
+				A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */,
+				A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */,
+				7A4656334143A2B67C5B96E6 /* DeviceAddFlowView.swift */,
+				C848654544461EA113B1105F /* DeviceControlView.swift */,
+				D1E402A7B4C9F8235A6E7301 /* DeviceProfileView.swift */,
+				D2F513B8C5DA09346B7F8412 /* DeviceRooms.swift */,
+				E3A624C9D6EB1A457C8F9523 /* DeviceSchedules.swift */,
+				E4B735DAE7FC2B568D9FA634 /* DeviceSchedulesView.swift */,
+				F78A99DEE9067BA863E5A98A /* Info.plist */,
+			);
+			path = DeviceApp;
+			sourceTree = "<group>";
+		};
+		89FF95F2059933EF6BA920F6 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				528F142C7DA965FCA2DF204A /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		9ABD247B2DA57617003A5A22 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -803,6 +1242,7 @@
 				9AF3A3AA2DA58E8E004EADAA /* Metal.framework */,
 				9ABD247C2DA57617003A5A22 /* ARKit.framework */,
 				B57549563DDD14E44449F681 /* Pods_Limi.framework */,
+				89FF95F2059933EF6BA920F6 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -840,6 +1280,7 @@
 				10RPM0A02FA4E929008A89D8 /* Features/RoomPlan3D */,
 				10SHD0A02FA4E929008A89D8 /* Shared */,
 				10PH13B05FA4E929008A89D8 /* Tests */,
+				5374171019702492ABD38ACF /* DeviceApp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -848,6 +1289,7 @@
 			children = (
 				9ADA72142D6DD6D80044A7CF /* LIMI AI.app */,
 				10PH13D03FA4E929008A89D8 /* LimiTests.xctest */,
+				85AC56BB9C7C745112E21242 /* LIMI AI Device.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -861,7 +1303,6 @@
 				9ADA72D32D6DD73C0044A7CF /* Amenti-Regular.otf */,
 				9ADA72D42D6DD73C0044A7CF /* Amenti-Light.otf */,
 				9ADA72D52D6DD73C0044A7CF /* Amenti-Thin.otf */,
-				9ADA72D62D6DD73C0044A7CF /* Amenti-Vf.ttf */,
 				9ADA72D72D6DD73C0044A7CF /* info.txt */,
 				9ADA72D82D6DD73C0044A7CF /* OFL.txt */,
 				9ADA72D92D6DD73C0044A7CF /* Poppins-Black.ttf */,
@@ -878,6 +1319,10 @@
 				9ADA72E42D6DD73C0044A7CF /* Poppins-Medium.ttf */,
 				9ADA72E52D6DD73C0044A7CF /* Poppins-MediumItalic.ttf */,
 				9ADA72E62D6DD73C0044A7CF /* Poppins-Regular.ttf */,
+				A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */,
+				A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */,
+				A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */,
+				A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */,
 				9ADA72E72D6DD73C0044A7CF /* Poppins-SemiBold.ttf */,
 				9ADA72E82D6DD73C0044A7CF /* Poppins-SemiBoldItalic.ttf */,
 				9ADA72E92D6DD73C0044A7CF /* Poppins-Thin.ttf */,
@@ -913,6 +1358,41 @@
 			productName = LimiTests;
 			productReference = 10PH13D03FA4E929008A89D8 /* LimiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		61333C4572670E7EF6A5A3B6 /* LimiAIDevice */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 09052A85F1A32F82DCE6B45A /* Build configuration list for PBXNativeTarget "LimiAIDevice" */;
+			buildPhases = (
+				E2F924FD0646F2A23D5C52D4 /* Sources */,
+				ABA63687766928C2B2592A26 /* Frameworks */,
+				C2F39BC716F0A14B865B8A64 /* Resources */,
+				834ECAD98BB756E721704947 /* Run Script */,
+			);
+			buildRules = (
+				D7E1CE22E08C20D9B8C26760 /* PBXBuildRule */,
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				9A6EFC5C2D8BB14500272B02 /* Features */,
+			);
+			name = LimiAIDevice;
+			packageProductDependencies = (
+				01D1DB7DEC49573113830E27 /* FLAnimatedImage */,
+				24DD33E28A29E590C12684B3 /* SDWebImageSwiftUI */,
+				D0D43B317FEA7A67D472BA4E /* FocusEntity */,
+				56C89AF19D9D644CA4C57CBD /* WebRTC */,
+				E18D6C7A6A3DBD71218AED20 /* SocketIO */,
+				B670412EDF242A9B2F560A59 /* GoogleSignIn */,
+				54F1E9587437242129902D8E /* GoogleSignInSwift */,
+				7733AE3A9690D95CD328EAD0 /* SwiftLAME */,
+				67AB4CD1B7E92B552292F940 /* AppAuth */,
+				F5F27A95CA4BDAA8762774F3 /* AppAuthCore */,
+				F5CEEBA28E8B6151CBC688E7 /* AppAuthTV */,
+			);
+			productName = LimiAIDevice;
+			productReference = 85AC56BB9C7C745112E21242 /* LIMI AI Device.app */;
+			productType = "com.apple.product-type.application";
 		};
 		9ADA72132D6DD6D80044A7CF /* Limi */ = {
 			isa = PBXNativeTarget;
@@ -959,7 +1439,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					9ADA72132D6DD6D80044A7CF = {
 						CreatedOnToolsVersion = 16.2;
@@ -1005,6 +1485,7 @@
 			targets = (
 				9ADA72132D6DD6D80044A7CF /* Limi */,
 				10PH13D01FA4E929008A89D8 /* LimiTests */,
+				61333C4572670E7EF6A5A3B6 /* LimiAIDevice */,
 			);
 		};
 /* End PBXProject section */
@@ -1032,7 +1513,6 @@
 				9ADA72FA2D6DD73C0044A7CF /* Poppins-LightItalic.ttf in Resources */,
 				9ABFFE3B2D6F20AF00FCA582 /* modela.usdz in Resources */,
 				9ADA72FB2D6DD73C0044A7CF /* Poppins-BlackItalic.ttf in Resources */,
-				9ADA72FC2D6DD73C0044A7CF /* Amenti-Vf.ttf in Resources */,
 				9ADA72FD2D6DD73C0044A7CF /* Poppins-Italic.ttf in Resources */,
 				9ADA72FE2D6DD73C0044A7CF /* Poppins-ExtraBold.ttf in Resources */,
 				9ADA72FF2D6DD73C0044A7CF /* Poppins-ExtraLightItalic.ttf in Resources */,
@@ -1044,6 +1524,50 @@
 				9ADA73042D6DD73C0044A7CF /* OFL.txt in Resources */,
 				9ADA73052D6DD73C0044A7CF /* Poppins-Bold.ttf in Resources */,
 				9ADA73062D6DD73C0044A7CF /* Poppins-Medium.ttf in Resources */,
+				A1NUNI00122FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */,
+				A1NUNI10122FA4E929008A89D8 /* Nunito-SemiBold.ttf in Resources */,
+				A1NUNI20122FA4E929008A89D8 /* Nunito-Bold.ttf in Resources */,
+				A1NUNI30122FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2F39BC716F0A14B865B8A64 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A2858A5A6B250FB4FD1DB1A /* Amenti-Medium.ttf in Resources */,
+				55104C717D471AB7B76802E7 /* Poppins-Light.ttf in Resources */,
+				741A74FF599F4F5D068E0B2B /* Poppins-ExtraLight.ttf in Resources */,
+				1A6BD64AFDBDA9568E5D435B /* info.txt in Resources */,
+				7F28632C48C9834DF13FC3C7 /* Poppins-SemiBold.ttf in Resources */,
+				412A406E5B0343BA7BAA3F9F /* Amenti-Thin.otf in Resources */,
+				3824C006512F312C0F1F62C7 /* Amenti-Black.ttf in Resources */,
+				AFD287C321B4A326C650909D /* Amenti-Regular.otf in Resources */,
+				F912FE4841D13C4D9538197B /* Poppins-MediumItalic.ttf in Resources */,
+				3FFE57C47FB8C482973BEF96 /* Poppins-Thin.ttf in Resources */,
+				AC8B0827883828CA507D89CB /* Poppins-Regular.ttf in Resources */,
+				17E1F52113CE54C6D9BBC632 /* Amenti-Light.otf in Resources */,
+				7EEB3A57565941CA26065351 /* Amenti-Bold.ttf in Resources */,
+				5C82CC9BDCDEDEF5B783C0F0 /* Poppins-ExtraBoldItalic.ttf in Resources */,
+				4823D653C9D632851D349520 /* README.md in Resources */,
+				021667969900281E04448B95 /* Poppins-LightItalic.ttf in Resources */,
+				CAF219737E48ED1486767C6A /* modela.usdz in Resources */,
+				69F539B883327473B740E4B4 /* Poppins-BlackItalic.ttf in Resources */,
+				CCB1A4135352483356A3777F /* Poppins-Italic.ttf in Resources */,
+				83317AF548E163442DD4C401 /* Poppins-ExtraBold.ttf in Resources */,
+				066F241CB4D8A9D27AEF6F9B /* Poppins-ExtraLightItalic.ttf in Resources */,
+				354C79444254CE469E458D72 /* Bulbs.usdz in Resources */,
+				EF6A1F2D6DFED7C1BB87478F /* Poppins-ThinItalic.ttf in Resources */,
+				3E78666C82A25F155B01D37E /* Poppins-Black.ttf in Resources */,
+				88DC3C527B8216F9428038C4 /* Poppins-SemiBoldItalic.ttf in Resources */,
+				39BBD06EFB53F276E9F8F58A /* Poppins-BoldItalic.ttf in Resources */,
+				2C5E1007CFE845CB1DD4102A /* OFL.txt in Resources */,
+				7710693A4319044020056129 /* Poppins-Bold.ttf in Resources */,
+				626B84928952F12C7E6F2A4D /* Poppins-Medium.ttf in Resources */,
+				A1NUNI00222FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */,
+				A1NUNI10222FA4E929008A89D8 /* Nunito-SemiBold.ttf in Resources */,
+				A1NUNI20222FA4E929008A89D8 /* Nunito-Bold.ttf in Resources */,
+				A1NUNI30222FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1072,6 +1596,26 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		834ECAD98BB756E721704947 /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(PLATFORM_DIR)/Developer/Library/Frameworks/RealityKit.framework/Resources/RealityKitContent.bundle",
+			);
+			name = "Run Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/RealityKitContent.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\nFRAMEWORK_RKC=\"${PLATFORM_DIR}/Developer/Library/Frameworks/RealityKit.framework/Resources/RealityKitContent.bundle\"\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RealityKitContent.bundle\"\nif [ -d \"$FRAMEWORK_RKC\" ]; then\n    rm -rf \"${DEST}\"\n    cp -R \"${FRAMEWORK_RKC}\" \"${DEST}\"\nfi\n";
+		};
 		9A2AE98C2DE03CC800C68465 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1080,11 +1624,13 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(PLATFORM_DIR)/Developer/Library/Frameworks/RealityKit.framework/Resources/RealityKitContent.bundle",
 			);
 			name = "Run Script";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/RealityKitContent.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1127,6 +1673,7 @@
 				10RPMT012FA4E929008A89D8 /* RoomPlanUploadServiceTests.swift in Sources */,
 				10RPMT0132FA4E929008A89D8 /* RoomCaptureViewModelTests.swift in Sources */,
 				10APPT012FA4E929008A89D8 /* AppEnvironmentTests.swift in Sources */,
+				10CASE012FA4E929008A89D8 /* TransportCaseLogicTests.swift in Sources */,
 				10PHMT0112FA4E929008A89D8 /* AuthManagerTests.swift in Sources */,
 				10PHMT0122FA4E929008A89D8 /* LimiAPIErrorTests.swift in Sources */,
 				10PHMT0132FA4E929008A89D8 /* ConfiguratorModelStoreTests.swift in Sources */,
@@ -1172,11 +1719,17 @@
 				10AB0000000000000000B00A /* LimiTransportError.swift in Sources */,
 				10AB0000000000000000B00B /* ThrottledSender.swift in Sources */,
 				10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */,
+				10AB0000000000000000B00D /* CloudOfflineLocalSwitchCoordinator.swift in Sources */,
+				10AB0000000000000000B00E /* CloudOfflineLocalSwitchAlert.swift in Sources */,
+				10AB0000000000000000B00F /* CloudPresenceMemory.swift in Sources */,
+				10AB0000000000000000B010 /* ConfiguredBLEDeviceStore.swift in Sources */,
+				10AB0000000000000000B011 /* BLECloudFallbackService.swift in Sources */,
 				10PH13A02FA4E929008A89D8 /* LimiAPIError.swift in Sources */,
 				10BCB0112FA4E929008A89D8 /* BluetoothManager.swift in Sources */,
 				10BCB0122FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift in Sources */,
 				10BCB0132FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift in Sources */,
 				10BCB0142FA4E929008A89D8 /* BluetoothManager+WifiProvisioning.swift in Sources */,
+				10WIFP0112FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift in Sources */,
 				10BCB0152FA4E929008A89D8 /* BluetoothDeviceState.swift in Sources */,
 				10BCB0162FA4E929008A89D8 /* ContextManager.swift in Sources */,
 				10BCB0172FA4E929008A89D8 /* GlobalVariables.swift in Sources */,
@@ -1184,13 +1737,118 @@
 				10APP0112FA4E929008A89D8 /* DependencyProtocols.swift in Sources */,
 				10APP0122FA4E929008A89D8 /* AppEnvironment.swift in Sources */,
 				10BCB0192FA4E929008A89D8 /* HomeRoute.swift in Sources */,
-				10AUTH0112FA4E929008A89D8 /* AuthRoute.swift in Sources */,
 				10NET0112FA4E929008A89D8 /* BLEDevice.swift in Sources */,
+				10LIMN0112FA4E929008A89D8 /* LimiDeviceNaming.swift in Sources */,
+				10CARD0112FA4E929008A89D8 /* Card.swift in Sources */,
+				10PEND0112FA4E929008A89D8 /* PendantModelCatalog.swift in Sources */,
 				10NET0122FA4E929008A89D8 /* PingPoller.swift in Sources */,
 				10NET0132FA4E929008A89D8 /* BonjourServiceBrowser.swift in Sources */,
 				10SHD0112FA4E929008A89D8 /* VisualEffectBlur.swift in Sources */,
 				10SHD0122FA4E929008A89D8 /* RainbowSlider.swift in Sources */,
 				10SHD0132FA4E929008A89D8 /* LimiModalChrome.swift in Sources */,
+				10ADD0182FA4E929008A89D8 /* AddDeviceCoordinator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2F924FD0646F2A23D5C52D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C70A0DA034D3FD1EDB133255 /* LimiDeviceApp.swift in Sources */,
+				D0A9CC242E63DC4ADA9279A3 /* DeviceRootView.swift in Sources */,
+				6EEB73A9AD185AC9332CCDF7 /* DeviceSignInView.swift in Sources */,
+				1895B4B355FD496A15745B18 /* DeviceHomeView.swift in Sources */,
+				A1SMOVR0122FA4E929008A89D8 /* DeviceSmartHomeOverview.swift in Sources */,
+				A1HOMUI0122FA4E929008A89D8 /* DeviceHomeUITheme.swift in Sources */,
+				A1H1TOK0122FA4E929008A89D8 /* HomeUI1Tokens.swift in Sources */,
+				A1H1ELV0122FA4E929008A89D8 /* HomeUI1Elevation.swift in Sources */,
+				A1H1CMP0122FA4E929008A89D8 /* HomeUI1Components.swift in Sources */,
+				A1H1ACV0122FA4E929008A89D8 /* HomeUI1AnimatedCanvas.swift in Sources */,
+				A1H1CHR0122FA4E929008A89D8 /* HomeUI1OverviewChrome.swift in Sources */,
+				A1H1PD0122FA4E929008A89D8 /* HomeUI1PendantIcon.swift in Sources */,
+				A1H1BB0122FA4E929008A89D8 /* HomeUI1BottomBar.swift in Sources */,
+				A1H1CTL0122FA4E929008A89D8 /* HomeUI1ControlChrome.swift in Sources */,
+				A1H2TOK0122FA4E929008A89D8 /* HomeUI2Tokens.swift in Sources */,
+				A1H2CMP0122FA4E929008A89D8 /* HomeUI2Components.swift in Sources */,
+				A1H2VW0122FA4E929008A89D8 /* HomeUI2HomeView.swift in Sources */,
+				A1H3TOK0122FA4E929008A89D8 /* HomeUI3Tokens.swift in Sources */,
+				A1H3VW0122FA4E929008A89D8 /* HomeUI3HomeView.swift in Sources */,
+				A1H4TOK0122FA4E929008A89D8 /* HomeUI4Tokens.swift in Sources */,
+				A1H4VW0122FA4E929008A89D8 /* HomeUI4HomeView.swift in Sources */,
+				A1H5TOK0122FA4E929008A89D8 /* HomeUI5Tokens.swift in Sources */,
+				A1H5VW0122FA4E929008A89D8 /* HomeUI5HomeView.swift in Sources */,
+				A1ROOM0112FA4E929008A89D8 /* RoomControlView.swift in Sources */,
+				A1ROOM0122FA4E929008A89D8 /* RoomControlViewModel.swift in Sources */,
+				A1DEVUX0122FA4E929008A89D8 /* DeviceAppUX.swift in Sources */,
+				A1REMEM0122FA4E929008A89D8 /* RememberedLimiDevice.swift in Sources */,
+				35C26BA0472B3635667B2FCD /* DeviceAddFlowView.swift in Sources */,
+				2DFE71C6C14E0480A3730D25 /* DeviceControlView.swift in Sources */,
+				2E9B11D3F0A4C58217D6B402 /* DeviceProfileView.swift in Sources */,
+				3FAC22E4A1B5D69328E7C503 /* DeviceRooms.swift in Sources */,
+				4ABD33F5B2C6E7A439F8D614 /* DeviceSchedules.swift in Sources */,
+				5BCE44A6C3D7F8B54AA9E725 /* DeviceSchedulesView.swift in Sources */,
+				FE214F7F0DCE15B07CD33942 /* AppDelegate.swift in Sources */,
+				E86A606A60686BD45109DE7F /* LocationManager.swift in Sources */,
+				A7DA47817FFD20BB7376F402 /* AuthResponseParsing.swift in Sources */,
+				8FA5425263C12491DF988E74 /* ManagerAPI.swift in Sources */,
+				631BFD85CC6877B8B53B73DF /* WeatherData.swift in Sources */,
+				3EBBD2F429E43C3A4971F77E /* WeatherService.swift in Sources */,
+				AEA144273060F69231615130 /* LimiHTTPClient.swift in Sources */,
+				CC0731BC91348F538872BFF5 /* LimiDeviceAPI.swift in Sources */,
+				59F5B8AE62FE0D83F5B8088D /* LimiConfiguratorAPI.swift in Sources */,
+				6A27B7DEF101D69396DF55F1 /* LimiAPIAuthPolicy.swift in Sources */,
+				D7CE00AD7738EBB4C80CD072 /* AuthManger.swift in Sources */,
+				C4BB07973D2D28F202E736CB /* Color.swift in Sources */,
+				2A1EB0561AEE23C648CCCB92 /* LimiDesignSystem.swift in Sources */,
+				D7A1BC8F51B543C1D5E03441 /* NeumorphicSystem.swift in Sources */,
+				DC78A9D55353FF827A169CAC /* LanguageSettings.swift in Sources */,
+				495715AA06455221D0A50829 /* NetworkMonitor.swift in Sources */,
+				0EFA3688B83205913E34685B /* FloatingAssistantManager.swift in Sources */,
+				A32C9E9247E11DE2FB2D7E5A /* FloatingRootViewController.swift in Sources */,
+				9D762012343DDA95CBC621D0 /* FloatingWindow.swift in Sources */,
+				09183BE2E7E0BAC41D2C9F90 /* SocketIOExample.swift in Sources */,
+				64B717455EE217A119498473 /* LightControllingSocket.swift in Sources */,
+				D2E701FED25B465529E23F16 /* AuthManager.swift in Sources */,
+				F31B763B9D4326047F1BF591 /* LimiCommand.swift in Sources */,
+				A601F9D83A4C26B6C1D60944 /* Door.swift in Sources */,
+				160208298260B5F976F9C5C9 /* DeviceTransportState.swift in Sources */,
+				6A135B803AC3D1A5AF2DDA4D /* DeviceTransportRegistry.swift in Sources */,
+				C102B2B688B02FCC361D896A /* MQTTClientProtocol.swift in Sources */,
+				1DF8ED2086DE7BF1A06F5B40 /* SocketIOMQTTBridge.swift in Sources */,
+				61C9C123A6159B2A6AD1DFB2 /* DeviceWebSocketClient.swift in Sources */,
+				BCA911ADCDA9E0707311CEC6 /* BLELightWriter.swift in Sources */,
+				D320A11E30AC7390600205FF /* LimiTransport.swift in Sources */,
+				8C8AC2B6C9A864BC85827017 /* LimiTransportError.swift in Sources */,
+				80251DC25FA334E2ACB0EC75 /* ThrottledSender.swift in Sources */,
+				98265A892E2FBBDF750F06CF /* TransportMediumPreference.swift in Sources */,
+				10AB0000000000000000B10D /* CloudOfflineLocalSwitchCoordinator.swift in Sources */,
+				10AB0000000000000000B10E /* CloudOfflineLocalSwitchAlert.swift in Sources */,
+				10AB0000000000000000B10F /* CloudPresenceMemory.swift in Sources */,
+				10AB0000000000000000B110 /* ConfiguredBLEDeviceStore.swift in Sources */,
+				10AB0000000000000000B111 /* BLECloudFallbackService.swift in Sources */,
+				82BFA108A8657469096252BC /* LimiAPIError.swift in Sources */,
+				2731E7EC6A9E5C66CB2845C7 /* BluetoothManager.swift in Sources */,
+				734C43065BB0A67AAA181175 /* BluetoothManager+BackgroundScan.swift in Sources */,
+				146F228B2B7DE6ACADEF8946 /* BluetoothManager+GATTWrite.swift in Sources */,
+				80F05F97A8646D1E722F3B04 /* BluetoothManager+WifiProvisioning.swift in Sources */,
+				387D8E0230C521CC88DB108B /* WiFiProvisioningCoordinator.swift in Sources */,
+				FDAC4B94A4D593897D42235A /* BluetoothDeviceState.swift in Sources */,
+				A22B37CA4D85EB5EDD721C71 /* ContextManager.swift in Sources */,
+				08DFB1BB86640D0B568E613C /* GlobalVariables.swift in Sources */,
+				32DE53792470E35C30E70FC3 /* AppRouter.swift in Sources */,
+				207A6D3CD23B2FF8A7F91B37 /* DependencyProtocols.swift in Sources */,
+				A9F914429F62696029BC8F00 /* AppEnvironment.swift in Sources */,
+				3F6BEC0F6A2541DB8CA1080E /* HomeRoute.swift in Sources */,
+				85ED9A9ACA47238CC77C85D0 /* BLEDevice.swift in Sources */,
+				144B460D5657CDF9C75F7790 /* LimiDeviceNaming.swift in Sources */,
+				1869F184FD05E1F75CE0F7F6 /* Card.swift in Sources */,
+				10PEND0212FA4E929008A89D8 /* PendantModelCatalog.swift in Sources */,
+				E4DE16AD2564F438FC44059F /* PingPoller.swift in Sources */,
+				9AC7485E655897F97B374CE9 /* BonjourServiceBrowser.swift in Sources */,
+				F4C8E35C5E441A78C4247CF0 /* VisualEffectBlur.swift in Sources */,
+				AF5B020A17FAA8FEA5E7AFF8 /* RainbowSlider.swift in Sources */,
+				7AA2D07A64AFDAC367B78589 /* LimiModalChrome.swift in Sources */,
+				9F1E0416F8C7D3FC22BCAFD9 /* AddDeviceCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1211,7 +1869,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -1230,7 +1887,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -1243,11 +1899,56 @@
 			};
 			name = Release;
 		};
+		37A2DA98EF5FC0AF3C2BE98C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A61C6C5FC5CEC81C5118D7B4 /* LimiAIDevice-Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Limi.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 50;
+				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DeviceApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "LIMI AI Device";
+				INFOPLIST_KEY_NFCReaderUsageDescription = "This app needs access to NFC to scan tags.";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth to connect to devices";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app needs Bluetooth to connect to devices";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is used if you choose to update your profile photo.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "Contacts access may be requested by sign-in features included with this app. LIMI AI Device does not use your contacts for lighting control.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to save screenshots.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs photo library access so you can set a profile photo.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = osi.shahryar.LimitLess.Device.v1;
+				PRODUCT_NAME = "LIMI AI Device";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		9ADA72202D6DD6D90044A7CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1278,6 +1979,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1302,6 +2004,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "LIMI AI";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1313,6 +2016,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1343,6 +2047,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1360,6 +2065,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "LIMI AI";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
@@ -1378,7 +2084,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 49;
 				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
-				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1423,7 +2128,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 49;
 				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
-				DEVELOPMENT_TEAM = Y39JJ6B8MN;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1456,9 +2160,62 @@
 			};
 			name = Release;
 		};
+		CBD4BD55AD79FC7AD9AB6CD8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2DB91D6593FF7BB0CB177147 /* LimiAIDevice-Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Limi.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 50;
+				DEVELOPMENT_ASSET_PATHS = "\"Features/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DeviceApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "LIMI AI Device";
+				INFOPLIST_KEY_NFCReaderUsageDescription = "This app needs access to NFC to scan tags.";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app needs Bluetooth to connect to devices";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app needs Bluetooth to connect to devices";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is used if you choose to update your profile photo.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "Contacts access may be requested by sign-in features included with this app. LIMI AI Device does not use your contacts for lighting control.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to save screenshots.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs photo library access so you can set a profile photo.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = osi.shahryar.LimitLess.Device.v1;
+				PRODUCT_NAME = "LIMI AI Device";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		09052A85F1A32F82DCE6B45A /* Build configuration list for PBXNativeTarget "LimiAIDevice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37A2DA98EF5FC0AF3C2BE98C /* Release */,
+				CBD4BD55AD79FC7AD9AB6CD8 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		10PH13F01FA4E929008A89D8 /* Build configuration list for PBXNativeTarget "LimiTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1556,6 +2313,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		01D1DB7DEC49573113830E27 /* FLAnimatedImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9AF2B1BA2D7D59A1003D366D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;
+			productName = FLAnimatedImage;
+		};
 		1042906A2F0004EE003BB7B4 /* AppAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 104290692F0004EE003BB7B4 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
@@ -1586,6 +2348,31 @@
 			package = 10B43B742EF922970040610A /* XCRemoteSwiftPackageReference "SwiftLAME" */;
 			productName = SwiftLAME;
 		};
+		24DD33E28A29E590C12684B3 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9A78A3122D8A7E4100F01E0D /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		54F1E9587437242129902D8E /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 104604CA2EBB1446004D0557 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		56C89AF19D9D644CA4C57CBD /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9A87FD1A2E69B49600C02EEE /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+		67AB4CD1B7E92B552292F940 /* AppAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 104290692F0004EE003BB7B4 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
+			productName = AppAuth;
+		};
+		7733AE3A9690D95CD328EAD0 /* SwiftLAME */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 10B43B742EF922970040610A /* XCRemoteSwiftPackageReference "SwiftLAME" */;
+			productName = SwiftLAME;
+		};
 		9A6A3D612E8BC3FC00924422 /* SocketIO */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9A6A3D602E8BC3FC00924422 /* XCRemoteSwiftPackageReference "socket" */;
@@ -1610,6 +2397,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9AF2B1BA2D7D59A1003D366D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;
 			productName = FLAnimatedImage;
+		};
+		B670412EDF242A9B2F560A59 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 104604CA2EBB1446004D0557 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		D0D43B317FEA7A67D472BA4E /* FocusEntity */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9A9D0CE42DD30B6900A8C1B3 /* XCRemoteSwiftPackageReference "FocusEntity" */;
+			productName = FocusEntity;
+		};
+		E18D6C7A6A3DBD71218AED20 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9A6A3D602E8BC3FC00924422 /* XCRemoteSwiftPackageReference "socket" */;
+			productName = SocketIO;
+		};
+		F5CEEBA28E8B6151CBC688E7 /* AppAuthTV */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 104290692F0004EE003BB7B4 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
+			productName = AppAuthTV;
+		};
+		F5F27A95CA4BDAA8762774F3 /* AppAuthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 104290692F0004EE003BB7B4 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
+			productName = AppAuthCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

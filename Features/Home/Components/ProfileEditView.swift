@@ -38,6 +38,7 @@ struct ProfileEditView: View {
                         
                         Image("logoSplash")
                             .resizable()
+                            .scaledToFit()
                             .frame(width: 120, height: 100)
                             .padding(.bottom, 40)
                             .offset(y: welcomeTextOffset)
@@ -89,7 +90,7 @@ struct ProfileEditView: View {
                         dismiss()
                     }
                     .foregroundColor(.appTextPrimary)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(LimiTypography.headline)
                 }
                 
                 ToolbarItem(placement: .keyboard) {
@@ -100,7 +101,7 @@ struct ProfileEditView: View {
                                 isTextFieldFocused = false
                             }
                             .foregroundColor(.primaryAccent)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(LimiTypography.headline)
                         }
                     }
                 }
@@ -162,7 +163,7 @@ struct ProfileEditView: View {
                             )
                             .overlay(
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 48, weight: .light))
+                                    .font(LimiTypography.title2)
                                     .foregroundColor(.charlestonGreen.opacity(0.6))
                             )
                     }
@@ -175,7 +176,7 @@ struct ProfileEditView: View {
                 Circle()
                     .stroke(
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.alabaster, Color.emerald]),
+                            gradient: Gradient(colors: [Color.alabaster, Color.brandAction]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -187,9 +188,9 @@ struct ProfileEditView: View {
             PhotosPicker(selection: $selectedImage, matching: .images) {
                 HStack(spacing: 8) {
                     Image(systemName: "photo")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                     Text("Change Photo")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(LimiTypography.headline)
                 }
                 .foregroundColor(.appTextPrimary)
                 .padding(.horizontal, 20)
@@ -212,7 +213,7 @@ struct ProfileEditView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Username")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(LimiTypography.button)
                     .foregroundColor(.appTextPrimary)
                 
                 Spacer()
@@ -220,19 +221,19 @@ struct ProfileEditView: View {
                 if !username.isEmpty {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.emerald)
-                        .font(.system(size: 16))
+                        .font(LimiTypography.body)
                 }
             }
             
             HStack {
                 Image(systemName: "at")
                     .foregroundColor(.appTextInverse)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(LimiTypography.headline)
                     .frame(width: 20)
                 
                 TextField("Enter your username", text: $username)
                     .focused($isTextFieldFocused)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextInverse)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
@@ -244,8 +245,8 @@ struct ProfileEditView: View {
                 if !username.isEmpty {
                     Button(action: { username = "" }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray.opacity(0.6))
-                            .font(.system(size: 16))
+                            .foregroundColor(.appTextMuted.opacity(0.6))
+                            .font(LimiTypography.body)
                     }
                 }
             }
@@ -257,7 +258,7 @@ struct ProfileEditView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(
-                                isTextFieldFocused ? Color.charlestonGreen : Color.gray.opacity(0.2),
+                                isTextFieldFocused ? Color.charlestonGreen : Color.appBorderPrimary.opacity(0.35),
                                 lineWidth: isTextFieldFocused ? 2 : 1
                             )
                     )
@@ -272,15 +273,15 @@ struct ProfileEditView: View {
             HStack(spacing: 12) {
                 if isLoading {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
+                        .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
                         .scaleEffect(0.9)
                 } else {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(LimiTypography.headline)
                 }
                 
                 Text(isLoading ? "Updating Profile..." : "Update Profile")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(LimiTypography.button)
             }
             .foregroundColor(.appTextPrimary)
             .frame(maxWidth: .infinity)
@@ -288,12 +289,12 @@ struct ProfileEditView: View {
             .background(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(
-                        Color.emerald
+                        Color.brandAction
 //                        isButtonDisabled
-//                            ? AnyShapeStyle(Color.gray.opacity(0.4))
+//                            ? AnyShapeStyle(Color.appTextMuted.opacity(0.4))
 //                            : AnyShapeStyle(
 //                                LinearGradient(
-//                                    gradient: Gradient(colors: [Color.charlestonGreen, Color.emerald]),
+//                                    gradient: Gradient(colors: [Color.charlestonGreen, Color.brandAction]),
 //                                    startPoint: .leading,
 //                                    endPoint: .trailing
 //                                )
@@ -301,7 +302,7 @@ struct ProfileEditView: View {
                     )
             )
 //            .shadow(
-//                color: isButtonDisabled ? Color.alabaster : Color.emerald,
+//                color: isButtonDisabled ? Color.alabaster : Color.brandAction,
 //                radius: 8,
 //                x: 0,
 //                y: 4

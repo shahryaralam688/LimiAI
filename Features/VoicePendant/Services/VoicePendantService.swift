@@ -43,7 +43,7 @@ enum VoicePendantService {
 /// match the real backend contract when it lands.
 enum VoicePendantEndpoints {
     /// GET — all devices; voice pendants are filtered client-side (`device_type == voice_pendant`).
-    static let list = "http://69.62.125.138:7000/api/devices"
+    static let list = "http://69.62.125.138:8000/api/devices"
 
     private static var base: String { APIConstants.baseURL }
 
@@ -126,10 +126,9 @@ final class LiveVoicePendantService: VoicePendantServicing {
     }
 
     func connect(to pendantID: String) async throws {
-        _ = try await LimiHTTPClient.postJSON(
-            urlString: VoicePendantEndpoints.connect(pendantID),
-            body: ["pendant_id": pendantID],
-            auth: .requiredBearer
+        _ = try await LimiHTTPClient.get(
+            urlString: VoicePendantVoiceConfiguration.healthURL.absoluteString,
+            auth: .none
         )
     }
 

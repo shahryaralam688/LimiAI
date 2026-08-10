@@ -34,7 +34,7 @@ struct AIMainView: View {
                 VStack(spacing: 0) {
                     VStack(spacing: 16) {
                         Text("Limi AI")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(LimiTypography.largeTitle)
                             .foregroundColor(.appTextPrimary)
                             .padding(.top, 20)
 
@@ -47,9 +47,9 @@ struct AIMainView: View {
                                 }) {
                                     HStack(spacing: 5) {
                                         Image(systemName: screen.icon)
-                                            .font(.system(size: 12))
+                                            .font(LimiTypography.caption)
                                         Text(screen.title)
-                                            .font(.system(size: 13, weight: .semibold))
+                                            .font(LimiTypography.footnote)
                                     }
                                     .foregroundColor(selectedScreen == screen ? .appCanvasPrimary : .appTextSecondary)
                                     .padding(.horizontal, 14)
@@ -58,13 +58,13 @@ struct AIMainView: View {
                                         Capsule()
                                             .fill(
                                                 selectedScreen == screen
-                                                ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
-                                                : AnyShapeStyle(Color.white.opacity(0.04))
+                                                ? AnyShapeStyle(LimiGradients.cta)
+                                                : AnyShapeStyle(Color.appGlassFill)
                                             )
                                     )
                                     .overlay(
                                         Capsule()
-                                            .stroke(Color.white.opacity(selectedScreen == screen ? 0 : 0.06), lineWidth: 0.5)
+                                            .stroke(Color.appGlassFillMedium.opacity(selectedScreen == screen ? 0 : 1), lineWidth: 0.5)
                                     )
                                 }
                                 .tapScale()

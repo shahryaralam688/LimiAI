@@ -28,19 +28,24 @@ public final class DeviceTransportState: ObservableObject {
     /// Per spec: BLE is OFF when MQTT is connected.
     public var bleAdvertisingExpected: Bool { !mqttConnected }
 
+    /// True when the device can be controlled over Wi‑Fi / cloud / configured BLE.
+    public var isAvailableForControl: Bool {
+        wifiConnected || mqttConnected || ConfiguredBLEDeviceStore.shared.hasConfiguredBLE(for: deviceId)
+    }
+
     /// The door that LimiTransport must use right now.
-    /// Decision logic encoded exactly per spec:
-    ///   1) Wi-Fi NOT connected               -> .ble
-    ///   2) Wi-Fi connected & MQTT connected  -> .mqtt   (NEVER open WS)
-    ///   3) Wi-Fi connected & MQTT NOT conn.  -> .webSocket
+    /// Decision logic (Case 3 aware + Cloud-first):
+    ///   1) MQTT connected (cloud presence)   -> .mqtt   (highest priority)
+    ///   2) Wi-Fi connected & MQTT NOT conn.  -> .webSocket
+    ///   3) Otherwise (incl. cloud miss)      -> .ble   (reconnect via stored UUID)
     public var activeDoor: Door {
-        if !wifiConnected {
-            return .ble
-        }
         if mqttConnected {
             return .mqtt
         }
-        return .webSocket
+        if wifiConnected {
+            return .webSocket
+        }
+        return .ble
     }
 
     public init(deviceId: String) {
@@ -50,14 +55,13 @@ public final class DeviceTransportState: ObservableObject {
     // MARK: - Mutators (called by DeviceTransportRegistry, always on main)
 
     /// Update Wi-Fi reachability and (optionally) IP from a Bonjour event.
+    /// Does not clear MQTT — cloud presence is owned by `updateMQTTPresence` (Case 3).
     public func updateBonjour(reachable: Bool, ip: String?) {
         runOnMain { [weak self] in
             guard let self = self else { return }
             if self.wifiConnected != reachable { self.wifiConnected = reachable }
             if let ip = ip, self.deviceIP != ip { self.deviceIP = ip }
-            if !reachable && self.mqttConnected {
-                self.mqttConnected = false
-            }
+            if !reachable, self.deviceIP != nil { self.deviceIP = nil }
         }
     }
 

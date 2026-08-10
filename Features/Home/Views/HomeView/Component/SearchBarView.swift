@@ -21,11 +21,11 @@ struct SearchBarView: View {
                 .frame(height: 45)
                 .background(
                     RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.themeWhite.opacity(0.9))
+                        .fill(Color.appTextPrimary.opacity(0.9))
                         .shadow(color: Color.themeBlack.opacity(0.1), radius: searchFieldFocused ? 8 : 3, x: 0, y: 2)
                         .overlay(
                             RoundedRectangle(cornerRadius: 15)
-                                .stroke(Color.eton.opacity(searchFieldFocused ? 0.5 : 0), lineWidth: 2)
+                                .stroke(Color.brandHighlight.opacity(searchFieldFocused ? 0.5 : 0), lineWidth: 2)
                         )
                 )
                 .onTapGesture {
@@ -50,7 +50,7 @@ struct SearchBarView: View {
                 ZStack {
                     // Animated ring
                     Circle()
-                        .stroke(Color.eton.opacity(0.3), lineWidth: 2)
+                        .stroke(Color.brandHighlight.opacity(0.3), lineWidth: 2)
                         .frame(width: 50, height: 50)
                         .scaleEffect(isLoaded ? 1.2 : 0.8)
                         .opacity(isLoaded ? 0.0 : 0.8)
@@ -64,13 +64,13 @@ struct SearchBarView: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.charlestonGreen, Color.charlestonGreen.opacity(0.8)]),
+                                gradient: Gradient(colors: [Color.brandAction, Color.brandActionDark.opacity(0.85)]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: 45, height: 45)
-                        .shadow(color: Color.themeBlack.opacity(0.15), radius: 5, x: 0, y: 3)
+                        .shadow(color: Color.appShadowMedium, radius: 5, x: 0, y: 3)
                     
                     // Icon
                     Image(systemName: "cube.transparent")

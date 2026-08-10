@@ -12,6 +12,7 @@ protocol DemoScanBluetoothControlling: ObservableObject {
     func stopScanning()
     func selectAndConnect(name: String, uuidString: String)
     func readWifiList(completion: @escaping ([String]) -> Void)
+    func refreshScan()
 }
 
 final class DemoScanBluetoothAdapter: DemoScanBluetoothControlling {
@@ -88,5 +89,9 @@ final class DemoScanBluetoothAdapter: DemoScanBluetoothControlling {
 
     func readWifiList(completion: @escaping ([String]) -> Void) {
         manager.readWifiList(completion: completion)
+    }
+
+    func refreshScan() {
+        manager.refreshScan()
     }
 }

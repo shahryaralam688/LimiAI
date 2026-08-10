@@ -30,16 +30,10 @@ struct DemoAddDeviceView: View {
                     Text("Add Device")
                         .font(LimiTypography.title)
                         .padding()
-                        .foregroundColor(.white)
+                        .foregroundColor(.appTextInverse)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [.orbGlow4, .orbGlow1],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
+                                .fill(LimiGradients.cta)
                         )
                 }
             }

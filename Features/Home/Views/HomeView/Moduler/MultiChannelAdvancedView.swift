@@ -14,20 +14,20 @@ struct MultiChannelAdvancedView: View {
                 VStack(spacing: 16) {
                     VStack(spacing: 8) {
                         Text(device.deviceName)
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(LimiTypography.title)
                             .foregroundColor(.appTextPrimary)
 
                         Text("Advanced device control")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextSecondary)
 
                         HStack(spacing: 6) {
                             Text("Device ID:")
-                                .font(.caption)
-                                .foregroundColor(.themeWhite.opacity(0.5))
+                                .font(LimiTypography.caption)
+                                .foregroundColor(.appTextPrimary.opacity(0.5))
                             Text(device.chennalMac)
-                                .font(.caption)
-                                .foregroundColor(.themeWhite.opacity(0.75))
+                                .font(LimiTypography.caption)
+                                .foregroundColor(.appTextPrimary.opacity(0.75))
                         }
                     }
                     .padding(.top, 12)
@@ -67,7 +67,7 @@ struct MultiChannelAdvancedView: View {
 
                 ToolbarItem(placement: .principal) {
                     Text("Advanced")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .font(LimiTypography.button)
                         .foregroundColor(.appTextPrimary)
                 }
 
@@ -75,8 +75,8 @@ struct MultiChannelAdvancedView: View {
                     Button("Channels") {
                         showChannelSelection = true
                     }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.brandAction)
                 }
             }
             .sheet(isPresented: $showChannelSelection) {
@@ -93,29 +93,29 @@ struct MultiChannelAdvancedView: View {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color.orbGlow4.opacity(0.2))
+                        .fill(Color.brandHighlight.opacity(0.2))
                         .frame(width: 46, height: 46)
 
                     Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.brandAction)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Select Channels")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(LimiTypography.headline)
                         .foregroundColor(.appTextPrimary)
 
                     Text("\(device.chennalCount) channels available")
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextSecondary)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.themeWhite.opacity(0.5))
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary.opacity(0.5))
             }
             .padding(16)
             .background(
@@ -124,7 +124,7 @@ struct MultiChannelAdvancedView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.themeWhite.opacity(0.1), lineWidth: 1)
+                    .stroke(Color.appGlassFillStrong, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -133,11 +133,11 @@ struct MultiChannelAdvancedView: View {
     private var unavailableState: some View {
         VStack(spacing: 12) {
             Image(systemName: "network.slash")
-                .font(.system(size: 28, weight: .semibold))
+                .font(LimiTypography.title2)
                 .foregroundColor(.appTextSecondary)
 
             Text("Advanced view is unavailable right now.")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(LimiTypography.callout)
                 .foregroundColor(.appTextPrimary)
         }
         .frame(maxWidth: .infinity)

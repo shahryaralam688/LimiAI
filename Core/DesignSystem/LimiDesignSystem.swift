@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Design Tokens
 
@@ -19,18 +20,150 @@ enum LimiSpacing {
     static let floatingOrbClearance: CGFloat = 100
 }
 
+// MARK: - Brand Gradients (single source for CTAs)
+
+enum LimiGradients {
+    static let ctaColors: [Color] = [.brandAction, .brandActionDark]
+
+    static var cta: LinearGradient {
+        LinearGradient(colors: ctaColors, startPoint: .leading, endPoint: .trailing)
+    }
+
+    static var ctaVertical: LinearGradient {
+        LinearGradient(colors: ctaColors, startPoint: .top, endPoint: .bottom)
+    }
+
+    /// Animated borders / orb rings — emerald + eton only
+    static let accentRingColors: [Color] = [
+        .brandHighlight, .brandAction, .brandActionDark, .brandHighlight
+    ]
+
+    /// Subtle weather / hero tint on dark cards (collapsed home weather)
+    static var weatherAccent: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color.brandHighlight.opacity(0.14),
+                Color.brandAction.opacity(0.06),
+                Color.clear
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}
+
+/// iOS-style card tokens — one family for Home grids, weather, modules.
+enum LimiCard {
+    static let radius: CGFloat = 16
+    static let radiusLarge: CGFloat = 20
+    static let moduleMinHeight: CGFloat = 110
+    static let weatherCompactHeight: CGFloat = 80
+    static let weatherExpandedHeight: CGFloat = 200
+}
+
+extension View {
+    /// Standard dark canvas behind screen content.
+    func limiScreenBackground(showParticles: Bool = false) -> some View {
+        background(DeepSpaceBackground(showParticles: showParticles))
+    }
+}
+
+// MARK: - Brand Typography (Amenti headings + Poppins body)
+
+enum LimiFont {
+    enum Amenti {
+        static let thin = "Amenti-Thin"
+        static let light = "Amenti-Light"
+        static let regular = "Amenti-Regular"
+        static let medium = "Amenti-Medium"
+        static let bold = "Amenti-Bold"
+        static let black = "Amenti-Black"
+    }
+
+    enum Poppins {
+        static let regular = "Poppins-Regular"
+        static let medium = "Poppins-Medium"
+        static let semiBold = "Poppins-SemiBold"
+        static let bold = "Poppins-Bold"
+        static let light = "Poppins-Light"
+    }
+
+    static func amenti(size: CGFloat, weight: Font.Weight = .bold) -> Font {
+        let name: String
+        switch weight {
+        case .black, .heavy:
+            name = LimiFont.Amenti.black
+        case .bold:
+            name = LimiFont.Amenti.bold
+        case .medium, .semibold:
+            name = LimiFont.Amenti.medium
+        case .light, .thin, .ultraLight:
+            name = LimiFont.Amenti.light
+        default:
+            name = LimiFont.Amenti.regular
+        }
+        return custom(name, size: size, weight: weight, fallbackDesign: .rounded)
+    }
+
+    static func amentiMedium(size: CGFloat) -> Font {
+        custom(LimiFont.Amenti.medium, size: size, weight: .medium, fallbackDesign: .rounded)
+    }
+
+    static func poppins(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        let name: String
+        switch weight {
+        case .bold, .heavy, .black:
+            name = LimiFont.Poppins.bold
+        case .semibold:
+            name = LimiFont.Poppins.semiBold
+        case .medium:
+            name = LimiFont.Poppins.medium
+        case .light, .thin, .ultraLight:
+            name = LimiFont.Poppins.light
+        default:
+            name = LimiFont.Poppins.regular
+        }
+        return custom(name, size: size, weight: weight, fallbackDesign: .default)
+    }
+
+    private static func custom(
+        _ name: String,
+        size: CGFloat,
+        weight: Font.Weight,
+        fallbackDesign: Font.Design
+    ) -> Font {
+        if UIFont(name: name, size: size) != nil {
+            return .custom(name, size: size)
+        }
+        return .system(size: size, weight: weight, design: fallbackDesign)
+    }
+}
+
 enum LimiTypography {
-    static let largeTitle: Font = .system(size: 28, weight: .bold, design: .rounded)
-    static let title: Font = .system(size: 24, weight: .bold, design: .rounded)
-    static let title2: Font = .system(size: 22, weight: .semibold, design: .rounded)
-    static let title3: Font = .system(size: 20, weight: .semibold, design: .rounded)
-    static let headline: Font = .system(size: 17, weight: .semibold, design: .rounded)
-    static let body: Font = .system(size: 16, weight: .regular, design: .rounded)
-    static let callout: Font = .system(size: 15, weight: .medium, design: .rounded)
-    static let subheadline: Font = .system(size: 14, weight: .regular, design: .rounded)
-    static let footnote: Font = .system(size: 13, weight: .medium, design: .rounded)
-    static let caption: Font = .system(size: 12, weight: .medium, design: .rounded)
-    static let caption2: Font = .system(size: 11, weight: .medium, design: .rounded)
+    static let largeTitle: Font = LimiFont.amenti(size: 28, weight: .bold)
+    static let title: Font = LimiFont.amenti(size: 24, weight: .bold)
+    static let title2: Font = LimiFont.amentiMedium(size: 22)
+    static let title3: Font = LimiFont.amentiMedium(size: 20)
+    static let headline: Font = LimiFont.poppins(size: 17, weight: .semibold)
+    static let body: Font = LimiFont.poppins(size: 16, weight: .regular)
+    static let callout: Font = LimiFont.poppins(size: 15, weight: .medium)
+    static let subheadline: Font = LimiFont.poppins(size: 14, weight: .regular)
+    static let footnote: Font = LimiFont.poppins(size: 13, weight: .medium)
+    static let caption: Font = LimiFont.poppins(size: 12, weight: .medium)
+    static let caption2: Font = LimiFont.poppins(size: 11, weight: .medium)
+    /// Primary CTA label — Poppins SemiBold 17
+    static let button: Font = LimiFont.poppins(size: 17, weight: .semibold)
+    /// Secondary pill / compact actions
+    static let buttonSmall: Font = LimiFont.poppins(size: 14, weight: .semibold)
+}
+
+/// Standard SF Symbol sizes — use instead of ad‑hoc `.font(.system(size: …))`.
+enum LimiIconSize {
+    static let tabBar: CGFloat = 18
+    static let inline: CGFloat = 20
+    static let deviceRow: CGFloat = 24
+    static let section: CGFloat = 40
+    static let hero: CGFloat = 56
 }
 
 // MARK: - Motion Constants (Arc-inspired physics)
@@ -78,9 +211,9 @@ struct LimiShimmerModifier: ViewModifier {
                 GeometryReader { geo in
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0),
-                            Color.white.opacity(0.06),
-                            Color.white.opacity(0)
+                            Color.themeWhite.opacity(0),
+                            Color.appGlassFillMedium,
+                            Color.themeWhite.opacity(0)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
@@ -129,6 +262,16 @@ extension View {
     ) -> some View {
         modifier(GlassCardStyle(cornerRadius: cornerRadius))
     }
+
+    /// Standard elevated panel — replaces flat `appSurfaceSecondaryAlt` blocks.
+    func limiPanel(cornerRadius: CGFloat = LimiRadius.medium) -> some View {
+        glassCard(cornerRadius: cornerRadius)
+    }
+
+    /// Home screen module / weather compact card — same neumorphic glass as the grid.
+    func limiHomeCard(cornerRadius: CGFloat = LimiCard.radius) -> some View {
+        glassCard(cornerRadius: cornerRadius)
+    }
 }
 
 // MARK: - Tap Scale Effect
@@ -165,9 +308,8 @@ struct LimiOrbView: View {
     @State private var rotation: Double = 0
     @State private var pulseGlow = false
 
-    private let cyanAccent  = Color(hex: "00E5FF")
-    private let violetCore  = Color(hex: "9B5DE5")
-    private let deepViolet  = Color(hex: "6A1B9A")
+    private let accentGlow = Color.brandHighlight
+    private let coreGlow = Color.brandAction
 
     var body: some View {
         Button(action: onTap) {
@@ -177,8 +319,8 @@ struct LimiOrbView: View {
                     .fill(
                         RadialGradient(
                             colors: [
-                                cyanAccent.opacity(isActive ? 0.25 : 0.10),
-                                violetCore.opacity(isActive ? 0.15 : 0.05),
+                                accentGlow.opacity(isActive ? 0.25 : 0.10),
+                                coreGlow.opacity(isActive ? 0.15 : 0.05),
                                 Color.clear
                             ],
                             center: .center,
@@ -194,11 +336,11 @@ struct LimiOrbView: View {
                     .stroke(
                         AngularGradient(
                             colors: [
-                                cyanAccent.opacity(0.5),
-                                violetCore.opacity(0.3),
-                                cyanAccent.opacity(0.15),
-                                violetCore.opacity(0.5),
-                                cyanAccent.opacity(0.5)
+                                accentGlow.opacity(0.5),
+                                coreGlow.opacity(0.3),
+                                accentGlow.opacity(0.15),
+                                coreGlow.opacity(0.5),
+                                accentGlow.opacity(0.5)
                             ],
                             center: .center
                         ),
@@ -208,18 +350,14 @@ struct LimiOrbView: View {
                     .rotationEffect(.degrees(rotation))
                     .blur(radius: 0.5)
 
-                // Neural sphere image
-                Image("neuralOrb")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: size, height: size)
-                    .clipShape(Circle())
+                // 3D geodesic orb scene
+                LimiOrbScene(isActive: isActive, size: size, renderMode: .swiftUI)
                     .overlay(
                         Circle()
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        Color.white.opacity(0.12),
+                                        Color.appGlassStrokeStrong,
                                         Color.clear
                                     ],
                                     startPoint: .topLeading,
@@ -232,8 +370,8 @@ struct LimiOrbView: View {
                             .stroke(
                                 LinearGradient(
                                     colors: [
-                                        cyanAccent.opacity(0.4),
-                                        violetCore.opacity(0.2),
+                                        accentGlow.opacity(0.4),
+                                        coreGlow.opacity(0.2),
                                         Color.clear
                                     ],
                                     startPoint: .topLeading,
@@ -242,13 +380,13 @@ struct LimiOrbView: View {
                                 lineWidth: 0.8
                             )
                     )
-                    .shadow(color: cyanAccent.opacity(isActive ? 0.6 : 0.3), radius: isActive ? 24 : 12)
-                    .shadow(color: violetCore.opacity(isActive ? 0.4 : 0.2), radius: isActive ? 40 : 20)
+                    .shadow(color: accentGlow.opacity(isActive ? 0.6 : 0.3), radius: isActive ? 24 : 12)
+                    .shadow(color: coreGlow.opacity(isActive ? 0.4 : 0.2), radius: isActive ? 40 : 20)
                     .scaleEffect(breathe ? 1.02 : 0.98)
 
                 // Specular highlight dot
                 Circle()
-                    .fill(Color.white.opacity(pulseGlow ? 0.18 : 0.08))
+                    .fill(Color.themeWhite.opacity(pulseGlow ? 0.18 : 0.08))
                     .frame(width: size * 0.22, height: size * 0.22)
                     .offset(x: -size * 0.14, y: -size * 0.14)
                     .blur(radius: 3)
@@ -278,14 +416,14 @@ struct LimiSectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(LimiTypography.callout)
                 .foregroundColor(.appTextSecondary)
                 .tracking(1)
                 .textCase(.uppercase)
             Spacer()
             if let trailing {
                 Text(trailing)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(.appTextMuted)
             }
         }
@@ -303,25 +441,19 @@ struct FloatingInputBar: View {
         HStack(spacing: 10) {
             TextField("", text: $text, prompt: Text(placeholder).foregroundColor(.appTextPlaceholder))
                 .textFieldStyle(.plain)
-                .font(.system(size: 16, weight: .regular))
+                .font(LimiTypography.body)
                 .foregroundColor(.appTextPrimary)
                 .padding(.leading, 16)
                 .padding(.vertical, 14)
 
             Button(action: onSend) {
                 Image(systemName: "arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appCanvasPrimary)
                     .frame(width: 36, height: 36)
                     .background(
                         Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.orbGlow4, .orbGlow1],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .fill(LimiGradients.cta)
                     )
             }
             .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -329,7 +461,7 @@ struct FloatingInputBar: View {
             .padding(.trailing, 8)
         }
         .glassCard(cornerRadius: 24, strokeOpacity: 0.1, fillOpacity: 0.08)
-        .shadow(color: Color.orbGlow1.opacity(0.08), radius: 20, y: 8)
+        .shadow(color: Color.brandAction.opacity(0.08), radius: 20, y: 8)
     }
 }
 
@@ -360,7 +492,7 @@ private struct ParticleDot: View {
 
     var body: some View {
         Circle()
-            .fill(Color.orbGlow3.opacity(opacity))
+            .fill(Color.brandHighlight.opacity(opacity))
             .frame(width: particleSize, height: particleSize)
             .position(x: offset.x, y: offset.y)
             .onAppear {
@@ -392,7 +524,7 @@ struct DeepSpaceBackground: View {
             // Subtle radial gradient at top
             RadialGradient(
                 colors: [
-                    Color.orbGlow2.opacity(0.06),
+                    Color.brandHighlight.opacity(0.06),
                     Color.clear
                 ],
                 center: .init(x: 0.5, y: 0.15),
@@ -405,6 +537,19 @@ struct DeepSpaceBackground: View {
                 AmbientParticlesView(count: 20)
                     .ignoresSafeArea()
             }
+        }
+    }
+}
+
+/// Standard full-screen shell — canvas + optional content.
+struct LimiScreen<Content: View>: View {
+    var showParticles: Bool = false
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        ZStack {
+            DeepSpaceBackground(showParticles: showParticles)
+            content()
         }
     }
 }
@@ -459,7 +604,6 @@ struct LimiPrimaryButton: View {
     var height: CGFloat = 52
     var action: () -> Void
 
-    @State private var isPressed = false
     private var effectiveEnabled: Bool { isEnabled && !isLoading }
 
     var body: some View {
@@ -470,7 +614,7 @@ struct LimiPrimaryButton: View {
         }) {
             ZStack {
                 Text(title)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(LimiTypography.button)
                     .opacity(isLoading ? 0 : 1)
 
                 if isLoading {
@@ -482,32 +626,31 @@ struct LimiPrimaryButton: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: height - 10)
-            .foregroundColor(effectiveEnabled ? .white : .appTextDisabled)
+            .foregroundColor(effectiveEnabled ? .appTextInverse : .appTextDisabled)
             .background(
                 Capsule(style: .continuous)
                     .fill(
                         effectiveEnabled
-                        ? AnyShapeStyle(LinearGradient(
-                            colors: [.orbGlow4, .orbGlow1],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
-                        : AnyShapeStyle(Color.white.opacity(0.06))
+                        ? AnyShapeStyle(LimiGradients.cta)
+                        : AnyShapeStyle(Color.appGlassFillMedium)
                     )
             )
             .clipShape(Capsule(style: .continuous))
             .padding(5)
+            .frame(height: height)
+            .contentShape(Capsule(style: .continuous))
         }
-        .frame(height: height)
-        .neuElevationCapsule(level: isPressed ? -1 : 1)
-        .animation(LimiMotion.quick, value: isPressed)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true }
-                .onEnded { _ in isPressed = false }
-        )
+        .buttonStyle(LimiPrimaryCapsuleButtonStyle())
         .disabled(!effectiveEnabled)
         .animation(LimiMotion.quick, value: isLoading)
+    }
+}
+
+private struct LimiPrimaryCapsuleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .neuElevationCapsule(level: configuration.isPressed ? -1 : 1)
+            .animation(LimiMotion.quick, value: configuration.isPressed)
     }
 }
 
@@ -526,7 +669,7 @@ struct LimiDangerButton: View {
         }) {
             ZStack {
                 Text(title)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(LimiTypography.button)
                     .opacity(isLoading ? 0 : 1)
 
                 if isLoading {
@@ -537,7 +680,7 @@ struct LimiDangerButton: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: height)
-            .foregroundColor(.white)
+            .foregroundColor(.appTextInverse)
             .background(
                 Capsule(style: .continuous)
                     .fill(Color.appDanger)
@@ -560,7 +703,7 @@ struct LimiSecondaryButton: View {
             action()
         }) {
             Text(title)
-                .font(.system(size: 17, weight: .semibold))
+                .font(LimiTypography.button)
                 .frame(maxWidth: .infinity)
                 .frame(height: height)
                 .foregroundColor(.appTextPrimary)
@@ -570,7 +713,7 @@ struct LimiSecondaryButton: View {
                 )
                 .overlay(
                     Capsule(style: .continuous)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        .stroke(Color.appGlassStrokeStrong, lineWidth: 1)
                 )
         }
         .tapScale()
@@ -589,7 +732,7 @@ struct LimiPillButton: View {
             action()
         }) {
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
+                .font(LimiTypography.buttonSmall)
                 .foregroundColor(isFilled ? .white : .appTextPrimary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
@@ -598,7 +741,7 @@ struct LimiPillButton: View {
                         if isFilled {
                             Capsule(style: .continuous)
                                 .fill(LinearGradient(
-                                    colors: [.orbGlow4, .orbGlow1],
+                                    colors: [.brandAction, .brandActionDark],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 ))

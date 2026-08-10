@@ -3,13 +3,13 @@ import SwiftUI
 // MARK: - Limi Neumorphic Engine — Single Source of Truth
 
 enum NeuTheme {
-    static let baseCanvas   = Color(hex: "0B0B0F")
-    static let baseSurface  = Color(hex: "131318")
+    static let baseCanvas   = Color.appCanvasPrimary
+    static let baseSurface  = Color.appSurfaceCard
 
-    static let shadowLight  = Color(hex: "1C1C26")
-    static let shadowDark   = Color.black.opacity(0.8)
+    static let shadowLight  = Color.appSurfacePrimary
+    static let shadowDark   = Color.appCanvasPrimary.opacity(0.8)
 
-    static let accentEdge   = Color.white.opacity(0.05)
+    static let accentEdge   = Color.appGlassFill
 }
 
 // MARK: - Elevation Modifier
@@ -49,7 +49,6 @@ struct NeuElevationModifier<S: Shape>: ViewModifier {
             )
             .shadow(color: NeuTheme.shadowLight, radius: 8, x: -4, y: -4)
             .shadow(color: NeuTheme.shadowDark, radius: 10, x: 4, y: 4)
-            .drawingGroup()
     }
 
     // MARK: Level -1 — Recessed
@@ -63,7 +62,7 @@ struct NeuElevationModifier<S: Shape>: ViewModifier {
                     .stroke(
                         LinearGradient(
                             colors: [
-                                Color.black.opacity(0.6),
+                                Color.appShadowStrong,
                                 Color.clear,
                                 NeuTheme.shadowLight.opacity(0.4)
                             ],
@@ -75,7 +74,6 @@ struct NeuElevationModifier<S: Shape>: ViewModifier {
             )
             .clipShape(shape)
             .scaleEffect(0.98)
-            .drawingGroup()
     }
 
     // MARK: Level 0 — Base

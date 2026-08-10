@@ -15,8 +15,7 @@ struct StaticLightPreviewView: View {
             StaticLightARViewContainer(macAddress: "avcd")
                 .ignoresSafeArea()
         }
-        .background(Color.appCanvasPrimary)
-        .ignoresSafeArea()
+        .limiScreenBackground()
     }
 }
 

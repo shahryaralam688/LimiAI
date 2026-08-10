@@ -19,16 +19,16 @@ struct PWM2LEDView: View {
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
             }
 //            .background(
 //                Rectangle()
-//                    .fill(Color.themeBlack)
+//                    .fill(Color.appSurfaceDark)
 //                    .opacity(1)
-//                    .cornerRadius(22)
+//                    .cornerRadius(LimiCard.radiusLarge)
 //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 //
 //            )
@@ -54,8 +54,8 @@ struct PWM2LEDView: View {
                     Ellipse()
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3),
-                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3)
+                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow).opacity(0.3),
+                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow).opacity(0.3)
                             ]),
                             startPoint: .center,
                             endPoint: .trailing
@@ -75,12 +75,12 @@ struct PWM2LEDView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.themeWhite, radius: 4)
+                        .shadow(color: Color.brandHighlight.opacity(0.45), radius: 4)
 //                    Ellipse()
 //                        .fill(LinearGradient(
 //                            gradient: Gradient(colors: [
-//                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow),
-//                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.4)
+//                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow),
+//                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow).opacity(0.4)
 //                            ]),
 //                            startPoint: .center,
 //                            endPoint: .trailing
@@ -106,7 +106,7 @@ struct PWM2LEDView: View {
                         title: "Bela Lampe",
                         warmCold: $led1warmCold,
                         brightness: $led2Brightness,
-                        color: .emerald,
+                        color: .brandAction,
                         hub: hub,
                         wireHeight: $wireHeight,
                         backgroundImage: $backgroundImage,
@@ -188,15 +188,15 @@ struct PendantLampControlView: View {
         VStack {
             HStack {
 //                Text(title)
-//                    .font(.title)
+//                    .font(LimiTypography.title)
 //                    .fontWeight(.bold)
 //                    .foregroundColor(.appTextPrimary)
 //                    .padding(.top)
-//                    .shadow(color: .gray, radius: 6)
+//                    .shadow(color: Color.appBorderPrimary, radius: 6)
                 Spacer()
                 Toggle(isOn: $isOn) {}
-                    .shadow(color: .gray, radius: 6)
-                    .toggleStyle(SwitchToggleStyle(tint: .emerald))
+                    .shadow(color: Color.appBorderPrimary, radius: 6)
+                    .toggleStyle(SwitchToggleStyle(tint: .brandAction))
                     .onChange(of: isOn) { oldValue, newValue in
                         backgroundImage = newValue ? "name2" : "name3"
                         withAnimation {
@@ -213,7 +213,7 @@ struct PendantLampControlView: View {
                 VStack {
 //                    Text("\(Int(brightness))%")
 //                        .bold()
-//                        .font(.title2)
+//                        .font(LimiTypography.title2)
 //                        .foregroundColor(.appTextPrimary)
 //                        .padding(.bottom, 5)
 
@@ -234,11 +234,8 @@ struct PendantLampControlView: View {
             Spacer()
             VStack(spacing: 5 ) {
                 Text("Color")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded)) // font-family + size
-                    .fontWeight(.medium)                       // weight 500
-                    .foregroundColor(.appTextPrimary)               // color
-                    .kerning(-0.15)                            // letter-spacing
-                    .lineSpacing(0)                            // no extra line spacing
+                    .font(LimiTypography.title3)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.bottom,24)
                 
                     ZStack {
@@ -266,22 +263,16 @@ struct PendantLampControlView: View {
 
                     HStack{
                         Text("Warm")
-                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
-                            .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.appTextPrimary)               // custom color
-                            .lineSpacing(0)                            // no extra line spacing
-                            .kerning(-0.15)                            // letter-spacing
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
 
                         
                         
                         Spacer()
                         
                         Text("Cool")
-                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
-                            .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.appTextPrimary)               // custom color
-                            .lineSpacing(0)                            // no extra line spacing
-                            .kerning(-0.15)                            // letter-spacing
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
 
                         
                     }
@@ -298,9 +289,9 @@ struct PendantLampControlView: View {
             .frame(height: 243)
             .background(
                 Rectangle()
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .opacity(1)
-                    .cornerRadius(22)
+                    .cornerRadius(LimiCard.radiusLarge)
                     .padding(.horizontal, 16)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -310,7 +301,7 @@ struct PendantLampControlView: View {
         }
         .padding(.top, 20)
 //        .ignoresSafeArea()
-        .cornerRadius(16)
+        .cornerRadius(LimiRadius.medium)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Device Disconnected"), message: Text("Please reconnect your device."), dismissButton: .default(Text("OK")))
         }
@@ -507,7 +498,7 @@ struct PWM2LEDWifiView: View {
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -527,8 +518,8 @@ struct PWM2LEDWifiView: View {
                     Ellipse()
                         .fill(LinearGradient(
                             gradient: Gradient(colors: [
-                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3),
-                                (led1warmCold <= 50 ? Color.themeWhite : Color.appWarmGlow).opacity(0.3)
+                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow).opacity(0.3),
+                                (led1warmCold <= 50 ? Color.appTextPrimary : Color.appWarmGlow).opacity(0.3)
                             ]),
                             startPoint: .center,
                             endPoint: .trailing
@@ -548,7 +539,7 @@ struct PWM2LEDWifiView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.themeWhite, radius: 4)
+                        .shadow(color: Color.brandHighlight.opacity(0.45), radius: 4)
 
                 }
                 .padding(.top, -120)
@@ -569,7 +560,7 @@ struct PWM2LEDWifiView: View {
                         channelMac: String(channelMac ?? ""),
                         warmCold: $led1warmCold,
                         brightness: $led2Brightness,
-                        color: .emerald,
+                        color: .brandAction,
                         wireHeight: $wireHeight,
                         backgroundImage: $backgroundImage,
                         isOn: $isOn,
@@ -637,8 +628,8 @@ struct PendantLampControlWifiView: View {
 
                 Spacer()
                 Toggle(isOn: $isOn) {}
-                    .shadow(color: .gray, radius: 6)
-                    .toggleStyle(SwitchToggleStyle(tint: .emerald))
+                    .shadow(color: Color.appBorderPrimary, radius: 6)
+                    .toggleStyle(SwitchToggleStyle(tint: .brandAction))
                     .onChange(of: isOn) { oldValue, newValue in
                         backgroundImage = newValue ? "name2" : "name3"
                         withAnimation {
@@ -672,11 +663,8 @@ struct PendantLampControlWifiView: View {
             Spacer()
             VStack(spacing: 5 ) {
                 Text("Color")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded)) // font-family + size
-                    .fontWeight(.medium)                       // weight 500
-                    .foregroundColor(.appTextPrimary)               // color
-                    .kerning(-0.15)                            // letter-spacing
-                    .lineSpacing(0)                            // no extra line spacing
+                    .font(LimiTypography.title3)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.bottom,24)
                 
                     ZStack {
@@ -704,22 +692,16 @@ struct PendantLampControlWifiView: View {
 
                     HStack{
                         Text("Warm")
-                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
-                            .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.appTextPrimary)               // custom color
-                            .lineSpacing(0)                            // no extra line spacing
-                            .kerning(-0.15)                            // letter-spacing
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
 
                         
                         
                         Spacer()
                         
                         Text("Cool")
-                            .font(.system(size: 16, weight: .medium, design: .rounded)) // custom font + size
-                            .fontWeight(.medium)                       // weight 500 (medium)
-                            .foregroundColor(.appTextPrimary)               // custom color
-                            .lineSpacing(0)                            // no extra line spacing
-                            .kerning(-0.15)                            // letter-spacing
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
 
                         
                     }
@@ -736,9 +718,9 @@ struct PendantLampControlWifiView: View {
             .frame(height: 243)
             .background(
                 Rectangle()
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .opacity(1)
-                    .cornerRadius(22)
+                    .cornerRadius(LimiCard.radiusLarge)
                     .padding(.horizontal, 16)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -748,7 +730,7 @@ struct PendantLampControlWifiView: View {
         }
         .padding(.top, 20)
 //        .ignoresSafeArea()
-        .cornerRadius(16)
+        .cornerRadius(LimiRadius.medium)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Device Disconnected"), message: Text("Please reconnect your device."), dismissButton: .default(Text("OK")))
         }

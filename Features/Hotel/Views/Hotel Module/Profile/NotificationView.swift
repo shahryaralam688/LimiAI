@@ -96,7 +96,7 @@ struct NotificationToggleCard: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "bell")
-                .font(.system(size: 18, weight: .regular))
+                .font(LimiTypography.body)
                 
                 .foregroundColor(.appTextPrimary)
                 .background(
@@ -113,7 +113,7 @@ struct NotificationToggleCard: View {
                 )
                 .padding()
             Text(title)
-                .font(.system(size: 16, weight: .semibold))
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextPrimary)
 
             Spacer()
@@ -128,7 +128,7 @@ struct NotificationToggleCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.themeWhite.opacity(0.06), lineWidth: 1)
+                .stroke(Color.appGlassFillMedium, lineWidth: 1)
         )
     }
 }

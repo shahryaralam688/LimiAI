@@ -7,7 +7,7 @@ struct HubHeaderView: View {
         HStack {
             Spacer()
             Text(title)
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(LimiTypography.title3)
                 .foregroundColor(.appTextPrimary)
             Spacer()
         }

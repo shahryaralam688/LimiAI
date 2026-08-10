@@ -56,7 +56,7 @@ struct DataRGBView: View {
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -89,7 +89,7 @@ struct DataRGBView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.themeWhite, radius: 4)
+                        .shadow(color: Color.brandHighlight.opacity(0.45), radius: 4)
                     
                     
                     
@@ -107,18 +107,18 @@ struct DataRGBView: View {
             VStack{
                 HStack {
 //                    Text("RGB LED")
-//                        .font(.title)
+//                        .font(LimiTypography.title)
 //                        .fontWeight(.bold)
 //                        .foregroundColor(.alabaster)
 //                        .padding(.top)
 //                    
-//                        .shadow(color:.gray, radius: 6)
+//                        .shadow(color: Color.appBorderPrimary, radius: 6)
                     Spacer()
                     
                     Toggle(isOn: $isOn) {}
-                        .shadow(color:.gray, radius: 6)
+                        .shadow(color: Color.appBorderPrimary, radius: 6)
                     
-                        .toggleStyle(SwitchToggleStyle(tint: .green))
+                        .toggleStyle(SwitchToggleStyle(tint: .brandAction))
                         .onChange(of: isOn) { oldValue, newValue in
                             backgroundImage = newValue ? "name2" : "name3"  // Switch between name1 and name2
                             
@@ -142,7 +142,7 @@ struct DataRGBView: View {
                     VStack {
 //                        Text("\(Int(RGBBrightness))%")
 //                            .bold()
-//                            .font(.title2)
+//                            .font(LimiTypography.title2)
 //                            .foregroundColor(.alabaster)
 //                            .padding(.bottom, 5)
 
@@ -164,7 +164,7 @@ struct DataRGBView: View {
                     HStack{
                         Spacer()
                         Text("Select Color")
-                            .font(.title2)
+                            .font(LimiTypography.title2)
                             .foregroundColor(.appTextPrimary)
                             .padding(.top)
                         Spacer()
@@ -172,11 +172,11 @@ struct DataRGBView: View {
 //                            pasteColor()
 //                        }) {
 //                            Text("Paste Colour")
-//                                .font(.title2)
+//                                .font(LimiTypography.title2)
 //                                .padding(8)
 //                                .bold()
-//                                .background(!showSolidColor ? Color.yellow : selectedColor)
-//                                .foregroundColor(.themeWhite)
+//                                .background(!showSolidColor ? Color.appYellow : selectedColor)
+//                                .foregroundColor(.appTextPrimary)
 //                                .cornerRadius(8)
 //                        }
 //                        .padding(.top)
@@ -193,7 +193,7 @@ struct DataRGBView: View {
                         }) {
                             Text("Solid Color")
                                 .padding(8)
-                                .background(showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
+                                .background(showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
                                 .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
@@ -205,8 +205,8 @@ struct DataRGBView: View {
                         }) {
                             Text("Rainbow Color")
                                 .padding(8)
-                                .background(!showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.themeWhite)
+                                .background(!showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
+                                .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)
@@ -252,7 +252,7 @@ struct DataRGBView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.themeBlack)
+                        .fill(Color.appSurfaceDark)
                 )
                 .padding(.bottom, 20)
                 
@@ -477,7 +477,7 @@ struct ColorCircleSlider: View {
                     .frame(width: circleSize, height: circleSize)
                     .overlay(
                         Circle()
-                            .stroke(Color.themeWhite, lineWidth: 2)
+                            .stroke(Color.appGlassStrokeLight, lineWidth: 2)
                             .opacity(index == selectedIndex ? 1 : 0.6)
                     )
                     .scaleEffect(index == selectedIndex ? selectedScale : 1.0)
@@ -509,12 +509,12 @@ struct ColorPresetButton: View {
                 .frame(width: 50, height: 50)
                 .overlay(
                     Circle()
-                        .stroke(Color.themeWhite, lineWidth: 2)
+                        .stroke(Color.appGlassStrokeLight, lineWidth: 2)
                 )
                 .shadow(color: color.opacity(0.3), radius: 5, x: 0, y: 2)
                 .overlay(
                     Circle()
-                        .stroke(selectedColor == color ? Color.themeBlack : Color.clear, lineWidth: 3)
+                        .stroke(selectedColor == color ? Color.appBorderPrimary : Color.clear, lineWidth: 3)
                 )
                 .onTapGesture {
                     selectedColor = color
@@ -620,7 +620,7 @@ struct DataRGBWifiView: View {
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -653,7 +653,7 @@ struct DataRGBWifiView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.themeWhite, radius: 4)
+                        .shadow(color: Color.brandHighlight.opacity(0.45), radius: 4)
                     
                     
                     
@@ -674,9 +674,9 @@ struct DataRGBWifiView: View {
                     Spacer()
                     
                     Toggle(isOn: $isOn) {}
-                        .shadow(color:.gray, radius: 6)
+                        .shadow(color: Color.appBorderPrimary, radius: 6)
                     
-                        .toggleStyle(SwitchToggleStyle(tint: .green))
+                        .toggleStyle(SwitchToggleStyle(tint: .brandAction))
                         .onChange(of: isOn) { oldValue, newValue in
                             backgroundImage = newValue ? "name2" : "name3"  // Switch between name1 and name2
                             
@@ -718,7 +718,7 @@ struct DataRGBWifiView: View {
                     HStack{
                         Spacer()
                         Text("Select Color")
-                            .font(.title2)
+                            .font(LimiTypography.title2)
                             .foregroundColor(.appTextPrimary)
                             .padding(.top)
                         Spacer()
@@ -734,7 +734,7 @@ struct DataRGBWifiView: View {
                         }) {
                             Text("Solid Color")
                                 .padding(8)
-                                .background(showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
+                                .background(showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
                                 .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
@@ -746,8 +746,8 @@ struct DataRGBWifiView: View {
                         }) {
                             Text("Rainbow Color")
                                 .padding(8)
-                                .background(!showSolidColor ? Color.emerald : Color.eton.opacity(0.4))
-                                .foregroundColor(.themeWhite)
+                                .background(!showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
+                                .foregroundColor(.appTextPrimary)
                                 .cornerRadius(8)
                         }
                         .disabled(!isOn)
@@ -793,7 +793,7 @@ struct DataRGBWifiView: View {
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.themeBlack)
+                        .fill(Color.appSurfaceDark)
                 )
                 .padding(.bottom, 20)
                 

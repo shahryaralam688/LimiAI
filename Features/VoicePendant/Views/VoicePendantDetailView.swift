@@ -40,6 +40,7 @@ struct VoicePendantDetailView: View {
         .vpToast($viewModel.toastMessage)
         .task { await viewModel.loadAll() }
         .fullScreenCover(isPresented: $showVoiceAI) {
+            // Same main App AI (WebRTC) as Home / Hotel — not pendant WebSocket voice.
             VoiceView()
         }
         .trackScreen("VoicePendantDetailView", metadata: ["pendant": pendant.id])
@@ -54,33 +55,33 @@ struct VoicePendantDetailView: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "waveform")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.brandAction)
                         .frame(width: 40, height: 40)
-                        .background(Color.orbGlow4.opacity(0.12))
+                        .background(Color.brandHighlight.opacity(0.12))
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Talk to Limi")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
                         Text("Start a voice conversation with your AI assistant")
-                            .font(.system(size: 12, weight: .regular))
+                            .font(LimiTypography.caption)
                             .foregroundColor(Color.appTextTertiary)
                             .lineLimit(1)
                     }
 
                     Spacer()
                     Image(systemName: "mic.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.brandAction)
                 }
                 .padding(14)
                 .frame(maxWidth: .infinity)
                 .background(Color.appSurfaceSecondaryAlt)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.orbGlow4.opacity(0.4), lineWidth: 1)
+                        .stroke(Color.brandHighlight.opacity(0.4), lineWidth: 1)
                 )
                 .cornerRadius(16)
             }
@@ -92,31 +93,30 @@ struct VoicePendantDetailView: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.brandAction)
                         .frame(width: 40, height: 40)
-                        .background(Color.orbGlow4.opacity(0.12))
+                        .background(Color.brandHighlight.opacity(0.12))
                         .clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Chat with Limi")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
                         Text("Type a multi-turn conversation with the cloud AI")
-                            .font(.system(size: 12, weight: .regular))
+                            .font(LimiTypography.caption)
                             .foregroundColor(Color.appTextTertiary)
                             .lineLimit(1)
                     }
 
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(Color.appTextMuted)
                 }
                 .padding(14)
                 .frame(maxWidth: .infinity)
-                .background(Color.appSurfaceSecondaryAlt)
-                .cornerRadius(16)
+                .limiPanel(cornerRadius: 16)
             }
             .buttonStyle(.plain)
         }
@@ -128,14 +128,14 @@ struct VoicePendantDetailView: View {
         VStack(spacing: 16) {
             HStack(spacing: 14) {
                 Image(systemName: "waveform.circle.fill")
-                    .font(.system(size: 46, weight: .regular))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(pendant.name)
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.appTextPrimary)
                     Text(pendant.room)
-                        .font(.system(size: 14, weight: .regular))
+                        .font(LimiTypography.subheadline)
                         .foregroundColor(Color.appTextTertiary)
                 }
                 Spacer()
@@ -144,8 +144,7 @@ struct VoicePendantDetailView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(16)
+        .limiPanel(cornerRadius: 16)
     }
 
     // MARK: - Status strip
@@ -200,7 +199,7 @@ struct VoicePendantDetailView: View {
             } label: {
                 VPNavRow(icon: "slider.horizontal.3", title: "Device Controls",
                          subtitle: "Volume, status, AI model and configuration",
-                         accent: .orbGlow4)
+                         accent: .brandAction)
             }
             .buttonStyle(.plain)
 
@@ -209,7 +208,7 @@ struct VoicePendantDetailView: View {
             } label: {
                 VPNavRow(icon: "brain.head.profile", title: "Summary & Memory",
                          subtitle: "Conversations, summaries, notes and timeline",
-                         accent: .orbGlow4)
+                         accent: .brandAction)
             }
             .buttonStyle(.plain)
         }
@@ -230,8 +229,8 @@ struct VoicePendantDetailView: View {
 
     private func sectionTitle(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.themeWhite)
+            .font(LimiTypography.headline)
+            .foregroundColor(.appTextPrimary)
     }
 }
 

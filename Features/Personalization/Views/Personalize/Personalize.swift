@@ -41,6 +41,18 @@ enum Goal: String, CaseIterable, Codable, Identifiable {
         case .experimenting: return "flask.fill"
         }
     }
+
+    /// Warm, user-facing label (API still uses `rawValue`).
+    var displayTitle: String {
+        switch self {
+        case .aiAutomation: return "Everyday automation"
+        case .smartControl: return "Effortless control"
+        case .energyManagement: return "Smarter energy"
+        case .security: return "Peace of mind"
+        case .ambientExperience: return "Mood & atmosphere"
+        case .experimenting: return "Just exploring"
+        }
+    }
 }
 
 struct OnboardingData: Codable {
@@ -53,33 +65,34 @@ struct OnboardingData: Codable {
 // MARK: - ViewModel
 
 final class OnboardingViewModel: ObservableObject {
-    /// Committed when the user leaves the name step — not on every keystroke.
-    @Published var name: String = ""
+    @Published var name: String = "" {
+        didSet { scheduleSave() }
+    }
 
     @Published var selectedUseCase: UseCase? = nil {
-        didSet { persistIfNeeded() }
+        didSet { scheduleSave() }
     }
 
     @Published var selectedGoals: Set<Goal> = [] {
-        didSet { persistIfNeeded() }
+        didSet { scheduleSave() }
     }
 
     @Published var bluetoothAllowed: Bool? = nil {
-        didSet { persistIfNeeded() }
+        didSet { scheduleSave() }
     }
 
     private let storageKey = "onboarding_data"
-    private var isHydratingFromStorage = false
-    private var saveWorkItem: DispatchWorkItem?
+    private var isRestoringFromStorage = false
+    private var saveTask: Task<Void, Never>?
 
     init() {
-        isHydratingFromStorage = true
         load()
-        isHydratingFromStorage = false
     }
 
     private func load() {
         guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        isRestoringFromStorage = true
+        defer { isRestoringFromStorage = false }
         if let decoded = try? JSONDecoder().decode(OnboardingData.self, from: data) {
             name = decoded.name
             selectedUseCase = decoded.useCase
@@ -88,39 +101,38 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
-    private func persistIfNeeded() {
-        guard !isHydratingFromStorage else { return }
-        saveWorkItem?.cancel()
-        let work = DispatchWorkItem { [weak self] in
-            self?.saveNow()
+    /// Debounced so typing in the name field does not encode/write UserDefaults on every keystroke.
+    private func scheduleSave() {
+        guard !isRestoringFromStorage else { return }
+        saveTask?.cancel()
+        saveTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            guard !Task.isCancelled else { return }
+            persistNow()
         }
-        saveWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
     }
 
-    func commitName(_ value: String) {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard name != trimmed else { return }
-        name = trimmed
-        persistIfNeeded()
+    func flushPendingSave() {
+        saveTask?.cancel()
+        saveTask = nil
+        persistNow()
     }
 
-    private func saveNow() {
+    private func persistNow() {
         let model = OnboardingData(
             name: name,
             useCase: selectedUseCase,
             goals: Array(selectedGoals),
             bluetoothAllowed: bluetoothAllowed
         )
-        let storageKey = storageKey
-        DispatchQueue.global(qos: .utility).async {
-            if let data = try? JSONEncoder().encode(model) {
-                UserDefaults.standard.set(data, forKey: storageKey)
-            }
+
+        if let data = try? JSONEncoder().encode(model) {
+            UserDefaults.standard.set(data, forKey: storageKey)
         }
     }
 
     func completeOnboarding() {
+        flushPendingSave()
         let userName = name
         let whereLimiUsed = selectedUseCase?.rawValue
         let puroseOfLimi = Array(selectedGoals).map { $0.rawValue }
@@ -164,16 +176,13 @@ struct OnboardingFlowView: View {
     @State private var isCompleting = false
     /// Step 1: user confirms the typed name before Continue (pairs with voice “say yes when it’s correct”).
     @State private var nameStepConfirmed = false
-    /// Voice / AI fills this; NameStepView reads it without re-rendering the whole flow on each keystroke.
-    @State private var voiceSuggestedName: String?
     /// Steps 2–3: brief AI-selection pulse (white border + scale) when `personalize_set_field` updates a row.
     @State private var pulseUseCaseRaw: String?
     @State private var pulseGoalRaws: Set<String> = []
     @State private var pulseUseCaseGeneration = 0
     @State private var pulseGoalsGeneration = 0
-    @State private var proactiveTurnGeneration = 0
-    @State private var contextSyncGeneration = 0
-    @State private var contentReady = false
+    @State private var voiceBootstrapTask: Task<Void, Never>?
+    @State private var proactiveTurnTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -191,12 +200,9 @@ struct OnboardingFlowView: View {
                         switch step {
                         case 1:
                             NameStepView(
-                                initialName: viewModel.name,
-                                voiceSuggestedName: voiceSuggestedName,
+                                name: $viewModel.name,
                                 nameConfirmed: $nameStepConfirmed,
-                                onContinue: { committedName in
-                                    viewModel.commitName(committedName)
-                                    voiceSuggestedName = nil
+                                onContinue: {
                                     withAnimation(LimiMotion.smooth) { step += 1 }
                                 }
                             )
@@ -234,8 +240,10 @@ struct OnboardingFlowView: View {
                             )
                         }
                     }
-                    .transition(.opacity)
-                    .opacity(contentReady ? 1 : 0)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
                 }
                 .padding(.horizontal, 24)
             }
@@ -244,23 +252,23 @@ struct OnboardingFlowView: View {
             HomeView()
         }
         .fullScreenCover(isPresented: $showDemoScanView) {
-            AddDeviceCoordinator.destination(for: .deviceScan)
+            AddDeviceFlowView(onFinished: { _ in
+                showDemoScanView = false
+            })
         }
         .onAppear {
             FloatingAssistantManager.shared.setPersonalizeFlowActive(true)
-            withAnimation(LimiMotion.gentle) {
-                contentReady = true
+            DispatchQueue.main.async {
+                syncPersonalizeContext()
             }
-            scheduleContextSync(delay: 0.05)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
-                startPersonalizeVoiceIfNeeded()
-                scheduleProactiveAssistantTurn(delay: 0.35)
-            }
+            schedulePersonalizeVoiceBootstrap()
+            scheduleProactiveAssistantTurn(after: 1.5)
         }
         .onDisappear {
+            voiceBootstrapTask?.cancel()
+            proactiveTurnTask?.cancel()
+            viewModel.flushPendingSave()
             FloatingAssistantManager.shared.setPersonalizeFlowActive(false)
-            contextSyncGeneration += 1
-            proactiveTurnGeneration += 1
         }
         .onChange(of: showHomeView) { _, isShowingHome in
             if isShowingHome { FloatingAssistantManager.shared.setPersonalizeFlowActive(false) }
@@ -276,42 +284,45 @@ struct OnboardingFlowView: View {
             pulseGoalsGeneration += 1
             pulseUseCaseRaw = nil
             pulseGoalRaws = []
-            scheduleContextSync(delay: 0.05)
-            scheduleProactiveAssistantTurn(delay: 0.55)
+            DispatchQueue.main.async {
+                syncPersonalizeContext()
+            }
+            scheduleProactiveAssistantTurn(after: 0.6)
         }
         .onReceive(NotificationCenter.default.publisher(for: .limiPersonalizeToolUpdate)) { note in
             applyPersonalizeTool(note: note)
         }
     }
 
+    /// Defer WebRTC bootstrap so the first frame + keyboard can settle before mic/network work.
+    private func schedulePersonalizeVoiceBootstrap() {
+        voiceBootstrapTask?.cancel()
+        voiceBootstrapTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            guard !Task.isCancelled else { return }
+            startPersonalizeVoiceIfNeeded()
+        }
+    }
+
+    private func scheduleProactiveAssistantTurn(after delay: TimeInterval) {
+        proactiveTurnTask?.cancel()
+        proactiveTurnTask = Task { @MainActor in
+            let nanos = UInt64(max(delay, 0) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanos)
+            guard !Task.isCancelled else { return }
+            guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
+            FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
+        }
+    }
+
     /// Keep realtime voice session active while Personalize is visible (orb “on” when connected).
     private func startPersonalizeVoiceIfNeeded() {
-        guard AuthManager.shared.authorizationHeaderValue() != nil else { return }
         let voice = FloatingAssistantManager.shared.voiceClient
         switch voice.state {
         case .disconnected, .error:
             voice.start()
         case .connecting, .connected:
             break
-        }
-    }
-
-    private func scheduleContextSync(delay: TimeInterval) {
-        contextSyncGeneration += 1
-        let generation = contextSyncGeneration
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            guard generation == contextSyncGeneration else { return }
-            syncPersonalizeContext()
-        }
-    }
-
-    private func scheduleProactiveAssistantTurn(delay: TimeInterval) {
-        proactiveTurnGeneration += 1
-        let generation = proactiveTurnGeneration
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            guard generation == proactiveTurnGeneration else { return }
-            guard FloatingAssistantManager.shared.voiceClient.state == .connected else { return }
-            FloatingAssistantManager.shared.voiceClient.requestProactiveAssistantTurn()
         }
     }
 
@@ -340,6 +351,7 @@ struct OnboardingFlowView: View {
     /// First `HomeView` after this flow should run the spoken welcome; also used when user goes to Demo Scan first.
     private func persistPendingHomeWelcome() {
         let ud = UserDefaults.standard
+        ud.set(true, forKey: "hasCompletedPersonalize")
         let k = ContextManager.PendingHomeWelcome.self
         ud.set(true, forKey: k.pendingFlag)
         ud.set(viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines), forKey: k.nameKey)
@@ -353,7 +365,7 @@ struct OnboardingFlowView: View {
         guard !value.isEmpty else { return }
         switch field.lowercased() {
         case "name":
-            voiceSuggestedName = value
+            viewModel.name = value
             nameStepConfirmed = true
         case "use_case", "usecase":
             if let uc = Self.matchUseCase(from: value) {
@@ -508,20 +520,20 @@ struct OnboardingHeader: View {
 
             Spacer()
 
-            Text("Personalize")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+            Text("Getting to know you")
+                .font(LimiTypography.title3)
                 .foregroundColor(.appTextPrimary)
 
             Spacer()
 
             Text("\(step) of \(total)")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.caption)
+                .foregroundColor(.brandHighlight)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(Color.orbGlow4.opacity(0.12))
+                        .fill(Color.brandHighlight.opacity(0.12))
                 )
         }
         .padding(.top, 16)
@@ -531,52 +543,49 @@ struct OnboardingHeader: View {
 // MARK: - Step 1: Name
 
 struct NameStepView: View {
-    let initialName: String
-    let voiceSuggestedName: String?
+    @Binding var name: String
     @Binding var nameConfirmed: Bool
-    var onContinue: (String) -> Void
-
-    @State private var draftName: String = ""
+    var onContinue: () -> Void
     @FocusState private var isFocused: Bool
 
     private var trimmedName: String {
-        draftName.trimmingCharacters(in: .whitespacesAndNewlines)
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(spacing: 8) {
-                Text("What should we call you?")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                Text("What should I call you?")
+                    .font(LimiTypography.title2)
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Tell Limi or type below — confirm when it looks right, then tap Continue.")
-                    .font(.system(size: 14))
+                Text("Say it out loud or type it below — tap Continue when it feels right.")
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(.appTextSecondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            TextField("", text: $draftName, prompt: Text("Your name").foregroundColor(.appTextPlaceholder))
+            TextField("", text: $name, prompt: Text("Your name").foregroundColor(.appTextPlaceholder))
                 .textInputAutocapitalization(.words)
                 .disableAutocorrection(true)
                 .foregroundColor(.appTextPrimary)
-                .font(.system(size: 28, weight: .medium, design: .rounded))
+                .font(LimiTypography.title2)
                 .padding(.vertical, 12)
                 .overlay(
                     Rectangle()
                         .frame(height: 1)
-                        .foregroundColor(isFocused ? Color.orbGlow4.opacity(0.5) : Color.white.opacity(0.12)),
+                        .foregroundColor(isFocused ? Color.brandAction.opacity(0.5) : Color.appGlassStrokeStrong),
                     alignment: .bottom
                 )
                 .focused($isFocused)
 
             Toggle(isOn: $nameConfirmed) {
-                Text("This is how I want to be called")
-                    .font(.system(size: 15, weight: .medium))
+                Text("That's the name I'd like")
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextPrimary)
             }
-            .tint(.orbGlow4)
+            .tint(.brandAction)
             .disabled(trimmedName.isEmpty)
 
             Spacer()
@@ -584,27 +593,17 @@ struct NameStepView: View {
             PrimaryButton(
                 title: "Continue",
                 isEnabled: !trimmedName.isEmpty && nameConfirmed,
-                action: { onContinue(trimmedName) }
+                action: onContinue
             )
         }
         .padding(.bottom, 32)
         .onAppear {
-            if draftName.isEmpty {
-                draftName = initialName
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                 isFocused = true
             }
         }
-        .onChange(of: draftName) { _, _ in
+        .onChange(of: name) { _, _ in
             if trimmedName.isEmpty { nameConfirmed = false }
-        }
-        .onChange(of: voiceSuggestedName) { _, suggested in
-            guard let suggested else { return }
-            let trimmed = suggested.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return }
-            draftName = trimmed
-            nameConfirmed = true
         }
     }
 }
@@ -620,12 +619,12 @@ struct UseCaseStepView: View {
     var body: some View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
-                Text("Where will you use Limi?")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                Text("Where will we be spending time together?")
+                    .font(LimiTypography.title2)
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Choose one place — tap a card or tell Limi, then Continue below.")
-                    .font(.system(size: 14))
+                Text("Pick the place that feels most like home — or tell me out loud.")
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(.appTextSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -668,12 +667,12 @@ struct GoalsStepView: View {
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 8) {
-                Text("What should Limi help with?")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                Text("What would you like my help with?")
+                    .font(LimiTypography.title2)
                     .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                Text("Select one or more — you can explain in detail and Limi can help match goals.")
-                    .font(.system(size: 14))
+                Text("Choose what matters most — or describe it in your own words.")
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(.appTextSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -684,7 +683,7 @@ struct GoalsStepView: View {
                 VStack(spacing: 12) {
                     ForEach(Goal.allCases) { goal in
                         SelectableRow(
-                            title: goal.rawValue,
+                            title: goal.displayTitle,
                             icon: goal.icon,
                             isSelected: selectedGoals.contains(goal),
                             isPulseHighlight: pulseHighlightRaws.contains(goal.rawValue)
@@ -726,34 +725,34 @@ struct BluetoothStepView: View {
 
             ZStack {
                 Circle()
-                    .fill(Color.orbGlow2.opacity(0.08))
+                    .fill(Color.brandHighlight.opacity(0.08))
                     .frame(width: 80, height: 80)
                 Image(systemName: "antenna.radiowaves.left.and.right")
-                    .font(.system(size: 32, weight: .light))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.brandHighlight)
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .scaleEffect(appeared ? 1 : 0.8)
             .opacity(appeared ? 1 : 0)
 
-            Text("Allow Limi to use\nBluetooth")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+            Text("Help Limi find\nyour devices")
+                .font(LimiTypography.largeTitle)
                 .foregroundColor(.appTextPrimary)
                 .offset(y: appeared ? 0 : 10)
                 .opacity(appeared ? 1 : 0)
                 .animation(LimiMotion.appear.delay(0.1), value: appeared)
 
-            Text("Bluetooth lets Limi scan for nearby lights and controllers so you can pair them securely. You can allow access now for setup, or skip and add devices later from settings.")
+            Text("Bluetooth lets me gently scan for nearby lights and controllers so we can pair them together. Allow now for a smooth setup, or skip and add devices whenever you're ready.")
                 .foregroundColor(.appTextSecondary)
-                .font(.system(size: 15))
+                .font(LimiTypography.body)
                 .lineSpacing(5)
                 .offset(y: appeared ? 0 : 10)
                 .opacity(appeared ? 1 : 0)
                 .animation(LimiMotion.appear.delay(0.2), value: appeared)
 
-            Text("Only you can tap Allow or Skip — Limi’s voice can explain, but cannot choose for you.")
+            Text("Only you can tap Allow or Skip — I can explain, but the choice is always yours.")
                 .foregroundColor(.appTextMuted)
-                .font(.system(size: 13))
+                .font(LimiTypography.footnote)
                 .lineSpacing(4)
                 .padding(.top, 4)
                 .offset(y: appeared ? 0 : 10)
@@ -764,7 +763,7 @@ struct BluetoothStepView: View {
 
             Button(action: onSkip) {
                 Text("Skip for now")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextMuted)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
@@ -815,21 +814,21 @@ struct SelectableRow: View {
             HStack(spacing: 14) {
                 if let icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16))
-                        .foregroundColor(isSelected ? .orbGlow4 : .appTextMuted)
+                        .font(LimiTypography.body)
+                        .foregroundColor(isSelected ? .brandAction : .appTextMuted)
                         .frame(width: 24)
                 }
 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.brandAction)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
@@ -844,14 +843,14 @@ struct SelectableRow: View {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(
                         isSelected
-                        ? LinearGradient(colors: [.orbGlow4.opacity(0.4), .orbGlow1.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        ? LinearGradient(colors: [.brandAction.opacity(0.4), Color.brandHighlight.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
                         : LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing),
                         lineWidth: 1
                     )
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.white.opacity(isPulseHighlight ? 0.92 : 0), lineWidth: isPulseHighlight ? 2.5 : 0)
+                    .stroke(Color.themeWhite.opacity(isPulseHighlight ? 0.92 : 0), lineWidth: isPulseHighlight ? 2.5 : 0)
                     .shadow(color: .white.opacity(isPulseHighlight ? 0.35 : 0), radius: isPulseHighlight ? 10 : 0)
             )
             .scaleEffect(isPulseHighlight ? 1.045 : 1.0)

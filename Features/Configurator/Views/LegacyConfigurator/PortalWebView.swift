@@ -100,13 +100,13 @@ struct PortalWebView: View {
                     }
                 }) {
                     Text(tab.rawValue)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(LimiTypography.callout)
                         .foregroundColor(selectedTab == tab ? .appTextPrimary : .appTextMuted)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(selectedTab == tab ? Color.white.opacity(0.08) : Color.clear)
+                                .fill(selectedTab == tab ? Color.appGlassStroke : Color.clear)
                         )
                 }
                 .buttonStyle(.plain)
@@ -153,11 +153,11 @@ struct PortalWebView: View {
             Spacer()
 
             Image(systemName: "cube.transparent")
-                .font(.system(size: 40, weight: .ultraLight))
+                .font(LimiTypography.title2)
                 .foregroundColor(.appTextMuted)
 
             Text("No Designs Yet")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(LimiTypography.title3)
                 .foregroundColor(.appTextPrimary)
 
             LimiPrimaryButton(title: "Open Configurator", height: 48) {
@@ -181,9 +181,9 @@ struct PortalWebView: View {
             VStack(spacing: 14) {
                 ProgressView()
                     .scaleEffect(1.3)
-                    .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
+                    .progressViewStyle(CircularProgressViewStyle(tint: .brandAction))
                 Text("Loading model...")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextSecondary)
             }
             .padding(30)

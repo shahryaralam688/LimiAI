@@ -9,30 +9,66 @@ import SceneKit
 import AVFoundation
 import UIKit
 
+private struct OrbBrandPalette {
+    let edge: UIColor
+    let edgeGlow: UIColor
+    let coreFill: UIColor
+    let coreGlow: UIColor
+}
+
+private func orbBrandPalette(active: Bool) -> OrbBrandPalette {
+    if active {
+        return OrbBrandPalette(
+            edge: UIColor(red: 0.33, green: 0.73, blue: 0.45, alpha: 1.0),
+            edgeGlow: UIColor(red: 0.58, green: 0.81, blue: 0.64, alpha: 1.0),
+            coreFill: UIColor(red: 0.33, green: 0.73, blue: 0.45, alpha: 0.22),
+            coreGlow: UIColor(red: 0.58, green: 0.81, blue: 0.64, alpha: 0.55)
+        )
+    }
+    return OrbBrandPalette(
+        edge: UIColor(red: 0.33, green: 0.73, blue: 0.45, alpha: 0.42),
+        edgeGlow: UIColor(red: 0.45, green: 0.58, blue: 0.50, alpha: 0.28),
+        coreFill: UIColor(red: 0.20, green: 0.35, blue: 0.28, alpha: 0.18),
+        coreGlow: UIColor(red: 0.33, green: 0.73, blue: 0.45, alpha: 0.12)
+    )
+}
+
 struct OrbView: UIViewRepresentable {
     @Binding var intensity: CGFloat
     @Binding var currentVolume: CGFloat
+    var isActive: Bool = true
+
     private let edgeRetentionRatio: Double = 0.8
+    private let sphereRadius: CGFloat = 10
+    /// Smaller scale = larger orb inside the view (matches old `scaledToFill` PNG coverage).
+    private var orthographicScale: CGFloat { sphereRadius * 1.05 }
     
     func makeUIView(context: Context) -> SCNView {
         let sceneView = SCNView()
         sceneView.scene = SCNScene()
         sceneView.backgroundColor = .clear
-        sceneView.antialiasingMode = .multisampling4X
+        sceneView.antialiasingMode = .multisampling2X
         sceneView.autoenablesDefaultLighting = false
         sceneView.allowsCameraControl = false
+        sceneView.rendersContinuously = false
+        sceneView.preferredFramesPerSecond = 30
+        sceneView.isPlaying = true
         
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
         cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 22
+        cameraNode.camera?.orthographicScale = orthographicScale
         cameraNode.camera?.zNear = 1
         cameraNode.camera?.zFar = 1000
         cameraNode.position = SCNVector3(0, 0, 50)
         sceneView.scene?.rootNode.addChildNode(cameraNode)
         
-        let (vertices, edges) = buildGeodesicData(radius: 10, frequency: 3)
-        let orbNode = buildEdgeNode(vertices: vertices, edges: edges, sphereRadius: 10)
+        let (vertices, edges) = buildGeodesicData(radius: sphereRadius, frequency: 3)
+
+        let glowNode = makeGlowNode(radius: sphereRadius * 0.94, active: isActive)
+        sceneView.scene?.rootNode.addChildNode(glowNode)
+
+        let orbNode = buildEdgeNode(vertices: vertices, edges: edges, sphereRadius: sphereRadius, active: isActive)
         orbNode.name = "orb"
         sceneView.scene?.rootNode.addChildNode(orbNode)
         
@@ -41,9 +77,12 @@ struct OrbView: UIViewRepresentable {
         rotation.duration = 60
         rotation.repeatCount = .infinity
         orbNode.addAnimation(rotation, forKey: "rotate")
+        glowNode.addAnimation(rotation, forKey: "rotate")
         
         context.coordinator.orbNode = orbNode
+        context.coordinator.glowNode = glowNode
         context.coordinator.sceneView = sceneView
+        context.coordinator.isActive = isActive
         context.coordinator.startDisplayLink()
         return sceneView
     }
@@ -51,6 +90,15 @@ struct OrbView: UIViewRepresentable {
     func updateUIView(_ uiView: SCNView, context: Context) {
         context.coordinator.intensity = intensity
         context.coordinator.volume = currentVolume
+        if context.coordinator.isActive != isActive {
+            context.coordinator.isActive = isActive
+            context.coordinator.applyBrandAppearance(active: isActive)
+        }
+        context.coordinator.syncDisplayLink()
+    }
+
+    static func dismantleUIView(_ uiView: SCNView, coordinator: Coordinator) {
+        coordinator.stopDisplayLink()
     }
     
     func makeCoordinator() -> Coordinator {
@@ -59,15 +107,45 @@ struct OrbView: UIViewRepresentable {
     
     class Coordinator {
         var orbNode: SCNNode?
+        var glowNode: SCNNode?
         var sceneView: SCNView?
         var displayLink: CADisplayLink?
         var intensity: CGFloat = 3
         var volume: CGFloat = 0
+        var isActive: Bool = true
         private var currentRadius: CGFloat = 10
         
         func startDisplayLink() {
+            guard displayLink == nil else { return }
             displayLink = CADisplayLink(target: self, selector: #selector(update))
-            displayLink?.add(to: .main, forMode: .default)
+            displayLink?.preferredFrameRateRange = CAFrameRateRange(minimum: 20, maximum: 30, preferred: 30)
+            displayLink?.add(to: .main, forMode: .common)
+            syncDisplayLink()
+        }
+
+        func stopDisplayLink() {
+            displayLink?.invalidate()
+            displayLink = nil
+        }
+
+        func syncDisplayLink() {
+            let shouldAnimate = isActive || volume * intensity > 0.05
+            displayLink?.isPaused = !shouldAnimate
+            sceneView?.rendersContinuously = shouldAnimate
+        }
+
+        func applyBrandAppearance(active: Bool) {
+            let palette = orbBrandPalette(active: active)
+            orbNode?.enumerateChildNodes { node, _ in
+                guard let material = node.geometry?.firstMaterial else { return }
+                material.diffuse.contents = palette.edge
+                material.emission.contents = palette.edgeGlow
+            }
+            if let glowMaterial = glowNode?.geometry?.firstMaterial {
+                glowMaterial.diffuse.contents = palette.coreFill
+                glowMaterial.emission.contents = palette.coreGlow
+                glowMaterial.transparency = active ? 0.72 : 0.88
+            }
         }
         
         @objc func update() {
@@ -79,6 +157,8 @@ struct OrbView: UIViewRepresentable {
             currentRadius += (targetRadius - currentRadius) * smoothing
             let scale = Float(currentRadius / baseRadius)
             orb.scale = SCNVector3(x: scale, y: scale, z: scale)
+            glowNode?.scale = SCNVector3(x: scale, y: scale, z: scale)
+            sceneView?.setNeedsDisplay()
         }
     }
     
@@ -110,10 +190,10 @@ struct OrbView: UIViewRepresentable {
         return (finalVerts, uniqueEdges)
     }
 
-    private func buildEdgeNode(vertices: [SCNVector3], edges: [Edge], sphereRadius: CGFloat) -> SCNNode {
+    private func buildEdgeNode(vertices: [SCNVector3], edges: [Edge], sphereRadius: CGFloat, active: Bool) -> SCNNode {
         let parent = SCNNode()
-        let thickness: CGFloat = max(0.10, sphereRadius * 0.010)
-        let material = flatMaterial()
+        let thickness: CGFloat = max(0.14, sphereRadius * 0.020)
+        let material = edgeMaterial(active: active)
         let retention = max(0.0, min(1.0, edgeRetentionRatio))
         let total = edges.count
         let keepCount = max(0, min(total, Int((Double(total) * retention).rounded())))
@@ -171,13 +251,34 @@ struct OrbView: UIViewRepresentable {
         return SCNQuaternion(q.x/len, q.y/len, q.z/len, q.w/len)
     }
 
-    private func flatMaterial() -> SCNMaterial {
+    private func makeGlowNode(radius: CGFloat, active: Bool) -> SCNNode {
+        let sphere = SCNSphere(radius: radius)
+        let palette = orbBrandPalette(active: active)
+        let material = SCNMaterial()
+        material.lightingModel = .constant
+        material.isDoubleSided = true
+        material.diffuse.contents = palette.coreFill
+        material.emission.contents = palette.coreGlow
+        material.transparency = active ? 0.72 : 0.88
+        material.writesToDepthBuffer = false
+        sphere.firstMaterial = material
+        let node = SCNNode(geometry: sphere)
+        node.renderingOrder = -1
+        return node
+    }
+
+    private func edgeMaterial(active: Bool) -> SCNMaterial {
+        let palette = orbBrandPalette(active: active)
         let mat = SCNMaterial()
         mat.lightingModel = .constant
         mat.isDoubleSided = true
-        mat.diffuse.contents = UIColor(white: 0.45, alpha: 1.0)
-        mat.emission.contents = UIColor(white: 0.45, alpha: 1.0)
+        mat.diffuse.contents = palette.edge
+        mat.emission.contents = palette.edgeGlow
         return mat
+    }
+
+    private func flatMaterial() -> SCNMaterial {
+        edgeMaterial(active: true)
     }
 
     private func icosahedronVertices() -> [SCNVector3] {
@@ -234,6 +335,189 @@ struct OrbView: UIViewRepresentable {
     }
 }
 
+// MARK: - Shared orb scene (replaces neuralOrb / neuralOrbOff assets)
+
+enum LimiOrbRenderMode {
+    /// Full SceneKit geodesic orb — use for the floating AI bubble only.
+    case sceneKit
+    /// Lightweight SwiftUI orb — use on onboarding and other multi-animation screens.
+    case swiftUI
+}
+
+/// GPU-free brand orb for screens that already run heavy animations (onboarding, sign-in).
+struct LimiOrbBadge: View {
+    let isActive: Bool
+    let size: CGFloat
+
+    @State private var breathe = false
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.brandHighlight.opacity(isActive ? 0.30 : 0.12),
+                            Color.brandAction.opacity(isActive ? 0.18 : 0.07),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: size * 0.05,
+                        endRadius: size * 0.58
+                    )
+                )
+
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        colors: [
+                            Color.brandHighlight.opacity(isActive ? 0.55 : 0.25),
+                            Color.brandAction.opacity(isActive ? 0.35 : 0.15),
+                            Color.brandHighlight.opacity(0.12),
+                            Color.brandAction.opacity(isActive ? 0.45 : 0.2),
+                            Color.brandHighlight.opacity(isActive ? 0.5 : 0.22)
+                        ],
+                        center: .center
+                    ),
+                    lineWidth: max(0.8, size * 0.014)
+                )
+                .rotationEffect(.degrees(rotation))
+                .blur(radius: 0.4)
+
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.brandHighlight.opacity(isActive ? 0.95 : 0.55),
+                            Color.brandAction.opacity(isActive ? 0.85 : 0.45),
+                            Color.brandActionDark.opacity(isActive ? 0.65 : 0.35)
+                        ],
+                        center: UnitPoint(x: 0.38, y: 0.32),
+                        startRadius: 0,
+                        endRadius: size * 0.52
+                    )
+                )
+                .overlay(
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color.themeWhite.opacity(isActive ? 0.22 : 0.10), Color.clear],
+                                center: UnitPoint(x: 0.32, y: 0.28),
+                                startRadius: 0,
+                                endRadius: size * 0.28
+                            )
+                        )
+                )
+                .scaleEffect(breathe ? 1.03 : 0.97)
+                .shadow(color: Color.brandAction.opacity(isActive ? 0.45 : 0.2), radius: size * 0.14)
+                .shadow(color: Color.brandHighlight.opacity(isActive ? 0.35 : 0.15), radius: size * 0.22)
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .opacity(isActive ? 1 : 0.78)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3.6).repeatForever(autoreverses: true)) {
+                breathe = true
+            }
+            withAnimation(.linear(duration: 18).repeatForever(autoreverses: false)) {
+                rotation = 360
+            }
+        }
+    }
+}
+
+final class LimiOrbSceneState: ObservableObject {
+    @Published var isActive: Bool
+    let size: CGFloat
+
+    init(isActive: Bool = false, size: CGFloat = 56) {
+        self.isActive = isActive
+        self.size = size
+    }
+}
+
+struct LimiOrbScene: View {
+    let isActive: Bool
+    let size: CGFloat
+    var renderMode: LimiOrbRenderMode = .sceneKit
+
+    @State private var intensity: CGFloat = 3
+    @State private var volume: CGFloat = 0
+
+    init(isActive: Bool, size: CGFloat = 56, renderMode: LimiOrbRenderMode = .sceneKit) {
+        self.isActive = isActive
+        self.size = size
+        self.renderMode = renderMode
+    }
+
+    var body: some View {
+        Group {
+            switch renderMode {
+            case .swiftUI:
+                LimiOrbBadge(isActive: isActive, size: size)
+            case .sceneKit:
+                sceneKitBody
+            }
+        }
+    }
+
+    private var sceneKitBody: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.brandHighlight.opacity(isActive ? 0.28 : 0.10),
+                            Color.brandAction.opacity(isActive ? 0.16 : 0.06),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: size * 0.05,
+                        endRadius: size * 0.58
+                    )
+                )
+                .frame(width: size, height: size)
+
+            OrbView(intensity: $intensity, currentVolume: $volume, isActive: isActive)
+                .frame(width: size, height: size)
+                .scaleEffect(1.14)
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .opacity(isActive ? 1 : 0.78)
+        .onAppear { syncMotion(animated: false) }
+        .onChange(of: isActive) { _, active in
+            syncMotion(animated: true, isActive: active)
+        }
+    }
+
+    private func syncMotion(animated: Bool, isActive active: Bool? = nil) {
+        let active = active ?? isActive
+        let targetIntensity: CGFloat = active ? 8 : 2
+        let targetVolume: CGFloat = active ? 0.28 : 0.04
+
+        if animated {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                intensity = targetIntensity
+                volume = targetVolume
+            }
+        } else {
+            intensity = targetIntensity
+            volume = targetVolume
+        }
+    }
+}
+
+/// UIKit bridge — keeps `LimiOrbScene` in sync when `LimiOrbSceneState` changes.
+struct LimiOrbSceneController: View {
+    @ObservedObject var state: LimiOrbSceneState
+
+    var body: some View {
+        LimiOrbScene(isActive: state.isActive, size: state.size)
+    }
+}
+
 struct OrbShowcase: View {
     @State private var intensity: CGFloat = 3
     @State private var volume: CGFloat = 0.2
@@ -243,7 +527,7 @@ struct OrbShowcase: View {
                 .frame(width: 300, height: 300)
                 .background(Color.clear)
             Text("Animation Intensity:")
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
             Slider(value: $intensity, in: 0.5...120, step: 0.5)
                 .padding(.horizontal)
         }

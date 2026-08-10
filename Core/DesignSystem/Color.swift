@@ -6,59 +6,62 @@ enum AppTheme {
         static let themeWhite = Color(hex: "FFFFFF")
         static let themeBlack = Color(hex: "000000")
 
-        // Deep Space brand — purple/blue/neon
-        static let brandPrimary = Color(hex: "54BA73")
-        static let brandSecondary = Color(hex: "76E094")
-        static let brandTertiary = Color(hex: "51D18E")
+        // LIMI brand — official palette (V02 presentation)
+        // Emerald #54BB74 = CTAs | Eton #93CFA2 = logo accent / highlights
+        static let brandPrimary = Color(hex: "54BB74")
+        static let brandSecondary = Color(hex: "93CFA2")
+        static let brandTertiary = Color(hex: "76E094")
         static let brandAccent = Color(hex: "00FF8C")
+        static let brandActionDark = Color(hex: "047857")
 
-        // Deep Space canvas
-        static let canvasPrimary = Color(hex: "0B0B0F")
-        static let canvasSecondary = Color(hex: "0D0D12")
-        static let canvasTertiary = Color(hex: "080810")
-        static let canvasElevated = Color(hex: "131318")
-        static let canvasStrong = Color(hex: "16161C")
-        static let canvasMuted = Color(hex: "1A1A22")
-        static let canvasHotel = Color(hex: "1E1E28")
+        // Canvas — charcoal family anchored on Charleston Green #292929
+        static let canvasPrimary = Color(hex: "111214")
+        static let canvasSecondary = Color(hex: "101217")
+        static let canvasTertiary = Color(hex: "0B0E0C")
+        static let canvasElevated = Color(hex: "171717")
+        static let canvasStrong = Color(hex: "191B1E")
+        static let canvasMuted = Color(hex: "1C1C1C")
+        static let canvasHotel = Color(hex: "292929")
 
-        // Glass surfaces — slightly lighter, translucent feel
-        static let surfacePrimary = Color(hex: "1C1C26")
-        static let surfaceSecondary = Color(hex: "22222E")
-        static let surfaceSecondaryAlt = Color(hex: "24243A")
-        static let surfaceTertiary = Color(hex: "2A2A38")
+        // Surfaces — neutral warm grays (no purple tint)
+        static let surfacePrimary = Color(hex: "24262B")
+        static let surfaceSecondary = Color(hex: "2A2C33")
+        static let surfaceSecondaryAlt = Color(hex: "2C2F33")
+        static let surfaceTertiary = Color(hex: "393C43")
         static let surfaceQuaternary = Color(hex: "32323E")
-        static let surfaceFloating = Color(hex: "1A1A28")
-        static let surfaceDark = Color(hex: "141420")
-        static let surfaceDarker = Color(hex: "10101A")
-        static let surfaceDeep = Color(hex: "12121C")
-        static let surfacePanel = Color(hex: "181824")
-        static let surfaceInset = Color(hex: "161620")
-        static let surfaceInsetAlt = Color(hex: "161622")
-        static let surfaceCard = Color(hex: "1E1E2C")
-        static let surfaceNeutral = Color(hex: "242430")
-        static let surfaceNeutralAlt = Color(hex: "2E2E3A")
-        static let surfaceStroke = Color(hex: "3A3A4E")
-        static let surfaceField = Color(hex: "44445A")
-        static let surfaceChip = Color(hex: "55556A")
+        static let surfaceFloating = Color(hex: "22242A")
+        static let surfaceDark = Color(hex: "1C1C1C")
+        static let surfaceDarker = Color(hex: "171717")
+        static let surfaceDeep = Color(hex: "141414")
+        static let surfacePanel = Color(hex: "1F2126")
+        static let surfaceInset = Color(hex: "1C1C1C")
+        static let surfaceInsetAlt = Color(hex: "1A1A1A")
+        static let surfaceCard = Color(hex: "2C2F33")
+        static let surfaceNeutral = Color(hex: "2E2E2E")
+        static let surfaceNeutralAlt = Color(hex: "333333")
+        static let surfaceStroke = Color(hex: "484848")
+        static let surfaceField = Color(hex: "444444")
+        static let surfaceChip = Color(hex: "555555")
 
-        static let textPrimary = Color(hex: "F0ECF8")
-        static let textSecondary = Color(hex: "B8B4C8")
-        static let textTertiary = Color(hex: "9490A8")
-        static let textMuted = Color(hex: "7A7690")
-        static let textSubtle = Color(hex: "8884A0")
-        static let textInverse = Color(hex: "0B0B0F")
-        static let textQuiet = Color(hex: "E8E4F0")
-        static let textPlaceholder = Color(hex: "6E6A84")
-        static let textDisabled = Color(hex: "5A5670")
-        static let textSoft = Color(hex: "D8D4E8")
+        // Text — warm off-white (Alabaster family)
+        static let textPrimary = Color(hex: "F2EBE3")
+        static let textSecondary = Color(hex: "C9C4BD")
+        static let textTertiary = Color(hex: "B6BAC2")
+        static let textMuted = Color(hex: "A19D98")
+        static let textSubtle = Color(hex: "9AA0A6")
+        static let textInverse = Color(hex: "111111")
+        static let textQuiet = Color(hex: "E9E9E9")
+        static let textPlaceholder = Color(hex: "8A8580")
+        static let textDisabled = Color(hex: "6E6A64")
+        static let textSoft = Color(hex: "D8D2C8")
 
-        static let borderPrimary = Color(hex: "3A3A50")
-        static let borderSecondary = Color(hex: "4A4A60")
-        static let borderTertiary = Color(hex: "2E2E44")
-        static let borderQuaternary = Color(hex: "2C2C42")
-        static let borderSoft = Color(hex: "4E4E68")
-        static let borderSubtle = Color(hex: "5A5A70")
-        static let borderField = Color(hex: "4A4A64")
+        static let borderPrimary = Color(hex: "484848")
+        static let borderSecondary = Color(hex: "555555")
+        static let borderTertiary = Color(hex: "3A3A3A")
+        static let borderQuaternary = Color(hex: "333333")
+        static let borderSoft = Color(hex: "5A5A5A")
+        static let borderSubtle = Color(hex: "666666")
+        static let borderField = Color(hex: "4A4A4A")
 
         static let success = Color(hex: "2ECC71")
         static let successDark = Color(hex: "17543B")
@@ -90,49 +93,66 @@ enum AppTheme {
         static let weatherBackground = Color(red: 0.01, green: 0.07, blue: 0.12)
         static let weatherText = Color(red: 0.63, green: 0.72, blue: 0.8)
 
-        static let aiGradientStart = Color(hex: "1A1040")
-        static let aiGradientEnd = Color(hex: "0A0818")
-        static let chatUserBubble = Color(hex: "6C5CE7")
-        static let chatUserBubbleAlt = Color(hex: "A78BFA")
-        static let chatSend = Color(hex: "7C3AED")
-        static let chatBar = Color(hex: "1A1A28")
+        static let aiGradientStart = Color(hex: "0B0E0C")
+        static let aiGradientEnd = Color(hex: "111214")
+        static let chatUserBubble = Color(hex: "54BB74")
+        static let chatUserBubbleAlt = Color(hex: "93CFA2")
+        static let chatSend = Color(hex: "54BB74")
+        static let chatBar = Color(hex: "22242A")
         static let neutralLight = Color(red: 0.96, green: 0.96, blue: 0.96)
         static let neutralMid = Color(red: 0.95, green: 0.95, blue: 0.95)
         static let neutralGray = Color(red: 0.5, green: 0.5, blue: 0.5)
         static let placeholderGray = Color(red: 176 / 255, green: 176 / 255, blue: 176 / 255)
 
-        static let inputFill = Color(hex: "181824")
-        static let eton = Color(hex: "A78BFA")
-        static let alabaster = Color(hex: "F0ECF8")
-        static let charlestonGreen = Color(hex: "0B0B0F")
+        static let inputFill = Color(hex: "1C1C1C")
+        static let eton = Color(hex: "93CFA2")
+        static let alabaster = Color(hex: "F3EBE2")
+        static let charlestonGreen = Color(hex: "292929")
+        static let logoWhite = Color(hex: "F6EFEF")
         static let darkGray = Color(red: 0.3, green: 0.3, blue: 0.3)
         static let darkBrown = Color(red: 0.4, green: 0.25, blue: 0.2)
         static let grass = Color(red: 0.0, green: 0.5, blue: 0.0)
-        static let mint = Color(hex: "34D399")
+        static let mint = Color(hex: "93CFA2")
         static let spotlightWarm = Color(red: 1.0, green: 0.95, blue: 0.8)
         static let spotlightCool = Color(red: 0.8, green: 0.9, blue: 1.0)
         static let aqua = Color(hex: "67E8F9")
         static let accentMuted = Color(hex: "46A663")
-        static let accentLime = Color(hex: "43EB25")
+        static let accentLime = Color(hex: "00FF8C")
         static let brick = Color(red: 0.7, green: 0.3, blue: 0.2)
         static let tan = Color(red: 0.85, green: 0.7, blue: 0.45)
         static let overlayTint = Color(hex: "00000066")
 
-        // Deep Space accent gradients (Emerald)
-        static let orbGlow1 = Color(hex: "059669")
-        static let orbGlow2 = Color(hex: "047857")
-        static let orbGlow3 = Color(hex: "34D399")
-        static let orbGlow4 = Color(hex: "10B981")
+        // Legacy orb aliases — prefer brandAction / brandHighlight / brandActionDark
+        static let orbGlow1 = brandPrimary
+        static let orbGlow2 = brandActionDark
+        static let orbGlow3 = brandSecondary
+        static let orbGlow4 = brandPrimary
         static let glassStroke = Color(hex: "FFFFFF").opacity(0.08)
         static let glassFill = Color(hex: "FFFFFF").opacity(0.04)
+        static let glassFillMedium = Color(hex: "FFFFFF").opacity(0.06)
+        static let glassFillStrong = Color(hex: "FFFFFF").opacity(0.10)
+        static let glassStrokeLight = Color(hex: "FFFFFF").opacity(0.15)
+        static let glassStrokeStrong = Color(hex: "FFFFFF").opacity(0.12)
+        static let overlayScrim = Color(hex: "000000").opacity(0.5)
+        static let overlayScrimLight = Color(hex: "000000").opacity(0.35)
+        static let shadowMedium = Color(hex: "000000").opacity(0.3)
+        static let shadowStrong = Color(hex: "000000").opacity(0.6)
+        static let toggleOff = Color(hex: "FFFFFF").opacity(0.16)
 
-        // Neumorphic — aliases into NeuTheme (single source of truth)
-        static let neuBase = Color(hex: "131318")
+        // Weather card gradients — brand-aligned teal/emerald (no purple-blue)
+        static let weatherClearTop = Color(hex: "047857")
+        static let weatherClearMid = Color(hex: "00A5C9")
+        static let weatherClearBottom = Color(hex: "93CFA2")
+        static let weatherNightTop = Color(hex: "0B0E0C")
+        static let weatherNightMid = Color(hex: "111214")
+        static let weatherNightBottom = Color(hex: "292929")
+
+        static let neuBase = Color(hex: "171717")
     }
 }
 
 enum AppThemeDefaults {
-    static let selectedColorHex = "059669"
+    static let selectedColorHex = "54BB74"
 }
 
 extension Color {
@@ -168,10 +188,19 @@ extension Color {
     static let themeWhite = AppTheme.Palette.themeWhite
     static let themeBlack = AppTheme.Palette.themeBlack
 
+    // Legacy brand aliases — prefer `brandAction`, `brandHighlight`, `appTextPrimary`, `appCanvasPrimary`.
     static let emerald = AppTheme.Palette.brandPrimary
     static let eton = AppTheme.Palette.eton
     static let charlestonGreen = AppTheme.Palette.charlestonGreen
     static let alabaster = AppTheme.Palette.alabaster
+    static let logoWhite = AppTheme.Palette.logoWhite
+
+    /// Emerald — primary actions: buttons, toggles (on), sliders, FAB fill
+    static let brandAction = AppTheme.Palette.brandPrimary
+    /// Eton — accents: icons, tags, borders, halos, nav links
+    static let brandHighlight = AppTheme.Palette.brandSecondary
+    /// Dark emerald — gradient end, ambient depth
+    static let brandActionDark = AppTheme.Palette.brandActionDark
 
     static let appBrandPrimary = AppTheme.Palette.brandPrimary
     static let appBrandSecondary = AppTheme.Palette.brandSecondary
@@ -284,9 +313,10 @@ extension Color {
     static let backgroundColor = AppTheme.Palette.canvasPrimary
     static let cardColor = AppTheme.Palette.surfaceCard
     static let primaryAccent = AppTheme.Palette.brandPrimary
-    static let secondaryAccent = AppTheme.Palette.eton
+    static let secondaryAccent = AppTheme.Palette.brandSecondary
 
-    // Deep Space gradients
+    // Orb glow — prefer brandAction / brandHighlight in views
+    // orbGlow1, orbGlow4 → Emerald (action) | orbGlow3 → Eton (highlight) | orbGlow2 → dark ambient
     static let orbGlow1 = AppTheme.Palette.orbGlow1
     static let orbGlow2 = AppTheme.Palette.orbGlow2
     static let orbGlow3 = AppTheme.Palette.orbGlow3
@@ -295,8 +325,27 @@ extension Color {
     // Neumorphic — alias into NeuTheme
     static let neuBase = AppTheme.Palette.neuBase
 
+    static let appGlassFill = AppTheme.Palette.glassFill
+    static let appGlassFillMedium = AppTheme.Palette.glassFillMedium
+    static let appGlassFillStrong = AppTheme.Palette.glassFillStrong
+    static let appGlassStroke = AppTheme.Palette.glassStroke
+    static let appGlassStrokeLight = AppTheme.Palette.glassStrokeLight
+    static let appGlassStrokeStrong = AppTheme.Palette.glassStrokeStrong
+    static let appOverlayScrim = AppTheme.Palette.overlayScrim
+    static let appOverlayScrimLight = AppTheme.Palette.overlayScrimLight
+    static let appShadowMedium = AppTheme.Palette.shadowMedium
+    static let appShadowStrong = AppTheme.Palette.shadowStrong
+    static let appToggleOff = AppTheme.Palette.toggleOff
+
+    static let appWeatherClearTop = AppTheme.Palette.weatherClearTop
+    static let appWeatherClearMid = AppTheme.Palette.weatherClearMid
+    static let appWeatherClearBottom = AppTheme.Palette.weatherClearBottom
+    static let appWeatherNightTop = AppTheme.Palette.weatherNightTop
+    static let appWeatherNightMid = AppTheme.Palette.weatherNightMid
+    static let appWeatherNightBottom = AppTheme.Palette.weatherNightBottom
+
     static let verticalGradient = LinearGradient(
-        gradient: Gradient(colors: [AppTheme.Palette.orbGlow4.opacity(0.4), AppTheme.Palette.brandPrimary]),
+        gradient: Gradient(colors: [AppTheme.Palette.brandPrimary.opacity(0.4), AppTheme.Palette.brandPrimary]),
         startPoint: .top,
         endPoint: .bottom
     )
@@ -309,9 +358,9 @@ extension Color {
 
     static let orbAuraGradient = RadialGradient(
         colors: [
-            AppTheme.Palette.orbGlow1.opacity(0.6),
-            AppTheme.Palette.orbGlow2.opacity(0.3),
-            AppTheme.Palette.orbGlow3.opacity(0.1),
+            AppTheme.Palette.brandPrimary.opacity(0.6),
+            AppTheme.Palette.brandActionDark.opacity(0.3),
+            AppTheme.Palette.brandSecondary.opacity(0.1),
             Color.clear
         ],
         center: .center,

@@ -35,7 +35,7 @@ struct LoginSkipView: View {
                     Spacer()
 
                     Text("Sign In")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(LimiTypography.largeTitle)
                         .multilineTextAlignment(.center)
                         .lineSpacing(8)
                         .kerning(-0.3)
@@ -50,7 +50,7 @@ struct LoginSkipView: View {
 
                 HStack {
                     Text("Email Address")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(LimiTypography.title3)
                         .foregroundColor(.appTextPrimary)
                     Spacer()
                 }
@@ -67,15 +67,15 @@ struct LoginSkipView: View {
                     ZStack(alignment: .leading) {
                         if email.isEmpty {
                             Text(verbatim: "you@example.com")
-                                .font(.system(size: 16, weight: .regular, design: .rounded))
+                                .font(LimiTypography.body)
                                 .foregroundColor(.appTextMuted)
                                 .padding(.leading, 4)
                                 .allowsHitTesting(false)
                         }
 
                         TextField("", text: $email)
-                            .font(.system(size: 16, weight: .regular, design: .rounded))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.body)
+                            .foregroundColor(.appTextPrimary)
                             .padding(4)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
@@ -113,7 +113,7 @@ struct LoginSkipView: View {
                         Spacer()
 
                         Text("Sign in")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .font(LimiTypography.button)
                             .foregroundColor(.appTextInverse)
                         Image("Monotone arrow right")
                             .resizable()

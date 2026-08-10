@@ -72,37 +72,41 @@ struct WeatherWidgetView: View {
 
     private var mainCard: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: vm.gradientColors,
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.white.opacity(0.12), Color.clear, Color.black.opacity(0.08)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: isExpanded ? 24 : 20, style: .continuous)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 0.5)
-                )
-
             if isExpanded {
-                expandedCardContent
+                RoundedRectangle(cornerRadius: LimiCard.radiusLarge, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: vm.gradientColors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: LimiCard.radiusLarge, style: .continuous)
+                            .fill(Color.appCanvasPrimary.opacity(0.12))
+                    )
             } else {
-                compactCardContent
+                RoundedRectangle(cornerRadius: LimiCard.radius, style: .continuous)
+                    .fill(LimiGradients.weatherAccent)
+            }
+
+            Group {
+                if isExpanded {
+                    expandedCardContent
+                } else {
+                    compactCardContent
+                }
             }
         }
-        .frame(height: isExpanded ? 200 : 80)
-        .shadow(color: vm.gradientColors.first?.opacity(0.25) ?? .clear, radius: isExpanded ? 20 : 10, y: isExpanded ? 10 : 4)
+        .frame(height: isExpanded ? LimiCard.weatherExpandedHeight : LimiCard.weatherCompactHeight)
+        .limiHomeCard(cornerRadius: isExpanded ? LimiCard.radiusLarge : LimiCard.radius)
+        .shadow(
+            color: isExpanded
+                ? (vm.gradientColors.first?.opacity(0.2) ?? Color.brandAction.opacity(0.1))
+                : Color.brandAction.opacity(0.06),
+            radius: isExpanded ? 16 : 8,
+            y: isExpanded ? 8 : 4
+        )
     }
 
     // MARK: - Expanded Card
@@ -112,23 +116,23 @@ struct WeatherWidgetView: View {
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: "location.fill")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(LimiTypography.caption)
                     Text(vm.cityName.isEmpty ? "Locating..." : vm.cityName)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(LimiTypography.callout)
                 }
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(.appTextPrimary.opacity(0.9))
 
                 Spacer()
 
                 HStack(spacing: 12) {
                     Button(action: { vm.refresh() }) {
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(LimiTypography.footnote)
+                            .foregroundColor(.appTextPrimary.opacity(0.6))
                     }
                     Image(systemName: "chevron.up")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.4))
+                        .font(LimiTypography.caption)
+                        .foregroundColor(.appTextPrimary.opacity(0.4))
                 }
             }
 
@@ -138,22 +142,22 @@ struct WeatherWidgetView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .top, spacing: 0) {
                         Text("\(vm.temperature)")
-                            .font(.system(size: 72, weight: .thin, design: .rounded))
-                            .foregroundColor(.white)
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary)
                         Text("°")
-                            .font(.system(size: 36, weight: .thin, design: .rounded))
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary.opacity(0.8))
                             .padding(.top, 8)
                     }
                     Text(vm.conditionDescription)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white.opacity(0.85))
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary.opacity(0.85))
                 }
 
                 Spacer()
 
                 Image(systemName: vm.sfSymbol)
-                    .font(.system(size: 52, weight: .light))
+                    .font(LimiTypography.title2)
                     .foregroundStyle(iconGradient)
                     .shadow(color: iconShadow, radius: 12, y: 4)
                     .padding(.top, 8)
@@ -161,12 +165,12 @@ struct WeatherWidgetView: View {
 
             HStack {
                 Text("Feels like \(vm.feelsLike)°")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(LimiTypography.footnote)
+                    .foregroundColor(.appTextPrimary.opacity(0.6))
                 Spacer()
                 Text(vm.day)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(LimiTypography.footnote)
+                    .foregroundColor(.appTextPrimary.opacity(0.6))
             }
         }
         .padding(20)
@@ -177,35 +181,35 @@ struct WeatherWidgetView: View {
     private var compactCardContent: some View {
         HStack(spacing: 14) {
             Image(systemName: vm.sfSymbol)
-                .font(.system(size: 28, weight: .light))
+                .font(LimiTypography.title2)
                 .foregroundStyle(iconGradient)
                 .shadow(color: iconShadow, radius: 6, y: 2)
                 .frame(width: 40)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(vm.cityName.isEmpty ? "Locating..." : vm.cityName)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary.opacity(0.9))
                 Text(vm.conditionDescription)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .font(LimiTypography.caption)
+                    .foregroundColor(.appTextPrimary.opacity(0.6))
             }
 
             Spacer()
 
             HStack(alignment: .top, spacing: 0) {
                 Text("\(vm.temperature)")
-                    .font(.system(size: 34, weight: .thin, design: .rounded))
-                    .foregroundColor(.white)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
                 Text("°")
-                    .font(.system(size: 18, weight: .thin))
-                    .foregroundColor(.white.opacity(0.7))
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextPrimary.opacity(0.7))
                     .padding(.top, 4)
             }
 
             Image(systemName: "chevron.down")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.white.opacity(0.4))
+                .font(LimiTypography.caption)
+                .foregroundColor(.appTextPrimary.opacity(0.4))
         }
         .padding(.horizontal, 20)
     }
@@ -218,20 +222,20 @@ struct WeatherWidgetView: View {
                 ForEach(vm.hourlyForecast) { item in
                     VStack(spacing: 8) {
                         Text(item.hour)
-                            .font(.system(size: 11, weight: item.isNow ? .bold : .medium))
-                            .foregroundColor(item.isNow ? .orbGlow4 : .appTextSecondary)
+                            .font(LimiTypography.caption2)
+                            .foregroundColor(item.isNow ? .brandAction : .appTextSecondary)
 
                         Image(systemName: item.icon)
-                            .font(.system(size: 16))
+                            .font(LimiTypography.body)
                             .foregroundStyle(
                                 item.isNow
-                                ? AnyShapeStyle(LinearGradient(colors: [.orbGlow4, .orbGlow3], startPoint: .top, endPoint: .bottom))
+                                ? AnyShapeStyle(LinearGradient(colors: LimiGradients.ctaColors, startPoint: .top, endPoint: .bottom))
                                 : AnyShapeStyle(Color.appTextMuted)
                             )
                             .frame(height: 20)
 
                         Text("\(item.temp)°")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextPrimary)
                     }
                     .frame(width: 48)
@@ -264,55 +268,43 @@ struct WeatherWidgetView: View {
     // MARK: - Loading & Error
 
     private var loadingState: some View {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .fill(Color.white.opacity(0.04))
-            .frame(height: 80)
-            .overlay(
-                HStack(spacing: 12) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .orbGlow4))
-                    Text("Loading weather...")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.appTextMuted)
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
-            )
-            .padding(.horizontal, 16)
+        HStack(spacing: 12) {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .brandAction))
+            Text("Loading weather...")
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: LimiCard.weatherCompactHeight)
+        .limiHomeCard(cornerRadius: LimiCard.radius)
+        .padding(.horizontal, 16)
     }
 
     private func errorState(_ message: String) -> some View {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .fill(Color.white.opacity(0.04))
-            .frame(height: 80)
-            .overlay(
-                HStack(spacing: 12) {
-                    Image(systemName: "cloud.slash.fill")
-                        .font(.system(size: 20, weight: .light))
-                        .foregroundColor(.appTextMuted)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Weather unavailable")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.appTextPrimary)
-                        Text(message)
-                            .font(.system(size: 11))
-                            .foregroundColor(.appTextMuted)
-                            .lineLimit(1)
-                    }
-                    Spacer()
-                    Button("Retry") { vm.refresh() }
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
-                }
-                .padding(.horizontal, 20)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.white.opacity(0.06), lineWidth: 0.5)
-            )
-            .padding(.horizontal, 16)
+        HStack(spacing: 12) {
+            Image(systemName: "cloud.slash.fill")
+                .font(LimiTypography.title3)
+                .foregroundColor(.brandHighlight)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Weather unavailable")
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
+                Text(message)
+                    .font(LimiTypography.caption2)
+                    .foregroundColor(.appTextMuted)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Button("Retry") { vm.refresh() }
+                .font(LimiTypography.footnote)
+                .foregroundColor(.brandAction)
+        }
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
+        .frame(height: LimiCard.weatherCompactHeight)
+        .limiHomeCard(cornerRadius: LimiCard.radius)
+        .padding(.horizontal, 16)
     }
 
     // MARK: - Helpers
@@ -320,15 +312,15 @@ struct WeatherWidgetView: View {
     private var iconGradient: some ShapeStyle {
         LinearGradient(
             colors: vm.isDaytime
-                ? [.yellow, .orange.opacity(0.8)]
-                : [.white, .white.opacity(0.6)],
+                ? [Color.appWarmGlow, Color.appOrange.opacity(0.85)]
+                : [Color.brandHighlight, Color.brandHighlight.opacity(0.55)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
     }
 
     private var iconShadow: Color {
-        vm.isDaytime ? .yellow.opacity(0.4) : .white.opacity(0.15)
+        vm.isDaytime ? Color.appWarmGlow.opacity(0.35) : Color.brandHighlight.opacity(0.25)
     }
 }
 
@@ -342,22 +334,22 @@ private struct WeatherDetailCell: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(.orbGlow3)
+                .font(LimiTypography.body)
+                .foregroundColor(.brandHighlight)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(LimiTypography.caption2)
                     .foregroundColor(.appTextMuted)
                     .textCase(.uppercase)
                 Text(value)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
             }
             Spacer()
         }
         .padding(14)
-        .glassCard(cornerRadius: 14, fillOpacity: 0.04)
+        .limiHomeCard(cornerRadius: 14)
     }
 }
 

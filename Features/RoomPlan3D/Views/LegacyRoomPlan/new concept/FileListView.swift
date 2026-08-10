@@ -25,7 +25,7 @@ struct FileListView: View {
                 }) {
                     HStack {
                         Image(systemName: "cube.box")
-                            .foregroundColor(.orbGlow4)
+                            .foregroundColor(.brandAction)
                         
                         VStack(alignment: .leading) {
                             Text(file)
@@ -37,7 +37,7 @@ struct FileListView: View {
                                let fileSize = attributes[.size] as? UInt64 {
                                 
                                 Text("\(modDate, formatter: dateFormatter) • \(formatFileSize(fileSize))")
-                                    .font(.caption)
+                                    .font(LimiTypography.caption)
                                     .foregroundColor(.appTextMuted)
                             }
                         }

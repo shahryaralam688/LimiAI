@@ -31,14 +31,14 @@ struct ContentView: View {
                 }
                 .tag(1)
         }
-        .accentColor(.orbGlow4)
+        .accentColor(.brandAction)
         .trackScreen("ContentView", metadata: ["surface": "dev_led_testing_shell"])
         .onAppear {
             let appearance = UITabBarAppearance()
             appearance.configureWithOpaqueBackground()
             appearance.backgroundColor = UIColor.systemGray6
             
-            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.charlestonGreen.opacity(0.6))
+            appearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.brandAction.opacity(0.85))
             appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.appTextPrimary]
             
             appearance.stackedLayoutAppearance.normal.iconColor = UIColor.appTextPrimary.withAlphaComponent(0.5)
@@ -54,7 +54,6 @@ struct ContentView: View {
 struct MainLEDView: View {
     @Binding var toggles: [Bool]
     @ObservedObject var sharedDevice: SharedDevice
-    @State private var showGetStartScreen = false // State variable to control the presentation
     // Bluetooth Manager
     @StateObject private var bluetoothManager = BluetoothManager.shared
 
@@ -78,7 +77,7 @@ struct MainLEDView: View {
             
             VStack(spacing: 20) {
                 Text("Mini Controller Setting")
-                    .font(.largeTitle)
+                    .font(LimiTypography.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(.appTextPrimary)
                     .shadow(color:.alabaster, radius: 5)
@@ -98,14 +97,15 @@ struct MainLEDView: View {
 
                     Button(action: {
                         bluetoothManager.disconnectCurrentDevice()
-                        showGetStartScreen = true
+                        AuthManager.shared.clearToken()
+                        AuthManager.shared.clearRole()
                     }) {
                         HStack(spacing: 10) {
                             Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 16))
+                                .font(LimiTypography.body)
                                 .foregroundColor(.appDanger)
                             Text("Logout")
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(LimiTypography.callout)
                                 .foregroundColor(.appDanger)
                         }
                         .padding(.vertical, 12)
@@ -125,9 +125,6 @@ struct MainLEDView: View {
         }
         .onChange(of: sharedDevice.lastReceivedBytes) { oldValue, newValue in
             updateTogglesFromByte()
-        }
-        .fullScreenCover(isPresented: $showGetStartScreen) {
-            GetStart() // Replace with your GetStart screen view
         }
     }
     
@@ -163,11 +160,11 @@ struct TestingView: View {
             } else {
                 VStack {
                     Text("No devices available")
-                        .font(.headline)
+                        .font(LimiTypography.headline)
                         .foregroundColor(.appTextPrimary)
                     
                     Text("Please connect a device first")
-                        .font(.subheadline)
+                        .font(LimiTypography.subheadline)
                         .foregroundColor(.appTextSecondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -198,17 +195,17 @@ struct LEDToggleButton: View {
             HStack {
                 Text(buttonLabel)
                     .foregroundColor(.appTextInverse)
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .frame(width: 60, alignment: .leading)
                 
                 Toggle("", isOn: $toggles[index])
                     .labelsHidden()
-                    .tint(.eton)
+                    .tint(.brandAction)
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: toggles[index])
                     .scaleEffect(toggles[index] ? 1.1 : 1.0)
                     .overlay(
                         Circle()
-                            .fill(toggles[index] ? Color.eton.opacity(0.3) : Color.clear)
+                            .fill(toggles[index] ? Color.brandAction.opacity(0.3) : Color.clear)
                             .scaleEffect(toggles[index] ? 1.5 : 0)
                             .animation(.easeOut(duration: 0.3), value: toggles[index])
                     )
@@ -255,12 +252,12 @@ struct SendButton: View {
                 }
             }) {
                 Text("Save")
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                     .padding()
                     .frame(width: 200)
                     .background(
-                        LinearGradient(gradient: Gradient(colors: [.orbGlow4, .orbGlow1]), startPoint: .leading, endPoint: .trailing)
+                        LinearGradient(gradient: Gradient(colors: [.brandAction, .brandActionDark]), startPoint: .leading, endPoint: .trailing)
                     )
                     .cornerRadius(15)
                     .shadow(color: .alabaster, radius: 5)
@@ -269,8 +266,8 @@ struct SendButton: View {
             
             if showingSaveMessage {
                 Text("Setting Saved")
-                    .font(.headline)
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                     .padding()
                     .background(Color.charlestonGreen.opacity(0.8))
                     .cornerRadius(10)
@@ -314,14 +311,14 @@ struct PartHomeView: View {
     var body: some View {
         VStack {
             Text("Connected Devices")
-                .font(.headline)
+                .font(LimiTypography.headline)
             
             List(bluetoothManager.storedHubs, id: \.id) { hub in
                 Button(action: {
                     
                 }) {
                     Text(hub.name)
-                        .foregroundColor(.orbGlow4)
+                        .foregroundColor(.brandAction)
                         .padding()
                 }
             }

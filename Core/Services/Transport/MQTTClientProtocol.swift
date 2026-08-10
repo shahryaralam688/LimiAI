@@ -18,6 +18,10 @@ public protocol MQTTClient: AnyObject, MQTTPresenceProviding {
     /// Throws if the underlying transport is not currently connected.
     func publishCommand(_ payload: Data, deviceId: String) async throws
 
+    /// Publish a group envelope (`GroupID` + `deviceIds` + `command`).
+    /// Backend extracts `command` and fans out over MQTT to each device.
+    func publishGroupCommand(_ payload: Data) async throws
+
     /// Publish a reset to `device/<deviceId>/reset`. Reset MUST never be mixed
     /// into the command topic.
     func publishReset(deviceId: String) async throws

@@ -99,8 +99,10 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     private var didRegisterClientWhatsAppToolThisConnection = false
     private var receivedRealtimeSessionSnapshot = false
 
-    // Queues
+    // Queues — all peer connection lifecycle work must run here to avoid signaling-thread races.
     private let workQueue = DispatchQueue(label: "webrtc.voice.client")
+    /// Bumped whenever the peer is torn down; async callbacks must match the active generation.
+    private var connectionGeneration = 0
 
     // Notifications
     private var notificationObservers: [NSObjectProtocol] = []
@@ -140,7 +142,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             }
             
             LimiHTTPClient.perform(req) { [weak self] _, resp, err in
-                if let http = resp as? HTTPURLResponse {
+                if let http = resp {
                     self?.log("⬅️ Webhook Response Status: \(http.statusCode) from \(webhookURL.host ?? "?")")
                 }
                 if let err {
@@ -154,6 +156,8 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     }
 
     deinit {
+        reconnectWorkItem?.cancel()
+        workQueue.sync { invalidatePeerConnection(logTeardown: false) }
         removeAudioSessionNotifications()
     }
 
@@ -212,12 +216,14 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         sessionId = nil
         sessionModel = nil
         tearDownPeer()
-        state = .disconnected
-        log("Stopped voice session")
-        postWebhook(event: "session_stop", payload: [:])
-        teardownRemoteCommandCenter()
-        setupNowPlaying(isActive: false)
-        deactivateAudioSession()
+        DispatchQueue.main.async {
+            self.state = .disconnected
+            self.log("Stopped voice session")
+            self.postWebhook(event: "session_stop", payload: [:])
+            self.teardownRemoteCommandCenter()
+            self.setupNowPlaying(isActive: false)
+            self.deactivateAudioSession()
+        }
     }
 
     // MARK: Setup
@@ -232,7 +238,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         let session = AVAudioSession.sharedInstance()
         do {
             // Enhanced audio session configuration with better error handling
-            try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .defaultToSpeaker, .mixWithOthers, .allowBluetoothA2DP])
+            try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetoothHFP, .defaultToSpeaker, .mixWithOthers, .allowBluetoothA2DP])
             try session.setActive(true, options: [])
             log("Audio session configured successfully")
         } catch let error as NSError {
@@ -251,7 +257,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     private func configureAudioSessionForLoudspeaker() {
         let session = AVAudioSession.sharedInstance()
         do {
-            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetoothHFP])
             try session.setActive(true)
         } catch {
             print("Failed to set audio session category to loudspeaker: \(error)")
@@ -343,10 +349,11 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         log("Attempting recovery from audio interruption")
         configureAVAudioSession()
         updateAudioRouteForCurrentOutputs()
-        
-        // Recreate audio track if connection is still active
-        if state == .connected, let pc = peerConnection {
-            recreateLocalAudioTrack(for: pc)
+
+        guard state == .connected else { return }
+        workQueue.async { [weak self] in
+            guard let self, let pc = self.peerConnection else { return }
+            self.recreateLocalAudioTrack(for: pc)
         }
     }
     
@@ -464,79 +471,103 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
     }
 
     // MARK: Peer
+
     private func createPeerAndConnect() {
-        let config = RTCConfiguration()
-        config.sdpSemantics = .unifiedPlan
-        config.iceServers = [
-            RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"]) // Add TURN in production
-        ]
-        let constraints = RTCMediaConstraints(mandatoryConstraints: nil,
-                                              optionalConstraints: ["DtlsSrtpKeyAgreement": "true"])
-        let pc = factory.peerConnection(with: config, constraints: constraints, delegate: self)
-        self.peerConnection = pc
-
-        // Local audio
-        let track = createLocalAudioTrack()
-        self.localAudioTrack = track
-        // Add the microphone track to the peer connection
-        _ = pc?.add(track, streamIds: ["stream0"])
-
-        // Create data channel for JSON/text events from OpenAI
-        let dcConfig = RTCDataChannelConfiguration()
-        dcConfig.isOrdered = true
-        if let dc = pc?.dataChannel(forLabel: "oai-events", configuration: dcConfig) {
-            dc.delegate = self
-            self.dataChannel = dc
-            log("DataChannel created: label=\(dc.label)")
-        } else {
-            log("DataChannel creation failed")
-        }
-
-        // Offer
-        let offerConstraints = RTCMediaConstraints(mandatoryConstraints: [
-            "OfferToReceiveAudio": "true",
-            "VoiceActivityDetection": "true"
-        ], optionalConstraints: nil)
-        pc?.offer(for: offerConstraints) { [weak self] sdp, error in
+        workQueue.async { [weak self] in
             guard let self else { return }
-            if let error {
-                self.fail("Offer error: \(error.localizedDescription)")
+            self.invalidatePeerConnection()
+            let generation = self.connectionGeneration
+
+            let config = RTCConfiguration()
+            config.sdpSemantics = .unifiedPlan
+            config.iceServers = [
+                RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"]) // Add TURN in production
+            ]
+            let constraints = RTCMediaConstraints(
+                mandatoryConstraints: nil,
+                optionalConstraints: ["DtlsSrtpKeyAgreement": "true"]
+            )
+            guard let pc = self.factory.peerConnection(with: config, constraints: constraints, delegate: self) else {
+                self.fail("Failed to create peer connection")
                 return
             }
-            guard let sdp else {
-                self.fail("Offer error: nil SDP")
-                return
+            self.peerConnection = pc
+
+            let track = self.createLocalAudioTrack()
+            self.localAudioTrack = track
+            _ = pc.add(track, streamIds: ["stream0"])
+
+            let dcConfig = RTCDataChannelConfiguration()
+            dcConfig.isOrdered = true
+            if let dc = pc.dataChannel(forLabel: "oai-events", configuration: dcConfig) {
+                dc.delegate = self
+                self.dataChannel = dc
+                self.log("DataChannel created: label=\(dc.label)")
+            } else {
+                self.log("DataChannel creation failed")
             }
-            pc?.setLocalDescription(sdp) { [weak self] err in
-                if let err { self?.fail("setLocalDescription error: \(err.localizedDescription)"); return }
-                self?.sendOfferToBackend(offer: sdp)
+
+            let offerConstraints = RTCMediaConstraints(mandatoryConstraints: [
+                "OfferToReceiveAudio": "true",
+                "VoiceActivityDetection": "true"
+            ], optionalConstraints: nil)
+
+            pc.offer(for: offerConstraints) { [weak self] sdp, error in
+                self?.workQueue.async {
+                    guard let self, self.connectionGeneration == generation, pc === self.peerConnection else { return }
+                    if let error {
+                        self.fail("Offer error: \(error.localizedDescription)")
+                        return
+                    }
+                    guard let sdp else {
+                        self.fail("Offer error: nil SDP")
+                        return
+                    }
+                    pc.setLocalDescription(sdp) { [weak self] err in
+                        self?.workQueue.async {
+                            guard let self, self.connectionGeneration == generation, pc === self.peerConnection else { return }
+                            if let err {
+                                self.fail("setLocalDescription error: \(err.localizedDescription)")
+                                return
+                            }
+                            self.sendOfferToBackend(offer: sdp, generation: generation)
+                        }
+                    }
+                }
             }
         }
     }
 
     private func tearDownPeer() {
-        log("Tearing down peer connection gracefully")
-        
-        // Gracefully close data channel
+        workQueue.sync {
+            invalidatePeerConnection()
+        }
+    }
+
+    /// Must run on `workQueue`. Clears delegates before close to prevent signaling-thread use-after-free.
+    private func invalidatePeerConnection(logTeardown: Bool = true) {
+        if logTeardown {
+            log("Tearing down peer connection gracefully")
+        }
+        connectionGeneration += 1
+
         if let dc = dataChannel {
             dc.delegate = nil
-            if dc.readyState == .open {
+            if dc.readyState != .closed {
                 dc.close()
             }
             dataChannel = nil
         }
-        
-        // Remove local audio track before closing connection
+
         if let track = localAudioTrack, let pc = peerConnection {
-            let senders = pc.senders.filter { $0.track?.trackId == track.trackId }
-            for sender in senders {
-                pc.removeTrack(sender)
-            }
+            pc.senders
+                .filter { $0.track?.trackId == track.trackId }
+                .forEach { pc.removeTrack($0) }
         }
         localAudioTrack = nil
-        
-        // Close peer connection
+
         if let pc = peerConnection {
+            pc.delegate = nil
             pc.close()
         }
         peerConnection = nil
@@ -546,7 +577,9 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         didRegisterClientWhatsAppToolThisConnection = false
         receivedRealtimeSessionSnapshot = false
 
-        log("Peer connection torn down successfully")
+        if logTeardown {
+            log("Peer connection torn down successfully")
+        }
     }
 
     // MARK: Backend
@@ -599,7 +632,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
 
         LimiHTTPClient.perform(request) { [weak self] data, resp, err in
             guard let self else { return }
-            if let http = resp as? HTTPURLResponse {
+            if let http = resp {
                 self.log("⬅️ Status: \(http.statusCode) from \(url.host ?? "?")")
                 self.log("⬅️ Response Headers: \(http.allHeaderFields)")
             }
@@ -612,7 +645,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
                 }
                 return
             }
-            if let http = resp as? HTTPURLResponse, !(200 ... 299).contains(http.statusCode) {
+            if let http = resp, !(200 ... 299).contains(http.statusCode) {
                 let responseBody = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<empty>"
                 self.log("❌ Session endpoint HTTP \(http.statusCode) — URL: \(url.absoluteString)")
                 self.log("❌ Response body: \(responseBody)")
@@ -657,10 +690,17 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         }
     }
 
-    private func sendOfferToBackend(offer: RTCSessionDescription) {
-        guard let key = ephemeralKey else { fail("Missing ephemeral key"); return }
+    private func sendOfferToBackend(offer: RTCSessionDescription, generation: Int) {
+        guard connectionGeneration == generation else { return }
+        guard let key = ephemeralKey else {
+            fail("Missing ephemeral key")
+            return
+        }
         let model = sessionModel ?? "gpt-realtime"
-        guard let url = URL(string: AppURLs.External.openAIRealtime(model: model)) else { fail("Invalid OpenAI URL"); return }
+        guard let url = URL(string: AppURLs.External.openAIRealtime(model: model)) else {
+            fail("Invalid OpenAI URL")
+            return
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
@@ -669,39 +709,55 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         request.setValue("application/sdp", forHTTPHeaderField: "Accept")
         request.httpBody = offer.sdp.data(using: .utf8)
 
-        // Log outgoing request
         log("➡️ Request: POST \(url.absoluteString) [application/sdp] body=\(offer.sdp.count) chars\n📝 SDP (first 200): \(String(offer.sdp.prefix(200)))…")
 
         URLSession.shared.dataTask(with: request) { [weak self] data, resp, err in
             guard let self else { return }
-            if let http = resp as? HTTPURLResponse {
-                self.log("⬅️ OpenAI Status: \(http.statusCode) from \(url.absoluteString)")
-                if !(200...299).contains(http.statusCode) {
-                    let body = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<empty>"
-                    self.log("❌ OpenAI error \(http.statusCode): \(body)")
+            self.workQueue.async {
+                guard self.connectionGeneration == generation, let pc = self.peerConnection else { return }
+
+                if let http = resp as? HTTPURLResponse {
+                    self.log("⬅️ OpenAI Status: \(http.statusCode) from \(url.absoluteString)")
+                    if !(200...299).contains(http.statusCode) {
+                        let body = data.flatMap { String(data: $0, encoding: .utf8) } ?? "<empty>"
+                        self.log("❌ OpenAI error \(http.statusCode): \(body)")
+                    }
                 }
-            }
-            if let err { self.fail("Offer POST error: \(err.localizedDescription)"); return }
-            guard let data else { self.fail("Empty answer body"); return }
-            if let contentType = (resp as? HTTPURLResponse)?.allHeaderFields["Content-Type"] as? String, contentType.contains("application/json"),
-               let json = String(data: data, encoding: .utf8) {
-                self.fail("OpenAI error JSON: \(json)")
-                return
-            }
-            guard let answerSDP = String(data: data, encoding: .utf8) else {
-                self.fail("Answer not UTF-8 text")
-                return
-            }
-            self.log("⬅️ Answer SDP size=\(answerSDP.count) chars\n📝 SDP (first 200): \(String(answerSDP.prefix(200)))…")
-            let remote = RTCSessionDescription(type: .answer, sdp: answerSDP)
-            self.peerConnection?.setRemoteDescription(remote) { [weak self] err in
-                if let err { self?.fail("setRemoteDescription error: \(err.localizedDescription)"); return }
-                DispatchQueue.main.async {
-                    self?.state = .connected
-                    self?.reconnectAttempts = 0
-                    self?.log("Connected")
-                    self?.postWebhook(event: "connected", payload: [:])
-                    self?.setupNowPlaying(isActive: true)
+                if let err {
+                    self.fail("Offer POST error: \(err.localizedDescription)")
+                    return
+                }
+                guard let data else {
+                    self.fail("Empty answer body")
+                    return
+                }
+                if let contentType = (resp as? HTTPURLResponse)?.allHeaderFields["Content-Type"] as? String,
+                   contentType.contains("application/json"),
+                   let json = String(data: data, encoding: .utf8) {
+                    self.fail("OpenAI error JSON: \(json)")
+                    return
+                }
+                guard let answerSDP = String(data: data, encoding: .utf8) else {
+                    self.fail("Answer not UTF-8 text")
+                    return
+                }
+                self.log("⬅️ Answer SDP size=\(answerSDP.count) chars\n📝 SDP (first 200): \(String(answerSDP.prefix(200)))…")
+                let remote = RTCSessionDescription(type: .answer, sdp: answerSDP)
+                pc.setRemoteDescription(remote) { [weak self] err in
+                    self?.workQueue.async {
+                        guard let self, self.connectionGeneration == generation, pc === self.peerConnection else { return }
+                        if let err {
+                            self.fail("setRemoteDescription error: \(err.localizedDescription)")
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            self.state = .connected
+                            self.reconnectAttempts = 0
+                            self.log("Connected")
+                            self.postWebhook(event: "connected", payload: [:])
+                            self.setupNowPlaying(isActive: true)
+                        }
+                    }
                 }
             }
         }.resume()
@@ -770,7 +826,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
 
             LimiHTTPClient.perform(req) { [weak self] data, resp, err in
                 // Log response status and headers
-                if let http = resp as? HTTPURLResponse {
+                if let http = resp {
                     self?.log("⬅️ Webhook Response Status: \(http.statusCode) from \(webhookURL.host ?? "?")")
                     self?.log("⬅️ Webhook Response Headers: \(http.allHeaderFields)")
                 }
@@ -932,15 +988,13 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         
         reconnectWorkItem?.cancel()
         let work = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            
-            // Ensure audio session is still active before reconnecting
-            self.configureAVAudioSession()
-            
-            self.tearDownPeer()
+            guard let self else { return }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.resumeWebRTCAfterReconnectTeardown()
+            self.configureAVAudioSession()
+            self.invalidatePeerConnection()
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.resumeWebRTCAfterReconnectTeardown()
             }
         }
         reconnectWorkItem = work
@@ -953,71 +1007,95 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
 // MARK: - RTCPeerConnectionDelegate
 extension WebRTCVoiceClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
-        log("Signaling state: \(stateChanged.rawValue)")
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.log("Signaling state: \(stateChanged.rawValue)")
+        }
     }
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {}
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        log("ICE state: \(newState.rawValue)")
-        postWebhook(event: "ice_state_change", payload: ["state": newState.rawValue])
-        
-        switch newState {
-        case .connected, .completed:
-            log("ICE connection established successfully")
-            reconnectAttempts = 0 // Reset on successful connection
-        case .disconnected:
-            log("ICE connection disconnected - attempting recovery")
-            // Don't immediately reconnect, try to recover first
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                guard let self = self else { return }
-                if self.peerConnection?.iceConnectionState == .disconnected {
-                    self.scheduleReconnect()
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.log("ICE state: \(newState.rawValue)")
+            self.postWebhook(event: "ice_state_change", payload: ["state": newState.rawValue])
+
+            switch newState {
+            case .connected, .completed:
+                self.log("ICE connection established successfully")
+                DispatchQueue.main.async { self.reconnectAttempts = 0 }
+            case .disconnected:
+                self.log("ICE connection disconnected - attempting recovery")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    guard let self else { return }
+                    self.workQueue.async {
+                        guard peerConnection === self.peerConnection,
+                              self.peerConnection?.iceConnectionState == .disconnected else { return }
+                        DispatchQueue.main.async { self.scheduleReconnect() }
+                    }
                 }
+            case .failed:
+                self.log("ICE connection failed - scheduling reconnect")
+                DispatchQueue.main.async { self.scheduleReconnect() }
+            case .checking:
+                self.log("ICE connection checking...")
+            case .new:
+                self.log("ICE connection new")
+            case .closed:
+                self.log("ICE connection closed")
+            case .count:
+                self.log("ICE connection count state (unused)")
+            @unknown default:
+                self.log("ICE connection unknown state: \(newState.rawValue)")
             }
-        case .failed:
-            log("ICE connection failed - scheduling reconnect")
-            scheduleReconnect()
-        case .checking:
-            log("ICE connection checking...")
-        case .new:
-            log("ICE connection new")
-        case .closed:
-            log("ICE connection closed")
-        case .count:
-            log("ICE connection count state (unused)")
-        @unknown default:
-            log("ICE connection unknown state: \(newState.rawValue)")
         }
     }
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-        log("ICE gathering: \(newState.rawValue)")
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.log("ICE gathering: \(newState.rawValue)")
+        }
     }
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        postLocalIceCandidate(candidate)
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.postLocalIceCandidate(candidate)
+        }
     }
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-        log("DataChannel opened by remote: label=\(dataChannel.label)")
-        self.dataChannel = dataChannel
-        dataChannel.delegate = self
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.log("DataChannel opened by remote: label=\(dataChannel.label)")
+            self.dataChannel?.delegate = nil
+            self.dataChannel = dataChannel
+            dataChannel.delegate = self
+        }
     }
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams: [RTCMediaStream]) {
-        // Remote audio will be played automatically by WebRTC when audio track is received and AVAudioSession is active.
-        log("Remote track added: \(rtpReceiver.track?.kind ?? "?")")
+        workQueue.async { [weak self] in
+            guard let self, peerConnection === self.peerConnection else { return }
+            self.log("Remote track added: \(rtpReceiver.track?.kind ?? "?")")
+        }
     }
 }
 
 // MARK: - RTCDataChannelDelegate
 extension WebRTCVoiceClient: RTCDataChannelDelegate {
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
-        log("DataChannel state=\(dataChannel.readyState.rawValue) label=\(dataChannel.label)")
-        postWebhook(event: "datachannel_state", payload: ["state": dataChannel.readyState.rawValue, "label": dataChannel.label])
+        workQueue.async { [weak self] in
+            guard let self, dataChannel === self.dataChannel else { return }
+            self.log("DataChannel state=\(dataChannel.readyState.rawValue) label=\(dataChannel.label)")
+            self.postWebhook(
+                event: "datachannel_state",
+                payload: ["state": dataChannel.readyState.rawValue, "label": dataChannel.label]
+            )
 
-        guard dataChannel.readyState == .open else { return }
-        // Context was often skipped when `.connected` fired before the channel opened; flush here + optional first spoken turn.
-        DispatchQueue.main.async { [weak self] in
-            self?.flushContextAndProactiveGreeting()
+            guard dataChannel.readyState == .open else { return }
+            DispatchQueue.main.async { [weak self] in
+                self?.flushContextAndProactiveGreeting()
+            }
         }
     }
 
@@ -1053,6 +1131,13 @@ extension WebRTCVoiceClient: RTCDataChannelDelegate {
     }
 
     func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
+        workQueue.async { [weak self] in
+            guard let self, dataChannel === self.dataChannel else { return }
+            self.handleDataChannelMessage(buffer)
+        }
+    }
+
+    private func handleDataChannelMessage(_ buffer: RTCDataBuffer) {
         if buffer.isBinary {
             if let raw = String(data: buffer.data, encoding: .utf8) {
                 log("📩 DataChannel binary->text: \(raw)")

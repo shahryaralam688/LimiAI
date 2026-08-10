@@ -55,7 +55,7 @@ struct VoicePresenceLayout: View {
                     .fill(viewModel.connectionColor(for: viewModel.connectionState))
                     .frame(width: 6, height: 6)
                 Text(viewModel.connectionLabel(for: viewModel.connectionState))
-                    .font(.system(size: 12, weight: .medium))
+                    .font(LimiTypography.caption)
                     .foregroundColor(.appTextMuted)
             }
             .opacity(0.7)
@@ -64,7 +64,7 @@ struct VoicePresenceLayout: View {
 
             Button(action: onShowAIConnection) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextMuted)
                     .frame(width: 36, height: 36)
                     .glassCard(cornerRadius: 18, fillOpacity: 0.06)
@@ -78,13 +78,13 @@ struct VoicePresenceLayout: View {
     private var presenceStatus: some View {
         VStack(spacing: 6) {
             Text(viewModel.statusTitle(for: viewModel.assistantState))
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(LimiTypography.title3)
                 .foregroundColor(.appTextPrimary)
                 .opacity(statusOpacity)
                 .animation(.easeInOut(duration: 0.6), value: viewModel.assistantState)
 
             Text(viewModel.statusSubtitle(for: viewModel.assistantState))
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(.appTextSecondary)
                 .opacity(statusOpacity * 0.8)
                 .animation(.easeInOut(duration: 0.6).delay(0.1), value: viewModel.assistantState)
@@ -93,7 +93,7 @@ struct VoicePresenceLayout: View {
 
     private var liveTranscriptionBubble: some View {
         Text(viewModel.currentTranscription)
-            .font(.system(size: 15, weight: .medium))
+            .font(LimiTypography.callout)
             .foregroundColor(.appTextPrimary.opacity(0.8))
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -109,9 +109,9 @@ struct VoicePresenceLayout: View {
             Button(action: { viewModel.enterChatMode() }) {
                 HStack(spacing: 8) {
                     Image(systemName: "text.bubble")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                     Text("Type instead")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                 }
                 .foregroundColor(.appTextMuted)
                 .padding(.horizontal, 20)
@@ -132,13 +132,13 @@ struct VoiceOfflineView: View {
             VStack(spacing: 16) {
                 Spacer()
                 Image(systemName: "wifi.slash")
-                    .font(.system(size: 36, weight: .ultraLight))
+                    .font(LimiTypography.title2)
                     .foregroundColor(.appTextMuted)
                 Text("Waiting for connection")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(LimiTypography.title3)
                     .foregroundColor(.appTextPrimary)
                 Text("Limi will reconnect automatically.")
-                    .font(.system(size: 14))
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(.appTextSecondary)
                 Spacer()
             }

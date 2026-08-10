@@ -7,15 +7,13 @@ struct AppEnvironment {
     var transport: LimiTransporting
     var bluetooth: HomeBluetoothMaking
     var installerLogin: InstallerLoginPerforming
-    var roleManager: UserRoleManager
 
     static let live = AppEnvironment(
         auth: LiveAuthProvider(),
         http: LiveHTTPPerformer(),
         transport: LiveLimiTransport(),
         bluetooth: LiveHomeBluetoothFactory(),
-        installerLogin: DefaultInstallerLoginService(),
-        roleManager: .shared
+        installerLogin: DefaultInstallerLoginService()
     )
 
     static let mock = AppEnvironment(
@@ -23,8 +21,7 @@ struct AppEnvironment {
         http: MockHTTPPerformer(),
         transport: MockLimiTransport(),
         bluetooth: LiveHomeBluetoothFactory(),
-        installerLogin: MockInstallerLoginService(),
-        roleManager: .shared
+        installerLogin: MockInstallerLoginService()
     )
 }
 
@@ -102,15 +99,6 @@ extension HomeViewModel {
             deviceService: deviceService,
             authProvider: HomeAuthProviderAdapter(auth: environment.auth),
             networkPerformer: HomeHTTPPerformerAdapter(http: environment.http)
-        )
-    }
-}
-
-extension GetStartViewModel {
-    convenience init(environment: AppEnvironment) {
-        self.init(
-            installerLogin: environment.installerLogin,
-            roleManager: environment.roleManager
         )
     }
 }

@@ -406,8 +406,9 @@ struct WLEDView: View {
     @State private var selectedEffect = 0
     @State private var showingColorPicker = false
     @State private var selectedTopTab: Int = 0 // 0 = Offline, 1 = Customize
-    @State private var isOnline: Bool = true
+    @State private var isPhoneOnline: Bool = true
     @State private var showToast: Bool = false
+    @State private var didShowDeviceOfflineNotice = false
 
     // rainBow Color Bar Variable
     @State private var isOn: Bool = false
@@ -454,6 +455,10 @@ struct WLEDView: View {
         return DeviceControlPathDisplay(deviceId: id, preference: transportMediumPrefs.preference)
     }
 
+    private var controlsDisabledOpacity: Double { isOn ? 1.0 : 0.4 }
+
+    private var controlLabelColor: Color { isOn ? .appTextPrimary : .appTextMuted }
+
     private var lampStateStorageKey: String {
         "rgb-lamp-state-\(persistedStateStorageKey)"
     }
@@ -498,7 +503,7 @@ struct WLEDView: View {
                     macAddress: chennalMac,
                     selectedTopTab: $selectedTopTab,
                     showToast: $showToast,
-                    isOnline: isOnline,
+                    isOnline: isPhoneOnline,
                     metrics: metrics
                 )
 
@@ -509,8 +514,8 @@ struct WLEDView: View {
                     VStack(spacing: 12) {
                         HStack{
                             Text("Select Color")
-                                .font(.system(size: 18, weight: .bold, design: .rounded)) // Bold weight
-                                .foregroundColor(.appTextPrimary)
+                                .font(LimiTypography.button) // Bold weight
+                                .foregroundColor(controlLabelColor)
                                 .kerning(0.9)        // 5% of 18px ≈ 0.9 pts
                                 .lineSpacing(0)      // line-height = 100%
                                 .lineLimit(1)        // prevent wrapping
@@ -528,24 +533,20 @@ struct WLEDView: View {
                             }) {
                                 Text("Solid Color")
                                     .padding(8)
-                                    .background(showSolidColor ? Color.orbGlow4 : Color.eton.opacity(0.4))
-                                    .foregroundColor(.appTextPrimary)
+                                    .background(showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
+                                    .foregroundColor(controlLabelColor)
                                     .cornerRadius(8)
                             }
-                            .disabled(!isOn)
-                            .opacity(isOn ? 1.0 : 0.4)
                             
                             Button(action: {
                                 showSolidColor = false
                             }) {
                                 Text("Rainbow Color")
                                     .padding(8)
-                                    .background(!showSolidColor ? Color.orbGlow4 : Color.eton.opacity(0.4))
-                                    .foregroundColor(.themeWhite)
+                                    .background(!showSolidColor ? Color.brandAction : Color.brandHighlight.opacity(0.4))
+                                    .foregroundColor(controlLabelColor)
                                     .cornerRadius(8)
                             }
-                            .disabled(!isOn)
-                            .opacity(isOn ? 1.0 : 0.4)
                         }
                         .padding(.bottom, 20)
                         
@@ -561,8 +562,6 @@ struct WLEDView: View {
                                         // Send color to LED
                                         sendColorToLED(selectedColor)
                                     }
-                                    .disabled(!isOn)
-                                    .opacity(isOn ? 1.0 : 0.4)
 
                         } else {
                             RainbowSlider(value: $colorValue, selectedColor: $selectedColor)
@@ -575,11 +574,11 @@ struct WLEDView: View {
                                     let generator = UIImpactFeedbackGenerator(style: .medium)
                                     generator.impactOccurred()
                                 }
-                                .disabled(!isOn)
-                                .opacity(isOn ? 1.0 : 0.4)
                         }
                     }
                 }
+                .disabled(!isOn)
+                .opacity(controlsDisabledOpacity)
 
                 effectsScrollView
 
@@ -591,11 +590,11 @@ struct WLEDView: View {
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.themeBlack.opacity(0.8))
+                    .background(Color.appOverlayScrim)
                     .cornerRadius(12)
                     .padding(.top, 12)
                     .transition(.opacity)
@@ -627,12 +626,11 @@ struct WLEDView: View {
         }
 
         .onAppear {
-            // Socket.IO bridge stays connected at app scope; nothing to do here.
             let monitor = NWPathMonitor()
             monitor.pathUpdateHandler = { path in
                 DispatchQueue.main.async {
-                    isOnline = (path.status == .satisfied)
-                    if !isOnline && selectedTopTab == 1 {
+                    isPhoneOnline = (path.status == .satisfied)
+                    if !isPhoneOnline && selectedTopTab == 1 {
                         selectedTopTab = 0
                         showToast = true
                     }
@@ -641,6 +639,10 @@ struct WLEDView: View {
             let queue = DispatchQueue(label: "NetworkMonitor")
             monitor.start(queue: queue)
         }
+        .deviceControlAvailability(
+            transportState: transportState,
+            didShowOfflineNotice: $didShowDeviceOfflineNotice
+        )
         .onChange(of: showToast) { old, newVal in
             if newVal {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
@@ -724,11 +726,11 @@ struct WLEDView: View {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Power")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(LimiTypography.button)
                         .foregroundColor(.appTextPrimary)
 
                     Text("Turn OFF/ON")
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .font(LimiTypography.body)
                         .foregroundColor(.appTextPrimary.opacity(0.85))
 
                     DeviceControlPathStatusView(display: pathDisplay)
@@ -745,7 +747,7 @@ struct WLEDView: View {
                 }) {
                     ZStack {
                         Rectangle()
-                            .fill(isOn ? Color.orbGlow4 : Color.gray.opacity(0.3))
+                            .fill(isOn ? Color.brandAction : Color.appBorderPrimary.opacity(0.45))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
 
@@ -765,19 +767,19 @@ struct WLEDView: View {
     private var patternControls: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Pattern Controls")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
-                .foregroundColor(.appTextPrimary)
+                .font(LimiTypography.headline)
+                .foregroundColor(controlLabelColor)
 
             // Speed Slider
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Speed")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(controlLabelColor)
                     Spacer()
                     Text("\(Int(patternSpeed))%")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(controlLabelColor)
                 }
 
                 Slider(value: $patternSpeed, in: 0...100, onEditingChanged: { editing in
@@ -795,12 +797,12 @@ struct WLEDView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Intensity")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(controlLabelColor)
                     Spacer()
                     Text("\(Int(patternIntensity))%")
-                        .font(.system(size: 14, weight: .regular, design: .rounded))
-                        .foregroundColor(.appTextPrimary)
+                        .font(LimiTypography.subheadline)
+                        .foregroundColor(controlLabelColor)
                 }
 
                 Slider(value: $patternIntensity, in: 0...100, onEditingChanged: { editing in
@@ -816,6 +818,8 @@ struct WLEDView: View {
         }
         .padding()
         .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .disabled(!isOn)
+        .opacity(controlsDisabledOpacity)
     }
 
     private func sendCurrentPattern(patternId: Int) {
@@ -850,7 +854,7 @@ struct WLEDView: View {
     private var rainbowColorBar: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Color")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextPrimary)
                 .lineSpacing(0)
                 .kerning(0)
@@ -924,12 +928,14 @@ struct WLEDView: View {
         
         .padding()
         .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .disabled(!isOn)
+        .opacity(controlsDisabledOpacity)
     }
     
     private var brightnessTitle: some View {
         Text("Brightness")
-            .font(.system(size: 16, weight: .medium, design: .rounded))
-            .foregroundColor(.appTextPrimary)
+            .font(LimiTypography.headline)
+            .foregroundColor(controlLabelColor)
             .lineSpacing(0)
             .kerning(0)
             .lineLimit(1)
@@ -955,8 +961,8 @@ struct WLEDView: View {
             .frame(width: 46, height: 46)
             .overlay(
                 Text("0%")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(controlLabelColor)
             )
     }
     
@@ -966,8 +972,8 @@ struct WLEDView: View {
             .frame(width: 46, height: 46)
             .overlay(
                 Text("\(Int(100))%")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(controlLabelColor)
             )
     }
     
@@ -1033,6 +1039,7 @@ struct WLEDView: View {
     private func sliderGesture(geometry: GeometryProxy) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
+                guard isOn else { return }
                 let padding: CGFloat = 15
                 let availableWidth = geometry.size.width - (padding * 2)
                 let clampedX = max(padding, min(geometry.size.width - padding, value.location.x))
@@ -1098,14 +1105,15 @@ struct WLEDView: View {
         
         return VStack(alignment: .leading, spacing: 15) {
             Text("Effects")
-                .font(.headline)
-                .foregroundColor(.appTextPrimary)
+                .font(LimiTypography.headline)
+                .foregroundColor(controlLabelColor)
                 .padding(.horizontal)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(sampleEffects, id: \.id) { effect in
                         Button(action: {
+                            guard isOn else { return }
                             // Update UI selection
                             selectedEffect = effect.id
                             hasSelectedPattern = true
@@ -1115,11 +1123,11 @@ struct WLEDView: View {
                             VStack(spacing: 8) {
                                 // Effect icon based on name
                                 Image(systemName: effectIcon(for: effect.name))
-                                    .font(.title2)
+                                    .font(LimiTypography.title2)
                                     .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                 
                                 Text(effect.name)
-                                    .font(.caption)
+                                    .font(LimiTypography.caption)
                                     .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
@@ -1133,7 +1141,7 @@ struct WLEDView: View {
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(
                                         selectedEffect == effect.id ? 
-                                        Color.orbGlow4 : Color.alabaster.opacity(0.6), 
+                                        Color.brandAction : Color.appTextPrimary.opacity(0.6), 
                                         lineWidth: 1
                                     )
                             )
@@ -1147,6 +1155,8 @@ struct WLEDView: View {
         }
         .padding()
         .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .disabled(!isOn)
+        .opacity(controlsDisabledOpacity)
     }
     
     // Helper function to get appropriate SF Symbol for effect names

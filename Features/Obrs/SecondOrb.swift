@@ -23,10 +23,10 @@ struct GSAPLayoutAnimation: View {
             HStack(spacing: 0) {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.largeTitle)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 80, height: 80)
-                        .background(Circle().fill(Color.blue))
+                        .background(Circle().fill(Color.appInfo))
                         .opacity(opacity)
                 }
             }
@@ -35,8 +35,8 @@ struct GSAPLayoutAnimation: View {
             HStack(spacing: 20) {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.largeTitle)
+                        .foregroundColor(.appTextPrimary)
                         .opacity(opacity)
                 }
             }
@@ -45,10 +45,10 @@ struct GSAPLayoutAnimation: View {
             VStack(spacing: 10) {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.largeTitle)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 100, height: 100)
-                        .background(Rectangle().fill(Color.green))
+                        .background(Rectangle().fill(Color.appSuccess))
                         .opacity(opacity)
                 }
             }
@@ -57,10 +57,10 @@ struct GSAPLayoutAnimation: View {
             LazyVGrid(columns: [GridItem(), GridItem()], spacing: 20) {
                 ForEach(0..<letters.count, id: \.self) { index in
                     Text(letters[index])
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.largeTitle)
+                        .foregroundColor(.appTextPrimary)
                         .frame(width: 80, height: 80)
-                        .background(Circle().fill(Color.orange))
+                        .background(Circle().fill(Color.appOrange))
                         .opacity(opacity)
                 }
             }

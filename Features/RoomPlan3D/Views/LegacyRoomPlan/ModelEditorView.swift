@@ -220,13 +220,13 @@ struct ModelEditorView: View {
                     .italic()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.themeBlack)
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
             }
 
             // Controls
             VStack(spacing: 12) {
                 Button("Reset") { NotificationCenter.default.post(name: .resetCameraManual, object: nil) }
-                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.appTextSecondary.opacity(1)).cornerRadius(8)
                 VStack(spacing: 4) {
                     Button("↑") { move(.forward) }
                     HStack(spacing: 16) {
@@ -235,16 +235,16 @@ struct ModelEditorView: View {
                     }
                     Button("↓") { move(.backward) }
                 }
-                .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
+                .padding(8).background(Color.appTextSecondary.opacity(1)).cornerRadius(8)
                 
                 // Color selection
                 Button("Colors") { showColorPicker.toggle() }
-                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.appTextSecondary.opacity(1)).cornerRadius(8)
                 
                 if showColorPicker {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Wall Colors")
-                            .font(.caption)
+                            .font(LimiTypography.caption)
                             .padding(.horizontal, 8)
                         
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 30))], spacing: 8) {
@@ -265,7 +265,7 @@ struct ModelEditorView: View {
                         
                         // Texture scale slider
                         Text("Texture Scale: \(textureScale, specifier: "%.1f")")
-                            .font(.caption)
+                            .font(LimiTypography.caption)
                             .padding(.horizontal, 8)
                         
                         Slider(value: $textureScale, in: 0.5...5.0, step: 0.5)
@@ -277,16 +277,16 @@ struct ModelEditorView: View {
                                 applyColorToAllWalls()
                             }
                             .padding(8)
-                            .background(Color.blue.opacity(0.7))
-                            .foregroundColor(.themeWhite)
+                            .background(Color.appInfo.opacity(0.7))
+                            .foregroundColor(.appTextPrimary)
                             .cornerRadius(8)
                             
                             Button("Apply Brick to Walls") {
                                 applyBrickTextureToAllWalls()
                             }
                             .padding(8)
-                            .background(Color.orange.opacity(0.7))
-                            .foregroundColor(.themeWhite)
+                            .background(Color.appOrange.opacity(0.7))
+                            .foregroundColor(.appTextPrimary)
                             .cornerRadius(8)
                         }
                         .padding(.horizontal, 8)
@@ -297,16 +297,16 @@ struct ModelEditorView: View {
                                 createWallOverlays()
                             }
                             .padding(8)
-                            .background(Color.green.opacity(0.7))
-                            .foregroundColor(.themeWhite)
+                            .background(Color.appSuccess.opacity(0.7))
+                            .foregroundColor(.appTextPrimary)
                             .cornerRadius(8)
                             
                             Button("Remove Overlays") {
                                 removeWallOverlays()
                             }
                             .padding(8)
-                            .background(Color.red.opacity(0.7))
-                            .foregroundColor(.themeWhite)
+                            .background(Color.appDanger.opacity(0.7))
+                            .foregroundColor(.appTextPrimary)
                             .cornerRadius(8)
                         }
                         .padding(.horizontal, 8)
@@ -318,7 +318,7 @@ struct ModelEditorView: View {
                 
                 // Debug button
                 Button("Debug") { showDebug.toggle() }
-                    .padding(8).background(Color.themeWhite.opacity(0.7)).cornerRadius(8)
+                    .padding(8).background(Color.appTextSecondary.opacity(1)).cornerRadius(8)
             }
             .padding()
             
@@ -326,14 +326,14 @@ struct ModelEditorView: View {
             if showDebug {
                 VStack(alignment: .leading) {
                     Text("Debug Info")
-                        .font(.headline)
+                        .font(LimiTypography.headline)
                     Text(debugMessage)
-                        .font(.system(.body, design: .monospaced))
+                        .font(LimiTypography.body)
                         .lineLimit(10)
                 }
                 .padding()
                 .background(Color.themeBlack.opacity(0.7))
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
                 .cornerRadius(8)
                 .frame(maxWidth: 300)
                 .position(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height - 150)

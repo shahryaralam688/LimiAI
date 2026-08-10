@@ -32,20 +32,20 @@ struct HotelRoomDevices: View {
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "dot.radiowaves.left.and.right")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(LimiTypography.headline)
                         Text("BLE Devices")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(LimiTypography.headline)
                     }
-                    .foregroundColor(selectedTab == 0 ? .emerald : .themeWhite.opacity(0.6))
+                    .foregroundColor(selectedTab == 0 ? .emerald : .appTextPrimary.opacity(0.6))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         Rectangle()
-                            .fill(selectedTab == 0 ? Color.emerald.opacity(0.1) : Color.clear)
+                            .fill(selectedTab == 0 ? Color.brandAction.opacity(0.1) : Color.clear)
                     )
                     .overlay(
                         Rectangle()
-                            .fill(selectedTab == 0 ? Color.emerald : Color.clear)
+                            .fill(selectedTab == 0 ? Color.brandAction : Color.clear)
                             .frame(height: 2),
                         alignment: .bottom
                     )
@@ -58,20 +58,20 @@ struct HotelRoomDevices: View {
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "wifi")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(LimiTypography.headline)
                         Text("Wi-Fi Devices")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(LimiTypography.headline)
                     }
-                    .foregroundColor(selectedTab == 1 ? .emerald : .themeWhite.opacity(0.6))
+                    .foregroundColor(selectedTab == 1 ? .emerald : .appTextPrimary.opacity(0.6))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         Rectangle()
-                            .fill(selectedTab == 1 ? Color.emerald.opacity(0.1) : Color.clear)
+                            .fill(selectedTab == 1 ? Color.brandAction.opacity(0.1) : Color.clear)
                     )
                     .overlay(
                         Rectangle()
-                            .fill(selectedTab == 1 ? Color.emerald : Color.clear)
+                            .fill(selectedTab == 1 ? Color.brandAction : Color.clear)
                             .frame(height: 2),
                         alignment: .bottom
                     )
@@ -82,7 +82,7 @@ struct HotelRoomDevices: View {
             .background(Color.appSurfaceTertiary)
             .overlay(
                 Rectangle()
-                    .fill(Color.themeWhite.opacity(0.1))
+                    .fill(Color.appGlassFillStrong)
                     .frame(height: 1),
                 alignment: .bottom
             )
@@ -123,7 +123,7 @@ struct BLEDevicesView: View {
                 // Title
                 HStack {
                     Text("BLE Devices")
-                        .font(.system(size: 28, weight: .semibold))
+                        .font(LimiTypography.title2)
                         .foregroundColor(.appTextPrimary)
 
                     Spacer()
@@ -131,7 +131,7 @@ struct BLEDevicesView: View {
                     Button("WLED") {
                         viewModel.presentWLEDDiscovery()
                     }
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(Color.appSurfaceTertiary)
@@ -145,13 +145,13 @@ struct BLEDevicesView: View {
                     // Empty state
                     VStack(spacing: 10) {
                         Image(systemName: "bolt.horizontal.circle")
-                            .font(.system(size: 52))
-                            .foregroundColor(.themeWhite.opacity(0.6))
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary.opacity(0.6))
                         Text(viewModel.isBluetoothOn
                              ? "No devices connected through Bluetooth"
                              : "Bluetooth is Off")
-                            .font(.headline)
-                            .foregroundColor(.themeWhite.opacity(0.85))
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary.opacity(0.85))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -268,13 +268,13 @@ struct WiFiDevicesView: View {
                 // Title
                 HStack {
                     Text("Wi-Fi Devices")
-                        .font(.system(size: 28, weight: .semibold))
+                        .font(LimiTypography.title2)
                         .foregroundColor(.appTextPrimary)
                     Spacer()
                     Button("WLED"){
                         showWLEDViewScan = true
                     }
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(Color.appSurfaceTertiary)
@@ -344,11 +344,11 @@ struct DeviceCard: View {
                 HStack {
                     ZStack {
                         Circle()
-                            .fill(Color.charlestonGreen)
+                            .fill(Color.appSurfaceDark)
                             .frame(width: 45, height: 45)
                         
                         Image(systemName: device.icon)
-                            .font(.title2)
+                            .font(LimiTypography.title2)
                             .foregroundColor(.appTextPrimary)
                     }
                     Spacer()
@@ -357,19 +357,18 @@ struct DeviceCard: View {
                 // Title and device count
                 VStack(alignment: .leading, spacing: 4) {
                     Text(device.title)
-                        .font(.custom("Lexend", size: 17))
-                        .fontWeight(.semibold)
+                        .font(LimiTypography.headline)
                         .kerning(0)
                         .foregroundColor(.appTextPrimary)
                         .lineLimit(nil)            // limit to 2 lines max
                         .frame(maxHeight: 44, alignment: .top) // fixed height for consistency
 
                     Text("\(device.deviceCount) devices")
-                        .font(.custom("Lexend", size: 13))  // font-family + font-size
+                        .font(LimiTypography.footnote)  // font-family + font-size
                         .fontWeight(.regular)               // font-weight: 400 (Regular)
                         .lineSpacing(0)                     // adjust line spacing
                         .kerning(0)
-                        .foregroundColor(.alabaster.opacity(0.61234))
+                        .foregroundColor(Color.appTextMuted)
                 }
                 
                 Spacer()
@@ -377,7 +376,7 @@ struct DeviceCard: View {
                 // Status and Toggle
                 HStack {
                     Text(isOn ? "On" : "Off")
-                        .font(.custom("Inter", size: 16))
+                        .font(LimiTypography.body)
                         .fontWeight(.medium)
                         .foregroundColor(.appTextPrimary)
                     
@@ -391,13 +390,13 @@ struct DeviceCard: View {
                         ZStack {
                             // Background
                             Rectangle()
-                                .fill(isOn ? Color.emerald : Color.appCanvasHotel)
+                                .fill(isOn ? Color.brandAction : Color.appCanvasHotel)
                                 .frame(width: 50, height: 26)
                                 .cornerRadius(100)
                             
                             // Inner dot
                             Circle()
-                                .fill(Color.alabaster)
+                                .fill(Color.appTextPrimary)
                                 .frame(width: 20, height: 20)
                                 .offset(x: isOn ? 12 : -12, y: 0)
                                 .animation(.easeInOut(duration: 0.2), value: isOn)

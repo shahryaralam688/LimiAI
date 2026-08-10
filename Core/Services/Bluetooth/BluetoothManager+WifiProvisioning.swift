@@ -43,19 +43,12 @@ extension BluetoothManager {
                     self.provisionCompletion = nil
                     return
                 }
-                if self.fbAckCharacteristic != nil {
-                    let work = DispatchWorkItem { [weak self] in
-                        guard let self = self else { return }
-                        self.provisionCompletion?((status: "warning", message: "No acknowledgement received; connection kept"))
-                        self.provisionCompletion = nil
-                    }
-                    self.provisionTimeout?.cancel()
-                    self.provisionTimeout = work
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0, execute: work)
-                } else {
-                    self.provisionCompletion?((status: "warning", message: "No confirmation characteristic; credentials written"))
-                    self.provisionCompletion = nil
-                }
+                // Credentials are on the device; firmware reboots to join Wi-Fi.
+                // Final success is confirmed via Bonjour/mDNS, not BLE notify.
+                self.provisionTimeout?.cancel()
+                self.provisionTimeout = nil
+                self.provisionCompletion?((status: "credentials_sent", message: "Credentials sent to device"))
+                self.provisionCompletion = nil
             }
         }
     }

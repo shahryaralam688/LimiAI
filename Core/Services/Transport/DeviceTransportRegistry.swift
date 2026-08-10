@@ -32,7 +32,14 @@ public final class DeviceTransportRegistry {
 
     /// Returns the (cached or newly created) state for a device.
     public func state(for deviceId: String) -> DeviceTransportState {
-        let key = deviceId.uppercased()
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
+        guard !key.isEmpty else {
+            let fallback = deviceId.uppercased()
+            if let existing = states[fallback] { return existing }
+            let new = DeviceTransportState(deviceId: fallback)
+            states[fallback] = new
+            return new
+        }
         if let existing = states[key] { return existing }
         let new = DeviceTransportState(deviceId: key)
         states[key] = new
@@ -58,37 +65,101 @@ public final class DeviceTransportRegistry {
             }
             .store(in: &cancellables)
 
-        // MQTT presence: feed device_status (or future real MQTT presence/<id>)
-        // into the matching state.
+        // MQTT presence: feed device_status into state, then Case 1 local-switch offer,
+        // and notify UI (Case 3 cloud-online list).
         presenceProvider.presencePublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] update in
-                self?.state(for: update.deviceId).updateMQTTPresence(connected: update.connected)
+                guard let self else { return }
+                self.state(for: update.deviceId).updateMQTTPresence(connected: update.connected)
+                self.lastPresence[update.deviceId] = update.connected
+                CloudPresenceMemory.shared.record(
+                    deviceId: update.deviceId,
+                    connected: update.connected
+                )
+                self.presenceChangeSubject.send(update)
+                Task { @MainActor in
+                    CloudOfflineLocalSwitchCoordinator.shared.handleMQTTPresence(
+                        deviceId: update.deviceId,
+                        connected: update.connected
+                    )
+                }
             }
             .store(in: &cancellables)
     }
 
+    private var lastPresence: [String: Bool] = [:]
+    private let presenceChangeSubject = PassthroughSubject<MQTTPresenceUpdate, Never>()
+
+    /// UI (e.g. Device home) observes this to refresh cloud-online rows (Case 3).
+    public var presenceChangePublisher: AnyPublisher<MQTTPresenceUpdate, Never> {
+        presenceChangeSubject.eraseToAnyPublisher()
+    }
+
+    /// Snapshot of last in-memory presence (includes events that fired before UI subscribed).
+    public func presenceSnapshot() -> [MQTTPresenceUpdate] {
+        restorePersistedPresenceIfNeeded()
+        return lastPresence.map { MQTTPresenceUpdate(deviceId: $0.key, connected: $0.value) }
+    }
+
+    /// Apply UserDefaults presence into live registry (Case 3 remote reopen).
+    /// Does not override a presence value already received this session.
+    public func restorePersistedPresenceIfNeeded() {
+        for id in CloudPresenceMemory.shared.knownDeviceIds() {
+            let key = LimiDeviceNaming.normalizedHardwareId(id)
+            guard !key.isEmpty else { continue }
+            if lastPresence[key] != nil { continue }
+            let connected = CloudPresenceMemory.shared.lastConnected(deviceId: key) ?? false
+            lastPresence[key] = connected
+            state(for: key).updateMQTTPresence(connected: connected)
+        }
+    }
+
     private func applyBonjour(_ devices: [BLEDevice]) {
+        var presentIds = Set<String>()
+
         for device in devices {
-            // The TXT record's deviceId is what the rest of the app keys on.
-            // Fall back to the Bonjour name if TXT is missing (rare).
             guard let txtId = device.txtRecord?["deviceId"], !txtId.isEmpty else { continue }
-            let key = txtId.uppercased()
+            let key = LimiDeviceNaming.normalizedHardwareId(txtId)
+            guard !key.isEmpty else { continue }
+            presentIds.insert(key)
             let state = states[key] ?? {
                 let s = DeviceTransportState(deviceId: key)
                 states[key] = s
                 return s
             }()
-            state.updateBonjour(
-                reachable: device.reachability == .online,
-                ip: device.ipAddress
-            )
+            let reachable = device.reachability == .online
+            let ip = device.ipAddress
+            state.updateBonjour(reachable: reachable, ip: ip)
+
+            // Second case: board left MQTT and is advertising on LAN (WS).
+            let hasIP = !(ip?.isEmpty ?? true)
+            Task { @MainActor in
+                CloudOfflineLocalSwitchCoordinator.shared.handleLocalReachability(
+                    deviceId: key,
+                    wifiReachable: reachable,
+                    hasIP: hasIP
+                )
+            }
+        }
+
+        guard !devices.isEmpty else { return }
+
+        for (key, state) in states where !presentIds.contains(key) && state.wifiConnected {
+            state.updateBonjour(reachable: false, ip: nil)
+            Task { @MainActor in
+                CloudOfflineLocalSwitchCoordinator.shared.handleLocalReachability(
+                    deviceId: key,
+                    wifiReachable: false,
+                    hasIP: false
+                )
+            }
         }
     }
 
     private func seedFromBonjour(state: DeviceTransportState) {
         let match = BonjourServiceBrowser.shared.discoveredWiFiDevices.first {
-            ($0.txtRecord?["deviceId"] ?? "").uppercased() == state.deviceId
+            LimiDeviceNaming.normalizedHardwareId($0.txtRecord?["deviceId"] ?? "") == state.deviceId
         }
         guard let match = match else { return }
         state.updateBonjour(
@@ -111,7 +182,7 @@ public struct MQTTPresenceUpdate: Equatable {
     public let connected: Bool
 
     public init(deviceId: String, connected: Bool) {
-        self.deviceId = deviceId.uppercased()
+        self.deviceId = LimiDeviceNaming.normalizedHardwareId(deviceId)
         self.connected = connected
     }
 }

@@ -23,9 +23,9 @@ struct LightCard: View {
             HStack {
                 Image(systemName: "lightbulb")
                     
-                    .foregroundColor(.eton)
+                    .foregroundColor(.brandHighlight)
                 Text(lightName)
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextInverse)
                 Spacer()
 

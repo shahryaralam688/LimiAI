@@ -10,14 +10,14 @@ struct OTPDigitBox: View {
                 .stroke(isActive ? Color.appBorderPrimary : Color.appBorderPrimary.opacity(0.3), lineWidth: 2)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.06))
+                        .fill(Color.appGlassFillMedium)
                 )
                 .frame(width: 45, height: 55)
                 .shadow(color: isActive ? Color.appCanvasPrimary.opacity(0.3) : Color.clear, radius: 5, x: 0, y: 2)
 
             if !digit.isEmpty {
                 Text(digit)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(LimiTypography.title)
                     .foregroundColor(.appTextInverse)
                     .transition(.scale.combined(with: .opacity))
             }

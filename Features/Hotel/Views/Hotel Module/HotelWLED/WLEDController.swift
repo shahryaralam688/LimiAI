@@ -620,9 +620,9 @@ struct WLEDDiscoveryView: View {
     private var headerView: some View {
         VStack(spacing: 15) {
             Text("WLED Device Discovery")
-                .font(.title)
+                .font(LimiTypography.title)
                 .fontWeight(.bold)
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
             
             Button(action: {
                 viewModel.startDiscovery()
@@ -631,7 +631,7 @@ struct WLEDDiscoveryView: View {
                     if viewModel.isScanning {
                         ProgressView()
                             .scaleEffect(0.8)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
+                            .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
                     } else {
                         Image(systemName: "magnifyingglass")
                     }
@@ -639,11 +639,11 @@ struct WLEDDiscoveryView: View {
                     Text(viewModel.isScanning ? "Scanning..." : "Scan for Devices")
                         .fontWeight(.medium)
                 }
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(viewModel.isScanning ? Color.gray : Color.blue)
+                        .fill(viewModel.isScanning ? Color.appTextMuted : Color.appInfo)
                 )
             }
             .disabled(viewModel.isScanning)
@@ -651,7 +651,7 @@ struct WLEDDiscoveryView: View {
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.appDanger)
-                    .font(.caption)
+                    .font(LimiTypography.caption)
             }
         }
         .background(Color.appCanvasHotel)
@@ -661,15 +661,15 @@ struct WLEDDiscoveryView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "wifi.slash")
-                .font(.system(size: 60))
+                .font(LimiTypography.title2)
                 .foregroundColor(.appTextMuted)
             
             Text("No WLED devices found")
-                .font(.title2)
+                .font(LimiTypography.title2)
                 .foregroundColor(.appTextMuted)
             
             Text("Make sure your WLED devices are connected to the same Wi-Fi network")
-                .font(.body)
+                .font(LimiTypography.body)
                 .foregroundColor(.appTextMuted)
                 .multilineTextAlignment(.center)
         }
@@ -703,11 +703,11 @@ struct DeviceRowView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(device.name)
-                        .font(.headline)
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                     
                     Text("\(device.ip):\(device.port)")
-                        .font(.caption)
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextMuted)
                 }
                 
@@ -715,11 +715,11 @@ struct DeviceRowView: View {
                 
                 VStack(alignment: .trailing, spacing: 4) {
                     Circle()
-                        .fill(device.isOnline ? Color.green : Color.red)
+                        .fill(device.isOnline ? Color.appSuccess : Color.appDanger)
                         .frame(width: 12, height: 12)
                     
                     Text(device.isOnline ? "Online" : "Offline")
-                        .font(.caption)
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextMuted)
                 }
                 
@@ -729,7 +729,7 @@ struct DeviceRowView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.2))
+                    .fill(Color.appBorderPrimary.opacity(0.35))
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -776,7 +776,7 @@ struct WLEDDeviceControlView: View {
         VStack(spacing: 10) {
             HStack {
                 Circle()
-                    .fill(viewModel.isConnected ? Color.green : Color.red)
+                    .fill(viewModel.isConnected ? Color.appSuccess : Color.appDanger)
                     .frame(width: 12, height: 12)
                 
                 Text(viewModel.isConnected ? "Connected" : "Disconnected")
@@ -784,13 +784,13 @@ struct WLEDDeviceControlView: View {
             }
             
             Text("\(device.ip):\(device.port)")
-                .font(.caption)
+                .font(LimiTypography.caption)
                 .foregroundColor(.appTextMuted)
             
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.appDanger)
-                    .font(.caption)
+                    .font(LimiTypography.caption)
             }
         }
     }
@@ -811,8 +811,8 @@ struct WLEDDeviceControlView: View {
     private var powerToggleView: some View {
         HStack {
             Text("Power")
-                .font(.headline)
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appTextPrimary)
             
             Spacer()
             
@@ -825,7 +825,7 @@ struct WLEDDeviceControlView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color.appBorderPrimary.opacity(0.35))
         )
     }
     
@@ -833,8 +833,8 @@ struct WLEDDeviceControlView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("Brightness")
-                    .font(.headline)
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                 
                 Spacer()
                 
@@ -851,15 +851,15 @@ struct WLEDDeviceControlView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color.appBorderPrimary.opacity(0.35))
         )
     }
     
     private var colorPickerView: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Color")
-                .font(.headline)
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appTextPrimary)
             
             ColorPicker("Select Color", selection: $viewModel.selectedColor, supportsOpacity: false)
                 .labelsHidden()
@@ -873,7 +873,7 @@ struct WLEDDeviceControlView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color.appBorderPrimary.opacity(0.35))
         )
     }
 }

@@ -19,10 +19,10 @@ struct SpacesListView: View {
         VStack(alignment: .leading) {
             HStack {
                 Text("Connected Devices")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .font(LimiTypography.headline)
                     .tracking(-0.0083) // matches -0.15px letter spacing
                     .lineSpacing(3.6)  // ~120% line-height
-                    .foregroundColor(.themeWhite)
+                    .foregroundColor(.appTextPrimary)
 
             }
             .padding(.horizontal, 5)

@@ -49,18 +49,18 @@ public final class LimiTransport: ObservableObject {
 
     /// The effective door chosen for outgoing commands — includes manual medium override when set.
     public func door(for deviceId: String) -> Door {
-        let state = registry.state(for: deviceId.uppercased())
+        let state = registry.state(for: deviceId)
         return TransportMediumPreferenceStore.shared.resolvedDoor(for: state)
     }
 
     /// Firmware-derived door before any manual override (for debugging).
     public func firmwareDoor(for deviceId: String) -> Door {
-        registry.state(for: deviceId.uppercased()).activeDoor
+        registry.state(for: deviceId).activeDoor
     }
 
     /// Send any LimiCommand. Routes using **effective** door (preference override or firmware rules).
     public func sendCommand(_ command: LimiCommand, for deviceId: String) async throws {
-        let key = deviceId.uppercased()
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
         let state = registry.state(for: key)
         let door = TransportMediumPreferenceStore.shared.resolvedDoor(for: state)
 
@@ -70,15 +70,33 @@ public final class LimiTransport: ObservableObject {
         case .webSocket:
             try await sendOverWebSocket(command, state: state)
         case .ble:
-            try sendOverBLE(command)
+            try await sendOverBLE(command, deviceId: key)
         case .unreachable:
             throw LimiTransportError.deviceUnreachable
         }
     }
 
+    /// Send one group command for room control.
+    /// Emits `{ GroupID, deviceIds, command }` over the Socket.IO MQTT bridge;
+    /// backend extracts `command` and publishes to each device over MQTT.
+    public func sendGroupCommand(
+        _ command: LimiCommand,
+        groupId: String = LimiCommand.defaultGroupID,
+        deviceIds: [String]
+    ) async throws {
+        let normalized = deviceIds
+            .map { LimiDeviceNaming.normalizedHardwareId($0) }
+            .filter { !$0.isEmpty }
+        guard !normalized.isEmpty else {
+            throw LimiTransportError.deviceUnreachable
+        }
+        let payload = command.toGroupJSON(groupId: groupId, deviceIds: normalized)
+        try await mqtt.publishGroupCommand(payload)
+    }
+
     /// Send a reset to the device. MQTT-only — never WebSocket, never command topic.
     public func sendReset(for deviceId: String) async throws {
-        let key = deviceId.uppercased()
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
         let state = registry.state(for: key)
         let door = TransportMediumPreferenceStore.shared.resolvedDoor(for: state)
         guard door == .mqtt else {
@@ -114,7 +132,9 @@ public final class LimiTransport: ObservableObject {
         }
     }
 
-    private func sendOverBLE(_ command: LimiCommand) throws {
+    private func sendOverBLE(_ command: LimiCommand, deviceId: String) async throws {
+        // Smooth path: reconnect via stored BLE UUID when cloud is missing.
+        try await BLECloudFallbackService.shared.ensureConnected(hardwareId: deviceId)
         try ble.send(command)
     }
 }

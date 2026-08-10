@@ -3,7 +3,7 @@ import SwiftUI
 /// Top-level routes after splash (Phase C — central routing).
 enum AppRootRoute: Equatable {
     case onboarding
-    case getStart
+    case signIn
     case locationPrompt
     case home
 }
@@ -22,10 +22,10 @@ enum AppRouter {
             }
             return .home
         }
-        if !hasLaunchedBefore || !hasCompletedOnboarding {
+        if !hasCompletedOnboarding {
             return .onboarding
         }
-        return .getStart
+        return .signIn
     }
 
     @ViewBuilder
@@ -34,8 +34,8 @@ enum AppRouter {
         case .onboarding:
             OnboardingView()
                 .ignoresSafeArea()
-        case .getStart:
-            GetStart()
+        case .signIn:
+            SignInView(managesPostLoginNavigation: false)
                 .ignoresSafeArea()
         case .locationPrompt:
             LocationStorageView(showSkipButton: true)

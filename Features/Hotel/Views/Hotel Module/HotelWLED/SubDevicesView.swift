@@ -25,8 +25,8 @@ struct SubDevicesView: View {
             // MARK: - Header
             HStack {
                 Text("Settings")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
                     .padding()
                     .padding(.top, 40)
                 Spacer()
@@ -43,7 +43,7 @@ struct SubDevicesView: View {
             VStack {
                 HStack {
                     Text("Connected Devices")
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -78,8 +78,8 @@ struct SubDevicesView: View {
                             .frame(width: 45, height: 45)
                         
                         Image(systemName: "home")
-                            .font(.title2)
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.title2)
+                            .foregroundColor(.appTextPrimary)
                     }
                     Spacer()
                 }
@@ -87,14 +87,14 @@ struct SubDevicesView: View {
                 // Device Info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(deviceName)
-                        .font(.custom("Lexend", size: 17))
+                        .font(LimiTypography.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                         .lineLimit(2)
                     
                     Text("\(channelCount) channels")
-                        .font(.custom("Lexend", size: 13))
-                        .foregroundColor(.themeWhite.opacity(0.6))
+                        .font(LimiTypography.footnote)
+                        .foregroundColor(.appTextPrimary.opacity(0.6))
                 }
                 
                 Spacer()
@@ -102,9 +102,9 @@ struct SubDevicesView: View {
                 // Status and Toggle
                 HStack {
                     Text(isOn ? "On" : "Off")
-                        .font(.custom("Inter", size: 16))
+                        .font(LimiTypography.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                     
                     Spacer()
                     
@@ -114,7 +114,7 @@ struct SubDevicesView: View {
                     }) {
                         ZStack {
                             Rectangle()
-                                .fill(isOn ? Color.green : Color.appCanvasHotel)
+                                .fill(isOn ? Color.appSuccess : Color.appCanvasHotel)
                                 .frame(width: 50, height: 26)
                                 .cornerRadius(100)
                             

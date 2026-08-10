@@ -54,14 +54,18 @@ struct WeatherData: Codable {
     var gradientColors: [GradientStop] {
         if !isDay {
             return [
-                GradientStop(hex: "0F0C29"),
-                GradientStop(hex: "1A1A3E"),
-                GradientStop(hex: "24243E")
+                GradientStop(hex: "0B0E0C"),
+                GradientStop(hex: "111214"),
+                GradientStop(hex: "292929")
             ]
         }
         switch weatherCode {
         case 0, 1:
-            return [GradientStop(hex: "2E5BFF"), GradientStop(hex: "56A0F5"), GradientStop(hex: "87CEEB")]
+            return [
+                GradientStop(hex: "047857"),
+                GradientStop(hex: "00A5C9"),
+                GradientStop(hex: "93CFA2")
+            ]
         case 2:
             return [GradientStop(hex: "3B6CB7"), GradientStop(hex: "6A9BD8"), GradientStop(hex: "A8C8E8")]
         case 3, 45, 48:
@@ -71,9 +75,17 @@ struct WeatherData: Codable {
         case 71...77, 85, 86:
             return [GradientStop(hex: "CBD5E1"), GradientStop(hex: "E2E8F0"), GradientStop(hex: "F1F5F9")]
         case 95, 96, 99:
-            return [GradientStop(hex: "1E1B3A"), GradientStop(hex: "2D2B55"), GradientStop(hex: "44426E")]
+            return [
+                GradientStop(hex: "111214"),
+                GradientStop(hex: "191B1E"),
+                GradientStop(hex: "292929")
+            ]
         default:
-            return [GradientStop(hex: "2E5BFF"), GradientStop(hex: "56A0F5"), GradientStop(hex: "87CEEB")]
+            return [
+                GradientStop(hex: "047857"),
+                GradientStop(hex: "00A5C9"),
+                GradientStop(hex: "93CFA2")
+            ]
         }
     }
 

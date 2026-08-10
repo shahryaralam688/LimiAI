@@ -19,7 +19,7 @@ struct CatalogPanelView: View {
                         Image(item.iconName)
                             .resizable()
                             .frame(width: 50, height: 50)
-                        Text(item.name).font(.caption)
+                        Text(item.name).font(LimiTypography.caption)
                     }
                     .onTapGesture {
                         vm.addObject(item)

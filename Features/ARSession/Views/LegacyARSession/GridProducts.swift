@@ -32,7 +32,7 @@ struct GridProducts: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 10.0))
                             } else {
                                 RoundedRectangle(cornerRadius: 10.0)
-                                    .fill(Color.gray.opacity(0.2))
+                                    .fill(Color.appBorderPrimary.opacity(0.35))
                                     .frame(width: imageWidth, height: imageHeight)
                             }
                         }

@@ -83,7 +83,8 @@
 		<string>Amenti-Medium.ttf</string>
 		<string>Amenti-Regular.otf</string>
 		<string>Amenti-Light.otf</string>
-		<string>Amenti-Vf.ttf</string>
+		<string>Amenti-Thin.otf</string>
+		<string>Poppins-SemiBold.ttf</string>
 		<string>Poppins-Black.ttf</string>
 		<string>Poppins-BlackItalic.ttf</string>
 		<string>Poppins-Bold.ttf</string>
@@ -109,13 +110,11 @@
 		<string>nearby-interaction</string>
 		<string>voip</string>
 	</array>
-	<key>UIDeviceFamily</key>
-	<array>
-		<integer>1</integer>
-		<integer>2</integer>
-	</array>
 	<key>UILaunchScreen</key>
-	<dict/>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchScreenBackground</string>
+	</dict>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>

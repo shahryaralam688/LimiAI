@@ -9,19 +9,19 @@ struct ARBottomBar: View {
             }) {
                 ZStack {
                     Circle()
-                        .fill(Color.themeWhite.opacity(0.9))
+                        .fill(Color.appTextPrimary.opacity(0.9))
                         .frame(width: 70, height: 70)
                     Circle()
                         .stroke(Color.themeBlack.opacity(0.4), lineWidth: 3)
                         .frame(width: 70, height: 70)
                     Image(systemName: "camera")
-                        .font(.system(size: 26, weight: .semibold))
-                        .foregroundColor(.themeBlack)
+                        .font(LimiTypography.title2)
+                        .foregroundColor(.appTextPrimary)
                 }
             }
             
             Text("Tap To Take A Picture ")
-                .foregroundColor(Color.themeWhite)
+                .foregroundColor(.appTextPrimary)
                 .padding(.bottom)
             // Model picker bar
            ARModelList()

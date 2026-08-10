@@ -61,10 +61,20 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     var pendingWrites: [[UInt8]] = []
     // Track the target we want to (re)connect to
     private var desiredReconnectId: UUID?
+    /// When true, the next `didDisconnect` must not auto-reconnect (intentional cloud handoff).
+    private var suppressAutoReconnect = false
     
     var onDevicesUpdated: (([(name: String, id: String)]) -> Void)?
     // If a scan was requested before Bluetooth powered on, start it once powered
     var deferredScan: Bool = false
+    /// Number of UI/features that requested an active BLE scan (Home, Add Device, etc.).
+    private(set) var activeScanSessions: Int = 0
+
+    private static let scanOptions: [String: Any] = [
+        CBCentralManagerScanOptionAllowDuplicatesKey: true
+    ]
+    /// Background-safe scan must not use `AllowDuplicates` / nil-service thrash.
+    private static let reconnectScanOptions: [String: Any] = [:]
     
     override init() {
         super.init()
@@ -91,26 +101,56 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             if deferredScan {
                 print("🚀 Bluetooth powered on — starting deferred scan")
                 deferredScan = false
-                beginScanning()
+                if activeScanSessions > 0 {
+                    beginScanning(clearDiscovered: true)
+                }
             }
         }
     }
     
     func startScanning(completion: @escaping ([(name: String, id: String)]) -> Void) {
-        // Always keep the latest completion handler
         self.onDevicesUpdated = completion
-        
+        activeScanSessions += 1
+
         if isBluetoothOn {
-            beginScanning()
+            if activeScanSessions == 1 {
+                beginScanning(clearDiscovered: true)
+            } else {
+                dispatchDevicesUpdated()
+                resumeCentralScanIfNeeded()
+            }
         } else {
             print("⚠️ Bluetooth is off. Deferring scan until it powers on.")
             deferredScan = true
         }
     }
 
-    private func beginScanning() {
-        discoveredDevices.removeAll()
-        centralManager?.scanForPeripherals(withServices: nil, options: nil)
+    private func beginScanning(clearDiscovered: Bool) {
+        if clearDiscovered {
+            discoveredDevices.removeAll()
+            dispatchDevicesUpdated()
+        }
+        resumeCentralScanIfNeeded()
+    }
+
+    private func dispatchDevicesUpdated() {
+        let devices = discoveredDevices
+        let callback = onDevicesUpdated
+        DispatchQueue.main.async {
+            callback?(devices)
+        }
+    }
+
+    private func resumeCentralScanIfNeeded() {
+        guard isBluetoothOn, activeScanSessions > 0 else { return }
+        centralManager?.scanForPeripherals(withServices: nil, options: Self.scanOptions)
+    }
+
+    /// Restarts the radio scan while keeping the current session alive (e.g. device booted after scan started).
+    func refreshScan() {
+        guard activeScanSessions > 0, isBluetoothOn else { return }
+        centralManager?.stopScan()
+        centralManager?.scanForPeripherals(withServices: nil, options: Self.scanOptions)
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
@@ -137,7 +177,13 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
 
         if !discoveredDevices.contains(where: { $0.id == id }) {
             discoveredDevices.append((name: name, id: id))
-            onDevicesUpdated?(discoveredDevices)
+            dispatchDevicesUpdated()
+            notifyInterestDeviceIfNeeded(name: name, id: id)
+        } else if let index = discoveredDevices.firstIndex(where: { $0.id == id }),
+                  discoveredDevices[index].name != name,
+                  name != "Unknown Device" {
+            discoveredDevices[index] = (name: name, id: id)
+            dispatchDevicesUpdated()
         }
 
         // Auto-connect if we're in a reconnect flow and this is the target
@@ -145,8 +191,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             print("🔎 Found desired peripheral during scan. Connecting...")
             connectedPeripheral = peripheral
             peripheral.delegate = self
+            centralManager?.stopScan()
             centralManager?.connect(peripheral, options: nil)
-            stopScanning()
         }
     }
     
@@ -170,6 +216,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         peripheral.delegate = self
         peripheral.discoverServices(nil)
         
+        resumeScanAfterConnectionEvent()
+        
         // After services are discovered, this will trigger didDiscoverServices,
         // which will then discover characteristics and automatically send read request
         DispatchQueue.main.async {
@@ -179,6 +227,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         print("❌ Failed to connect to \(peripheral.name ?? "Unknown Device"): \(error?.localizedDescription ?? "Unknown error")")
+        resumeScanAfterConnectionEvent()
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -190,13 +239,24 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         connectedPeripheral = nil
         
         DispatchQueue.main.async {
+            self.isConnected = false
             SharedDevice.shared.connectedDevice = nil
             self.removeDisconnectedDevice(disconnectedID)
             self.lastDisconnectedDeviceID = disconnectedID
         }
-        // Remember the last device we were connected to and try to reconnect
-        desiredReconnectId = peripheral.identifier
-        attemptReconnect()
+
+        let shouldReconnect = !suppressAutoReconnect
+        suppressAutoReconnect = false
+        if shouldReconnect {
+            // Unexpected drop — remember and try to reconnect.
+            desiredReconnectId = peripheral.identifier
+            attemptReconnect()
+        } else {
+            // Intentional disconnect (e.g. cloud restored) — do not fight the door.
+            desiredReconnectId = nil
+            print("🔌 Intentional BLE disconnect — auto-reconnect suppressed")
+        }
+        resumeScanAfterConnectionEvent()
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -269,17 +329,17 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
                     }
                 } else if characteristic.uuid == FB05 {
                     fb05Characteristic = characteristic
-                    print("✅ FB05 characteristic found")
+                    fbAckCharacteristic = characteristic
+                    print("✅ FB05 (ACK/Notify) characteristic found")
+                    if characteristic.properties.contains(.notify) {
+                        peripheral.setNotifyValue(true, for: characteristic)
+                        print("✅ Subscribed to FB05 provisioning notifications")
+                    }
                     if fb05ShouldRead && characteristic.properties.contains(.read) {
                         print("📤 Sending read request for FB05")
                         peripheral.readValue(for: characteristic)
                         fb05ShouldRead = false
                     }
-                }
-                if characteristic.properties.contains(.notify) {
-                    fbAckCharacteristic = characteristic
-                    peripheral.setNotifyValue(true, for: characteristic)
-                    print("✅ Subscribed to FB01 notification characteristic: \(characteristic.uuid)")
                 }
             }
         }
@@ -380,10 +440,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
             // If not in system cache, scan until we rediscover it (didDiscover will auto-connect)
             print("⚠️ No system-cached peripheral. Scanning to find target again…")
-            startScanning { [weak self] _ in
-                // didDiscover handles auto-connect when peripheral matches desiredReconnectId
-                guard let _ = self else { return }
-            }
+            ensureScanForReconnect()
             return
         }
 
@@ -401,7 +458,23 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         }
 
         print("⚠️ No known peripheral to reconnect. Start scanning again.")
-        startScanning { _ in }
+        ensureScanForReconnect()
+    }
+
+    private func ensureScanForReconnect() {
+        guard isBluetoothOn else {
+            deferredScan = true
+            return
+        }
+        if activeScanSessions == 0 {
+            // No AllowDuplicates — reconnect only needs one discovery hit.
+            centralManager?.scanForPeripherals(withServices: nil, options: Self.reconnectScanOptions)
+        }
+    }
+
+    private func resumeScanAfterConnectionEvent() {
+        guard activeScanSessions > 0, isBluetoothOn else { return }
+        resumeCentralScanIfNeeded()
     }
     
     func removeDisconnectedDevice(_ deviceID: String) {
@@ -413,12 +486,15 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
         }
     }
-    func connectToDevice(deviceId: String) {
+    /// - Parameter allowDiscoveryScan: When false (app background), only system/retrieve cache —
+    ///   never start an unrestricted `scanForPeripherals` (iOS jetsam / background kill risk).
+    func connectToDevice(deviceId: String, allowDiscoveryScan: Bool = true) {
         guard let uuid = UUID(uuidString: deviceId) else {
             print("⚠️ Invalid UUID string: \(deviceId)")
             return
         }
 
+        suppressAutoReconnect = false
         desiredReconnectId = uuid
 
         // Prefer a recently discovered peripheral (most reliable)
@@ -439,22 +515,26 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             return
         }
 
-        // Final fallback: rescan briefly and attempt to connect if found
+        guard allowDiscoveryScan else {
+            print("⚠️ Device not in cache; skipping discovery scan (background-safe)")
+            return
+        }
+
+        // Final fallback: rescan until didDiscover auto-connects via desiredReconnectId.
         print("⚠️ Device not found in discovery or system cache. Rescanning...")
-        startScanning { [weak self] devices in
-            guard let self = self else { return }
-            // Attempt to connect as soon as the target shows up
-            if let target = self.storedPeripherals.first(where: { $0.identifier == uuid }) {
-                print("🔗 Connecting to \(target.name ?? "Unknown Device") (after rescan)")
-                self.connectedPeripheral = target
-                target.delegate = self
-                self.centralManager?.connect(target, options: nil)
-                self.stopScanning()
-            }
+        ensureScanForReconnect()
+    }
+
+    /// Stop orphan reconnect scanning after a timed-out ensureConnected attempt.
+    func clearReconnectTargetAndStopOrphanScan() {
+        desiredReconnectId = nil
+        if activeScanSessions == 0 {
+            centralManager?.stopScan()
         }
     }
     
     func disconnectAllDevices() {
+        suppressAutoReconnect = true
         for hub in storedHubs {
             if let peripheral = hub.peripheral { // Ensure peripheral is not nil
                 centralManager?.cancelPeripheralConnection(peripheral)
@@ -464,6 +544,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         connectedDevices.removeAll()
         connectedPeripheral = nil
         targetCharacteristic = nil
+        desiredReconnectId = nil
         SharedDevice.shared.connectedDevice = nil
         isConnected = false
         print("🔌 All devices have been disconnected.")
@@ -495,20 +576,21 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
         }
         
-        // Handle FB05 generic read/print
+        // Handle FB05 read + notify (provisioning status)
         if characteristic.uuid == FB05 {
             let bytes = [UInt8](data)
             let hex = bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
-            print("📥 FB05 Raw bytes: \(bytes) | hex=\(hex)")
-            if let text = String(data: data, encoding: .utf8), !text.isEmpty {
-                print("📥 FB05 UTF-8: \(text)")
-            } else {
-                print("ℹ️ FB05 value not valid UTF-8 or empty")
+            print("📥 FB05: bytes=\(bytes) hex=\(hex)")
+            // FB05 status codes (firmware contract):
+            // 0x00 = idle/ready, 0x01 = credentials received, 0x02 = Wi-Fi joined, 0x03 = Wi-Fi failed
+            if bytes.first == 0x03, provisionCompletion != nil {
+                provisionTimeout?.cancel()
+                provisionTimeout = nil
+                provisionCompletion?((status: "error", message: "Device could not join the Wi-Fi network"))
+                provisionCompletion = nil
             }
             return
         }
-
-        // Handle Wi‑Fi SSID list read from FB04
         if characteristic.uuid == FB04 {
             if let text = String(data: data, encoding: .utf8) {
                 print("📥 FB04 raw text: \(text)")
@@ -531,21 +613,14 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
             return
         }
-
-        if characteristic.service?.uuid == FB01 {
-            if characteristic == fbAckCharacteristic {
-                provisionTimeout?.cancel()
-                provisionTimeout = nil
-                let msg = "Wi-Fi credentials written and acknowledged"
-                provisionCompletion?((status: "success", message: msg))
-                provisionCompletion = nil
-                DispatchQueue.main.async {
-                    self.isConnected = true
-                }
-            }
-        }
     }
-    func disconnectCurrentDevice() {
+    /// - Parameter suppressReconnect: Set true when disconnecting on purpose (cloud restored)
+    ///   so `didDisconnect` does not immediately reconnect and fight MQTT.
+    func disconnectCurrentDevice(suppressReconnect: Bool = false) {
+        if suppressReconnect {
+            suppressAutoReconnect = true
+            desiredReconnectId = nil
+        }
         if let peripheral = connectedPeripheral {
             print("🔌 Disconnecting current device: \(peripheral.name ?? "Unknown Device")")
             centralManager?.cancelPeripheralConnection(peripheral)
@@ -553,10 +628,17 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             targetCharacteristic = nil
             SharedDevice.shared.connectedDevice = nil
             isConnected = false
+        } else if suppressReconnect {
+            suppressAutoReconnect = false
         }
     }
     func stopScanning() {
-        centralManager?.stopScan()
-        print("🔴 Stopped scanning for peripherals.")
+        activeScanSessions = max(0, activeScanSessions - 1)
+        if activeScanSessions == 0 {
+            centralManager?.stopScan()
+            print("🔴 Stopped scanning for peripherals.")
+        } else {
+            print("🔵 BLE scan session ended (\(activeScanSessions) still active).")
+        }
     }
 }

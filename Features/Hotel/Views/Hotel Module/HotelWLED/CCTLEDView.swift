@@ -50,8 +50,8 @@ struct CCTLEDView: View {
     @State private var isEditingSliderColor = false
     @State private var isWarmCoolReversed = false
     @State private var selectedTopTab: Int = 0 // 0 = Offline, 1 = Customize
-    @State private var isOnline: Bool = true
     @State private var showToast: Bool = false
+    @State private var didShowDeviceOfflineNotice = false
     @State private var lastSentBrightnessStep: Int?
     @State private var isBrightnessDragActive = false
     @State private var brightnessDragSessionID = 0
@@ -109,6 +109,10 @@ struct CCTLEDView: View {
         isWarmCoolReversed ? "Warm" : "Cool"
     }
 
+    private var controlsDisabledOpacity: Double { isOn ? 1.0 : 0.4 }
+
+    private var controlLabelColor: Color { isOn ? .appTextPrimary : .appTextMuted }
+
     var body: some View {
         DeviceControlScreenLayout { metrics in
             VStack(spacing: metrics.sectionSpacing) {
@@ -116,10 +120,10 @@ struct CCTLEDView: View {
                     macAddress: chennalMac,
                     selectedTopTab: $selectedTopTab,
                     showToast: $showToast,
-                    isOnline: isOnline,
+                    isOnline: transportState.isAvailableForControl,
                     metrics: metrics,
-                    gearActiveColor: .themeWhite,
-                    gearIdleColor: Color.gray.opacity(0.4)
+                    gearActiveColor: .appTextPrimary,
+                    gearIdleColor: Color.appTextMuted.opacity(0.4)
                 )
 
                 powerToggleButton
@@ -129,8 +133,8 @@ struct CCTLEDView: View {
                     VStack(spacing: 12) {
                         HStack{
                             Text("Select Color")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.appTextPrimary)
+                                .font(LimiTypography.button)
+                                .foregroundColor(controlLabelColor)
                                 .kerning(0.9)
                                 .lineSpacing(0)
                                 .lineLimit(1)
@@ -160,8 +164,8 @@ struct CCTLEDView: View {
                                 }
                             } label: {
                                 Image(systemName: "arrow.left.arrow.right.circle")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.appTextPrimary)
+                                    .font(LimiTypography.title3)
+                                    .foregroundColor(controlLabelColor)
                             }
                         }
 
@@ -193,18 +197,18 @@ struct CCTLEDView: View {
 
                         HStack{
                             Text(leftTemperatureLabel)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(LimiTypography.headline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.appTextPrimary)
+                                .foregroundColor(controlLabelColor)
                                 .lineSpacing(0)
                                 .kerning(-0.15)
 
                             Spacer()
 
                             Text(rightTemperatureLabel)
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(LimiTypography.headline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.appTextPrimary)
+                                .foregroundColor(controlLabelColor)
                                 .lineSpacing(0)
                                 .kerning(-0.15)
                         }
@@ -214,16 +218,18 @@ struct CCTLEDView: View {
                         }
                     }
                 }
+                .disabled(!isOn)
+                .opacity(controlsDisabledOpacity)
             }
         }
         .overlay(alignment: .top) {
             if showToast {
                 Text("Please connect to internet.")
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color.themeBlack.opacity(0.8))
+                    .background(Color.appOverlayScrim)
                     .cornerRadius(12)
                     .padding(.top, 12)
                     .transition(.opacity)
@@ -275,6 +281,10 @@ struct CCTLEDView: View {
         .onAppear {
             // The Socket.IO bridge stays connected at app scope; nothing to do here.
         }
+        .deviceControlAvailability(
+            transportState: transportState,
+            didShowOfflineNotice: $didShowDeviceOfflineNotice
+        )
     }
 
     // MARK: - Device Senders
@@ -509,11 +519,11 @@ struct CCTLEDView: View {
             HStack(alignment: .center, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Power")
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .font(LimiTypography.button)
                         .foregroundColor(.appTextPrimary)
 
                     Text("Turn OFF/ON")
-                        .font(.system(size: 15, weight: .regular, design: .rounded))
+                        .font(LimiTypography.body)
                         .foregroundColor(.appTextPrimary.opacity(0.85))
 
                     DeviceControlPathStatusView(display: pathDisplay)
@@ -528,7 +538,7 @@ struct CCTLEDView: View {
                 }) {
                     ZStack {
                         Rectangle()
-                            .fill(isOn ? Color.themeWhite : Color.gray.opacity(0.3))
+                            .fill(isOn ? Color.themeWhite : Color.appBorderPrimary.opacity(0.45))
                             .frame(width: 50, height: 26)
                             .cornerRadius(100)
 
@@ -561,7 +571,7 @@ struct CCTLEDView: View {
     private var rainbowColorBar: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Color")
-                .font(.system(size: 16, weight: .medium, design: .rounded))
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextPrimary)
                 .lineSpacing(0)
                 .kerning(0)
@@ -628,12 +638,14 @@ struct CCTLEDView: View {
         }
         .padding()
         .background(Color.appSurfacePrimary, in: RoundedRectangle(cornerRadius: 16))
+        .disabled(!isOn)
+        .opacity(controlsDisabledOpacity)
     }
 
     private var brightnessTitle: some View {
         Text("Brightness")
-            .font(.system(size: 16, weight: .medium, design: .rounded))
-            .foregroundColor(.appTextPrimary)
+            .font(LimiTypography.headline)
+            .foregroundColor(controlLabelColor)
             .lineSpacing(0)
             .kerning(0)
             .lineLimit(1)
@@ -657,8 +669,8 @@ struct CCTLEDView: View {
             .frame(width: 46, height: 46)
             .overlay(
                 Text("0%")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(controlLabelColor)
             )
     }
 
@@ -668,8 +680,8 @@ struct CCTLEDView: View {
             .frame(width: 46, height: 46)
             .overlay(
                 Text("\(Int(100))%")  // use computed %
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(controlLabelColor)
             )
     }
 
@@ -733,6 +745,7 @@ struct CCTLEDView: View {
     private func sliderGesture(geometry: GeometryProxy) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
+                guard isOn else { return }
                 beginBrightnessDragDiagnosticsIfNeeded()
                 dragUIEventCount += 1
 
@@ -770,7 +783,7 @@ struct CCTLEDView: View {
     private var effectsScrollView: some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Effects")
-                .font(.headline)
+                .font(LimiTypography.headline)
                 .foregroundColor(.appTextPrimary)
                 .padding(.horizontal)
 
@@ -784,24 +797,24 @@ struct CCTLEDView: View {
                             VStack(spacing: 8) {
                                 // Effect icon based on name
                                 Image(systemName: effectIcon(for: effect.name))
-                                    .font(.title2)
+                                    .font(LimiTypography.title2)
                                     .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
 
                                 Text(effect.name)
-                                    .font(.caption)
+                                    .font(LimiTypography.caption)
                                     .foregroundColor(selectedEffect == effect.id ? .themeWhite : .primary)
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2)
                             }
                             .frame(width: 80, height: 80)
                             .background(
-                                selectedEffect == effect.id ? Color.orbGlow4 : Color.clear
+                                selectedEffect == effect.id ? Color.brandAction : Color.clear
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(
                                         selectedEffect == effect.id ?
-                                        Color.orbGlow4 : Color.appTextPrimary.opacity(0.6),
+                                        Color.brandAction : Color.appTextPrimary.opacity(0.6),
                                         lineWidth: 1
                                     )
                             )
@@ -895,7 +908,13 @@ struct HorizontalWarmCoolSlider: View {
                 // Track
                 RoundedRectangle(cornerRadius: trackHeight/2)
                     .fill(
-                        LinearGradient(
+                        isDisabled
+                        ? LinearGradient(
+                            colors: [Color.appTextMuted.opacity(0.55), Color.appTextMuted.opacity(0.35)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        : LinearGradient(
                             colors: [
                                 isReversed ? Color.spotlightCool : Color.spotlightWarm,
                                 Color.themeWhite,
@@ -911,7 +930,7 @@ struct HorizontalWarmCoolSlider: View {
                 HStack {
                     ForEach(0..<10) { i in
                         Circle()
-                            .fill(Color.themeWhite.opacity(0.9))
+                            .fill(isDisabled ? Color.appTextMuted.opacity(0.6) : Color.appTextPrimary.opacity(0.9))
                             .frame(width: 3, height: 3)
                         if i < 9 { Spacer() }
                     }
@@ -919,7 +938,7 @@ struct HorizontalWarmCoolSlider: View {
 
                 // Thumb
                 Circle()
-                    .fill(Color.appSliderLight)
+                    .fill(isDisabled ? Color.appTextMuted.opacity(0.5) : Color.appSliderLight)
                     .frame(width: thumbSize, height: thumbSize)
                     .overlay(Circle().stroke(Color.themeBlack.opacity(0.9), lineWidth: 1))
                     .overlay(Circle().fill(Color.appSliderThumb).frame(width: 8, height: 8))

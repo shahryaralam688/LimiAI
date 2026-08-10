@@ -211,7 +211,7 @@ struct LimiContentView: View {
                     }) {
                         Image(systemName: "arkit")
                             .foregroundColor(.appTextPrimary)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(LimiTypography.title3)
                             .frame(width: 34, height: 34) // same fixed size
                             .background(
                                 Circle()

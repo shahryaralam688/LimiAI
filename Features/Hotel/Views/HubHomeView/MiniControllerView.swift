@@ -53,7 +53,7 @@ struct MiniControllerView: View {
     @Binding var brightness: Double
     @Binding var warmCold: Double
 
-    @State private var selectedColor: Color = .emerald // Default color
+    @State private var selectedColor: Color = .brandAction // Default color
     @State private var colorValue: Double = 0.0 // Represents position on rainbow slider
     @State private var backgroundImage: String = "name3"
 
@@ -87,7 +87,7 @@ struct MiniControllerView: View {
             VStack {
                 
                 RoundedRectangle(cornerRadius: UIScreen.main.bounds.height * 0.02 , style: .continuous)
-                    .fill(Color.themeBlack)
+                    .fill(Color.appSurfaceDark)
                     .frame(height: UIScreen.main.bounds.height * 0.55) // 70% of height
                     .frame(maxWidth: .infinity)
                 Spacer()
@@ -106,7 +106,7 @@ struct MiniControllerView: View {
                 ZStack {
                     
                     Ellipse()
-                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .themeWhite) : .themeWhite)
+                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .appTextPrimary) : .appTextPrimary)
                         .frame(width: 235, height: 135)
                         .opacity(
                             mode == "RGB"
@@ -129,10 +129,10 @@ struct MiniControllerView: View {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(0.1)) {
                             }
                         }
-                        .shadow(color:.themeWhite, radius: 4)
+                        .shadow(color: Color.brandHighlight.opacity(0.45), radius: 4)
 //                    
 //                    Ellipse()
-//                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .themeWhite) : .themeWhite)
+//                        .fill(mode == "RGB" ? (selectedRGB != nil ? selectedColor : .appTextPrimary) : .appTextPrimary)
 //                        .frame(width: 120, height: 45)
 //                        .opacity(
 //                            mode == "RGB"
@@ -167,20 +167,20 @@ struct MiniControllerView: View {
 
                                     HStack {
                                         Text("CCT LED \(pwm)")
-                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                            .font(LimiTypography.button)
                                             .foregroundColor(.appTextPrimary)
                                         
                                         Spacer()
                                         
                                         Text("\(Int(pwmBrightness[pwm - 1]))%")
-                                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                                            .foregroundColor(.emerald)
+                                            .font(LimiTypography.headline)
+                                            .foregroundColor(.brandAction)
                                     }
                                     
                                     // Brightness Slider
                                     HStack(spacing: 12) {
                                         Image(systemName: "sun.min.fill")
-                                            .foregroundColor(.emerald.opacity(0.7))
+                                            .foregroundColor(.brandAction.opacity(0.7))
                                         
                                         Slider(value: $pwmBrightness[pwm - 1], in: 0...100, step: 1, onEditingChanged: { isEditing in
                                             if isEditing {
@@ -196,10 +196,10 @@ struct MiniControllerView: View {
                                                 // Update happens automatically through binding
                                             }
                                         }
-                                        .accentColor(.emerald)
+                                        .accentColor(.brandAction)
                                         
                                         Image(systemName: "sun.max.fill")
-                                            .foregroundColor(.emerald)
+                                            .foregroundColor(.brandAction)
                                     }
                                 }
                             }
@@ -211,7 +211,7 @@ struct MiniControllerView: View {
                                     VStack(alignment: .leading, spacing: 16) {
                                         HStack {
                                             Text("RGB LED \(lednumber)")
-                                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                                .font(LimiTypography.button)
                                                 .foregroundColor(.appTextInverse)
                                             
                                             Spacer()
@@ -219,8 +219,8 @@ struct MiniControllerView: View {
                                             Circle()
                                                 .fill(selectedColor)
                                                 .frame(width: 24, height: 24)
-                                                .overlay(Circle().stroke(Color.themeWhite, lineWidth: 2))
-                                                .shadow(color: Color.themeBlack.opacity(0.1), radius: 2, x: 0, y: 1)
+                                                .overlay(Circle().stroke(Color.appGlassStrokeLight, lineWidth: 2))
+                                                .shadow(color: Color.appShadowMedium.opacity(0.1), radius: 2, x: 0, y: 1)
                                         }
                                         
                                         // Rainbow Color Picker
@@ -228,8 +228,8 @@ struct MiniControllerView: View {
                                             RainbowSlider(value: $colorValue, selectedColor: $selectedColor)
                                                 .frame(height: 40)
                                                 .cornerRadius(12)
-                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.themeWhite, lineWidth: 2))
-                                                .shadow(color: Color.themeBlack.opacity(0.1), radius: 3, x: 0, y: 2)
+                                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.appGlassStrokeLight, lineWidth: 2))
+                                                .shadow(color: Color.appShadowMedium.opacity(0.1), radius: 3, x: 0, y: 2)
                                                 .onChange(of: colorValue) { oldValue, newValue in
                                                     selectedColor = getColorFromSlider(newValue)
                                                     sendHapticFeedback()
@@ -240,12 +240,12 @@ struct MiniControllerView: View {
                                             
                                             // Color presets
                                             HStack(spacing: 12) {
-                                                ForEach([Color.red, Color.green, Color.blue, Color.yellow, Color.purple], id: \.self) { color in
+                                                ForEach([Color.appDanger, Color.appSuccess, Color.appInfo, Color.appYellow, Color.appPurple], id: \.self) { color in
                                                     Circle()
                                                         .fill(color)
                                                         .frame(width: 30, height: 30)
-                                                        .overlay(Circle().stroke(Color.themeWhite, lineWidth: 2))
-                                                        .shadow(color: Color.themeBlack.opacity(0.1), radius: 2, x: 0, y: 1)
+                                                        .overlay(Circle().stroke(Color.appGlassStrokeLight, lineWidth: 2))
+                                                        .shadow(color: Color.appShadowMedium.opacity(0.1), radius: 2, x: 0, y: 1)
                                                         .onTapGesture {
                                                             selectedColor = color
                                                             sendColorToLED(color, ledNumber: lednumber)
@@ -276,8 +276,8 @@ struct MiniControllerView: View {
                             }
                         }) {
                             Text("CCT")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(mode == "CCT" ? .themeWhite : .gray)
+                                .font(LimiTypography.headline)
+                                .foregroundColor(mode == "CCT" ? .appTextPrimary : .appTextMuted)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
@@ -292,8 +292,8 @@ struct MiniControllerView: View {
                             }
                         }) {
                             Text("RGB")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(mode == "RGB" ? .themeWhite : .gray)
+                                .font(LimiTypography.headline)
+                                .foregroundColor(mode == "RGB" ? .appTextPrimary : .appTextMuted)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
@@ -304,8 +304,8 @@ struct MiniControllerView: View {
                     }
                     .background(
                         RoundedRectangle(cornerRadius: 18)
-                            .fill(Color.themeBlack)
-                            .stroke(Color.themeBlack, lineWidth: 5)
+                            .fill(Color.appSurfaceDark)
+                            .stroke(Color.appBorderPrimary, lineWidth: 5)
                     )
                     .padding(.horizontal, 20)
                     
@@ -315,7 +315,7 @@ struct MiniControllerView: View {
                         VStack(alignment: .leading, spacing: 8) {
 //                            HStack {
 //                                Text("CCT LEDs")
-//                                    .font(.system(size: 16, weight: .medium))
+//                                    .font(LimiTypography.headline)
 //                                    .foregroundColor(.alabaster)
 //                                Spacer()
 //                            }
@@ -327,7 +327,7 @@ struct MiniControllerView: View {
                                         MiniButton(
                                             title: "LED \(index)",
                                             isSelected: selectedPWM == index,
-                                            color: .emerald,
+                                            color: .brandAction,
                                             action: {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                                     selectedPWM = (selectedPWM == index) ? nil : index
@@ -347,7 +347,7 @@ struct MiniControllerView: View {
                         VStack(alignment: .leading, spacing: 8) {
 //                            HStack {
 //                                Text("RGB LEDs")
-//                                    .font(.system(size: 16, weight: .medium))
+//                                    .font(LimiTypography.headline)
 //                                    .foregroundColor(.alabaster)
 //                                Spacer()
 //                            }
@@ -359,7 +359,7 @@ struct MiniControllerView: View {
                                         MiniButton(
                                             title: "RGB \(index)",
                                             isSelected: selectedRGB == index,
-                                            color: .eton,
+                                            color: .brandHighlight,
                                             selectedColor: selectedRGB == index ? selectedColor : nil,
                                             action: {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -559,26 +559,26 @@ struct MiniButton: View {
                 // Icon container with rounded square background
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isSelected ? Color.themeBlack : Color.gray.opacity(0.3))
+                        .fill(isSelected ? Color.appSurfaceDark : Color.appBorderPrimary.opacity(0.45))
                         .frame(width: 50, height: 50)
                     
                     // LED/Light icon
                     Image(systemName: title.contains("RGB") ? "lightbulb.fill" : "lamp.desk.fill")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(isSelected ? (selectedColor ?? color) : Color.themeWhite.opacity(0.7))
+                        .font(LimiTypography.title2)
+                        .foregroundColor(isSelected ? (selectedColor ?? color) : Color.appTextSecondary.opacity(1))
                 }
                 
                 // Text label below icon
                 Text(title)
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.caption)
+                    .foregroundColor(.appTextPrimary)
                     .multilineTextAlignment(.center)
             }
             .frame(width: 60, height: 80)
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(Color.appSurfacePrimary)
-                    .shadow(color: isSelected ? (selectedColor ?? color).opacity(0.3) : Color.themeBlack.opacity(0.1),
+                    .shadow(color: isSelected ? (selectedColor ?? color).opacity(0.3) : Color.appShadowMedium.opacity(0.1),
                             radius: isSelected ? 8 : 4,
                             x: 0,
                             y: isSelected ? 4 : 2)

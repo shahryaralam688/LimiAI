@@ -47,14 +47,14 @@ struct VoicePendantControlsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("Status Monitoring")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                     Button {
                         Task { await viewModel.refreshStatus() }
                     } label: {
                         Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(LimiTypography.callout)
                             .foregroundColor(Color.appBorderSoft)
                             .rotationEffect(.degrees(viewModel.isLoadingStatus ? 360 : 0))
                             .animation(viewModel.isLoadingStatus ? .linear(duration: 1).repeatForever(autoreverses: false) : .default,
@@ -92,15 +92,15 @@ struct VoicePendantControlsView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Storage")
-                    .font(.system(size: 14, weight: .regular))
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(Color.appTextSecondary)
                 Spacer()
                 Text("\(status.storageUsedMB) / \(status.storageTotalMB) MB")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.footnote)
+                    .foregroundColor(.appTextPrimary)
             }
             ProgressView(value: status.storageUsedFraction)
-                .tint(.orbGlow4)
+                .tint(.brandAction)
         }
         .padding(.vertical, 12)
     }
@@ -111,7 +111,7 @@ struct VoicePendantControlsView: View {
         VPSectionCard("Volume & Audio") {
             VStack(spacing: 18) {
                 sliderRow(icon: "speaker.wave.3.fill", title: "Volume",
-                          value: s.volume, tint: .orbGlow4)
+                          value: s.volume, tint: .brandAction)
                 divider
                 sliderRow(icon: "mic.fill", title: "Mic sensitivity",
                           value: s.micSensitivity, tint: .emerald)
@@ -126,14 +126,14 @@ struct VoicePendantControlsView: View {
         VStack(spacing: 8) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(LimiTypography.callout)
                     .foregroundColor(tint)
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
                 Text("\(Int(value.wrappedValue * 100))%")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(Color.appTextSecondary)
             }
             Slider(value: value, in: 0...1) { editing in
@@ -150,10 +150,10 @@ struct VoicePendantControlsView: View {
             Toggle(isOn: s.wakeWordEnabled) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Wake word")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.appTextPrimary)
                     Text("Respond to “Hey Limi”")
-                        .font(.system(size: 12, weight: .regular))
+                        .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextTertiary)
                 }
             }
@@ -189,33 +189,33 @@ struct VoicePendantControlsView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20, weight: .regular))
+                    .font(LimiTypography.title3)
                     .foregroundColor(isSelected ? .emerald : Color.appTextMuted)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Text(model.name)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.callout)
+                            .foregroundColor(.appTextPrimary)
                         Text(model.tier)
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(.orbGlow4)
+                            .font(LimiTypography.caption2)
+                            .foregroundColor(.brandAction)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(Color.orbGlow4.opacity(0.12))
+                            .background(Color.brandHighlight.opacity(0.12))
                             .clipShape(Capsule())
                     }
                     Text(model.detail)
-                        .font(.system(size: 12, weight: .regular))
+                        .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextTertiary)
                         .multilineTextAlignment(.leading)
                 }
                 Spacer()
             }
             .padding(12)
-            .background(isSelected ? Color.orbGlow4.opacity(0.08) : Color.appSurfacePrimary)
+            .background(isSelected ? Color.brandHighlight.opacity(0.08) : Color.appSurfacePrimary)
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color.orbGlow4.opacity(0.4) : Color.clear, lineWidth: 1)
+                    .stroke(isSelected ? Color.brandHighlight.opacity(0.4) : Color.clear, lineWidth: 1)
             )
             .cornerRadius(14)
         }
@@ -227,18 +227,18 @@ struct VoicePendantControlsView: View {
     private func infoRow(_ label: String, _ value: String) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextSecondary)
             Spacer()
             Text(value)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
         }
         .padding(.vertical, 12)
     }
 
     private var divider: some View {
-        Rectangle().fill(Color.themeWhite.opacity(0.06)).frame(height: 1)
+        Rectangle().fill(Color.appGlassFillMedium).frame(height: 1)
     }
 
     private static let placeholder = VoicePendantSettings(

@@ -6,6 +6,9 @@
 //  Detects HTTP 503 mqtt_active on the upgrade response and translates it to
 //  LimiTransportError.mqttActive. Does NOT auto-retry on 503 (per spec).
 //
+//  Connect is concurrency-safe: multiple callers wait on one handshake via a
+//  waiter list (a single CheckedContinuation used to be overwritten and crash).
+//
 
 import Foundation
 
@@ -18,7 +21,9 @@ public final class DeviceWebSocketClient: NSObject {
         let ipAddress: String
         var task: URLSessionWebSocketTask?
         var connecting: Bool = false
-        var connectContinuation: CheckedContinuation<Void, Error>?
+        var receiveLoopStarted: Bool = false
+        /// All callers waiting for the current handshake to finish.
+        var connectWaiters: [CheckedContinuation<Void, Error>] = []
 
         init(deviceId: String, ipAddress: String) {
             self.deviceId = deviceId
@@ -67,16 +72,28 @@ public final class DeviceWebSocketClient: NSObject {
         let key = deviceId.uppercased()
         queueLock.lock()
         let connection = connections.removeValue(forKey: key)
+        let waiters = connection?.connectWaiters ?? []
+        connection?.connectWaiters.removeAll()
         queueLock.unlock()
         connection?.task?.cancel(with: .normalClosure, reason: nil)
+        for waiter in waiters {
+            waiter.resume(throwing: LimiTransportError.deviceUnreachable)
+        }
     }
 
     public func disconnectAll() {
         queueLock.lock()
-        let all = connections.values
+        let all = Array(connections.values)
         connections.removeAll()
         queueLock.unlock()
-        all.forEach { $0.task?.cancel(with: .normalClosure, reason: nil) }
+        for connection in all {
+            let waiters = connection.connectWaiters
+            connection.connectWaiters.removeAll()
+            connection.task?.cancel(with: .normalClosure, reason: nil)
+            for waiter in waiters {
+                waiter.resume(throwing: LimiTransportError.deviceUnreachable)
+            }
+        }
     }
 
     // MARK: - Internal
@@ -87,7 +104,12 @@ public final class DeviceWebSocketClient: NSObject {
         if let existing = connections[deviceId] {
             // If the IP changed (DHCP), tear down and rebuild.
             if existing.ipAddress != ipAddress {
+                let staleWaiters = existing.connectWaiters
+                existing.connectWaiters.removeAll()
                 existing.task?.cancel(with: .normalClosure, reason: nil)
+                for waiter in staleWaiters {
+                    waiter.resume(throwing: LimiTransportError.deviceUnreachable)
+                }
                 let fresh = Connection(deviceId: deviceId, ipAddress: ipAddress)
                 connections[deviceId] = fresh
                 return fresh
@@ -100,24 +122,49 @@ public final class DeviceWebSocketClient: NSObject {
     }
 
     private func connectIfNeeded(_ connection: Connection) async throws {
-        if let existing = connection.task, existing.state == .running { return }
-
-        guard let url = AppURLs.Device.webSocketURL(ip: connection.ipAddress) else {
-            throw LimiTransportError.missingDeviceIP
-        }
-
-        let task = session.webSocketTask(with: url)
-        connection.task = task
-        connection.connecting = true
-        task.resume()
-
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            connection.connectContinuation = continuation
-        }
-        connection.connecting = false
+            queueLock.lock()
 
-        // Drain incoming so the socket stays alive and we can log responses.
-        receiveLoop(on: connection)
+            if let existing = connection.task, existing.state == .running {
+                queueLock.unlock()
+                continuation.resume()
+                return
+            }
+
+            // Another caller is already handshaking — join the waiter list.
+            if connection.connecting {
+                connection.connectWaiters.append(continuation)
+                queueLock.unlock()
+                return
+            }
+
+            guard let url = AppURLs.Device.webSocketURL(ip: connection.ipAddress) else {
+                queueLock.unlock()
+                continuation.resume(throwing: LimiTransportError.missingDeviceIP)
+                return
+            }
+
+            let task = session.webSocketTask(with: url)
+            connection.task = task
+            connection.connecting = true
+            connection.receiveLoopStarted = false
+            connection.connectWaiters.append(continuation)
+            queueLock.unlock()
+
+            task.resume()
+        }
+
+        // Only the first successful connect starts the receive loop once.
+        queueLock.lock()
+        let shouldStartReceive =
+            connection.task?.state == .running && !connection.receiveLoopStarted
+        if shouldStartReceive {
+            connection.receiveLoopStarted = true
+        }
+        queueLock.unlock()
+        if shouldStartReceive {
+            receiveLoop(on: connection)
+        }
     }
 
     private func receiveLoop(on connection: Connection) {
@@ -174,13 +221,21 @@ public final class DeviceWebSocketClient: NSObject {
     fileprivate func resolveContinuation(for task: URLSessionTask, with result: Result<Void, Error>) {
         queueLock.lock()
         let connection = connections.values.first { $0.task === task }
-        let cont = connection?.connectContinuation
-        connection?.connectContinuation = nil
+        let waiters = connection?.connectWaiters ?? []
+        connection?.connectWaiters.removeAll()
+        connection?.connecting = false
+        if case .failure = result {
+            connection?.receiveLoopStarted = false
+        }
         queueLock.unlock()
-        guard let cont else { return }
-        switch result {
-        case .success: cont.resume()
-        case .failure(let err): cont.resume(throwing: err)
+
+        for waiter in waiters {
+            switch result {
+            case .success:
+                waiter.resume()
+            case .failure(let err):
+                waiter.resume(throwing: err)
+            }
         }
     }
 }
@@ -216,8 +271,11 @@ extension DeviceWebSocketClient: URLSessionTaskDelegate {
         // For a WebSocket upgrade, the only way to learn about a 503 mqtt_active
         // rejection is to inspect the HTTP response on the failed task.
         if let http = task.response as? HTTPURLResponse, http.statusCode == 503 {
-            // Surface 503 as a strong signal that MQTT is active for this device.
-            if let key = connections.first(where: { $0.value.task === task })?.key {
+            // Surface 503 as a strong signal that MQTT is active for that device.
+            queueLock.lock()
+            let key = connections.first(where: { $0.value.task === task })?.key
+            queueLock.unlock()
+            if let key {
                 SocketIOMQTTBridge.shared.reportObservedMQTTActive(deviceId: key)
             }
             resolveContinuation(for: task, with: .failure(LimiTransportError.mqttActive))

@@ -17,7 +17,7 @@ struct RequestSummaryView: View {
                     Spacer()
                     
                     Text("Request Summary")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(LimiTypography.button)
                         .foregroundColor(.appTextPrimary)
                     
                     Spacer()
@@ -46,7 +46,7 @@ struct RequestSummaryView: View {
                 // Request Name Card
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Request Name")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
@@ -59,8 +59,8 @@ struct RequestSummaryView: View {
                         )
                     
                     Text(item.title)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.appTextPrimary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
@@ -70,7 +70,7 @@ struct RequestSummaryView: View {
                 // Request Time Card
                 VStack(alignment: .leading, spacing: 24) {
                     Text("Request Time")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
@@ -83,10 +83,10 @@ struct RequestSummaryView: View {
                         )
                     
                     Text(requestTime)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.appTextPrimary)
                     Text("Delivered by")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
@@ -99,10 +99,10 @@ struct RequestSummaryView: View {
                         )
                     
                     Text(deliveredBy)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.appTextPrimary)
                     Text("Summary")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
@@ -115,8 +115,8 @@ struct RequestSummaryView: View {
                         )
                     
                     Text(summary)
-                        .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.body)
+                        .foregroundColor(.appTextPrimary)
                         .lineSpacing(4)
                         .multilineTextAlignment(.leading)
                 }

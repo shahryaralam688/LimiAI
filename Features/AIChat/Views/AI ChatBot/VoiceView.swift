@@ -8,7 +8,10 @@ struct VoiceView: View {
     @Environment(\.limiBackendBaseURL) private var backendBaseURL
 
     var body: some View {
-        VoiceViewContent(backendBaseURL: backendBaseURL, onDismiss: { dismiss() })
+        VoiceViewContent(
+            backendBaseURL: backendBaseURL,
+            onDismiss: { dismiss() }
+        )
     }
 }
 
@@ -23,6 +26,8 @@ private struct VoiceViewContent: View {
     private let onDismiss: () -> Void
 
     init(backendBaseURL: URL, onDismiss: @escaping () -> Void) {
+        // Always use main App AI (WebRTC). Pendant hardware audio still uses
+        // VoicePendantVoiceManager separately for device streaming.
         _viewModel = StateObject(wrappedValue: VoiceViewModel(backendBaseURL: backendBaseURL))
         self.onDismiss = onDismiss
     }

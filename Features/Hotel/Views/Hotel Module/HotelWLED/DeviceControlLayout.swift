@@ -79,8 +79,8 @@ struct DeviceControlPreviewHeader: View {
     @Binding var showToast: Bool
     let isOnline: Bool
     let metrics: DeviceControlLayoutMetrics
-    var gearActiveColor: Color = .orbGlow4
-    var gearIdleColor: Color = Color.gray.opacity(0.4)
+    var gearActiveColor: Color = .brandAction
+    var gearIdleColor: Color = Color.appTextMuted.opacity(0.4)
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -98,7 +98,7 @@ struct DeviceControlPreviewHeader: View {
                         .frame(height: metrics.previewHeight)
                         .overlay {
                             Text("Configurator unavailable")
-                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .font(LimiTypography.footnote)
                                 .foregroundColor(.appTextSecondary)
                         }
                 }
@@ -114,7 +114,7 @@ struct DeviceControlPreviewHeader: View {
                 }
             } label: {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                     .frame(width: 36, height: 36)
                     .background(selectedTopTab == 1 ? gearActiveColor : gearIdleColor)
@@ -152,9 +152,9 @@ struct DeviceControlPathStatusView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Image(systemName: display.iconName)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(LimiTypography.caption2)
                 Text(display.effectiveDoor.description)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(LimiTypography.caption2)
             }
             .foregroundColor(.appTextPrimary.opacity(0.85))
             .padding(.horizontal, 10)
@@ -166,7 +166,7 @@ struct DeviceControlPathStatusView: View {
 
             if display.isManualOverride {
                 Text("Manual: \(display.preference.shortTitle) · Auto would: \(display.firmwareDoor.description)")
-                    .font(.system(size: 10, weight: .regular, design: .rounded))
+                    .font(LimiTypography.caption2)
                     .foregroundColor(.appTextPrimary.opacity(0.45))
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -185,10 +185,10 @@ struct ControlPathPickerCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.triangle.branch")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.brandAction)
                     Text("Control path")
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .font(LimiTypography.callout)
                         .foregroundColor(.appTextPrimary)
                     Spacer()
                 }
@@ -199,16 +199,95 @@ struct ControlPathPickerCard: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .tint(Color.orbGlow4)
+                .tint(Color.brandAction)
 
                 Text(store.preference == .automatic
                      ? "App picks MQTT, LAN, or BLE automatically."
                      : "Testing mode — commands always use \(store.preference.shortTitle).")
-                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .font(LimiTypography.caption2)
                     .foregroundColor(.appTextTertiary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+}
+
+// MARK: - Offline / unavailable overlay
+
+/// Shown when a provisioned device is powered off or unreachable while the user is on a control screen.
+struct DeviceControlUnavailableOverlay: View {
+    var title: String = "Device Unavailable"
+    var message: String = "This device is off or not reachable. Turn it on and wait a moment."
+
+    var body: some View {
+        ZStack {
+            Color.appOverlayScrimLight
+                .ignoresSafeArea()
+
+            VStack(spacing: 14) {
+                Image(systemName: "power.circle")
+                    .font(.system(size: LimiIconSize.section, weight: .regular))
+                    .foregroundColor(.appTextSecondary)
+
+                Text(title)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
+
+                Text(message)
+                    .font(LimiTypography.subheadline)
+                    .foregroundColor(.appTextMuted)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(24)
+            .glassCard(cornerRadius: 18)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.appGlassStrokeLight, lineWidth: 1)
+            )
+            .padding(.horizontal, 28)
+        }
+        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+    }
+}
+
+private struct DeviceControlAvailabilityModifier: ViewModifier {
+    @ObservedObject var transportState: DeviceTransportState
+    @Binding var didShowOfflineNotice: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .disabled(!transportState.isAvailableForControl)
+            .opacity(transportState.isAvailableForControl ? 1 : 0.45)
+            .overlay {
+                if !transportState.isAvailableForControl {
+                    DeviceControlUnavailableOverlay()
+                }
+            }
+            .animation(.easeInOut(duration: 0.22), value: transportState.isAvailableForControl)
+            .onChange(of: transportState.isAvailableForControl) { _, available in
+                guard !available, !didShowOfflineNotice else { return }
+                didShowOfflineNotice = true
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+            .onAppear {
+                if !transportState.isAvailableForControl {
+                    didShowOfflineNotice = true
+                }
+            }
+    }
+}
+
+extension View {
+    /// Dims controls and shows a light popup when the device is off or unreachable.
+    func deviceControlAvailability(
+        transportState: DeviceTransportState,
+        didShowOfflineNotice: Binding<Bool>
+    ) -> some View {
+        modifier(DeviceControlAvailabilityModifier(
+            transportState: transportState,
+            didShowOfflineNotice: didShowOfflineNotice
+        ))
     }
 }
 
@@ -231,16 +310,16 @@ struct DeviceControlNavigationShell<Content: View>: View {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close", action: onClose)
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.orbGlow4)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.brandAction)
                     }
                     ToolbarItem(placement: .principal) {
                         VStack(spacing: 2) {
                             Text(title)
-                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .font(LimiTypography.headline)
                             if let subtitle {
                                 Text(subtitle)
-                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .font(LimiTypography.caption2)
                                     .foregroundColor(.appTextSecondary)
                             }
                         }

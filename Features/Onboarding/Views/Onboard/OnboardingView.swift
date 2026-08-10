@@ -7,6 +7,7 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var showSignIn = false
     @State private var showPostStoryboardLocation = false
+    @State private var isCompletingOnboarding = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("globalUserLocation") private var storedLocation = ""
 
@@ -40,6 +41,7 @@ struct OnboardingView: View {
         }
         .onChange(of: showPostStoryboardLocation) { _, showing in
             if showing { onboardingSpeech.stop() }
+            if !showing && !showSignIn { isCompletingOnboarding = false }
         }
         .onDisappear {
             onboardingSpeech.stop()
@@ -54,6 +56,10 @@ struct OnboardingView: View {
     }
 
     private func handleStoryboardActivated() {
+        guard !isCompletingOnboarding else { return }
+        isCompletingOnboarding = true
+        onboardingSpeech.stop()
+
         let trimmed = storedLocation.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             showPostStoryboardLocation = true
@@ -70,10 +76,10 @@ struct OnboardingView: View {
             "surface": "ai_storyboard_onboarding"
         ]
         switch page {
-        case 0: m["ui_guide"] = "Intro: meet Limi AI — swipe left for the next story."
-        case 1: m["ui_guide"] = "Talk naturally; Limi controls lights and routines from context."
-        case 2: m["ui_guide"] = "The orb can be dragged; tap for voice, long-press for more later."
-        case 3: m["ui_guide"] = "Final frame: larger orb — Continue to sign in or enable the assistant."
+        case 0: m["ui_guide"] = "Intro: meet Limi — a warm AI companion; swipe for the next story."
+        case 1: m["ui_guide"] = "Talk naturally; Limi understands everyday requests like lights and routines."
+        case 2: m["ui_guide"] = "The orb can be moved anywhere; tap when you want to chat."
+        case 3: m["ui_guide"] = "Final frame: larger orb — tap Let's begin to continue to sign in."
         default: break
         }
         return m
@@ -92,7 +98,12 @@ struct OnboardingView: View {
                     StoryboardPage(backgroundImage: "storyboard_bg_4", screenSize: geo.size).tag(3).ignoresSafeArea()
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .allowsHitTesting(currentPage < totalPages - 1)
                 .ignoresSafeArea()
+
+                AmbientParticlesView(count: 8)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
 
                 OrbWithSpeechCard(
                     currentPage: currentPage,
@@ -137,17 +148,37 @@ private struct StoryboardPage: View {
 
     var body: some View {
         ZStack {
-            NeuTheme.baseCanvas.ignoresSafeArea()
+            // Charleston-anchored canvas with gentle depth (matches SplashScreen)
+            LinearGradient(
+                colors: [
+                    Color.appCanvasPrimary,
+                    Color.appCanvasPrimary,
+                    Color.charlestonGreen
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
             Image(backgroundImage)
                 .resizable()
                 .scaledToFill()
                 .frame(width: screenSize.width, height: screenSize.height)
                 .clipped()
-                .opacity(0.30)
+                .opacity(0.28)
                 .ignoresSafeArea()
-            AmbientParticlesView(count: 15)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
+
+            // Bottom scrim keeps titles and buttons readable over the artwork
+            LinearGradient(
+                colors: [
+                    Color.clear,
+                    Color.appCanvasPrimary.opacity(0.55),
+                    Color.appCanvasPrimary.opacity(0.92)
+                ],
+                startPoint: UnitPoint(x: 0.5, y: 0.42),
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
         }
     }
 }
@@ -165,7 +196,7 @@ private struct TypingText: View {
     @State private var charIndex = 0
     @State private var isComplete = false
 
-    init(_ text: String, speed: Double = 0.056, font: Font = .system(size: 16, weight: .semibold, design: .rounded), color: Color = .appTextPrimary, alignment: TextAlignment = .leading) {
+    init(_ text: String, speed: Double = 0.056, font: Font = LimiTypography.callout, color: Color = .appTextPrimary, alignment: TextAlignment = .leading) {
         self.fullText = text
         self.speed = speed
         self.font = font
@@ -216,7 +247,7 @@ private struct TypingCursor: View {
 
     var body: some View {
         Rectangle()
-            .fill(Color.appInfoBright)
+            .fill(Color.brandHighlight)
             .frame(width: 2, height: 16)
             .opacity(visible ? 1 : 0)
             .onAppear {
@@ -239,8 +270,8 @@ private struct OrbWithSpeechCard: View {
     @State private var rotation: Double = 0
     @State private var wiggle = false
 
-    private let infoAccent = Color.appInfoBright
-    private let violetCore = Color.appPurple
+    private let brandAccent = Color.brandHighlight
+    private let brandCore = Color.brandAction
 
     private var orbSize: CGFloat { currentPage == 3 ? 160 : 56 }
 
@@ -272,8 +303,8 @@ private struct OrbWithSpeechCard: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            infoAccent.opacity(currentPage == 3 ? 0.22 : 0.10),
-                            violetCore.opacity(0.05),
+                            brandAccent.opacity(currentPage == 3 ? 0.22 : 0.10),
+                            brandCore.opacity(0.05),
                             Color.clear
                         ],
                         center: .center,
@@ -287,7 +318,7 @@ private struct OrbWithSpeechCard: View {
             Circle()
                 .stroke(
                     AngularGradient(
-                        colors: [infoAccent.opacity(0.4), violetCore.opacity(0.2), infoAccent.opacity(0.1), violetCore.opacity(0.4), infoAccent.opacity(0.4)],
+                        colors: [brandAccent.opacity(0.4), brandCore.opacity(0.2), brandAccent.opacity(0.1), brandCore.opacity(0.4), brandAccent.opacity(0.4)],
                         center: .center
                     ),
                     lineWidth: currentPage == 3 ? 1.5 : 0.8
@@ -296,19 +327,15 @@ private struct OrbWithSpeechCard: View {
                 .rotationEffect(.degrees(rotation))
                 .blur(radius: 0.5)
 
-            Image("neuralOrb")
-                .resizable()
-                .scaledToFill()
-                .frame(width: orbSize, height: orbSize)
-                .clipShape(Circle())
+            LimiOrbScene(isActive: true, size: orbSize, renderMode: .swiftUI)
                 .overlay(
                     Circle().stroke(
-                        LinearGradient(colors: [infoAccent.opacity(0.35), violetCore.opacity(0.15), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                        LinearGradient(colors: [brandAccent.opacity(0.35), brandCore.opacity(0.15), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing),
                         lineWidth: currentPage == 3 ? 1.2 : 0.6
                     )
                 )
-                .shadow(color: infoAccent.opacity(currentPage == 3 ? 0.5 : 0.3), radius: currentPage == 3 ? 22 : 10)
-                .shadow(color: violetCore.opacity(currentPage == 3 ? 0.35 : 0.15), radius: currentPage == 3 ? 38 : 16)
+                .shadow(color: brandAccent.opacity(currentPage == 3 ? 0.5 : 0.3), radius: currentPage == 3 ? 22 : 10)
+                .shadow(color: brandCore.opacity(currentPage == 3 ? 0.35 : 0.15), radius: currentPage == 3 ? 38 : 16)
                 .scaleEffect(breathe ? 1.02 : 0.98)
                 .rotationEffect(.degrees(currentPage == 2 && wiggle ? 4 : 0))
         }
@@ -351,7 +378,11 @@ private struct OrbWithSpeechCard: View {
         }
         .padding(18)
         .frame(width: cardWidth, height: cardOuterHeight, alignment: .top)
-        .neuElevation(level: 1, cornerRadius: 20)
+        .limiPanel(cornerRadius: 20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.brandHighlight.opacity(0.14), lineWidth: 1)
+        )
         .position(x: cardX, y: cardY)
         .transition(.opacity.combined(with: .scale(scale: 0.92)))
     }
@@ -415,7 +446,7 @@ private struct SequentialSpeechAlignedCard: View {
         VStack(alignment: alignment == .trailing ? .trailing : .leading, spacing: 8) {
             HStack(alignment: .bottom, spacing: 2) {
                 Text(headlineDisplay)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                     .multilineTextAlignment(alignment)
                     .lineSpacing(3)
@@ -428,7 +459,7 @@ private struct SequentialSpeechAlignedCard: View {
             if headlineDone {
                 HStack(alignment: .bottom, spacing: 2) {
                     Text(detailDisplay)
-                        .font(.system(size: 13, weight: .regular, design: .rounded))
+                        .font(LimiTypography.subheadline)
                         .foregroundColor(.appTextSecondary)
                         .multilineTextAlignment(alignment)
                         .lineSpacing(4)
@@ -442,7 +473,7 @@ private struct SequentialSpeechAlignedCard: View {
             if detailDone {
                 HStack(alignment: .bottom, spacing: 2) {
                     Text(swipeDisplay)
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextMuted)
                         .multilineTextAlignment(alignment)
                         .lineSpacing(3)
@@ -464,21 +495,21 @@ private struct SequentialSpeechAlignedCard: View {
 private struct SwipeHint: View {
     @State private var pulse = false
 
-    private let cyanAccent = Color.appInfoBright
+    private let brandAccent = Color.brandHighlight
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "chevron.left")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(cyanAccent.opacity(0.4))
+                .font(LimiTypography.caption)
+                .foregroundColor(brandAccent.opacity(0.4))
 
-            Text("Swipe to continue")
-                .font(.system(size: 14, weight: .medium, design: .rounded))
+            Text("Swipe when you're ready")
+                .font(LimiTypography.callout)
                 .foregroundColor(.appTextMuted)
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(cyanAccent.opacity(0.4))
+                .font(LimiTypography.caption)
+                .foregroundColor(brandAccent.opacity(0.4))
         }
         .opacity(pulse ? 1.0 : 0.4)
         .onAppear {
@@ -496,22 +527,22 @@ private struct BottomContent: View {
     let totalPages: Int
     let onComplete: () -> Void
 
-    private let cyanAccent = Color.appInfoBright
+    private let brandAccent = Color.brandHighlight
 
     private var title: String {
         switch currentPage {
-        case 0: return "Meet Limi AI"
-        case 1: return "Natural Conversation"
-        case 2: return "Always Within Reach"
-        default: return "Your AI, Always Ready"
+        case 0: return "Meet Limi"
+        case 1: return "Just talk naturally"
+        case 2: return "Always here for you"
+        default: return "Ready whenever you are"
         }
     }
 
     private var subtitle: String {
         switch currentPage {
-        case 0: return "Intelligence that blends into your space"
-        case 1: return "Voice, touch, or full automation"
-        case 2: return "Tuck it away. Call it back anytime."
+        case 0: return "An AI companion that feels at home in yours"
+        case 1: return "Speak, tap, or let me handle the rest"
+        case 2: return "Quiet when you want peace. One tap when you don't."
         default: return ""
         }
     }
@@ -520,24 +551,32 @@ private struct BottomContent: View {
         VStack(spacing: 16) {
             if currentPage == 3 {
                 finalScreen
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
             } else {
                 standardBottom
             }
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 46)
+        .animation(LimiMotion.gentle, value: currentPage)
     }
 
     private var standardBottom: some View {
         VStack(spacing: 10) {
-            Text(title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.appTextPrimary)
+            // New id per page so title/subtitle cross-fade instead of snapping
+            VStack(spacing: 10) {
+                Text(title)
+                    .font(LimiTypography.largeTitle)
+                    .foregroundColor(.appTextPrimary)
 
-            Text(subtitle)
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .foregroundColor(.appTextSecondary)
-                .multilineTextAlignment(.center)
+                Text(subtitle)
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+            }
+            .id("bottom_copy_\(currentPage)")
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
 
             SwipeHint()
                 .padding(.top, 14)
@@ -550,23 +589,27 @@ private struct BottomContent: View {
     private var finalScreen: some View {
         VStack(spacing: 18) {
             Text(title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(LimiTypography.largeTitle)
                 .foregroundColor(.appTextPrimary)
 
             Text(OnboardingStoryboardCopy.page3Subtitle)
-                .font(.system(size: 14, weight: .regular, design: .rounded))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(.appTextSecondary)
                 .multilineTextAlignment(.center)
 
             VStack(alignment: .leading, spacing: 16) {
-                InstructionRow(icon: "hand.tap", label: "Tap", detail: "to start a conversation")
-                InstructionRow(icon: "hand.tap.fill", label: "Tap again", detail: "to end the session")
-                InstructionRow(icon: "arrow.up.and.down.and.arrow.left.and.right", label: "Drag", detail: "to reposition anywhere")
+                InstructionRow(icon: "hand.tap", label: "Tap", detail: "to say hello")
+                InstructionRow(icon: "hand.tap.fill", label: "Tap again", detail: "when you're done chatting")
+                InstructionRow(icon: "arrow.up.and.down.and.arrow.left.and.right", label: "Drag", detail: "to move me anywhere you like")
             }
             .padding(20)
-            .neuElevation(level: 1, cornerRadius: 22)
+            .limiPanel(cornerRadius: 22)
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(Color.brandHighlight.opacity(0.14), lineWidth: 1)
+            )
 
-            ActivateLimiButton(action: onComplete)
+            LimiPrimaryButton(title: "Let's begin", action: onComplete)
                 .padding(.top, 8)
 
             pageIndicators
@@ -579,11 +622,11 @@ private struct BottomContent: View {
             ForEach(0..<totalPages, id: \.self) { idx in
                 if idx == currentPage {
                     Capsule()
-                        .fill(cyanAccent)
+                        .fill(brandAccent)
                         .frame(width: 24, height: 6)
                 } else {
                     Circle()
-                        .fill(Color.appBorderPrimary.opacity(0.45))
+                        .fill(Color.appTextMuted.opacity(0.5))
                         .frame(width: 6, height: 6)
                 }
             }
@@ -599,83 +642,23 @@ private struct InstructionRow: View {
     let label: String
     let detail: String
 
-    private let cyanAccent = Color.appInfoBright
+    private let brandAccent = Color.brandHighlight
 
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(cyanAccent)
+                .font(LimiTypography.headline)
+                .foregroundColor(brandAccent)
                 .frame(width: 28)
             HStack(spacing: 4) {
                 Text(label)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appTextPrimary)
                 Text(detail)
-                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .font(LimiTypography.subheadline)
                     .foregroundColor(.appTextSecondary)
             }
             Spacer()
-        }
-    }
-}
-
-// MARK: - Activate Limi AI Button (animated gradient border)
-
-private struct ActivateLimiButton: View {
-    let action: () -> Void
-    @State private var gradientRotation: Double = 0
-
-    private let cyanAccent = Color.appInfoBright
-
-    private let borderColors: [Color] = [
-        Color.appInfoBright,
-        Color.appBrandSecondary,
-        Color.appIndigo,
-        Color.appPink,
-        Color.appOrange,
-        Color.appInfoBright
-    ]
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: "waveform.circle.fill")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(cyanAccent)
-                Text("Activate Limi AI")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .foregroundColor(.appTextPrimary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.appTextMuted)
-            }
-            .padding(.horizontal, 20)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(NeuTheme.baseSurface)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(
-                        AngularGradient(
-                            colors: borderColors,
-                            center: .center,
-                            angle: .degrees(gradientRotation)
-                        ),
-                        lineWidth: 1.5
-                    )
-            )
-            .shadow(color: cyanAccent.opacity(0.15), radius: 16, y: 6)
-        }
-        .onAppear {
-            withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
-                gradientRotation = 360
-            }
         }
     }
 }

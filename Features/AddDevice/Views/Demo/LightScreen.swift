@@ -43,13 +43,13 @@ struct LightScreen: View {
 
                 VStack {
                     Text(title)
-                        .font(.largeTitle)
+                        .font(LimiTypography.largeTitle)
                         .padding()
 
                     if showToast {
                         Text("AI adjusting environment…")
-                            .font(.subheadline)
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.subheadline)
+                            .foregroundColor(.appTextPrimary)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
                             .background(Color.themeBlack.opacity(0.8))
@@ -66,8 +66,8 @@ struct LightScreen: View {
                             .fontWeight(.bold)
                             .padding()
                             .frame(width: 150, height: 60)
-                            .background(Color.orbGlow4)
-                            .foregroundColor(.themeWhite)
+                            .background(Color.brandAction)
+                            .foregroundColor(.appTextPrimary)
                             .cornerRadius(10)
                     }
                     .padding(.top, 20)

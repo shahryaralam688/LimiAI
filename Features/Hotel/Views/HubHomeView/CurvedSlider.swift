@@ -30,7 +30,7 @@ struct CurvedSlider: View {
             ZStack(alignment: .center) {
                 // Track background
                 CircularTrackShape(radius: radius)
-                    .stroke(Color.gray.opacity(0.2), lineWidth: trackHeight)
+                    .stroke(Color.appBorderPrimary.opacity(0.35), lineWidth: trackHeight)
                     .frame(width: 2 * radius, height: radius)
 
                 // Gradient track
@@ -39,7 +39,7 @@ struct CurvedSlider: View {
                         LinearGradient(
                             gradient: Gradient(colors: [
                                 Color.spotlightWarm,
-                                Color.themeWhite,
+                                Color.brandHighlight,
                                 Color.spotlightCool
                             ]),
                             startPoint: .leading,
@@ -52,23 +52,23 @@ struct CurvedSlider: View {
                 // Knob with percentage popup
                 ZStack {
                     Circle()
-                        .fill(Color.themeWhite.opacity(0.5))
+                        .fill(Color.brandHighlight.opacity(0.5))
                         .frame(width: knobSize + 8, height: knobSize + 8)
                         .blur(radius: 4)
 
                     Circle()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.themeWhite, Color.themeWhite.opacity(0.9)]),
+                                gradient: Gradient(colors: [Color.brandHighlight, Color.appTextPrimary.opacity(0.9)]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                         .frame(width: knobSize, height: knobSize)
-                        .shadow(color: Color.themeBlack.opacity(0.2), radius: 2, x: 0, y: 1)
+                        .shadow(color: Color.appShadowMedium.opacity(0.2), radius: 2, x: 0, y: 1)
 
                     Circle()
-                        .fill(Color.themeWhite)
+                        .fill(Color.brandHighlight)
                         .frame(width: knobSize * 0.6, height: knobSize * 0.6)
                 }
                 .overlay(
@@ -81,8 +81,8 @@ struct CurvedSlider: View {
                                     .foregroundColor(.appTextInverse)
                             }
                             .padding(8)
-                            .background(Color.alabaster)
-                            .cornerRadius(10)
+                            .background(Color.appSurfaceSecondary)
+                            .cornerRadius(LimiRadius.small)
                             .shadow(radius: 5)
                             .frame(width: 120) // 👈 Width fix kar di
                             .offset(y: -80) // 👈 thoda upar kiya
@@ -226,7 +226,7 @@ struct CurvedSlider_Previews: PreviewProvider {
         var body: some View {
             VStack {
                 Text("Temperature Control")
-                    .font(.headline)
+                    .font(LimiTypography.headline)
                     .padding(.bottom, 20)
                 
                 CurvedSlider(value: $sliderValue, in: 0...100, step: 1)

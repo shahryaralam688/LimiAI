@@ -24,8 +24,8 @@ final class VoicePendantAudioViewModel: NSObject, ObservableObject {
     @Published var errorMessage: String?
     @Published var toastMessage: String?
 
-    // Recording
-    let recorder = VoicePendantAudioRecorder()
+    // Recording — live PCM stream to pendant voice backend (ws://69.62.125.138:8000)
+    let backendRecorder: VoicePendantBackendRecorder
 
     // Playback
     @Published private(set) var playback: AudioPlaybackState = .idle
@@ -42,6 +42,7 @@ final class VoicePendantAudioViewModel: NSObject, ObservableObject {
     init(pendant: VoicePendant, service: VoicePendantDataServicing = VoicePendantDataService.current) {
         self.pendant = pendant
         self.service = service
+        self.backendRecorder = VoicePendantBackendRecorder(deviceID: pendant.id)
         super.init()
     }
 
@@ -59,32 +60,32 @@ final class VoicePendantAudioViewModel: NSObject, ObservableObject {
 
     // MARK: - Recording
 
-    var isRecording: Bool { recorder.isRecording }
+    var isRecording: Bool { backendRecorder.isRecording }
 
     func startRecording() async {
-        let ok = await recorder.start()
-        if !ok && recorder.permissionDenied {
+        let ok = await backendRecorder.start()
+        if !ok && backendRecorder.permissionDenied {
             errorMessage = "Microphone access is off. Enable it in Settings to record."
         }
     }
 
     func stopRecordingAndSave() {
-        guard let result = recorder.stop() else { return }
+        guard let result = backendRecorder.stop() else { return }
         let note = VoiceNote(
             id: "vn-\(UUID().uuidString.prefix(6))",
             title: "Recording \(shortTimestamp())",
             durationSeconds: result.duration,
             createdAt: Date(),
-            sharedToPendant: false,
+            sharedToPendant: true,
             source: .recorded,
             fileURL: result.url
         )
         voiceNotes.insert(note, at: 0)
-        toastMessage = "Recording saved"
+        toastMessage = "Live voice sent to pendant backend"
     }
 
     func cancelRecording() {
-        recorder.cancel()
+        backendRecorder.cancel()
     }
 
     // MARK: - Import (Files / other apps)
@@ -218,24 +219,23 @@ final class VoicePendantAudioViewModel: NSObject, ObservableObject {
         sharingNoteID = note.id
         defer { sharingNoteID = nil }
 
-        // Read the actual audio bytes off disk (nil for demo notes).
-        var audioData: Data?
-        if let url = note.fileURL {
-            audioData = try? Data(contentsOf: url)
-            if audioData == nil {
-                errorMessage = "Audio file is missing on this device."
+        guard let url = note.fileURL else {
+            if note.sharedToPendant {
+                toastMessage = "This note was already streamed live to the pendant."
                 return
             }
+            errorMessage = "No audio file to send. Record again to stream live voice."
+            return
         }
 
         do {
-            let response = try await service.shareAudio(note: note, audioData: audioData, to: pendant.id)
+            try await VoicePendantPCMFileStreamer.stream(fileURL: url, deviceID: pendant.id)
             if let index = voiceNotes.firstIndex(where: { $0.id == note.id }) {
                 voiceNotes[index].sharedToPendant = true
             }
-            toastMessage = response.message ?? "Audio sent to pendant."
+            toastMessage = "Voice sent to pendant backend."
         } catch {
-            errorMessage = (error as? LimiAPIError)?.errorDescription ?? error.localizedDescription
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
         }
     }
 

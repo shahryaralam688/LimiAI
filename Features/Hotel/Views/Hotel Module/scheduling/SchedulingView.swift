@@ -105,8 +105,8 @@ struct SchedulingView: View {
         VStack(spacing: 20) {
             HStack {
                 Text("My Routines")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.largeTitle)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -141,7 +141,7 @@ struct SchedulingView: View {
                     }
                 } label: {
                     Text(tab.rawValue)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(LimiTypography.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .foregroundColor(selectedTab == tab ? .themeWhite : Color.appSurfaceChip)
@@ -205,7 +205,7 @@ struct SchedulingView: View {
     private func emptyState(text: String) -> some View {
         VStack(spacing: 8) {
             Text(text)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appSurfaceChip)
         }
         .frame(maxWidth: .infinity)
@@ -234,14 +234,14 @@ private struct ScheduleCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 )
             
             // Text content
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
                     Text(schedule.type)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(.appTextPrimary)
                         .padding(.vertical, 3)
                         .padding(.horizontal, 10)
@@ -255,7 +255,7 @@ private struct ScheduleCard: View {
                     
                     if showCompletedBadge {
                         Text("Completed")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(LimiTypography.caption2)
                             .foregroundColor(.appSuccess)
                             .padding(.vertical, 2)
                             .padding(.horizontal, 8)
@@ -267,12 +267,12 @@ private struct ScheduleCard: View {
                 }
                 
                 Text(timeString)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title3)
+                    .foregroundColor(.appTextPrimary)
                 
                 Text(schedule.notes)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.themeWhite.opacity(0.8))
+                    .font(LimiTypography.subheadline)
+                    .foregroundColor(.appTextPrimary.opacity(0.8))
                     .lineLimit(2)
             }
             

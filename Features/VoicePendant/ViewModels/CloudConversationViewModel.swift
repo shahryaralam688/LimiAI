@@ -36,6 +36,7 @@ final class CloudConversationViewModel: ObservableObject {
     }
 
     var pendantName: String { pendant.name }
+    var pendantID: String { pendant.id }
 
     // MARK: - Sending
 

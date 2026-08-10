@@ -2,13 +2,8 @@
 //  VoicePendantSummaryService.swift
 //  Limi
 //
-//  Produces a real, LLM-generated conversation summary for the pendant memory
-//  screens. Strategy:
-//    1. Preferred: `POST /memory/summary` (structured backend endpoint).
-//    2. Fallback: ask the cloud chat LLM (`POST /limi-ai/chat`) to summarise
-//       recent conversation text and return structured JSON.
-//    3. Local cache: last successful summary per (pendant, range) is cached so
-//       the screen still shows something offline.
+//  Loads AI conversation summaries for the pendant memory screens via
+//  `GET /limi-ai/daily-summaries` (UTC dateKey window + optional limit).
 //
 //  Demo implementation returns canned structured data for previews/offline.
 //
@@ -18,8 +13,7 @@ import Foundation
 // MARK: - Protocol
 
 protocol VoicePendantSummaryServicing {
-    /// Generates (or regenerates) an AI summary for a pendant over a time range.
-    /// `recentTranscript` is optional context used by the chat fallback.
+    /// Loads an AI summary for a pendant over a time range.
     func generateSummary(for pendantID: String,
                          range: SummaryRange,
                          recentTranscript: String?) async throws -> VoicePendantAISummary
@@ -34,8 +28,8 @@ enum VoicePendantSummaryService {
 // MARK: - Endpoints
 
 enum VoicePendantSummaryEndpoints {
-    /// `POST` — structured memory summary. Body: `{ "pendant_id": ..., "range": "day|week|month" }`.
-    static var summary: String { APIConstants.baseURL + "memory/summary" }
+    /// `GET` — daily summaries. Query: `from`, `to` (YYYY-MM-DD UTC), `limit` (default 90 on server).
+    static var dailySummaries: String { APIConstants.limiAIDailySummaries }
 }
 
 // MARK: - Local Cache
@@ -102,90 +96,46 @@ final class DemoVoicePendantSummaryService: VoicePendantSummaryServicing {
 
 final class LiveVoicePendantSummaryService: VoicePendantSummaryServicing {
 
-    private let chatService: VoicePendantChatServicing
+    private static let defaultLimit = 90
+
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
         return d
     }()
 
-    init(chatService: VoicePendantChatServicing = VoicePendantChatService.current) {
-        self.chatService = chatService
-    }
-
     func generateSummary(for pendantID: String,
                          range: SummaryRange,
                          recentTranscript: String?) async throws -> VoicePendantAISummary {
-        // 1. Preferred structured endpoint.
         do {
-            let summary = try await fetchStructuredSummary(pendantID: pendantID, range: range)
+            let summary = try await fetchDailySummaries(range: range)
             VoicePendantSummaryCache.save(summary, pendantID: pendantID)
             return summary
         } catch {
-            // 2. Fallback to the chat LLM.
-            do {
-                let summary = try await summariseViaChat(range: range, transcript: recentTranscript)
-                VoicePendantSummaryCache.save(summary, pendantID: pendantID)
-                return summary
-            } catch {
-                // 3. Offline cache, else surface the error.
-                if let cached = VoicePendantSummaryCache.load(pendantID: pendantID, range: range) {
-                    return cached
-                }
-                throw error
+            if let cached = VoicePendantSummaryCache.load(pendantID: pendantID, range: range) {
+                return cached
             }
+            throw error
         }
     }
 
-    // MARK: Preferred endpoint
-
-    private func fetchStructuredSummary(pendantID: String, range: SummaryRange) async throws -> VoicePendantAISummary {
-        let data = try await LimiHTTPClient.postJSON(
-            urlString: VoicePendantSummaryEndpoints.summary,
-            body: ["pendant_id": pendantID, "range": range.apiValue],
-            auth: .requiredBearer
-        )
-        let response = try LimiHTTPClient.decode(VoicePendantSummaryResponse.self, from: data, decoder: decoder)
-        guard let dto = response.resolved else {
-            throw LimiAPIError.backend(message: "Empty summary response.")
+    private func fetchDailySummaries(range: SummaryRange) async throws -> VoicePendantAISummary {
+        let bounds = range.utcDateKeyBounds()
+        guard var components = URLComponents(string: VoicePendantSummaryEndpoints.dailySummaries) else {
+            throw LimiAPIError.invalidURL
         }
-        return dto.toModel(range: range)
-    }
-
-    // MARK: Chat fallback
-
-    private func summariseViaChat(range: SummaryRange, transcript: String?) async throws -> VoicePendantAISummary {
-        let context = (transcript?.isEmpty == false)
-            ? transcript!
-            : "Recent voice conversations with the Limi pendant."
-        let prompt = """
-        Summarise the user's conversations for the past \(range.displayName.lowercased()). \
-        Match the language of the conversation (Urdu + English mix is fine). \
-        Respond ONLY with compact JSON in this exact shape, no extra text:
-        {"overview":"2-4 sentences","key_points":["..."],"action_items":["..."],"topics":["..."]}
-
-        Conversation context:
-        \(context)
-        """
-
-        let result = try await chatService.send(userPrompt: prompt, conversationID: nil)
-        guard let dto = Self.extractSummaryJSON(from: result.assistantText) else {
-            // Last resort: wrap the raw reply as the overview.
-            return VoicePendantAISummary(
-                overview: result.assistantText,
-                keyPoints: [], actionItems: [], topics: [],
-                generatedAt: Date(), range: range
-            )
+        components.queryItems = [
+            URLQueryItem(name: "from", value: bounds.from),
+            URLQueryItem(name: "to", value: bounds.to),
+            URLQueryItem(name: "limit", value: String(Self.defaultLimit))
+        ]
+        guard let urlString = components.url?.absoluteString else {
+            throw LimiAPIError.invalidURL
         }
-        return dto.toModel(range: range)
-    }
 
-    /// Extracts the first `{ ... }` JSON object from an LLM reply and decodes it.
-    private static func extractSummaryJSON(from text: String) -> VoicePendantSummaryDTO? {
-        guard let start = text.firstIndex(of: "{"),
-              let end = text.lastIndex(of: "}"), start < end else { return nil }
-        let jsonString = String(text[start...end])
-        guard let data = jsonString.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(VoicePendantSummaryDTO.self, from: data)
+        let data = try await LimiHTTPClient.get(urlString: urlString, auth: .requiredBearer)
+        let response = try LimiHTTPClient.decode(DailySummariesResponse.self, from: data, decoder: decoder)
+        let items = response.data?.summaries ?? []
+        return DailySummaryDTO.aggregate(items, range: range)
     }
 }

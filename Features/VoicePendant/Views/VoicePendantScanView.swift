@@ -92,8 +92,8 @@ struct VoicePendantScanView: View {
             showBluetoothSetup = true
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.callout)
+                .foregroundColor(.brandAction)
         }
         .accessibilityLabel("Set up new pendant")
     }
@@ -103,8 +103,8 @@ struct VoicePendantScanView: View {
             Task { await viewModel.scan() }
         } label: {
             Image(systemName: "arrow.clockwise")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.callout)
+                .foregroundColor(.brandAction)
                 .rotationEffect(.degrees(viewModel.isScanning ? 360 : 0))
                 .animation(
                     viewModel.isScanning
@@ -139,7 +139,7 @@ struct VoicePendantScanView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: Color.appBorderSoft))
                 .scaleEffect(1.2)
             Text("Scanning for pendants…")
-                .font(.system(size: 15, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(Color.appTextSecondary)
             Spacer()
         }
@@ -150,10 +150,10 @@ struct VoicePendantScanView: View {
         VStack(spacing: 16) {
             Spacer()
             Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 36, weight: .semibold))
+                .font(LimiTypography.title2)
                 .foregroundColor(Color.appTextMuted)
             Text(message)
-                .font(.system(size: 15, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(Color.appTextSecondary)
                 .multilineTextAlignment(.center)
             LimiPrimaryButton(title: "Try Again") {
@@ -170,13 +170,13 @@ struct VoicePendantScanView: View {
         VStack(spacing: 16) {
             Spacer()
             Image(systemName: "dot.radiowaves.left.and.right")
-                .font(.system(size: 40, weight: .semibold))
+                .font(LimiTypography.title2)
                 .foregroundColor(Color.appTextMuted)
             Text("No pendants found")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appTextPrimary)
             Text("Make sure your pendants are powered on and on the same network.")
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(Color.appTextMuted)
                 .multilineTextAlignment(.center)
             LimiPrimaryButton(title: "Set Up New Pendant") {
@@ -186,7 +186,7 @@ struct VoicePendantScanView: View {
             Button("Scan Again") {
                 Task { await viewModel.scan() }
             }
-            .font(.system(size: 14, weight: .semibold))
+            .font(LimiTypography.callout)
             .foregroundColor(Color.appBorderSoft)
             Spacer()
         }
@@ -199,8 +199,8 @@ struct VoicePendantScanView: View {
             VStack(spacing: 16) {
                 HStack {
                     Text("Found \(viewModel.pendants.count) pendant\(viewModel.pendants.count == 1 ? "" : "s")")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                     Spacer()
                 }
                 .padding(.horizontal, 16)
@@ -231,20 +231,19 @@ struct VoicePendantScanView: View {
         if showAcknowledgement, let message = viewModel.lastAcknowledgement {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Color.emerald)
+                    .font(LimiTypography.button)
+                    .foregroundColor(Color.brandAction)
                 Text(message)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color.appSurfaceSecondaryAlt)
-            .cornerRadius(16)
+            .limiPanel(cornerRadius: 16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.themeWhite.opacity(0.15), lineWidth: 1)
+                    .stroke(Color.appGlassStrokeLight, lineWidth: 1)
             )
             .padding(.horizontal, 16)
             .limiFloatingOrbClearance()
@@ -265,16 +264,16 @@ struct VoicePendantCard: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
                 Image(systemName: "waveform.circle.fill")
-                    .font(.system(size: 32, weight: .regular))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pendant.name)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                         .lineLimit(1)
                     Text(pendant.room)
-                        .font(.system(size: 13, weight: .regular))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(Color.appTextTertiary)
                 }
 
@@ -299,8 +298,7 @@ struct VoicePendantCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(16)
+        .limiPanel(cornerRadius: 16)
         .contentShape(Rectangle())
         .onTapGesture { onTap() }
     }
@@ -311,7 +309,7 @@ struct VoicePendantCard: View {
                 .fill(statusColor)
                 .frame(width: 8, height: 8)
             Text(pendant.status.displayName)
-                .font(.system(size: 12, weight: .medium))
+                .font(LimiTypography.caption)
                 .foregroundColor(statusColor)
         }
         .padding(.horizontal, 10)
@@ -332,9 +330,9 @@ struct VoicePendantCard: View {
     private func metric(icon: String, value: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 11, weight: .medium))
+                .font(LimiTypography.caption2)
             Text(value)
-                .font(.system(size: 12, weight: .medium))
+                .font(LimiTypography.caption)
         }
         .foregroundColor(Color.appTextTertiary)
     }
@@ -347,9 +345,9 @@ struct VoicePendantCard: View {
                 Button(action: onTap) {
                     HStack(spacing: 8) {
                         Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(LimiTypography.callout)
                         Text("Control")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(LimiTypography.footnote)
                     }
                     .foregroundColor(Color.appBorderSoft)
                     .padding(.vertical, 10)
@@ -369,10 +367,10 @@ struct VoicePendantCard: View {
                                 .scaleEffect(0.8)
                         } else {
                             Image(systemName: "link")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(LimiTypography.callout)
                         }
                         Text(isConnecting ? "Connecting…" : "Connect")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(LimiTypography.footnote)
                     }
                     .foregroundColor(Color.appBorderSoft)
                     .padding(.vertical, 10)
@@ -386,7 +384,7 @@ struct VoicePendantCard: View {
                 .disabled(isConnecting)
             } else {
                 Text("Unavailable")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(Color.appTextMuted)
                     .padding(.vertical, 10)
             }
@@ -394,6 +392,7 @@ struct VoicePendantCard: View {
     }
 }
 
+#if DEBUG
 #Preview("Voice Pendants — API devices") {
     VoicePendantScanView(
         viewModel: VoicePendantScanViewModel(previewPendants: VoicePendant.previewFromAPI)
@@ -418,3 +417,4 @@ struct VoicePendantCard: View {
         .padding(16)
     }
 }
+#endif

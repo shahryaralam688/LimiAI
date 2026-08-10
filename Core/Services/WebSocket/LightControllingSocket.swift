@@ -12,6 +12,12 @@ import SocketIO
 class LightControllingSocket: ObservableObject {
     static let shared = LightControllingSocket()
 
+    enum ConnectionStatus: Equatable {
+        case disconnected
+        case connecting
+        case connected
+    }
+
     private var manager: SocketManager
     private var socket: SocketIOClient
     private var lastConnectAuthToken: String?
@@ -23,6 +29,9 @@ class LightControllingSocket: ObservableObject {
     /// arrives. Used by SocketIOMQTTBridge to surface MQTT presence into
     /// DeviceTransportState. Multiple handlers are supported.
     private var presenceHandlers: [(String, String) -> Void] = []
+
+    /// Published for UI banners (DeviceApp / home). Updated on main thread.
+    @Published private(set) var connectionStatus: ConnectionStatus = .disconnected
 
     /// True while the underlying SocketIO connection is connected.
     var isConnected: Bool { socket.status == .connected }
@@ -108,13 +117,19 @@ class LightControllingSocket: ObservableObject {
 
     private func setupSocketEvents() {
         // Listen for connection
-        socket.on(clientEvent: .connect) { data, ack in
+        socket.on(clientEvent: .connect) { [weak self] data, ack in
             print("Socket connected successfully")
+            self?.publishConnectionStatus(.connected)
+        }
+
+        socket.on(clientEvent: .reconnect) { [weak self] data, ack in
+            self?.publishConnectionStatus(.connected)
         }
 
         // Listen for disconnection
-        socket.on(clientEvent: .disconnect) { data, ack in
+        socket.on(clientEvent: .disconnect) { [weak self] data, ack in
             print("Socket disconnected")
+            self?.publishConnectionStatus(.disconnected)
         }
 
         // Listen for server_hello event
@@ -142,42 +157,68 @@ class LightControllingSocket: ObservableObject {
                 print("Received device_status with no payload: \(data)")
                 return
             }
-            var parsed: (String, String)?
+            var parsed: (deviceId: String, status: String, pendantTypes: String?)?
             if let dict = raw as? [String: Any] {
-                let deviceId = dict["deviceId"] as? String ?? "<unknown>"
-                let status = dict["status"] as? String ?? "<unknown>"
-                print("📩 device_status => deviceId: \(deviceId), status: \(status)")
-                parsed = (deviceId, status)
+                parsed = Self.parseDeviceStatusDict(dict)
+                if let parsed {
+                    print("📩 device_status => deviceId: \(parsed.deviceId), status: \(parsed.status), pendantTypes: \(parsed.pendantTypes ?? "nil")")
+                }
             } else if let jsonString = raw as? String,
                       let jsonData = jsonString.data(using: .utf8),
                       let dict = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-                let deviceId = dict["deviceId"] as? String ?? "<unknown>"
-                let status = dict["status"] as? String ?? "<unknown>"
-                print("📩 device_status (string JSON) => deviceId: \(deviceId), status: \(status)")
-                parsed = (deviceId, status)
+                parsed = Self.parseDeviceStatusDict(dict)
+                if let parsed {
+                    print("📩 device_status (string JSON) => deviceId: \(parsed.deviceId), status: \(parsed.status), pendantTypes: \(parsed.pendantTypes ?? "nil")")
+                }
             } else {
                 print("Received device_status with unexpected payload: \(data)")
             }
-            if let parsed, let self {
-                for handler in self.presenceHandlers {
-                    handler(parsed.0, parsed.1)
+            if let parsed {
+                DevicePendantTypeStore.shared.update(
+                    deviceId: parsed.deviceId,
+                    pendantTypes: parsed.pendantTypes
+                )
+                if let self {
+                    for handler in self.presenceHandlers {
+                        handler(parsed.deviceId, parsed.status)
+                    }
                 }
             }
         }
         // Listen for any errors
-        socket.on(clientEvent: .error) { data, ack in
+        socket.on(clientEvent: .error) { [weak self] data, ack in
             print("Socket error: \(data)")
+            guard let self else { return }
+            if self.socket.status != .connected {
+                self.publishConnectionStatus(self.wantsConnection ? .connecting : .disconnected)
+            }
         }
     }
 
     func connect() {
         wantsConnection = true
+        if socket.status != .connected {
+            publishConnectionStatus(.connecting)
+        }
         refreshSocketWithCurrentAuth(andConnect: true)
     }
 
     func disconnect() {
         wantsConnection = false
         socket.disconnect()
+        publishConnectionStatus(.disconnected)
+    }
+
+    private func publishConnectionStatus(_ status: ConnectionStatus) {
+        let apply = { [weak self] in
+            guard let self, self.connectionStatus != status else { return }
+            self.connectionStatus = status
+        }
+        if Thread.isMainThread {
+            apply()
+        } else {
+            DispatchQueue.main.async(execute: apply)
+        }
     }
 
     func sendLightControlOnOff(message: [String]) {
@@ -362,6 +403,15 @@ class LightControllingSocket: ObservableObject {
     /// Passes `(deviceId, status)` as raw strings.
     func registerPresenceHandler(_ handler: @escaping (String, String) -> Void) {
         presenceHandlers.append(handler)
+    }
+
+    private static func parseDeviceStatusDict(_ dict: [String: Any]) -> (deviceId: String, status: String, pendantTypes: String?) {
+        let deviceId = dict["deviceId"] as? String ?? "<unknown>"
+        let status = dict["status"] as? String ?? "<unknown>"
+        let pendantTypes = (dict["pendantTypes"] as? String)
+            ?? (dict["pendantType"] as? String)
+            ?? (dict["pendant_types"] as? String)
+        return (deviceId, status, pendantTypes)
     }
 
     /// Generic emit-with-ack helper used by the transport layer to publish

@@ -6,7 +6,7 @@ struct AddDeviceView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.charlestonGreen.edgesIgnoringSafeArea(.all)
+                Color.appCanvasPrimary.ignoresSafeArea()
 
                 if viewModel.currentScreen == .addDevices {
                     AddDevicesView(onOptionSelected: { option in

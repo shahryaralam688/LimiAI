@@ -56,8 +56,8 @@ struct ARSurfaceGuideView: View {
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     Image(systemName: type.iconName)
-                        .font(.title2)
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.title2)
+                        .foregroundColor(.appTextPrimary)
                         .scaleEffect(pulseAnimation ? 1.2 : 1.0)
                         .animation(
                             .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
@@ -65,14 +65,14 @@ struct ARSurfaceGuideView: View {
                         )
                     
                     Text(type.title)
-                        .font(.title2)
+                        .font(LimiTypography.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 }
                 
 //                Text(type.instruction)
-//                    .font(.subheadline)
-//                    .foregroundColor(.themeWhite.opacity(0.8))
+//                    .font(LimiTypography.subheadline)
+//                    .foregroundColor(.appTextPrimary.opacity(0.8))
 //                    .multilineTextAlignment(.center)
 //                    .lineLimit(2)
             }
@@ -108,7 +108,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.themeWhite.opacity(0.3), Color.themeWhite.opacity(0.1)],
+                        colors: [Color.themeWhite.opacity(0.3), Color.appGlassFillStrong],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -135,7 +135,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.themeWhite.opacity(0.1), Color.themeWhite.opacity(0.3)],
+                        colors: [Color.appGlassFillStrong, Color.themeWhite.opacity(0.3)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -165,7 +165,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(
                     LinearGradient(
-                        colors: [Color.themeWhite.opacity(0.2), Color.themeWhite.opacity(0.1)],
+                        colors: [Color.themeWhite.opacity(0.2), Color.appGlassFillStrong],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -195,7 +195,7 @@ struct ARSurfaceGuideView: View {
                 .frame(width: 36, height: 64)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.themeWhite.opacity(0.15))
+                        .fill(Color.appGlassStrokeLight)
                         .frame(width: 36, height: 64)
                 )
             
@@ -203,7 +203,7 @@ struct ARSurfaceGuideView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(
                     LinearGradient(
-                        colors: [Color.blue.opacity(0.6), Color.cyan.opacity(0.4)],
+                        colors: [Color.brandAction.opacity(0.6), Color.brandHighlight.opacity(0.4)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )

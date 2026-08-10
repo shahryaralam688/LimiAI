@@ -36,7 +36,7 @@ struct VoicePendantMemoryView: View {
                     showAddNote = true
                 } label: {
                     Image(systemName: "square.and.pencil")
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 }
             }
         }
@@ -67,32 +67,32 @@ struct VoicePendantMemoryView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.orbGlow4)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.brandAction)
                     .frame(width: 40, height: 40)
-                    .background(Color.orbGlow4.opacity(0.12))
+                    .background(Color.brandHighlight.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("AI Summary")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                     Text("Day / Week / Month — AI-generated overview")
-                        .font(.system(size: 12, weight: .regular))
+                        .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextTertiary)
                         .lineLimit(1)
                 }
 
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(Color.appTextMuted)
             }
             .padding(14)
             .background(Color.appSurfaceSecondaryAlt)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.orbGlow4.opacity(0.4), lineWidth: 1)
+                    .stroke(Color.brandHighlight.opacity(0.4), lineWidth: 1)
             )
             .cornerRadius(16)
         }
@@ -106,11 +106,11 @@ struct VoicePendantMemoryView: View {
     private var searchBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 15, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(Color.appTextMuted)
             TextField("Search memory…", text: $viewModel.searchText)
                 .textFieldStyle(.plain)
-                .foregroundColor(.themeWhite)
+                .foregroundColor(.appTextPrimary)
                 .autocorrectionDisabled()
             if !viewModel.searchText.isEmpty {
                 Button {
@@ -123,8 +123,7 @@ struct VoicePendantMemoryView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(14)
+        .limiPanel(cornerRadius: 14)
         .padding(.horizontal, 16)
         .padding(.top, 12)
     }
@@ -153,12 +152,12 @@ struct VoicePendantMemoryView: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(LimiTypography.footnote)
                 Text("\(count)")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(LimiTypography.caption)
                     .foregroundColor(isSelected ? Color.appCanvasPrimary : Color.appTextMuted)
             }
-            .foregroundColor(isSelected ? Color.appCanvasPrimary : .themeWhite)
+            .foregroundColor(isSelected ? Color.appCanvasPrimary : .appTextPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(isSelected ? Color.themeWhite : Color.appSurfaceSecondaryAlt)
@@ -203,7 +202,7 @@ struct VoicePendantMemoryView: View {
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: item.kind.icon)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(LimiTypography.callout)
                     .foregroundColor(accent(for: item.kind))
                     .frame(width: 38, height: 38)
                     .background(accent(for: item.kind).opacity(0.12))
@@ -212,23 +211,22 @@ struct VoicePendantMemoryView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(item.title)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.callout)
+                            .foregroundColor(.appTextPrimary)
                         Spacer()
                         Text(relativeTime(item.timestamp))
-                            .font(.system(size: 11, weight: .regular))
+                            .font(LimiTypography.caption2)
                             .foregroundColor(Color.appTextMuted)
                     }
                     Text(item.detail)
-                        .font(.system(size: 13, weight: .regular))
+                        .font(LimiTypography.footnote)
                         .foregroundColor(Color.appTextSecondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
             }
             .padding(14)
-            .background(Color.appSurfaceSecondaryAlt)
-            .cornerRadius(16)
+            .limiPanel(cornerRadius: 16)
         }
         .buttonStyle(.plain)
     }
@@ -237,15 +235,15 @@ struct VoicePendantMemoryView: View {
         VStack(spacing: 12) {
             Spacer()
             Image(systemName: "tray")
-                .font(.system(size: 36, weight: .semibold))
+                .font(LimiTypography.title2)
                 .foregroundColor(Color.appTextMuted)
             Text(viewModel.searchText.isEmpty ? "Nothing here yet" : "No matches found")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
             Text(viewModel.searchText.isEmpty
                  ? "Conversations and summaries will appear here."
                  : "Try a different search term.")
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
                 .multilineTextAlignment(.center)
             Spacer()
@@ -262,7 +260,7 @@ struct VoicePendantMemoryView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     VPSectionCard("Summary") {
                         Text(summary.summary)
-                            .font(.system(size: 15, weight: .regular))
+                            .font(LimiTypography.body)
                             .foregroundColor(Color.appTextSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -272,11 +270,11 @@ struct VoicePendantMemoryView: View {
                                 ForEach(summary.highlights, id: \.self) { highlight in
                                     HStack(alignment: .top, spacing: 10) {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .font(.system(size: 14, weight: .semibold))
+                                            .font(LimiTypography.callout)
                                             .foregroundColor(.emerald)
                                         Text(highlight)
-                                            .font(.system(size: 14, weight: .regular))
-                                            .foregroundColor(.themeWhite)
+                                            .font(LimiTypography.subheadline)
+                                            .foregroundColor(.appTextPrimary)
                                         Spacer()
                                     }
                                 }
@@ -295,7 +293,7 @@ struct VoicePendantMemoryView: View {
 
     private func accent(for kind: MemoryItemKind) -> Color {
         switch kind {
-        case .conversation: return .orbGlow4
+        case .conversation: return .brandAction
         case .summary: return .emerald
         case .note: return .orange
         }

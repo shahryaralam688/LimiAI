@@ -11,6 +11,7 @@ import SwiftData
 @main
 struct YourApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
 
     // Shared BackgroundLogic instance for the whole app
     @State private var bgLogic = BackgroundLogic()
@@ -36,11 +37,20 @@ struct YourApp: App {
                 .environment(\.locale, Locale(identifier: LanguageSettings.currentLanguage().rawValue == AppLanguage.system.rawValue ? Locale.current.identifier : LanguageSettings.currentLanguage().rawValue))
                 .environment(\.layoutDirection, LanguageSettings.currentLanguage().isRTL ? .rightToLeft : .leftToRight)
                 .preferredColorScheme(.dark)
+                .cloudOfflineLocalSwitchAlert()
                 .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
                     languageRefreshID = UUID()
                 }
         }
         .modelContainer(for: [WarmCoolSliderPreference.self, DeviceNamePreference.self])
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                BluetoothManager.shared.resumeBackgroundDiscoveryIfNeeded()
+            } else if phase == .background {
+                BLECloudFallbackService.shared.cancelAllPreparing()
+                BluetoothManager.shared.pauseBackgroundDiscovery()
+            }
+        }
     }
 }
 

@@ -50,8 +50,7 @@ struct HotelHomeView: View {
                     isSidebarOpen: $viewModel.isSidebarOpen
                 )
             }
-            .background(Color.appCanvasPrimary)
-            .ignoresSafeArea()
+            .limiScreenBackground()
             
 //            // Sidebar (highest priority) — pin to leading without affecting layout width
 //            HotelEnhancedSidebarView(isSidebarOpen: $isSidebarOpen)
@@ -120,11 +119,11 @@ private struct HotelChip: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "mappin.and.ellipse")
-                .font(.system(size: 14, weight: .semibold))
+                .font(LimiTypography.callout)
                 .foregroundColor(.appTextPrimary)
             
             Text(displayText)
-                .font(.system(size: 14, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(.appTextPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -136,8 +135,8 @@ private struct HotelChip: View {
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(.ultraThinMaterial.opacity(0.5)) // frosted blur material
-                .fill(Color.themeWhite.opacity(0.2))
-                .shadow(color: Color.themeBlack.opacity(0.2), radius: 8, x: 0, y: 4)
+                .fill(Color.appGlassFillStrong)
+                .shadow(color: Color.appShadowMedium, radius: 8, x: 0, y: 4)
         )
         .onAppear {
             reverseGeocode()
@@ -179,10 +178,10 @@ private struct RecentActivitySection: View {
             HStack {
                 HStack(spacing: 4) {
                     Text("✨")
-                        .font(.system(size: 18))
+                        .font(LimiTypography.body)
                     Text("Suggestions for you")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.title3)
+                        .foregroundColor(.appTextPrimary)
                 }
                 
                 Spacer()
@@ -190,8 +189,8 @@ private struct RecentActivitySection: View {
                 Button("See All") {
                     // Action
                 }
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.green)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appSuccess)
             }
             .padding(.horizontal, 20)
             
@@ -245,23 +244,23 @@ private struct SuggestionCard: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(title)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
                             .lineLimit(1)
                         
                         HStack(spacing: 4) {
                             Text(rating)
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.themeWhite)
+                                .font(LimiTypography.caption)
+                                .foregroundColor(.appTextPrimary)
                             Text("Rating")
-                                .font(.system(size: 12, weight: .regular))
-                                .foregroundColor(.themeWhite.opacity(0.7))
+                                .font(LimiTypography.caption)
+                                .foregroundColor(.appTextPrimary.opacity(0.7))
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.themeWhite.opacity(0.1))
+                                .fill(Color.appGlassFillStrong)
                         )
                     }
                     
@@ -270,13 +269,13 @@ private struct SuggestionCard: View {
                     // Green Arrow Button
                     Button(action: {}) {
                         Image(systemName: "arrow.right")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.callout)
+                            .foregroundColor(.appTextPrimary)
                     }
                     .frame(width: 32, height: 32)
                     .background(
                         Circle()
-                            .fill(Color.green)
+                            .fill(Color.appSuccess)
                     )
                 }
             }
@@ -303,21 +302,21 @@ private struct FeatureCard: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(LimiTypography.title2)
                     .foregroundColor(iconColor)
                     .padding(10)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.green.opacity(0.08))
+                            .fill(Color.brandAction.opacity(0.08))
                     )
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                 
                 Text(subtitle)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(.themeWhite.opacity(0.7))
+                    .font(LimiTypography.caption)
+                    .foregroundColor(.appTextPrimary.opacity(0.7))
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
                 
@@ -332,7 +331,7 @@ private struct FeatureCard: View {
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
                             .stroke(Color.themeWhite.opacity(0.04), lineWidth: 1)
                     )
-                    .shadow(color: Color.themeBlack.opacity(0.5), radius: 20, x: 0, y: 12)
+                    .shadow(color: Color.appOverlayScrim, radius: 20, x: 0, y: 12)
             )
         }
         .buttonStyle(.plain)
@@ -357,7 +356,7 @@ private struct BottomTabBar: View {
                 .frame(height: 80)
                 .overlay(
                     Capsule()
-                        .stroke(Color.emerald, lineWidth: 0.5)
+                        .stroke(Color.brandAction, lineWidth: 0.5)
                 )
             
             HStack(spacing: 16) {
@@ -396,11 +395,11 @@ private struct BottomTabBar: View {
         } label: {
             VStack(spacing: 6) {
                 Image(systemName: systemIcon)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(selected == tab ? Color.green : Color.themeWhite.opacity(0.8))
+                    .font(LimiTypography.button)
+                    .foregroundColor(selected == tab ? Color.appSuccess : Color.appTextSecondary)
                 Text(tab.rawValue)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(selected == tab ? Color.themeWhite : Color.themeWhite.opacity(0.7))
+                    .font(LimiTypography.caption)
+                    .foregroundColor(selected == tab ? Color.appTextPrimary : Color.appTextSecondary)
             }
             .frame(width: 64, height: 50)
             .contentShape(Rectangle())
@@ -422,8 +421,8 @@ private struct BottomTabBar: View {
                     .fill(
                         RadialGradient(
                             colors: [
-                                Color(hex: "00E5FF").opacity(0.15),
-                                Color(hex: "9B5DE5").opacity(0.08),
+                                Color.brandHighlight.opacity(0.15),
+                                Color.brandAction.opacity(0.08),
                                 Color.clear
                             ],
                             center: .center,
@@ -433,19 +432,15 @@ private struct BottomTabBar: View {
                     )
                     .frame(width: 96, height: 96)
 
-                // Neural orb image
-                Image("neuralOrb")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 78, height: 78)
-                    .clipShape(Circle())
+                // 3D geodesic orb scene
+                LimiOrbScene(isActive: true, size: 78, renderMode: .swiftUI)
                     .overlay(
                         Circle()
                             .stroke(
                                 LinearGradient(
                                     colors: [
-                                        Color(hex: "00E5FF").opacity(0.4),
-                                        Color(hex: "9B5DE5").opacity(0.2),
+                                        Color.brandHighlight.opacity(0.4),
+                                        Color.brandAction.opacity(0.2),
                                         Color.clear
                                     ],
                                     startPoint: .topLeading,
@@ -454,8 +449,8 @@ private struct BottomTabBar: View {
                                 lineWidth: 1
                             )
                     )
-                    .shadow(color: Color(hex: "00E5FF").opacity(0.4), radius: 14)
-                    .shadow(color: Color(hex: "9B5DE5").opacity(0.25), radius: 24)
+                    .shadow(color: Color.brandHighlight.opacity(0.4), radius: 14)
+                    .shadow(color: Color.brandAction.opacity(0.25), radius: 24)
             }
         }
         .buttonStyle(.plain)
@@ -470,11 +465,6 @@ struct HotelEnhancedSidebarView: View {
     @State private var showProfileEditView = false
     @State private var showIFrameView = false
     @State private var navigateToLIMI = false
-    @State private var showGetStartScreen = false
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore = false
-    @AppStorage("demoEmail") var demoEmail: String = "umer.asif@terralumen.co.uk"
-
     var body: some View {
         ZStack {
             // Dimmed background
@@ -493,7 +483,7 @@ struct HotelEnhancedSidebarView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Settings Title
                     Text("Settings")
-                        .font(.system(size: 28, weight: .semibold))
+                        .font(LimiTypography.title2)
                         .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 20)
                         .padding(.top, 60)
@@ -503,17 +493,17 @@ struct HotelEnhancedSidebarView: View {
                     VStack(spacing: 12) {
                         // Profile Image
                         Circle()
-                            .fill(Color.gray.opacity(0.3))
+                            .fill(Color.appBorderPrimary.opacity(0.45))
                             .frame(width: 80, height: 80)
                             .overlay(
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.title2)
+                                    .foregroundColor(.appTextPrimary)
                             )
                         
                         Text("Umer")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.themeBlack)
+                            .font(LimiTypography.button)
+                            .foregroundColor(.appTextPrimary)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 30)
@@ -544,24 +534,21 @@ struct HotelEnhancedSidebarView: View {
                             // Logout
                             Button(action: {
                                 AuthManager.shared.clearToken()
-                                showGetStartScreen = true
+                                AuthManager.shared.clearRole()
                                 BluetoothManager.shared.disconnectAllDevices()
-                                hasCompletedOnboarding = false
-                                hasLaunchedBefore = false
-                                demoEmail = ""
                             }) {
                                 HStack {
                                     Text("Logout")
-                                        .font(.system(size: 16, weight: .regular))
-                                        .foregroundColor(.red)
+                                        .font(LimiTypography.body)
+                                        .foregroundColor(.appDanger)
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.red.opacity(0.5))
+                                        .font(LimiTypography.callout)
+                                        .foregroundColor(.appDanger.opacity(0.5))
                                 }
                                 .padding(.vertical, 16)
                                 .padding(.horizontal, 20)
-                                .background(Color.themeWhite)
+                                .limiPanel(cornerRadius: LimiRadius.medium)
                             }
                             .padding(.top, 20)
                         }
@@ -570,15 +557,12 @@ struct HotelEnhancedSidebarView: View {
                     Spacer()
                 }
                 .frame(width: UIScreen.main.bounds.width * 0.8)
-                .background(Color(uiColor: .systemBackground))
+                .background(Color.appSurfacePrimary)
                 .offset(x: isSidebarOpen ? 0 : -UIScreen.main.bounds.width * 0.8)
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSidebarOpen)
                 
                 Spacer()
             }
-        }
-        .fullScreenCover(isPresented: $showGetStartScreen) {
-            GetStart()
         }
     }
 }
@@ -589,8 +573,8 @@ private struct SectionHeader: View {
     
     var body: some View {
         Text(title)
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(.gray)
+            .font(LimiTypography.caption)
+            .foregroundColor(.appTextMuted)
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
     }
@@ -609,16 +593,16 @@ private struct MenuItem: View {
         }) {
             HStack {
                 Text(title)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.themeBlack)
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.gray.opacity(0.5))
+                    .font(LimiTypography.callout)
+                    .foregroundColor(.appTextMuted.opacity(0.5))
             }
             .padding(.vertical, 16)
             .padding(.horizontal, 20)
-            .background(Color.themeWhite)
+            .limiPanel(cornerRadius: LimiRadius.medium)
         }
     }
 }
@@ -674,7 +658,7 @@ struct HomeTabView: View {
                                 .clipped()
                             
                             // White overlay for the ocean image effect
-                            Color.themeWhite.opacity(0.1)
+                            Color.appGlassFillStrong
                                 .frame(
                                     width: UIScreen.main.bounds.width,
                                     height: UIScreen.main.bounds.height * 0.5
@@ -689,13 +673,13 @@ struct HomeTabView: View {
                         VStack(alignment: .center, spacing: 12) {
                             VStack(spacing: 4) {
                                 Text(greeting)
-                                    .font(.system(size: 18, weight: .regular))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.body)
+                                    .foregroundColor(.appTextPrimary)
                                     .onReceive(greetingTimer) { now = $0 }
 
                                 Text("Welcome Back")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.largeTitle)
+                                    .foregroundColor(.appTextPrimary)
                                     .shadow(color: .themeBlack.opacity(0.3), radius: 4, x: 0, y: 2)
                                     .multilineTextAlignment(.center)
                             }
@@ -733,14 +717,14 @@ struct RequestsTabView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("My Requests")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.largeTitle)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 20)
                     .padding(.top, 60)
                 
                 Text("View and manage your service requests")
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(.themeWhite.opacity(0.7))
+                    .font(LimiTypography.body)
+                    .foregroundColor(.appTextPrimary.opacity(0.7))
                     .padding(.horizontal, 20)
                 
                 // Add your request items here
@@ -775,24 +759,24 @@ private struct RequestItemCard: View {
         HStack {
             VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                 
                 Text(time)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.themeWhite.opacity(0.6))
+                    .font(LimiTypography.subheadline)
+                    .foregroundColor(.appTextPrimary.opacity(0.6))
             }
             
             Spacer()
             
             Text(status)
-                .font(.system(size: 14, weight: .medium))
+                .font(LimiTypography.callout)
                 .foregroundColor(status == "Completed" ? .green : .orange)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill((status == "Completed" ? Color.green : Color.orange).opacity(0.2))
+                        .fill((status == "Completed" ? Color.appSuccess : Color.appOrange).opacity(0.2))
                 )
         }
         .padding(16)
@@ -811,16 +795,16 @@ private struct HotelStayChip: View {
     var body: some View {
         HStack {
             Text(roomInfo)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
             
             Spacer()
             
             Text(stayDates)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.themeWhite.opacity(0.8))
+                .font(LimiTypography.callout)
+                .foregroundColor(.appTextPrimary.opacity(0.8))
                 .lineLimit(1)
                 .truncationMode(.tail)
         }
@@ -828,8 +812,8 @@ private struct HotelStayChip: View {
         .frame(height: 38) // ✅ fixed height
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.themeBlack.opacity(0.45))
-                .shadow(color: Color.themeBlack.opacity(0.35), radius: 16, x: 0, y: 8)
+                .fill(Color.appOverlayScrimLight)
+                .shadow(color: Color.appOverlayScrimLight, radius: 16, x: 0, y: 8)
         )
     }
 }

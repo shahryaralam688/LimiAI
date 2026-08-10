@@ -153,10 +153,10 @@ final class VoiceViewModel: ObservableObject {
 
     func orbGlowColor(for state: AssistantVisualState) -> Color {
         switch state {
-        case .idle: return .orbGlow2
-        case .listening: return .orbGlow4
-        case .thinking: return .orbGlow3
-        case .speaking: return .orbGlow1
+        case .idle: return .brandActionDark
+        case .listening: return .brandAction
+        case .thinking: return .brandHighlight
+        case .speaking: return .brandAction
         }
     }
 

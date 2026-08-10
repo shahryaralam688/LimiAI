@@ -974,8 +974,8 @@ struct ARInstructionOverlay: View {
                             .frame(height: 150)
 
                         Text(instructionText)
-                            .font(.headline)
-                            .foregroundColor(.themeWhite)
+                            .font(LimiTypography.headline)
+                            .foregroundColor(.appTextPrimary)
                             .multilineTextAlignment(.center)
                             .padding(.top)
                     }
@@ -993,9 +993,9 @@ struct ARInstructionOverlay: View {
             if showPlacementIndicator {
                 VStack {
                     Text("Tap")
-                        .font(.title2)
+                        .font(LimiTypography.title2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
                         .background(

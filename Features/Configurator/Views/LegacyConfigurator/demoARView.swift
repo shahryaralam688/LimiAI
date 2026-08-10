@@ -85,8 +85,7 @@ struct DemoARView: View {
             Spacer()
         }
         .padding(.bottom, 32)
-        .background(Color.appCanvasPrimary)
-        .ignoresSafeArea()
+        .limiScreenBackground()
         .onAppear {
             ContextManager.shared.updateContext(
                 screen: "DemoARView",
@@ -126,13 +125,13 @@ struct ARCardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 // Title
                 Text(title)
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.appTextPrimary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Subtitle
                 Text("State of the art AR Experience")
-                    .font(.system(size: 15, weight: .regular))
+                    .font(LimiTypography.body)
                     .foregroundColor(Color.appTextTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -149,11 +148,11 @@ struct ARCardView: View {
                     }
                 }) {
                     Text("Experience Now")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
+                        .font(LimiTypography.button)
+                        .foregroundColor(.appTextPrimary)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing))
+                        .background(LimiGradients.cta)
                         .clipShape(Capsule(style: .continuous))
                 }
                 .tapScale()
@@ -187,12 +186,12 @@ struct ARCardView: View {
         }
 
         if configuratorViewModel.isLoading {
-            Color.themeBlack.opacity(0.5)
+            Color.appOverlayScrim
                 .ignoresSafeArea()
 
             ProgressView("Loading 3D Model...")
-                .progressViewStyle(CircularProgressViewStyle(tint: .themeWhite))
-                .foregroundColor(.themeWhite)
+                .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
+                .foregroundColor(.appTextPrimary)
         }
         }
     }

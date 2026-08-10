@@ -11,11 +11,13 @@ struct AIDesignTokens {
     static let brandEmerald = Color.appBrandPrimary
     static let brandEmeraldPressed = Color.appBrandPrimary
     static let brandEmerald20 = Color.appBrandPrimary.opacity(0.20)
+    static let brandEton = Color.appBrandSecondary
+    static let brandEton12 = Color.appBrandSecondary.opacity(0.12)
     static let accentWarn = Color.appDanger
-    static let strokeSoft = Color.white.opacity(0.06)
-    static let chipBg = Color.white.opacity(0.04)
-    static let badgeBg = Color.white.opacity(0.06)
-    static let toggleOff = Color.white.opacity(0.16)
+    static let strokeSoft = Color.appGlassFillMedium
+    static let chipBg = Color.appGlassFill
+    static let badgeBg = Color.appGlassFillMedium
+    static let toggleOff = Color.appToggleOff
 
     static let spacingXXS: CGFloat = 4
     static let spacingXS: CGFloat = 6
@@ -34,11 +36,11 @@ struct AIDesignTokens {
     static let radiusXL: CGFloat = 24
     static let radiusPill: CGFloat = 999
 
-    static let h1Font = Font.system(size: 28, weight: .bold, design: .rounded)
-    static let h2Font = Font.system(size: 20, weight: .semibold, design: .rounded)
-    static let titleFont = Font.system(size: 18, weight: .semibold)
-    static let bodyFont = Font.system(size: 16, weight: .regular)
-    static let captionFont = Font.system(size: 13, weight: .medium)
+    static let h1Font = LimiTypography.title
+    static let h2Font = LimiTypography.title2
+    static let titleFont = LimiTypography.title3
+    static let bodyFont = LimiTypography.body
+    static let captionFont = LimiTypography.caption
 }
 
 // MARK: - Atoms
@@ -67,13 +69,13 @@ struct AITag: View {
 
     var body: some View {
         Text(label)
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(.orbGlow4)
+            .font(LimiTypography.caption)
+            .foregroundColor(AIDesignTokens.brandEton)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(
                 Capsule()
-                    .fill(Color.orbGlow4.opacity(0.12))
+                    .fill(AIDesignTokens.brandEton12)
             )
     }
 }
@@ -84,10 +86,10 @@ struct TokenPill: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: "bolt.fill")
-                .font(.system(size: 12))
-                .foregroundColor(.orbGlow3)
+                .font(LimiTypography.caption)
+                .foregroundColor(.brandHighlight)
             Text(tokenCount)
-                .font(.system(size: 12, weight: .medium))
+                .font(LimiTypography.caption)
                 .foregroundColor(.appTextSecondary)
         }
     }
@@ -102,15 +104,15 @@ struct AICustomToggleStyle: ToggleStyle {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(
                         configuration.isOn
-                        ? LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
-                        : LinearGradient(colors: [Color.white.opacity(0.1), Color.white.opacity(0.1)], startPoint: .leading, endPoint: .trailing)
+                        ? LimiGradients.cta
+                        : LinearGradient(colors: [Color.appGlassFillStrong, Color.appGlassFillStrong], startPoint: .leading, endPoint: .trailing)
                     )
                     .frame(width: 52, height: 30)
 
                 Circle()
-                    .fill(Color.white)
+                    .fill(Color.themeWhite)
                     .frame(width: 26, height: 26)
-                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                    .shadow(color: Color.appCanvasPrimary.opacity(0.2), radius: 2, x: 0, y: 1)
                     .padding(2)
             }
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isOn)
@@ -141,12 +143,12 @@ struct AIAppBar: View {
     var body: some View {
         HStack(spacing: 14) {
             Button(closeTitle, action: onBack)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(.orbGlow4)
+                .font(LimiTypography.headline)
+                .foregroundColor(.brandHighlight)
                 .accessibilityLabel("Close")
 
             Text(title)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(LimiTypography.title)
                 .foregroundColor(.appTextPrimary)
 
             Spacer()
@@ -172,7 +174,7 @@ struct ModelCard: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.orbGlow1.opacity(0.1))
+                        .fill(AIDesignTokens.brandEton12)
                         .frame(width: 52, height: 52)
 
                     Image(iconName)
@@ -180,7 +182,7 @@ struct ModelCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(.orbGlow4)
+                        .foregroundColor(AIDesignTokens.brandEton)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -190,7 +192,7 @@ struct ModelCard: View {
                         }
                     }
                     Text(title)
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .font(LimiTypography.button)
                         .foregroundColor(.appTextPrimary)
                 }
 
@@ -201,7 +203,7 @@ struct ModelCard: View {
                         .fill(isConnected ? Color.appSuccess : Color.appTextMuted)
                         .frame(width: 8, height: 8)
                     Text(connectionStatus)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextSecondary)
                 }
             }
@@ -212,7 +214,7 @@ struct ModelCard: View {
 
                 Button(action: onAction) {
                     Text(isConnected ? "Connected" : "Connect")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(LimiTypography.callout)
                         .foregroundColor(isConnected ? .appCanvasPrimary : .appTextPrimary)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 8)
@@ -220,13 +222,13 @@ struct ModelCard: View {
                             Capsule()
                                 .fill(
                                     isConnected
-                                    ? LinearGradient(colors: [.orbGlow4, .orbGlow1], startPoint: .leading, endPoint: .trailing)
+                                    ? LimiGradients.cta
                                     : LinearGradient(colors: [Color.clear, Color.clear], startPoint: .leading, endPoint: .trailing)
                                 )
                         )
                         .overlay(
                             Capsule()
-                                .stroke(Color.white.opacity(isConnected ? 0 : 0.12), lineWidth: 1)
+                                .stroke(Color.appGlassStrokeStrong.opacity(isConnected ? 0 : 1), lineWidth: 1)
                         )
                 }
                 .animation(.easeInOut(duration: 0.2), value: isConnected)
@@ -248,19 +250,19 @@ struct ConnectionRow: View {
         HStack(spacing: 14) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.orbGlow2.opacity(0.08))
+                    .fill(Color.brandHighlight.opacity(0.08))
                     .frame(width: 44, height: 44)
                 Image(systemName: iconName)
-                    .font(.system(size: 18))
-                    .foregroundColor(.orbGlow3)
+                    .font(LimiTypography.body)
+                    .foregroundColor(.brandHighlight)
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                 Text(subtitle)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(.appTextSecondary)
                     .lineLimit(2)
             }
@@ -282,20 +284,20 @@ struct InfoBanner: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(LimiTypography.button)
                 .foregroundColor(.appTextPrimary)
             Text(description)
-                .font(.system(size: 14, weight: .regular))
+                .font(LimiTypography.subheadline)
                 .foregroundColor(.appTextSecondary)
                 .lineSpacing(4)
             Button(action: onCTA) {
                 HStack(spacing: 4) {
                     Text(ctaText)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.brandHighlight)
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.orbGlow4)
+                        .font(LimiTypography.caption)
+                        .foregroundColor(.brandHighlight)
                 }
             }
         }
@@ -305,7 +307,7 @@ struct InfoBanner: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color.orbGlow1.opacity(0.08), Color.orbGlow2.opacity(0.04)],
+                        colors: [Color.brandHighlight.opacity(0.08), Color.brandAction.opacity(0.04)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -313,7 +315,7 @@ struct InfoBanner: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.orbGlow1.opacity(0.12), lineWidth: 0.5)
+                .stroke(Color.brandHighlight.opacity(0.12), lineWidth: 0.5)
         )
     }
 }
@@ -327,10 +329,10 @@ struct IntegrationOption: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(LimiTypography.headline)
                     .foregroundColor(.appTextPrimary)
                 Text(subtitle)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(.appTextSecondary)
             }
             Spacer()

@@ -51,14 +51,14 @@ struct VoicePendantControlView: View {
     private var summaryCard: some View {
         HStack(spacing: 14) {
             Image(systemName: "waveform.circle.fill")
-                .font(.system(size: 40, weight: .regular))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.title2)
+                .foregroundColor(.appTextPrimary)
             VStack(alignment: .leading, spacing: 4) {
                 Text(pendant.name)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.appTextPrimary)
                 Text(pendant.room)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(Color.appTextTertiary)
             }
             Spacer()
@@ -69,8 +69,7 @@ struct VoicePendantControlView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(16)
+        .limiPanel(cornerRadius: 16)
     }
 
     // MARK: - Voice Packages
@@ -120,9 +119,9 @@ struct VoicePendantControlView: View {
             HStack(spacing: 10) {
                 Image(systemName: "stop.fill")
                 Text("Stop Playback")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(LimiTypography.callout)
             }
-            .foregroundColor(.themeWhite)
+            .foregroundColor(.appTextPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(Color.appSurfacePrimary)
@@ -140,10 +139,10 @@ struct VoicePendantControlView: View {
     private func sectionHeader(_ title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appTextPrimary)
             Text(subtitle)
-                .font(.system(size: 13, weight: .regular))
+                .font(LimiTypography.footnote)
                 .foregroundColor(Color.appTextMuted)
         }
     }
@@ -157,29 +156,28 @@ struct VoicePendantControlView: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                     .frame(width: 36, height: 36)
                     .background(Color.themeBlack.opacity(0.25))
                     .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.appTextPrimary)
                     Text(subtitle)
-                        .font(.system(size: 12, weight: .regular))
+                        .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextTertiary)
                 }
 
                 Spacer()
                 Image(systemName: "paperplane.fill")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(LimiTypography.callout)
                     .foregroundColor(Color.appBorderSoft)
             }
             .padding(14)
-            .background(Color.appSurfaceSecondaryAlt)
-            .cornerRadius(16)
+            .limiPanel(cornerRadius: 16)
         }
         .disabled(isBusy)
     }

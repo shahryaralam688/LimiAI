@@ -16,12 +16,7 @@ struct OTPVerificationView: View {
     var body: some View {
         NavigationStack {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [Color.appCanvasPrimary, Color.appSurfacePrimary]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .edgesIgnoringSafeArea(.all)
+            DeepSpaceBackground(showParticles: false)
 
             ZStack {
                 Circle()
@@ -41,8 +36,8 @@ struct OTPVerificationView: View {
             VStack(spacing: 30) {
                 VStack(spacing: 15) {
                     Image(systemName: "lock.shield.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.themeBlack)
+                        .font(LimiTypography.title2)
+                        .foregroundColor(.appTextPrimary)
                         .padding()
                         .background(
                             Circle()
@@ -53,13 +48,13 @@ struct OTPVerificationView: View {
                         .opacity(isAppearing ? 1.0 : 0.5)
 
                     Text("Verification Code")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(LimiTypography.largeTitle)
                         .foregroundColor(.appTextPrimary)
                         .opacity(isAppearing ? 1.0 : 0.0)
                         .offset(y: isAppearing ? 0 : 20)
 
-                    Text("Please enter the 6-digit code sent to\n\(email)")
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
+                    Text("We sent a 6-digit code to\n\(email)")
+                        .font(LimiTypography.headline)
                         .foregroundColor(.appTextSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
@@ -101,7 +96,7 @@ struct OTPVerificationView: View {
 
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .font(LimiTypography.callout)
                         .foregroundColor(.appDanger)
                         .padding(.horizontal)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -119,7 +114,7 @@ struct OTPVerificationView: View {
                                 .frame(width: 30, height: 30)
                         } else {
                             Text("Verify")
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
+                                .font(LimiTypography.button)
                                 .foregroundColor(.appTextPrimary)
                         }
                     }
@@ -132,12 +127,12 @@ struct OTPVerificationView: View {
 
                 HStack(spacing: 5) {
                     Text("Didn't receive the code?")
-                        .font(.system(size: 14, design: .rounded))
+                        .font(LimiTypography.subheadline)
                         .foregroundColor(.appTextSecondary)
 
                     Button(action: generateOTP) {
                         Text("Resend")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
+                            .font(LimiTypography.callout)
                             .foregroundColor(.appTextPrimary)
                     }
                 }

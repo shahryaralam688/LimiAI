@@ -1,5 +1,6 @@
 import UIKit
 import Combine
+import SwiftUI
 
 protocol AIBubbleViewDelegate: AnyObject {
     func bubbleTapped()
@@ -23,19 +24,22 @@ final class AIBubbleView: UIButton {
 
     // MARK: - Subviews
 
-    private let orbImageView = UIImageView()
+    private let orbState: LimiOrbSceneState
+    private let orbHost: UIHostingController<LimiOrbSceneController>
     private let pulseLayer = CAShapeLayer()
     private var isAnimatingPulse = false
     private let borderLayer = CAShapeLayer()
 
     // MARK: - Colors
 
-    private let cyanColor = UIColor(red: 0.0, green: 0.9, blue: 1.0, alpha: 1.0)
-    private let mutedColor = UIColor(white: 0.25, alpha: 1.0)
+    private let accentColor = UIColor.appBrandPrimary
+    private let mutedColor = UIColor.appBorderPrimary
 
     // MARK: - Init
 
     override init(frame: CGRect) {
+        orbState = LimiOrbSceneState(isActive: false, size: Self.diameter)
+        orbHost = UIHostingController(rootView: LimiOrbSceneController(state: orbState))
         super.init(frame: frame)
         setupAppearance()
         setupGestures()
@@ -53,14 +57,12 @@ final class AIBubbleView: UIButton {
         layer.cornerRadius = size / 2
         clipsToBounds = false
 
-        // Neural orb image (starts with "off" state)
-        orbImageView.image = UIImage(named: "neuralOrbOff")
-        orbImageView.contentMode = .scaleAspectFill
-        orbImageView.frame = bounds
-        orbImageView.layer.cornerRadius = size / 2
-        orbImageView.clipsToBounds = true
-        orbImageView.isUserInteractionEnabled = false
-        addSubview(orbImageView)
+        orbHost.view.backgroundColor = .clear
+        orbHost.view.frame = bounds
+        orbHost.view.layer.cornerRadius = size / 2
+        orbHost.view.clipsToBounds = true
+        orbHost.view.isUserInteractionEnabled = false
+        addSubview(orbHost.view)
 
         setImage(nil, for: .normal)
 
@@ -82,7 +84,7 @@ final class AIBubbleView: UIButton {
         let size = Self.diameter
         let pulseBounds = CGRect(x: -8, y: -8, width: size + 16, height: size + 16)
         pulseLayer.path = UIBezierPath(ovalIn: pulseBounds).cgPath
-        pulseLayer.fillColor = cyanColor.withAlphaComponent(0.2).cgColor
+        pulseLayer.fillColor = accentColor.withAlphaComponent(0.2).cgColor
         pulseLayer.opacity = 0
         layer.insertSublayer(pulseLayer, at: 0)
     }
@@ -206,15 +208,12 @@ final class AIBubbleView: UIButton {
 
     func setActiveAppearance(_ active: Bool) {
         isActive = active
-
-        UIView.transition(with: orbImageView, duration: 0.3, options: .transitionCrossDissolve) {
-            self.orbImageView.image = UIImage(named: active ? "neuralOrb" : "neuralOrbOff")
-        }
+        orbState.isActive = active
 
         if active {
             startPulse()
-            borderLayer.strokeColor = cyanColor.withAlphaComponent(0.35).cgColor
-            layer.shadowColor = cyanColor.withAlphaComponent(0.5).cgColor
+            borderLayer.strokeColor = accentColor.withAlphaComponent(0.35).cgColor
+            layer.shadowColor = accentColor.withAlphaComponent(0.5).cgColor
             layer.shadowRadius = 20
             layer.shadowOpacity = 0.9
         } else {

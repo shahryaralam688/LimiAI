@@ -50,7 +50,7 @@ struct WebViewScreen: View {
                                 Circle()
                                     .stroke(
                                         LinearGradient(
-                                            gradient: Gradient(colors: [Color.eton.opacity(0.3), Color.eton.opacity(0.1)]),
+                                            gradient: Gradient(colors: [Color.brandHighlight.opacity(0.3), Color.brandHighlight.opacity(0.1)]),
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -62,7 +62,7 @@ struct WebViewScreen: View {
                                     .trim(from: 0, to: CGFloat(loadingProgress))
                                     .stroke(
                                         LinearGradient(
-                                            gradient: Gradient(colors: [Color.eton, Color.eton.opacity(0.7)]),
+                                            gradient: Gradient(colors: [Color.brandHighlight, Color.brandHighlight.opacity(0.7)]),
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
@@ -73,18 +73,18 @@ struct WebViewScreen: View {
                                     .animation(.easeInOut, value: loadingProgress)
                                 
                                 Image(systemName: "globe")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(Color.eton)
+                                    .font(LimiTypography.title2)
+                                    .foregroundColor(Color.brandHighlight)
                             }
                             
                             Text("Loading Shop...")
-                                .font(.headline)
+                                .font(LimiTypography.headline)
                                 .foregroundColor(.appTextInverse)
                                 .padding(.horizontal, 30)
                                 .padding(.vertical, 10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.themeWhite.opacity(0.9))
+                                        .fill(Color.appTextPrimary.opacity(0.9))
                                         .shadow(color: Color.themeBlack.opacity(0.05), radius: 5, x: 0, y: 3)
                                 )
                                 // Shimmer effect
@@ -103,8 +103,8 @@ struct WebViewScreen: View {
                                     }
                                     .mask(
                                         Text("Loading Shop...")
-                                            .font(.headline)
-                                            .foregroundColor(.themeWhite)
+                                            .font(LimiTypography.headline)
+                                            .foregroundColor(.appTextPrimary)
                                     )
                                     .onAppear {
                                         animateShimmer = true

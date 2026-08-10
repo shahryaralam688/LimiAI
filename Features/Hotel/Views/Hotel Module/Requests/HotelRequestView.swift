@@ -108,8 +108,8 @@ struct HotelRequestView: View {
         VStack(spacing: 20) {
             HStack {
                 Text("My Requests")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.largeTitle)
+                    .foregroundColor(.appTextPrimary)
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -144,7 +144,7 @@ struct HotelRequestView: View {
                     }
                 }) {
                     Text(tab.rawValue)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(LimiTypography.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .foregroundColor(selectedTab == tab ? .themeWhite : Color.appSurfaceChip)
@@ -198,8 +198,8 @@ struct HotelRequestView: View {
                 // Date Header
                 HStack {
                     Text(section.date)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.themeBlack)
+                        .font(LimiTypography.callout)
+                        .foregroundColor(.appTextPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(
@@ -239,7 +239,7 @@ private struct ActiveRequestCard: View {
         HStack(spacing: 16) {
             // Image thumbnail
             RoundedRectangle(cornerRadius: 16)
-//                .fill(Color.gray.opacity(0.3))
+//                .fill(Color.appBorderPrimary.opacity(0.45))
                 .fill(Color.appInputFill)
 
                 .frame(width: 80, height: 80)
@@ -248,13 +248,13 @@ private struct ActiveRequestCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 80, height: 80)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 )
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
@@ -266,13 +266,13 @@ private struct ActiveRequestCard: View {
                             )
                     )
                 Text(request.title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.appTextPrimary)
                 
                 // Progress Bar
                 if let progress = request.progress {
                     ProgressView(value: progress)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .themeWhite))
+                        .progressViewStyle(LinearProgressViewStyle(tint: .appTextPrimary))
                         .scaleEffect(y: 2)
                 }
             }
@@ -313,14 +313,14 @@ private struct HistoryRequestCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 80, height: 80)
-                        .foregroundColor(.themeWhite)
+                        .foregroundColor(.appTextPrimary)
                 )
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.footnote)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
                     .background(
@@ -331,17 +331,17 @@ private struct HistoryRequestCard: View {
                             )
                     )
                 Text(request.title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.appTextPrimary)
                 
                 // Time with clock icon
                 HStack(spacing: 6) {
                     Image(systemName: "clock.fill")
-                        .font(.system(size: 12))
+                        .font(LimiTypography.caption)
                         .foregroundColor(.appTextMuted)
                     
                     Text(request.time)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(LimiTypography.callout)
                         .foregroundColor(.appTextMuted)
                 }
             }
@@ -375,18 +375,18 @@ private struct CancelledRequestCard: View {
         HStack(spacing: 16) {
             // Image thumbnail with red overlay
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.gray.opacity(0.3))
+                .fill(Color.appBorderPrimary.opacity(0.45))
                 .frame(width: 80, height: 80)
                 .overlay(
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 24, weight: .medium))
+                        .font(LimiTypography.title2)
                         .foregroundColor(.appDanger)
                 )
             
             // Content
             VStack(alignment: .leading, spacing: 8) {
                 Text(request.category)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(LimiTypography.footnote)
                     .foregroundColor(.appTextPrimary)
                     .padding(.vertical, 3)
                     .padding(.horizontal, 10)
@@ -399,11 +399,11 @@ private struct CancelledRequestCard: View {
                     )
                 
                 Text(request.title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.button)
+                    .foregroundColor(.appTextPrimary)
                 
                 Text("Cancelled")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(LimiTypography.callout)
                     .foregroundColor(.appDanger)
             }
             

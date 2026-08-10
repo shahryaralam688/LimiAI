@@ -36,8 +36,8 @@ struct ModulerView: View {
 
             HStack{
                 Text("Installed Modules")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.headline)
+                    .foregroundColor(.appTextPrimary)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
                 Spacer()
@@ -66,33 +66,25 @@ struct ModulerView: View {
                 }
                 .limiFloatingOrbClearance()
             }
-            HStack{
+            HStack {
                 Spacer()
-                Button(action: {
+                LimiPillButton(title: "Install Modules") {
                     showToast = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                         showToast = false
                     }
-                }) {
-                    Text("Install Modules")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.appCanvasMuted)
-                        .frame(width: 138)
-                        .padding(.vertical, 14)
-                        .background(Color.themeWhite)
-                        .cornerRadius(24)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 24)
             }
         }
-        .background(Color.appCanvasPrimary)
+        .limiScreenBackground()
         .overlay {
 
             if showModuleActionMenu, let activeModule = selectedModule {
                 ZStack {
                     // Dark overlay background
-                    Color.themeBlack.opacity(0.45)
+                    Color.appOverlayScrimLight
                         .ignoresSafeArea()
                         .onTapGesture {
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
@@ -105,14 +97,14 @@ struct ModulerView: View {
                     VStack(spacing: 0) {
                         VStack(spacing: 8) {
                             Text(activeModule.title)
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.themeWhite)
+                                .font(LimiTypography.button)
+                                .foregroundColor(.appTextPrimary)
                                 .multilineTextAlignment(.center)
                                 .tracking(-0.3)
 
                             Text("What would you like to do?")
-                                .font(.system(size: 13, weight: .regular))
-                                .foregroundColor(Color.themeWhite.opacity(0.7))
+                                .font(LimiTypography.footnote)
+                                .foregroundColor(Color.appTextPrimary.opacity(0.7))
                                 .multilineTextAlignment(.center)
                                 .tracking(-0.2)
                         }
@@ -121,7 +113,7 @@ struct ModulerView: View {
                         .padding(.bottom, 12)
 
                         Divider()
-                            .background(Color.themeWhite.opacity(0.08))
+                            .background(Color.appGlassFillMedium)
 
                         // Install / Uninstall Button
                         Button(action: {
@@ -135,12 +127,12 @@ struct ModulerView: View {
                         }) {
                             HStack(spacing: 12) {
                                 Image(systemName: "square.and.arrow.down")
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.button)
+                                    .foregroundColor(.appTextPrimary)
 
                                 Text(activeModule.status == .addModule ? "Install" : "Uninstall")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.callout)
+                                    .foregroundColor(.appTextPrimary)
 
                                 Spacer()
                             }
@@ -149,7 +141,7 @@ struct ModulerView: View {
                         }
 
                         Divider()
-                            .background(Color.themeWhite.opacity(0.08))
+                            .background(Color.appGlassFillMedium)
 
                         // Later Button
                         Button(action: {
@@ -160,12 +152,12 @@ struct ModulerView: View {
                         }) {
                             HStack(spacing: 12) {
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.button)
+                                    .foregroundColor(.appTextPrimary)
 
                                 Text("Close")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.callout)
+                                    .foregroundColor(.appTextPrimary)
 
                                 Spacer()
                             }
@@ -176,7 +168,7 @@ struct ModulerView: View {
                     .background(
                         Color.appSurfacePrimary
                             .opacity(0.8)
-                            .shadow(color: Color.themeBlack.opacity(0.5), radius: 20, x: 0, y: 18)
+                            .shadow(color: Color.appOverlayScrim, radius: 20, x: 0, y: 18)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 24)
                                     .stroke(Color.appBorderPrimary, lineWidth: 4) // ← 1-point border
@@ -205,17 +197,17 @@ struct ModulerView: View {
                     VStack(spacing: 12) {
                         HStack(spacing: 12) {
                             Image(systemName: "sparkles")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.themeWhite)
+                                .font(LimiTypography.button)
+                                .foregroundColor(.appTextPrimary)
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Exciting Updates Coming!")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.themeWhite)
+                                    .font(LimiTypography.callout)
+                                    .foregroundColor(.appTextPrimary)
                                 
                                 Text("New modules with amazing features are on the way.")
-                                    .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(Color.themeWhite.opacity(0.75))
+                                    .font(LimiTypography.footnote)
+                                    .foregroundColor(Color.appTextPrimary.opacity(0.75))
                             }
                             
                             Spacer()
@@ -271,8 +263,8 @@ struct ModuleCard: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(module.icon)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(.themeWhite)
+                    .font(LimiTypography.title2)
+                    .foregroundColor(.brandHighlight)
                 
                 Spacer()
                 Button(action: {
@@ -280,14 +272,14 @@ struct ModuleCard: View {
                 }) {
                     Image(systemName: "ellipsis")
                         .rotationEffect(.degrees(90))
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.themeWhite)
+                        .font(LimiTypography.headline)
+                        .foregroundColor(.appTextPrimary)
                 }
             }
             
             Text(module.title)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.themeWhite)
+                .font(LimiTypography.headline)
+                .foregroundColor(.appTextPrimary)
             
             Spacer()
             
@@ -308,11 +300,11 @@ struct ModuleCard: View {
                         HStack(spacing: 8) {
                             
                             Image(systemName: "plus.circle")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(LimiTypography.callout)
                                 .foregroundColor(Color.appBorderSoft)
                             
                             Text("Install")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(LimiTypography.footnote)
                                 .foregroundColor(Color.appBorderSoft)
                             
                         }
@@ -341,10 +333,10 @@ struct ModuleCard: View {
                     } else if showInstalledStatus {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(LimiTypography.callout)
                                 .foregroundColor(Color.appBorderSoft)
                             Text("Installed")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(LimiTypography.footnote)
                                 .foregroundColor(Color.appBorderSoft)
                         }
                     }
@@ -353,8 +345,7 @@ struct ModuleCard: View {
         }
         .frame(minHeight: 128)
         .padding(16)
-        .background(Color.appSurfaceSecondaryAlt)
-        .cornerRadius(16)
+        .limiPanel(cornerRadius: 16)
         .onAppear {
             if module.status != .addModule {
                 isLoadingInstalled = false

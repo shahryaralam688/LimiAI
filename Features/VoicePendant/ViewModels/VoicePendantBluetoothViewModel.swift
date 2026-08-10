@@ -133,22 +133,27 @@ final class VoicePendantBluetoothViewModel: ObservableObject {
 
     func provision() {
         guard case .password(let ssid) = step else { return }
+        guard let device = selectedDevice else { return }
         let password = passwordInput
         step = .provisioning(ssid: ssid)
 
-        adapter.provisionWifi(ssid: ssid, password: password) { [weak self] result in
-            DispatchQueue.main.async {
+        WiFiProvisioningCoordinator.shared.provisionAndVerify(
+            deviceName: device.name,
+            bleDeviceId: device.id,
+            ssid: ssid,
+            password: password,
+            onPhaseUpdate: { _ in },
+            completion: { [weak self] result in
                 guard let self else { return }
-                switch result.status {
-                case "error":
-                    self.errorMessage = result.message
-                    self.step = .password(ssid: ssid)
-                default:
-                    // success / warning — credentials written; pendant joins Wi-Fi.
+                switch result {
+                case .success:
                     self.step = .success(ssid: ssid)
+                case .failure(let failure):
+                    self.errorMessage = failure.userMessage
+                    self.step = .password(ssid: ssid)
                 }
             }
-        }
+        )
     }
 
     // MARK: - Navigation helpers
