@@ -72,9 +72,6 @@ struct StaticLightARViewContainer: UIViewRepresentable {
 
     // MARK: - Debug helper for model info (optional but useful)
     private func debugPrintModelInfo(root: Entity, from url: URL) {
-        print("================================")
-        print("Loaded model from: \(url.lastPathComponent)")
-        print("Root entity name: '\(root.name)' type: \(type(of: root))")
 
         var modelEntityCount = 0
         var meshSubmeshCount = 0
@@ -83,19 +80,13 @@ struct StaticLightARViewContainer: UIViewRepresentable {
 
         func walk(_ entity: Entity, level: Int = 0) {
             let indent = String(repeating: "  ", count: level)
-            print("\(indent)─ Entity: '\(entity.name)' [\(type(of: entity))]")
 
             // Transform info
             let t = entity.transform
-            print("\(indent)  Transform:")
-            print("\(indent)    translation: \(t.translation)")
-            print("\(indent)    rotation: \(t.rotation)")
-            print("\(indent)    scale: \(t.scale)")
 
             // Model / mesh / material info
             if let modelEntity = entity as? ModelEntity {
                 modelEntityCount += 1
-                print("\(indent)  ✅ Has ModelComponent")
 
                 if let modelComp = modelEntity.model {
                     let mesh = modelComp.mesh
@@ -103,23 +94,18 @@ struct StaticLightARViewContainer: UIViewRepresentable {
                     // This isn't a perfect "submesh count" but gives an idea of pieces
                     let submeshCount = mesh.contents.models.count
                     meshSubmeshCount += submeshCount
-                    print("\(indent)    Mesh submesh count (approx): \(submeshCount)")
 
                     let mats = modelComp.materials
                     materialCount += mats.count
-                    print("\(indent)    Materials (\(mats.count)):")
                     for (index, material) in mats.enumerated() {
                         let matName = ((material.name?.isEmpty) != nil) ? "<unnamed>" : material.name
-                        print("\(indent)      [\(index)] \(matName) – \(type(of: material))")
                         materialNames.append(matName ?? "")
                     }
                 } else {
-                    print("\(indent)    ModelEntity has no ModelComponent")
                 }
             }
 
             if !entity.children.isEmpty {
-                print("\(indent)  Children count: \(entity.children.count)")
             }
 
             for child in entity.children {
@@ -129,16 +115,9 @@ struct StaticLightARViewContainer: UIViewRepresentable {
 
         walk(root)
 
-        print("---------- SUMMARY ----------")
-        print("Total ModelEntity objects: \(modelEntityCount)")
-        print("Total mesh submeshes (approx): \(meshSubmeshCount)")
-        print("Total materials: \(materialCount)")
         let uniqueNames = Array(Set(materialNames))
-        print("Unique material names (\(uniqueNames.count)):")
         for name in uniqueNames {
-            print("  • \(name)")
         }
-        print("================================")
     }
 
     func makeUIView(context: Context) -> ARView {

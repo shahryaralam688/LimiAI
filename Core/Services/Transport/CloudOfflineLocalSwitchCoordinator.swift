@@ -49,8 +49,13 @@ public struct LocalControlSwitchOffer: Identifiable, Equatable {
     }
 
     public var alertMessage: String {
+        if canUseWebSocket && !canUseBLE {
+            return "Cloud and Bluetooth are unavailable. Allow local network (Bonjour) / WebSocket control for this device?"
+        }
+        if canUseWebSocket {
+            return "Do you want to allow local network (Bonjour) / WebSocket control for this device?"
+        }
         var parts: [String] = []
-        if canUseWebSocket { parts.append("local network") }
         if canUseBLE { parts.append("BLE") }
         let paths = parts.isEmpty ? "local network / BLE" : parts.joined(separator: " / ")
         return "Your device is not connected to the cloud. Do you want to switch over \(paths) control?"
@@ -162,9 +167,12 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
             )
             if activeOffer != nil { break }
         }
-        // One light prepare pass for configured hubs (foreground + cooldown gated inside).
-        if let first = ConfiguredBLEDeviceStore.shared.allRecords.first {
-            BLECloudFallbackService.shared.prepareBLEIfCloudMissing(hardwareId: first.hardwareId)
+        for record in ConfiguredBLEDeviceStore.shared.allRecords {
+            if DeviceTransportRegistry.shared.state(for: record.hardwareId).mqttConnected { continue }
+            if BluetoothManager.shared.isLiveConnected(forPeripheralUUID: record.blePeripheralUUID) {
+                continue
+            }
+            BLECloudFallbackService.shared.prepareBLEIfCloudMissing(hardwareId: record.hardwareId)
         }
     }
 
@@ -198,8 +206,13 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
             guard canWS || canBLE || BluetoothManager.shared.isBluetoothOn else { return }
         }
 
-        // Prefer LAN WS when available; otherwise BLE (Cloud-miss path).
-        let suggested: TransportMediumPreference = canWS ? .webSocket : .ble
+        // Prefer BLE automatically; offer modal mainly for Bonjour/WS permission.
+        let suggested: TransportMediumPreference
+        if canWS {
+            suggested = .webSocket
+        } else {
+            suggested = .ble
+        }
         let offerCanBLE = canBLE || BluetoothManager.shared.isBluetoothOn
         activeOffer = LocalControlSwitchOffer(
             deviceId: key,
@@ -208,12 +221,18 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
             canUseBLE: offerCanBLE,
             switchCase: switchCase
         )
-        print(
-            "☁️ [LocalSwitch][\(switchCase.rawValue)] Offer for \(key) → \(suggested.shortTitle) (ws=\(canWS), ble=\(canBLE))"
-        )
     }
 
     // MARK: - User actions
+
+    /// Home probe failed MQTT+BLE — ask for Bonjour/WS if LAN reachable.
+    public func offerBonjourIfNeeded(deviceId: String) {
+        considerOffer(
+            deviceId: normalizeId(deviceId),
+            switchCase: .firstCloudOffline,
+            requireLocalReachable: true
+        )
+    }
 
     public func accept() {
         guard let offer = activeOffer else { return }
@@ -223,18 +242,20 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
         }
         store.preference = offer.suggested
         switchedForDeviceId = offer.deviceId
-        // Smooth: start BLE reconnect immediately when user picks BLE (or WS falls back later).
+        // Bonjour / WS requires explicit user Yes.
+        if offer.suggested == .webSocket || offer.canUseWebSocket {
+            LocalNetworkAllowStore.shared.allow(offer.deviceId)
+        }
+        // Smooth: start BLE reconnect when user picks BLE (or as backup).
         if offer.suggested == .ble || offer.canUseBLE {
             BLECloudFallbackService.shared.prepareBLEIfCloudMissing(hardwareId: offer.deviceId)
         }
         activeOffer = nil
-        print("☁️ [LocalSwitch] Accepted \(offer.suggested.shortTitle) for \(offer.deviceId)")
     }
 
     public func decline() {
         if let offer = activeOffer {
             declinedDeviceIds.insert(offer.deviceId)
-            print("☁️ [LocalSwitch] Declined for \(offer.deviceId)")
         }
         activeOffer = nil
     }
@@ -249,7 +270,6 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
         TransportMediumPreferenceStore.shared.preference = previous
         preferenceBeforeLocalSwitch = nil
         switchedForDeviceId = nil
-        print("☁️ [LocalSwitch] Restored preference → \(previous.shortTitle)")
     }
 
     // MARK: - Observers

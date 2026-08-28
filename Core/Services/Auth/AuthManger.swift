@@ -60,7 +60,6 @@ class GoogleAuthManager: NSObject, ObservableObject {
     
     func signInWithGoogle(completion: ((Bool) -> Void)? = nil) {
         guard let presentingViewController = Self.topViewController() else {
-            print("No presenting view controller found")
             completion?(false)
             return
         }
@@ -68,56 +67,41 @@ class GoogleAuthManager: NSObject, ObservableObject {
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { [weak self] result, error in
             DispatchQueue.main.async {
                 if let error = error {
-                    print("Google Sign-In Error: \(error.localizedDescription)")
                     completion?(false)
                     return
                 }
                 
                 guard let user = result?.user else {
-                    print("No user data received")
                     completion?(false)
                     return
                 }
                 
                 // DEBUG: Full Google user dump so we can see exactly what comes from Google
-                print("[GoogleAuth] ===== GOOGLE RAW RESPONSE (signInWithGoogle) START =====")
-                print("[GoogleAuth] user: \(user)")
-                print("[GoogleAuth] user.profile?.email: \(user.profile?.email ?? "-")")
-                print("[GoogleAuth] user.profile?.name: \(user.profile?.name ?? "-")")
-                print("[GoogleAuth] user.grantedScopes: \(user.grantedScopes ?? [])")
-                print("[GoogleAuth] ===== GOOGLE RAW RESPONSE (signInWithGoogle) END =====")
 
                 let idTokenString = user.idToken?.tokenString ?? ""
                 let serverAuthCode = result?.serverAuthCode
 
                 if !idTokenString.isEmpty {
-                    print("[GoogleAuth] 🪪 Google ID token (FULL): \(idTokenString)")
                 } else {
-                    print("[GoogleAuth] No Google ID token available in signInWithGoogle")
                 }
 
-                print("[GoogleAuth] serverAuthCode (signInWithGoogle): \(serverAuthCode ?? "nil")")
 
                 self?.isSignedIn = true
                 self?.userEmail = user.profile?.email ?? ""
                 self?.userName = user.profile?.name ?? ""
                 self?.userProfileImage = user.profile?.imageURL(withDimension: 200)?.absoluteString ?? ""
                 guard let idToken = user.idToken?.tokenString, !idToken.isEmpty else {
-                    print("No idToken available")
                     completion?(false)
                     return
                 }
 
-                print("[GoogleAuth] Sending idToken + serverAuthCode to backend from signInWithGoogle()")
                 self?.sendTokenToBackend(
                     idToken,
                     serverAuthCode: serverAuthCode,
                     grantedScopes: user.grantedScopes
                 ) { success in
                     if success {
-                        print("Successfully signed in: \(self?.userEmail ?? "")")
                     } else {
-                        print("[GoogleAuth] Backend token exchange failed after Google sign-in")
                     }
                     completion?(success)
                 }
@@ -128,14 +112,11 @@ class GoogleAuthManager: NSObject, ObservableObject {
     /// Request additional Google permissions (scopes) for the user.
     /// This re-runs the Google Sign-In flow but asks for the extra scopes.
     func requestGooglePermissions(scopes: [String], completion: ((Bool) -> Void)? = nil) {
-        print("[GoogleAuth] 🔵 requestGooglePermissions() called with scopes: \(scopes)")
         guard let presentingViewController = Self.topViewController() else {
-            print("No presenting view controller found for scope request")
             completion?(false)
             return
         }
 
-        print("[GoogleAuth] Presenting Google Sign-In UI for additional scopes...")
 
         // Use signIn(withPresenting:hint:additionalScopes:) which is available in the
         // GoogleSignIn SDK version you are using.
@@ -145,43 +126,27 @@ class GoogleAuthManager: NSObject, ObservableObject {
             additionalScopes: scopes
         ) { [weak self] result, error in
             DispatchQueue.main.async {
-                print("[GoogleAuth] ⏹ Google signIn callback for additional scopes reached")
                 if let error = error {
-                    print("[GoogleAuth] Failed to request additional Google scopes: \(error.localizedDescription)")
                     completion?(false)
                     return
                 }
 
                 guard let user = result?.user else {
-                    print("[GoogleAuth] No user returned when requesting additional scopes")
                     completion?(false)
                     return
                 }
 
                 // DEBUG: Full Google user dump so we can see exactly what comes from Google
-                print("[GoogleAuth] ===== GOOGLE RAW RESPONSE (requestGooglePermissions) START =====")
-                print("[GoogleAuth] user: \(user)")
-                print("[GoogleAuth] user.profile?.email: \(user.profile?.email ?? "-")")
-                print("[GoogleAuth] user.profile?.name: \(user.profile?.name ?? "-")")
-                print("[GoogleAuth] user.grantedScopes: \(user.grantedScopes ?? [])")
-                print("[GoogleAuth] ===== GOOGLE RAW RESPONSE (requestGooglePermissions) END =====")
 
                 let idTokenString = user.idToken?.tokenString ?? ""
                 let serverAuthCode = result?.serverAuthCode
 
                 if !idTokenString.isEmpty {
-                    print("[GoogleAuth] 🪪 (scopes) Google ID token (FULL): \(idTokenString)")
                 } else {
-                    print("[GoogleAuth] (scopes) No Google ID token available")
                 }
 
-                print("[GoogleAuth] serverAuthCode (requestGooglePermissions): \(result?.serverAuthCode ?? "nil")")
 
                 // Debug: log granted scopes and user information
-                print("[GoogleAuth] ✅ Additional scopes requested:")
-                print("[GoogleAuth]   Requested scopes: \(scopes)")
-                print("[GoogleAuth]   Granted scopes: \(user.grantedScopes ?? [])")
-                print("[GoogleAuth]   User email: \(user.profile?.email ?? "-")")
 
                 // Update local user info
                 self?.isSignedIn = true
@@ -192,14 +157,10 @@ class GoogleAuthManager: NSObject, ObservableObject {
                 // Optionally send refreshed idToken + serverAuthCode + granted scopes to backend
                 if let idToken = user.idToken?.tokenString {
                     let prefix = String(idToken.prefix(50))
-                    print("[GoogleAuth] idToken prefix (50 chars): \(prefix)...")
-                    print("[GoogleAuth] Sending idToken + serverAuthCode + scopes to backend from requestGooglePermissions()")
                     self?.sendTokenToBackend(idToken, serverAuthCode: serverAuthCode, grantedScopes: user.grantedScopes)
                 } else {
-                    print("[GoogleAuth] No idToken found after requesting additional scopes")
                 }
 
-                print("[GoogleAuth] 🔵 requestGooglePermissions() completed successfully")
                 completion?(true)
             }
         }
@@ -238,16 +199,11 @@ class GoogleAuthManager: NSObject, ObservableObject {
         grantedScopes: [String]? = nil,
         completion: ((Bool) -> Void)? = nil
     ) {
-        print("[Backend] 🔵 sendTokenToBackend() called")
-        print("[Backend] URL: \(APIConstants.loginGoogle)")
 
         let payload: [String: Any] = [
             "id_token": token,
             "server_auth_code": serverAuthCode as Any
         ]
-        print("[Backend] Sending id_token to backend (truncated): \(String(token.prefix(50)))...")
-        print("[Backend] server_auth_code: \(serverAuthCode ?? "nil")")
-        print("[Backend] Granted scopes: \(grantedScopes ?? [])")
 
         LimiHTTPClient.postJSON(
             urlString: APIConstants.loginGoogle,
@@ -255,46 +211,36 @@ class GoogleAuthManager: NSObject, ObservableObject {
             auth: .none
         ) { data, response, error in
             DispatchQueue.main.async {
-                print("[Backend] ⏹ Backend response received")
                 if let error = error {
-                    print("[Backend] Error: \(error)")
                     completion?(false)
                     return
                 }
 
                 if let http = response {
-                    print("[Backend] Status code: \(http.statusCode)")
                 }
 
                 guard let data = data else {
-                    print("[Backend] No data returned")
                     completion?(false)
                     return
                 }
 
                 if let raw = String(data: data, encoding: .utf8) {
-                    print("[Backend] Raw response: \(raw)")
                 }
 
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                        let dataField = json["data"] as? [String: Any],
                        let sessionToken = dataField["token"] as? String {
-                        print("[Backend] Full JSON: \(json)")
-                        print("[Backend] Extracted Token: \(sessionToken)")
                         // Defer isAuthenticated until SignIn / Personalize completes.
                         AuthManager.shared.saveToken(sessionToken, updateAuthState: false)
                         AuthManager.shared.clearRole()
                         completion?(true)
                     } else {
-                        print("[Backend] Token not found in response JSON.")
                         completion?(false)
                     }
                 } catch {
-                    print("[Backend] JSON parsing error: \(error)")
                     completion?(false)
                 }
-                print("[Backend] 🔵 sendTokenToBackend() finished")
             }
         }
     }
@@ -339,8 +285,6 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
             let identityToken = appleIDCredential.identityToken.flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
             #if DEBUG
-            print("[AppleAuth] Apple user id: \(userId)")
-            print("[AppleAuth] identityToken received (length: \(identityToken.count))")
             #endif
             
             DispatchQueue.main.async {
@@ -356,7 +300,6 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
                     case .success:
                         self?.appleSignInCompletion?(true)
                     case .failure(let err):
-                        print("[AppleAuth] Exchange failed: \(err.localizedDescription)")
                         self?.appleSignInCompletion?(false)
                     }
                     self?.appleSignInCompletion = nil
@@ -371,7 +314,6 @@ extension GoogleAuthManager: ASAuthorizationControllerDelegate, ASAuthorizationC
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        print("Apple Sign-In Error: \(error.localizedDescription)")
         DispatchQueue.main.async {
             self.appleSignInCompletion?(false)
             self.appleSignInCompletion = nil

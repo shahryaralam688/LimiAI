@@ -434,9 +434,7 @@ struct MiniControllerView: View {
             let combinedString = "\(deviceInfo) | Hex Data: [\(hexString)]"
 
             sendDeviceInfo(deviceInfo: combinedString)
-            print("Sending LED number:", ledNumber, "Color:", byteArray)
         } else {
-            print("Error: LED number out of range!")
         }
     }
 
@@ -455,12 +453,8 @@ struct MiniControllerView: View {
 
         let steps = 4
         let difference = targetBrightness - previousBrightness
-        print("previousBrightness:\(previousBrightness)")
-        print("currentBrightness:\(targetBrightness)")
-        print("defference:\(difference)")
 
         let stepSize = difference / steps
-        print("stepSize:\(stepSize)")
         
         for i in 1...steps {
             let delayTime = Double(i - 1) * 0.15 // 150ms delay between steps
@@ -475,7 +469,6 @@ struct MiniControllerView: View {
                 ]
                 
                 let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")
-                print("Step \(i) - LED \(ledNumber): \(hexString) (\(intermediateValue)%)")
                 
                 let deviceInfo = String(describing: SharedDevice.shared.connectedDevice)
                 let combinedString = "\(deviceInfo) | Hex Data: [\(hexString)]"
@@ -502,7 +495,6 @@ struct MiniControllerView: View {
             sendDeviceInfo(deviceInfo: combinedString)
 //            self.storeHistory.addElement(hub: self.hub, byteArray: byteArray)
 
-            print("Final brightness (\(targetBrightness))")
             UserDefaults.standard.set(targetBrightness, forKey: key)
             
             switch pwmled {
@@ -530,7 +522,6 @@ struct MiniControllerView: View {
             miniPwmIntensityObj.sendMessageToDevice(to: hub.id, message: [UInt8](data)) // Convert Data back to [UInt8]
 
         } else {
-            print("Device not connected")
         }
     }
     

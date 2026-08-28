@@ -78,6 +78,16 @@ struct DeviceControlView: View {
         .navigationTitle(deviceName)
         .navigationBarTitleDisplayMode(.inline)
         .homeUI1ControlNavigationChrome(enabled: usesHomeUI1)
+        .onAppear {
+            LightControllingSocket.shared.connect()
+            let key = LimiDeviceNaming.normalizedHardwareId(chennalMac)
+            guard !key.isEmpty else { return }
+            DevicePresenceCoordinator.shared.requestRefresh(
+                deviceIds: [key],
+                reason: .homeAppear,
+                force: true
+            )
+        }
     }
 }
 

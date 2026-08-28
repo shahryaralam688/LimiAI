@@ -17,10 +17,8 @@ struct ProductARView: View {
         
         ARContainerWithOverlay(card: card)
             .onAppear {
-                print("TestARView appeared")
             }
             .onDisappear {
-                print("TestARView disappeared")
             }
             
     }
@@ -29,7 +27,6 @@ struct ProductARView: View {
             downloadId: card.objectName,
             bundledName: card.objectName
         ) else {
-            print("❌ Failed to load model for: \(card.objectName)")
             return
         }
 

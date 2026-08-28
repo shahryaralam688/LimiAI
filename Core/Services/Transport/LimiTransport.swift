@@ -133,8 +133,17 @@ public final class LimiTransport: ObservableObject {
     }
 
     private func sendOverBLE(_ command: LimiCommand, deviceId: String) async throws {
+        // Safety net: provisioned hubs reject BLE while MQTT is active on firmware.
+        if TransportMediumPreferenceStore.shared.preference == .automatic {
+            let state = registry.state(for: deviceId)
+            if state.activeDoor == .mqtt {
+                try await sendOverMQTT(command, deviceId: deviceId)
+                return
+            }
+        }
         // Smooth path: reconnect via stored BLE UUID when cloud is missing.
         try await BLECloudFallbackService.shared.ensureConnected(hardwareId: deviceId)
-        try ble.send(command)
+        let bleUUID = ConfiguredBLEDeviceStore.shared.blePeripheralUUID(for: deviceId)
+        try ble.send(command, toPeripheralUUID: bleUUID)
     }
 }

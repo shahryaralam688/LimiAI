@@ -152,7 +152,6 @@ private struct HotelChip: View {
         let geocoder = CLGeocoder()
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
             if let error = error {
-                print("Reverse geocoding failed: \(error.localizedDescription)")
                 return
             }
             
@@ -456,7 +455,6 @@ private struct BottomTabBar: View {
         .buttonStyle(.plain)
     }
 }
-
 
 
 //// MARK: - Enhanced Sidebar with Improved Animation

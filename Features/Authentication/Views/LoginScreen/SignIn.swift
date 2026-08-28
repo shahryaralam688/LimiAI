@@ -112,7 +112,6 @@ struct SignInView: View {
                 .padding(.bottom, 16)
 
 
-
             Button(action: { viewModel.showEmailLogin() }) {
                 HStack(spacing: 8) {
                     Image(systemName: "envelope.fill")
@@ -196,7 +195,7 @@ struct SignInView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 6) {
-                Button(action: { print("Terms tapped") }) {
+                Button(action: { }) {
                     Text("Terms")
                         .font(LimiTypography.caption)
                         .foregroundColor(Color.appTextQuiet)

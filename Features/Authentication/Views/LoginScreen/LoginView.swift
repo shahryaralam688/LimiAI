@@ -158,11 +158,20 @@ struct LoginView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 0)
 
+                    if let otpError = viewModel.otpRequestErrorMessage {
+                        Text(otpError)
+                            .font(LimiTypography.footnote)
+                            .foregroundColor(.appDanger)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 8)
+                    }
 
                     Button(action: {
                         authManager.signInWithApple { success in
-                            if success {
+                            if success, AuthManager.shared.getToken() != nil {
                                 DispatchQueue.main.async {
+                                    AuthManager.shared.isAuthenticated = true
                                     viewModel.isOTPVerified = true
                                 }
                             }
@@ -186,8 +195,9 @@ struct LoginView: View {
                     // Primary Button
                     Button(action: {
                         authManager.signInWithGoogle { success in
-                            if success {
+                            if success, AuthManager.shared.getToken() != nil {
                                 DispatchQueue.main.async {
+                                    AuthManager.shared.isAuthenticated = true
                                     viewModel.isOTPVerified = true
                                 }
                             }
@@ -249,7 +259,12 @@ struct LoginView: View {
         }
         
         .sheet(isPresented: $viewModel.isShowingOTPView) {
-            OTPVerificationView(email: viewModel.email, enteredOTP: $viewModel.enteredOTP, isOTPVerified: $viewModel.isOTPVerified)
+            OTPVerificationView(
+                email: viewModel.email,
+                confirmationMessage: viewModel.otpSentConfirmationMessage,
+                enteredOTP: $viewModel.enteredOTP,
+                isOTPVerified: $viewModel.isOTPVerified
+            )
         }
         .fullScreenCover(isPresented: $viewModel.isOTPVerified) {
             HomeView()

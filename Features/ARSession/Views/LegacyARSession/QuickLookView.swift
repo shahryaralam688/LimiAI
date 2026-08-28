@@ -29,11 +29,9 @@ struct ARQuickLookView: UIViewControllerRepresentable {
 
         func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
             guard let finalURL = ConfiguratorModelStore.previewURL(forSnapId: parent.card.objectName) else {
-                print("❌ Model not found: \(parent.card.objectName)")
                 return QLPreviewItemDummy()
             }
 
-            print("📦 Loading model for QuickLook:", finalURL.path)
             return finalURL as NSURL
         }
     }

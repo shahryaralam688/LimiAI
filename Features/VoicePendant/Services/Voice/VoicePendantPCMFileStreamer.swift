@@ -51,7 +51,6 @@ enum VoicePendantPCMFileStreamer {
                         for chunk in chunks {
                             try await webSocket.sendBinary(chunk)
                         }
-                        print("🔊 [VoicePendantVoice] Sent \(chunks.count) PCM chunks (\(fileURL.lastPathComponent)) -> \(deviceID)")
                         webSocket.disconnect()
                         gate.complete()
                     } catch {

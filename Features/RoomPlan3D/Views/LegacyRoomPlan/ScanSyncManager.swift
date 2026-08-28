@@ -15,18 +15,15 @@ class ScanSyncManager {
             url: url,
             method: "GET"
         ) else {
-            print("❌ No valid token found.")
             return
         }
 
         LimiHTTPClient.perform(request) { data, response, error in
             if let error = error {
-                print("❌ Error fetching scans:", error)
                 return
             }
 
             guard let data = data else {
-                print("❌ No data received")
                 return
             }
 
@@ -39,32 +36,26 @@ class ScanSyncManager {
                         }
                     }
                 }
-            } catch {
-                print("❌ Error parsing JSON:", error)
-            }
+            } catch { /* ignored */ }
         }
     }
 
     static func downloadAndSaveScanFile(fileName: String, downloadURL: String) {
         guard let url = URL(string: downloadURL) else {
-            print("❌ Invalid download URL:", downloadURL)
             return
         }
 
         LimiHTTPClient.perform(URLRequest(url: url)) { data, _, error in
             if let error = error {
-                print("❌ Error downloading file:", error)
                 return
             }
 
             guard let data = data else {
-                print("❌ No data received from:", url)
                 return
             }
 
             let success = RoominatorFileManager.shared.saveUSDZFile(data, withName: fileName)
             if success {
-                print("✅ File \(fileName) downloaded and saved locally.")
             }
         }
     }

@@ -6,23 +6,21 @@
 import CoreBluetooth
 
 extension BluetoothManager {
-    func writeDataToFF03(_ bytes: [UInt8]) {
-        guard let peripheral = connectedPeripheral else {
-            print("❌ No connected peripheral found! Reconnecting...")
+    func writeDataToFF03(_ bytes: [UInt8], toPeripheralUUID uuidString: String? = nil) {
+        let resolved = resolveWriteTarget(uuidString)
+        guard let peripheral = resolved?.peripheral else {
             enqueue(bytes)
             attemptReconnect()
             return
         }
         
         if peripheral.state != .connected {
-            print("⚠️ Peripheral is disconnected! Attempting to reconnect...")
             enqueue(bytes)
             attemptReconnect()
             return
         }
         
-        guard let characteristic = targetCharacteristic else {
-            print("⚠️ FF03 characteristic is missing! Rediscovering...")
+        guard let characteristic = resolved?.characteristic ?? targetCharacteristic else {
             enqueue(bytes)
             peripheral.discoverServices(nil)
             return
@@ -32,20 +30,34 @@ extension BluetoothManager {
         let props = characteristic.properties
         let writeType: CBCharacteristicWriteType = props.contains(.write) ? .withResponse : (props.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse)
         let hex = bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
-        print("📤 Writing to FF03 (type=\(writeType == .withResponse ? "withResponse" : "withoutResponse")) | name=\(peripheral.name ?? "Unknown"), id=\(peripheral.identifier.uuidString) | bytes=\(bytes) | hex=\(hex)")
         peripheral.writeValue(dataToSend, for: characteristic, type: writeType)
+    }
+
+    private func resolveWriteTarget(_ uuidString: String?) -> (peripheral: CBPeripheral, characteristic: CBCharacteristic?)? {
+        if let uuidString, !uuidString.isEmpty {
+            if let entry = connectedEntry(forPeripheralUUID: uuidString) {
+                return (entry.peripheral, entry.characteristic)
+            }
+            if let connected = connectedPeripheral,
+               connected.identifier.uuidString.caseInsensitiveCompare(uuidString) == .orderedSame {
+                return (connected, targetCharacteristic)
+            }
+            return nil
+        }
+        if let connected = connectedPeripheral {
+            return (connected, targetCharacteristic)
+        }
+        return nil
     }
 
     func writeValue(_ bytes: [UInt8]) {
         guard let peripheral = connectedPeripheral else {
-            print("❌ No connected peripheral found! Reconnecting...")
             enqueue(bytes)
             attemptReconnect()
             return
         }
         
         if peripheral.state != .connected {
-            print("⚠️ Peripheral is disconnected! Attempting to reconnect...")
             enqueue(bytes)
             attemptReconnect()
             return
@@ -57,14 +69,12 @@ extension BluetoothManager {
     /// Convenience: send UTF-8 string payloads over FF03
     func writeString(_ text: String) {
         let bytes = Array(text.utf8)
-        print("📝 Preparing to send string (UTF-8): \(text)")
         writeValue(bytes)
     }
 
     /// Simple helper requested: send a plain string message to the connected BLE device.
     /// Logs whether it is queued (not yet connected/ready) or being sent now.
     func BLESend(message: String) {
-        print("➡️ BLESend called with message: \(message)")
         writeString(message)
     }
 
@@ -72,12 +82,10 @@ extension BluetoothManager {
     func enqueue(_ bytes: [UInt8]) {
         pendingWrites.append(bytes)
         let hex = bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
-        print("🕓 Queued write until connected/ready: bytes=\(bytes) | hex=\(hex)")
     }
 
     func flushPendingWrites() {
         guard !pendingWrites.isEmpty else { return }
-        print("🚀 Flushing \(pendingWrites.count) pending write(s)...")
         let writes = pendingWrites
         pendingWrites.removeAll()
         for payload in writes {
@@ -86,12 +94,10 @@ extension BluetoothManager {
     }
     func readValue() {
         guard let peripheral = connectedPeripheral else {
-            print("❌ No connected peripheral found!")
             return
         }
         
         if peripheral.state != .connected {
-            print("⚠️ Peripheral is disconnected! Attempting to reconnect...")
             attemptReconnect()
             return
         }
@@ -100,14 +106,12 @@ extension BluetoothManager {
         for service in peripheral.services ?? [] {
             for characteristic in service.characteristics ?? [] {
                 if characteristic.uuid == CBUUID(string: "FF02") {
-                    print("📥 Sending read request for FF02")
                     peripheral.readValue(for: characteristic)
                     return
                 }
             }
         }
         
-        print("⚠️ FF02 characteristic not found! Rediscovering services...")
         peripheral.discoverServices(nil)
     }
 }

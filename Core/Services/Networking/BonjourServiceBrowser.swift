@@ -60,10 +60,10 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
     func startBrowsing() {
         guard !isBrowsing else { return }
         isBrowsing = true
-        print("🔍 Starting Bonjour service discovery for _Limi1Ch._udp.")
         servicesByName.removeAll()
         servicesByUuid.removeAll()
         nameToUuid.removeAll()
+        DeviceConsole.log(.bonjour, "start browsing _Limi1Ch._udp. local.")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.serviceBrowser.searchForServices(ofType: "_Limi1Ch._udp.", inDomain: "local.")
@@ -72,7 +72,7 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
     }
 
     func stopBrowsing() {
-        print("🔴 Stopping Bonjour service discovery")
+        DeviceConsole.log(.bonjour, "stop browsing")
         serviceBrowser.stop()
         resolvingServices.removeAll()
         stopDeviceMonitoring()
@@ -87,7 +87,6 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
         let now = Date()
         guard now.timeIntervalSince(lastBonjourRestart) >= minRestartInterval else { return }
         lastBonjourRestart = now
-        print("♻️ Restarting Bonjour discovery…")
         stopBrowsing()
         resetBrowser()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { self.startBrowsing() }
@@ -95,30 +94,47 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
 
     // MARK: - HARD REMOVE API (for BLE handover)
 
-    /// Remove any Bonjour device whose TXT `deviceId`, Bonjour UUID, or Name matches the BLE identity.
+    /// Remove Wi‑Fi ghost only when it is the same physical hub as this BLE peripheral (by hardware id).
     func removeCompletelyMatching(bleName: String, bleId: String) {
-        // 1) Match by TXT deviceId
-        if let toRemove = discoveredWiFiDevices.first(where: { ($0.txtRecord?["deviceId"] ?? "") == bleId || ($0.txtRecord?["deviceId"] ?? "") == bleName }) {
+        if WiFiProvisioningActivityGate.isActive || AddDeviceFlowActivityGate.isActive {
+            DeviceConsole.log(
+                .bonjour,
+                "skip removeCompletelyMatching — Add Device / provision active ble=\(bleId)"
+            )
+            return
+        }
+        if let ownerHw = ConfiguredBLEDeviceStore.shared.allRecords.first(where: {
+            $0.blePeripheralUUID.caseInsensitiveCompare(bleId) == .orderedSame
+        })?.hardwareId {
+            let hw = LimiDeviceNaming.normalizedHardwareId(ownerHw)
+            if let toRemove = discoveredWiFiDevices.first(where: { $0.resolvedHardwareId() == hw }) {
+                removeWiFiDeviceCompletely(
+                    uuid: toRemove.uuid,
+                    reason: "Matched LAN hub hw=\(hw) for BLE \(bleId)"
+                )
+                return
+            }
+        }
+        // Match TXT deviceId to peripheral UUID (legacy paths).
+        if let toRemove = discoveredWiFiDevices.first(where: {
+            ($0.txtRecord?["deviceId"] ?? "") == bleId || ($0.txtRecord?["deviceId"] ?? "") == bleName
+        }) {
             removeWiFiDeviceCompletely(uuid: toRemove.uuid, reason: "Matched TXT deviceId with BLE (\(bleName), \(bleId))")
             return
         }
-        // 2) Match by Bonjour UUID against BLE id
         if let toRemove = discoveredWiFiDevices.first(where: { $0.uuid == bleId }) {
             removeWiFiDeviceCompletely(uuid: toRemove.uuid, reason: "Matched Bonjour UUID with BLE id \(bleId)")
             return
         }
-        // 3) Match by Bonjour Name against BLE name
+        // Never drop a Wi‑Fi row by generic name alone ("LIMI Device" is shared by every hub).
+        guard !LimiDeviceNaming.isBLEProvisioningHubName(bleName), bleName != "LIMI Device" else { return }
         if let toRemove = discoveredWiFiDevices.first(where: { $0.name == bleName }) {
             removeWiFiDeviceCompletely(uuid: toRemove.uuid, reason: "Matched Bonjour Name with BLE name \(bleName)")
-            return
         }
-        // 4) Nothing matched
-        print("ℹ️ No Bonjour entry matched BLE (\(bleName), \(bleId)) — nothing to remove.")
     }
 
     /// Fully purge a Wi-Fi record from memory, cancel pings/monitoring, and drop service references.
     private func removeWiFiDeviceCompletely(uuid: String, reason: String) {
-        print("🧹 HARD REMOVE Bonjour device '\(uuid)' – \(reason)")
         // Cancel any pings
         if let p = activePings.removeValue(forKey: uuid) { p.cancel() }
         if let v = verifyPings.removeValue(forKey: uuid) { v.cancel() }
@@ -135,16 +151,98 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
         // Drop presence bookkeeping
         deviceLastSeenTXT.removeValue(forKey: uuid)
         // Remove from array
+        let before = discoveredWiFiDevices.count
         discoveredWiFiDevices.removeAll { $0.uuid == uuid }
         // Trigger publisher
         discoveredWiFiDevices = Array(discoveredWiFiDevices)
+        if discoveredWiFiDevices.count != before {
+            DeviceConsole.log(.bonjour, "purged uuid=\(uuid) reason=\(reason)")
+        }
+    }
+
+    /// Drop every Offline Bonjour row (stale IP after factory reset / reboot).
+    func purgeOfflineDevices(reason: String) {
+        let offlineUUIDs = discoveredWiFiDevices
+            .filter { device in
+                guard device.deviceType == .wifi && device.reachability == .offline else { return false }
+                let hw = LimiDeviceNaming.normalizedHardwareId(device.txtRecord?["deviceId"] ?? device.uuid)
+                // Configured hubs may flicker offline during browse restarts — keep for re-resolve.
+                if !hw.isEmpty, ConfiguredBLEDeviceStore.shared.hasConfiguredBLE(for: hw) {
+                    return false
+                }
+                return true
+            }
+            .map(\.uuid)
+        for uuid in offlineUUIDs {
+            removeWiFiDeviceCompletely(uuid: uuid, reason: reason)
+        }
+    }
+
+    /// Drop Bonjour Wi‑Fi rows with no live MQTT while a BLE provisioning hub is visible.
+    /// After factory reset the board stops MQTT but the old LAN IP can still answer ping.
+    /// Skipped while Wi‑Fi provisioning is actively waiting for Bonjour/MQTT confirmation.
+    func purgeWiFiGhostsWithoutLiveMQTT(bleProvisioningVisible: Bool) {
+        guard bleProvisioningVisible else { return }
+        if WiFiProvisioningActivityGate.isActive || AddDeviceFlowActivityGate.isActive {
+            return
+        }
+        guard LightControllingSocket.shared.isConnected else { return }
+
+        let hasAnyLiveMQTT = discoveredWiFiDevices.contains { device in
+            guard device.deviceType == .wifi else { return false }
+            let hw = LimiDeviceNaming.normalizedHardwareId(device.txtRecord?["deviceId"] ?? "")
+            guard !hw.isEmpty else { return false }
+            return DeviceTransportRegistry.shared.state(for: hw).mqttConnected
+        }
+        guard hasAnyLiveMQTT else { return }
+
+        for device in discoveredWiFiDevices where device.deviceType == .wifi {
+            let hw = LimiDeviceNaming.normalizedHardwareId(device.txtRecord?["deviceId"] ?? "")
+            guard !hw.isEmpty else { continue }
+            if DeviceTransportRegistry.shared.state(for: hw).mqttConnected { continue }
+            removeWiFiDeviceCompletely(
+                uuid: device.uuid,
+                reason: "BLE provisioning visible; Bonjour Wi‑Fi has no live MQTT"
+            )
+        }
+    }
+
+    /// Collapse rename ghosts already in memory (same MAC or same IP, multiple rows).
+    func collapseDuplicateDevices(reason: String) {
+        let wifi = discoveredWiFiDevices.filter { $0.deviceType == .wifi }
+        guard wifi.count > 1 else { return }
+
+        var keepers: [BLEDevice] = []
+        for device in wifi {
+            let hw = LimiDeviceNaming.normalizedHardwareId(device.txtRecord?["deviceId"] ?? "")
+            let ip = (device.ipAddress ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if let idx = keepers.firstIndex(where: { kept in
+                let keptHw = LimiDeviceNaming.normalizedHardwareId(kept.txtRecord?["deviceId"] ?? "")
+                if !hw.isEmpty, keptHw == hw { return true }
+                let keptIP = (kept.ipAddress ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                if !ip.isEmpty, keptIP == ip { return true }
+                return false
+            }) {
+                let preferred = LimiDeviceNaming.preferredWiFiDuplicate(keepers[idx], device)
+                let drop = preferred.uuid == device.uuid ? keepers[idx] : device
+                keepers[idx] = preferred
+                if drop.uuid != preferred.uuid {
+                    DeviceConsole.log(
+                        .bonjour,
+                        "collapse (\(reason)) drop=\(drop.name)/\(drop.uuid) keep=\(preferred.name)/\(preferred.uuid)"
+                    )
+                    removeWiFiDeviceCompletely(uuid: drop.uuid, reason: "collapse \(reason)")
+                }
+            } else {
+                keepers.append(device)
+            }
+        }
     }
 
     // MARK: - NetServiceBrowserDelegate
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
-        print("🔍 Found Bonjour service: \(service.name) of type _Limi1Ch._udp.")
-        print("   ↳ type=\(service.type) domain=\(service.domain) host=\(service.hostName ?? "nil") moreComing=\(moreComing)")
         servicesByName[serviceIdentity(for: service)] = service
         service.delegate = self
         resolvingServices.append(service)
@@ -153,8 +251,6 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didRemove service: NetService, moreComing: Bool) {
-        print("🔴 Bonjour service removed: \(service.name)")
-        print("   ↳ type=\(service.type) domain=\(service.domain) host=\(service.hostName ?? "nil") moreComing=\(moreComing)")
         let identity = serviceIdentity(for: service)
         let uuid = nameToUuid[identity] ?? service.name
         markOffline(uuid: uuid, because: "Bonjour didRemove")
@@ -164,26 +260,20 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String : NSNumber]) {
-        print("❌ Bonjour search failed: \(errorDict)")
     }
 
     // MARK: - NetServiceDelegate
 
     func netServiceDidResolveAddress(_ sender: NetService) {
-        print("✅ Resolved Bonjour service: \(sender.name)")
-        print("   ↳ type=\(sender.type) domain=\(sender.domain) host=\(sender.hostName ?? "nil") port=\(sender.port)")
         guard let addresses = sender.addresses, !addresses.isEmpty else {
-            print("⚠️ No addresses found for service: \(sender.name)")
             return
         }
 
         guard let firstAddress = addresses.first else {
-            print("⚠️ No address data for service: \(sender.name)")
             return
         }
 
         let ipAddress = getIPAddress(from: firstAddress)
-        print("📍 Service \(sender.name) resolved to IP: \(ipAddress ?? "unknown")")
 
         var txtRecordDict: [String: String] = [:]
         if let txtData = sender.txtRecordData() {
@@ -203,21 +293,26 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
                 }
             }
         }
-        print("🧾 TXT count for \(sender.name): \(txtRecordDict.count)")
         if txtRecordDict.isEmpty {
-            print("🧾 TXT payload is empty for \(sender.name)")
         } else {
             for key in txtRecordDict.keys.sorted() {
-                print("   • \(key)=\(txtRecordDict[key] ?? "")")
             }
         }
 
-        // Keep each resolved device distinct even when multiple units share
-        // the same deviceId or Bonjour name.
-        let uuid = ipAddress.map { "\(sender.name)|\($0)" } ?? serviceIdentity(for: sender)
+        // Stable identity: prefer TXT deviceId (MAC), else IP.
+        // Do NOT key by advertised name — rename (LIMI Device → LIMI Device-2)
+        // would otherwise create duplicate rows for the same board.
+        let hardwareKey = LimiDeviceNaming.normalizedHardwareId(txtRecordDict["deviceId"] ?? "")
+        let uuid: String
+        if !hardwareKey.isEmpty {
+            uuid = hardwareKey
+        } else if let ip = ipAddress, !ip.isEmpty {
+            uuid = "ip:\(ip)"
+        } else {
+            uuid = serviceIdentity(for: sender)
+        }
         nameToUuid[serviceIdentity(for: sender)] = uuid
         servicesByUuid[uuid] = sender
-        print("🆔 Discovery identity for \(sender.name): \(uuid)")
 
         // Verify reachability once before deciding initial state
         if let ip = ipAddress {
@@ -243,12 +338,29 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
 
     private func upsert(uuid: String, name: String, ipAddress: String?, txt: [String:String], reach: BLEDevice.Reachability) {
         DispatchQueue.main.async {
+            let deviceId = txt["deviceId"] ?? ""
+            let hardwareKey = LimiDeviceNaming.normalizedHardwareId(deviceId)
+            let isNew = !self.discoveredWiFiDevices.contains(where: { $0.uuid == uuid })
             if let idx = self.discoveredWiFiDevices.firstIndex(where: { $0.uuid == uuid }) {
                 let prev = self.discoveredWiFiDevices[idx]
                 let mergedTxt: [String:String]? = txt.isEmpty ? prev.txtRecord : txt
                 let newLastSeen: Date? = (reach == .online) ? Date() : prev.lastSeen
-                let updated = prev.with(ip: ipAddress, txt: mergedTxt, reach: reach, lastSeen: newLastSeen)
+                let updated = prev.with(
+                    name: name,
+                    ip: ipAddress,
+                    txt: mergedTxt,
+                    reach: reach,
+                    lastSeen: newLastSeen
+                )
+                let reachChanged = prev.reachability != reach
+                let nameChanged = prev.name != name
                 self.discoveredWiFiDevices[idx] = updated
+                if reachChanged || nameChanged {
+                    DeviceConsole.log(
+                        .bonjour,
+                        "update name=\(name) id=\(deviceId.isEmpty ? uuid : deviceId) ip=\(ipAddress ?? "-") reach=\(reach.rawValue)"
+                    )
+                }
             } else {
                 let initialLastSeen: Date? = (reach == .online) ? Date() : nil
                 let new = BLEDevice(
@@ -262,7 +374,58 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
                 )
                 self.discoveredWiFiDevices.append(new)
             }
+            if isNew {
+                DeviceConsole.log(
+                    .bonjour,
+                    "discovered name=\(name) id=\(deviceId.isEmpty ? uuid : deviceId) ip=\(ipAddress ?? "-") reach=\(reach.rawValue)"
+                )
+            }
+            if reach == .online, !hardwareKey.isEmpty {
+                PresenceSnapshotStore.shared.record(
+                    deviceId: hardwareKey,
+                    isOnline: true,
+                    path: .local
+                )
+            }
+
+            // Drop rename/stale twins: same MAC or same LAN IP must be one row.
+            self.purgeDuplicateWiFiRows(
+                keepingUUID: uuid,
+                hardwareId: hardwareKey,
+                ipAddress: ipAddress
+            )
             self.discoveredWiFiDevices = Array(self.discoveredWiFiDevices)
+        }
+    }
+
+    /// Removes ghost rows left after a board renames or re-advertises under a new Bonjour name.
+    private func purgeDuplicateWiFiRows(keepingUUID: String, hardwareId: String, ipAddress: String?) {
+        let hw = LimiDeviceNaming.normalizedHardwareId(hardwareId)
+        let ip = ipAddress?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let twins = discoveredWiFiDevices.filter { device in
+            guard device.uuid != keepingUUID else { return false }
+            let otherHw = LimiDeviceNaming.normalizedHardwareId(device.txtRecord?["deviceId"] ?? "")
+            if !hw.isEmpty {
+                if otherHw == hw { return true }
+                if LimiDeviceNaming.normalizedHardwareId(device.uuid) == hw { return true }
+            }
+            if !ip.isEmpty, let otherIP = device.ipAddress,
+               otherIP.trimmingCharacters(in: .whitespacesAndNewlines) == ip {
+                return true
+            }
+            // Legacy name|ip keys from older builds.
+            if !ip.isEmpty, device.uuid.hasSuffix("|\(ip)") { return true }
+            return false
+        }
+        for twin in twins {
+            DeviceConsole.log(
+                .bonjour,
+                "dedupe purge twin name=\(twin.name) uuid=\(twin.uuid) ip=\(twin.ipAddress ?? "-") kept=\(keepingUUID)"
+            )
+            removeWiFiDeviceCompletely(
+                uuid: twin.uuid,
+                reason: "duplicate of \(keepingUUID) hw=\(hw.isEmpty ? "-" : hw) ip=\(ip.isEmpty ? "-" : ip)"
+            )
         }
     }
 
@@ -298,13 +461,11 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
         monitoringTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             DispatchQueue.main.async { [weak self] in self?.tick() }
         }
-        print("🔄 Started continuous device monitoring (every 1.0s)")
     }
 
     private func stopDeviceMonitoring() {
         monitoringTimer?.invalidate()
         monitoringTimer = nil
-        print("⏹️ Stopped device monitoring")
     }
 
     private func tick() {
@@ -347,8 +508,15 @@ class BonjourServiceBrowser: NSObject, ObservableObject, BonjourWiFiBrowsing, Ne
     }
 
     private func markOffline(uuid: String, because: String) {
-        print("🔻 Marking '\(uuid)' Offline – \(because)")
         updateReachability(uuid: uuid, reach: .offline)
+        // After factory reset / reboot the old mDNS+IP often lingers as Offline.
+        // Drop it shortly so Add Device does not show a dead Wi‑Fi twin next to BLE.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) { [weak self] in
+            guard let self else { return }
+            guard let still = self.discoveredWiFiDevices.first(where: { $0.uuid == uuid }),
+                  still.reachability == .offline else { return }
+            self.removeWiFiDeviceCompletely(uuid: uuid, reason: "offline timeout (\(because))")
+        }
     }
 
     // MARK: - Utils

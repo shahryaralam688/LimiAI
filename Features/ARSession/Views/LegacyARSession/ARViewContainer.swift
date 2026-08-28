@@ -27,7 +27,6 @@ final class ARViewHolder: ObservableObject {
         applyHDRILightingIfAvailable()
 
         runSession(reset: true)
-        print("Persistent AR session started at \(Date())")
     }
 
     private func applyHDRILightingIfAvailable() {
@@ -36,9 +35,7 @@ final class ARViewHolder: ObservableObject {
         if exrUrl == nil {
             let exrs = Bundle.main.urls(forResourcesWithExtension: "exr", subdirectory: nil) ?? []
             let hdrs = Bundle.main.urls(forResourcesWithExtension: "hdr", subdirectory: nil) ?? []
-            print("⚠️ living-room_2K.exr not found in app bundle. Available .exr=\(exrs.map { $0.lastPathComponent }) .hdr=\(hdrs.map { $0.lastPathComponent })")
         } else {
-            print("✅ Found HDRI file in bundle: \(exrUrl!.lastPathComponent)")
         }
 
         do {
@@ -54,8 +51,6 @@ final class ARViewHolder: ObservableObject {
             // we fall back to ARKit's real-world lighting (environmentTexturing + lightEstimation).
             arView.environment.lighting.resource = nil
             arView.environment.lighting.intensityExponent = 1.0
-            print("❌ Failed to load HDRI EnvironmentResource named living-room_2K: \(error)")
-            print("ℹ️ living-room_2K.exr is in the bundle, but must be converted to a RealityKit EnvironmentResource (.reality) to be loadable by name. Falling back to ARKit lighting.")
         }
     }
 
@@ -65,7 +60,6 @@ final class ARViewHolder: ObservableObject {
         let options: ARSession.RunOptions = reset ? [.resetTracking, .removeExistingAnchors] : []
         arView.session.run(lastConfig, options: options)
         // Simple log to help diagnose lifecycle issues
-        print("AR session run called. reset=\(reset) @ \(Date())")
     }
 
     // Enable LiDAR scene mesh occlusion (and people occlusion where supported)
@@ -179,7 +173,6 @@ struct ARViewContainer: UIViewRepresentable {
                 shadowBlobTexture = texture
                 return texture
             } catch {
-                print("❌ Failed to generate shadow blob texture: \(error)")
                 return nil
             }
         }
@@ -241,7 +234,6 @@ struct ARViewContainer: UIViewRepresentable {
             do {
                 return try MeshResource.generate(from: [descriptor])
             } catch {
-                print("❌ MeshResource generation failed: \(error)")
                 return nil
             }
         }
@@ -278,7 +270,6 @@ struct ARViewContainer: UIViewRepresentable {
             }
 
             self.modelEntity = container
-            print("   ▶️ Initial container scale: \(container.transform.scale)")
 
             let bounds = container.visualBounds(relativeTo: nil)
             let baseSize = bounds.extents
@@ -288,8 +279,6 @@ struct ARViewContainer: UIViewRepresentable {
                 baseSize.y * scale.y,
                 baseSize.z * scale.z
             )
-            print("📏 Base model size (m) [W,H,D]: \(baseSize)")
-            print("📏 Final model size with scale (m) [W,H,D]: \(finalSize)")
 
             applyReflectiveAdjustments(to: container)
         }
@@ -563,7 +552,6 @@ struct ARViewContainer: UIViewRepresentable {
                 planeEntity.name = "ShadowPlane"
                 shadowPlane = planeEntity
                 parentAnchor.addChild(planeEntity)
-                print("✅ ShadowPlane created")
             }
 
             planeEntity.model = ModelComponent(mesh: shadowMesh, materials: [shadowMaterial])
@@ -599,13 +587,11 @@ struct ARViewContainer: UIViewRepresentable {
                 return
             }
 
-            print("🟢 handleTap fired")
 
             // Place a clone of the loaded model at the preview location
             let anchor = AnchorEntity(world: placeTransform)
             let clone = entity.clone(recursive: true)
 
-            print("🟢 clone created: \(type(of: clone)) children=\(clone.children.count)")
 
             // 👉 Make the placed clone interactive:
             // 1) Generate collision so gestures can "hit" the entity
@@ -614,7 +600,6 @@ struct ARViewContainer: UIViewRepresentable {
             if let collidableClone = clone as? HasCollision {
                 arView.installGestures([.translation, .rotation, .scale], for: collidableClone)
             } else {
-                print("⚠️ Placed clone does not conform to HasCollision even with container; gestures not installed.")
             }
 
             anchor.addChild(clone)
@@ -624,15 +609,12 @@ struct ARViewContainer: UIViewRepresentable {
 
             placedModel = firstModelEntity(in: clone)
             if placedModel == nil {
-                print("⚠️ No ModelEntity found in placed clone; creating shadow based on Entity bounds")
             }
 
             addOrUpdateShadowPlane(parentAnchor: anchor, for: clone)
-            print("🟢 shadow plane update called")
 
             updateModelAmbience()
 
-            print("📐 Placed model scale: \(clone.transform.scale)")
 
             DispatchQueue.main.async {
                 self.parent.showInstructions = false
@@ -642,11 +624,11 @@ struct ARViewContainer: UIViewRepresentable {
 
             switch placementTarget() {
             case .ceiling:
-                print("📌 Placed model on ceiling at preview location")
+                break
             case .floor:
-                print("📌 Placed model on floor at preview location")
+                break
             case .wall:
-                print("📌 Placed model on wall at preview location")
+                break
             }
         }
 
@@ -670,7 +652,6 @@ struct ARViewContainer: UIViewRepresentable {
 
         func session(_ session: ARSession, didUpdate frame: ARFrame) {
             if let lightEstimate = frame.lightEstimate {
-                print("💡 AR LightEstimate - ambientIntensity=\(lightEstimate.ambientIntensity), colorTemp=\(lightEstimate.ambientColorTemperature)")
                 updateAmbient(from: lightEstimate)
             }
 
@@ -945,7 +926,6 @@ struct ARViewContainer: UIViewRepresentable {
     
     static func dismantleUIView(_ uiView: ARView, coordinator: ()) {
         // Do not pause the singleton session here; leaving it running avoids losing camera feed on next appear
-        print("ARViewContainer dismantle called (session left running)")
         uiView.removeFromSuperview()
     }
 

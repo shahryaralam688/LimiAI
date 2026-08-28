@@ -20,11 +20,13 @@ struct CCTLEDPreviewView: View {
     let downloadId: String?
     let chennalMac: String?
     let chennelPosition: Int?
+    /// When set, commands emit `virtual_light_control` instead of per-MAC transport.
+    let virtualDeviceID: String?
 
     @Environment(\.modelContext) private var modelContext
 
-    /// Slider-aware throttled sender that talks to LimiTransport.
-    @StateObject private var throttle: ThrottledSender
+    /// Slider-aware throttled sender (device transport or virtual socket).
+    @StateObject private var commandRouter: CommandRouter
     /// Per-device transport state, used for the offline notice.
     @StateObject private var transportState: DeviceTransportState
     @ObservedObject private var transportMediumPrefs = TransportMediumPreferenceStore.shared
@@ -45,22 +47,35 @@ struct CCTLEDPreviewView: View {
     /// `bundledName` defaults from Socket.IO `pendantTypes` → art.scnassets pendant USDZ
     /// (UNKNOWN → `ball_Chrome_pendant`, never the old mount1 default).
     init(chennalMac: String?, chennelPosition: Int?, bundledName: String? = nil) {
+        self.virtualDeviceID = nil
         self.chennalMac = chennalMac
         self.chennelPosition = chennelPosition
         self.bundledName = bundledName ?? PendantModelCatalog.bundledName(forDeviceId: chennalMac)
         self.downloadId = chennalMac.flatMap { DeviceDownloadStore.shared.get(forMac: $0) }
-        let id = (chennalMac ?? "unknown").uppercased()
-        _throttle = StateObject(wrappedValue: ThrottledSender(deviceId: id))
+        let id = LimiDeviceNaming.normalizedHardwareId(chennalMac ?? "unknown")
+        _commandRouter = StateObject(wrappedValue: CommandRouter(deviceId: id, virtualDeviceId: nil))
         _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: id))
+    }
+
+    /// Virtual master device — all CCT commands go through Socket.IO.
+    init(virtualDeviceID: String, bundledName: String? = nil) {
+        self.virtualDeviceID = virtualDeviceID
+        self.chennalMac = nil
+        self.chennelPosition = 1
+        self.bundledName = bundledName ?? "ball_Chrome_pendant"
+        self.downloadId = nil
+        _commandRouter = StateObject(wrappedValue: CommandRouter(deviceId: nil, virtualDeviceId: virtualDeviceID))
+        _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: "VIRTUAL"))
     }
 
     /// Preview / demo init without a device.
     init(bundledName: String, downloadId: String? = nil) {
+        self.virtualDeviceID = nil
         self.bundledName = bundledName
         self.downloadId = downloadId
         self.chennalMac = nil
         self.chennelPosition = nil
-        _throttle = StateObject(wrappedValue: ThrottledSender(deviceId: "unknown"))
+        _commandRouter = StateObject(wrappedValue: CommandRouter(deviceId: "unknown", virtualDeviceId: nil))
         _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: "UNKNOWN"))
     }
 
@@ -118,7 +133,7 @@ struct CCTLEDPreviewView: View {
                         label: { "\(Int(($0 * 100).rounded()))" },
                         onActivity: { scheduleAutoHide() },
                         onEditingChanged: { editing in
-                            if !editing { throttle.flush() }
+                            if !editing { commandRouter.flush() }
                         }
                     )
                     .disabled(!isOn)
@@ -145,7 +160,7 @@ struct CCTLEDPreviewView: View {
                             endLabels: (top: topTemperatureLabel, bottom: bottomTemperatureLabel),
                             onActivity: { scheduleAutoHide() },
                             onEditingChanged: { editing in
-                                if !editing { throttle.flush() }
+                                if !editing { commandRouter.flush() }
                             }
                         )
                         .disabled(!isOn)
@@ -174,6 +189,16 @@ struct CCTLEDPreviewView: View {
         }
         .limiScreenBackground()
         .onAppear {
+            if virtualDeviceID == nil, let mac = chennalMac {
+                let key = LimiDeviceNaming.normalizedHardwareId(mac)
+                LightControllingSocket.shared.connect()
+                _ = DeviceTransportRegistry.shared.state(for: key)
+                DevicePresenceCoordinator.shared.requestRefresh(
+                    deviceIds: [key],
+                    reason: .homeAppear,
+                    force: true
+                )
+            }
             // Only the model during the entrance; the edge handles fade
             // in once it has settled.
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
@@ -196,10 +221,11 @@ struct CCTLEDPreviewView: View {
             if isOn { sendColor() }
             persistUIState()
         }
-        .deviceControlAvailability(
+        .modifier(CCTDeviceAvailabilityModifier(
+            virtualDeviceID: virtualDeviceID,
             transportState: transportState,
             didShowOfflineNotice: $didShowDeviceOfflineNotice
-        )
+        ))
     }
 
     // MARK: - Header (power chip + transport path)
@@ -230,7 +256,11 @@ struct CCTLEDPreviewView: View {
             }
             .buttonStyle(.plain)
 
-            if chennalMac != nil {
+            if virtualDeviceID != nil {
+                Text("Virtual · Cloud")
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.45))
+            } else if chennalMac != nil {
                 DeviceControlPathStatusView(display: pathDisplay)
             }
         }
@@ -275,7 +305,6 @@ struct CCTLEDPreviewView: View {
 
     private func togglePower() {
         isOn.toggle()
-        print("🔌 User toggled power: \(isOn)")
         sendLampState()
         persistUIState()
         scheduleAutoHide()
@@ -333,26 +362,23 @@ struct CCTLEDPreviewView: View {
     /// Temperature dial drag — coalesce through ThrottledSender.
     private func sendColor() {
         let command = currentCCTCommand()
-        print("🔶 sendColor() -> \(command.commandPayload())")
-        throttle.update(command)
+        commandRouter.update(command)
     }
 
     /// Brightness dial drag — throttled, final value flushed on release.
     private func sendBrightness() {
-        throttle.update(currentCCTCommand())
+        commandRouter.update(currentCCTCommand())
     }
 
     private func sendLampState() {
         if isOn {
             // Restore last brightness/colour by sending a fresh CCT frame.
             let command = currentCCTCommand()
-            print("💡 Lamp ON -> \(command.commandPayload())")
-            throttle.sendOneShot(command)
+            commandRouter.sendOneShot(command)
         } else {
             // Spec-compliant power-off; firmware preserves last colour state.
             let command: LimiCommand = .power(channel: channel, on: false)
-            print("💤 Lamp OFF -> \(command.commandPayload())")
-            throttle.sendOneShot(command)
+            commandRouter.sendOneShot(command)
         }
     }
 
@@ -371,7 +397,10 @@ struct CCTLEDPreviewView: View {
     }
 
     private var warmCoolPreferenceStorageKey: String {
-        "\(warmCoolPreferenceDeviceID ?? "unknown")-\(warmCoolPreferenceChannelPosition)"
+        if let virtualDeviceID {
+            return "virtual-\(virtualDeviceID)"
+        }
+        return "\(warmCoolPreferenceDeviceID ?? "unknown")-\(warmCoolPreferenceChannelPosition)"
     }
 
     private var persistedStateStorageKey: String { warmCoolPreferenceStorageKey }
@@ -436,7 +465,6 @@ struct CCTLEDPreviewView: View {
             let preference = try modelContext.fetch(descriptor).first
             isWarmCoolReversed = preference?.isReversed ?? false
         } catch {
-            print("Failed to load warm/cool slider preference: \(error)")
             isWarmCoolReversed = false
         }
     }
@@ -466,9 +494,7 @@ struct CCTLEDPreviewView: View {
             }
 
             try modelContext.save()
-        } catch {
-            print("Failed to save warm/cool slider preference: \(error)")
-        }
+        } catch { /* ignored */ }
     }
 }
 
@@ -946,7 +972,6 @@ struct CCTLEDPreviewContainer: UIViewRepresentable {
             downloadId: downloadId,
             bundledName: bundledName
         ) else {
-            print("❌ CCTLEDPreviewView: model not found (downloadId: \(downloadId ?? "nil"), bundledName: \(bundledName))")
             return arView
         }
 
@@ -1132,6 +1157,25 @@ struct CCTLEDPreviewContainer: UIViewRepresentable {
         )
     }
 
+}
+
+// MARK: - Virtual vs per-device availability
+
+private struct CCTDeviceAvailabilityModifier: ViewModifier {
+    let virtualDeviceID: String?
+    @ObservedObject var transportState: DeviceTransportState
+    @Binding var didShowOfflineNotice: Bool
+
+    func body(content: Content) -> some View {
+        if virtualDeviceID != nil {
+            content
+        } else {
+            content.deviceControlAvailability(
+                transportState: transportState,
+                didShowOfflineNotice: $didShowOfflineNotice
+            )
+        }
+    }
 }
 
 #Preview {

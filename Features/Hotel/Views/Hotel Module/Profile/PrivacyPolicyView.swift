@@ -6,7 +6,6 @@
 //
 
 
-
 import SwiftUI
 
 struct PrivacyPolicyView: View {
@@ -55,26 +54,19 @@ struct PrivacyPolicyView: View {
             ScrollView{
                 VStack(alignment: .leading, spacing: 16) {
                     LimiPrimaryButton(title: "Grant Google Permissions") {
-                        print("[PrivacyPolicyView] Grant Google Permissions button tapped")
                         showGooglePermissionAlert = true
                     }
                     .disabled(isRequestingGooglePermissions)
                     .alert("Google Permissions", isPresented: $showGooglePermissionAlert) {
                         Button("Cancel", role: .cancel) {
-                            print("[PrivacyPolicyView] Google permissions alert canceled by user")
                         }
                         Button(isRequestingGooglePermissions ? "Requesting..." : "Allow") {
-                            print("[PrivacyPolicyView] Allow button tapped in Google permissions alert")
                             guard !isRequestingGooglePermissions else { return }
-                            print("[PrivacyPolicyView] Starting Google permissions request...")
                             isRequestingGooglePermissions = true
                             let scopes = AppURLs.External.googleScopes
-                            print("[PrivacyPolicyView] Requesting Google permissions with scopes: \(scopes)")
                             googleAuthManager.requestGooglePermissions(scopes: scopes) { success in
-                                print("[PrivacyPolicyView] Google permissions request completed. Success = \(success)")
                                 DispatchQueue.main.async {
                                     isRequestingGooglePermissions = false
-                                    print("[PrivacyPolicyView] isRequestingGooglePermissions set to false")
                                 }
                             }
                         }

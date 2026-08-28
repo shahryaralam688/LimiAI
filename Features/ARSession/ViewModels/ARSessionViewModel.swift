@@ -157,7 +157,6 @@ final class ARSessionViewModel: ObservableObject {
             )
             return directory.appendingPathComponent("light_configs_cache.json")
         } catch {
-            print("Failed to resolve cache directory: \(error)")
             return nil
         }
     }
@@ -166,10 +165,7 @@ final class ARSessionViewModel: ObservableObject {
         guard let fileURL = cacheFileURL else { return }
         do {
             try data.write(to: fileURL, options: [.atomic])
-            print("Light configs cached at: \(fileURL.path)")
-        } catch {
-            print("Failed to write cache file: \(error)")
-        }
+        } catch { /* ignored */ }
     }
 
     @discardableResult
@@ -184,10 +180,8 @@ final class ARSessionViewModel: ObservableObject {
             stateManager.isUsingPresets = false
             syncWithCurrentARModel()
             showPresetBanner = true
-            print("Loaded light configs from cache")
             return true
         } catch {
-            print("Failed to load cached light configs: \(error)")
             return false
         }
     }

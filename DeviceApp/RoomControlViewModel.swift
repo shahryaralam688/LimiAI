@@ -131,7 +131,6 @@ final class RoomControlViewModel: ObservableObject {
         sendTask = Task { @MainActor in
             await sendGroup(command, successLabel: label)
         }
-        print("🏠 [RoomControl] \(roomName) queued \(label)")
     }
 
     // MARK: - Group send (single emit)
@@ -162,14 +161,12 @@ final class RoomControlViewModel: ObservableObject {
             canRetry = false
             statusMessage = "Updated \(deviceIds.count) device\(deviceIds.count == 1 ? "" : "s")"
             DeviceAppGuidance.successNotification()
-            print("🏠 [RoomControl] \(roomName) group → \(deviceIds.count) \(successLabel)")
         } catch {
             guard !Task.isCancelled else { return }
             statusIsError = true
             canRetry = true
             statusMessage = DeviceAppGuidance.message(for: error)
             DeviceAppGuidance.warningNotification()
-            print("❌ [RoomControl] group send failed: \(error)")
         }
     }
 

@@ -146,14 +146,11 @@ final class OnboardingViewModel: ObservableObject {
             ]
         ) { data, response, error in
             if let error = error {
-                print("[Onboarding] sendUserPreference error: \(error.localizedDescription)")
                 return
             }
             if let http = response {
-                print("[Onboarding] sendUserPreference status: \(http.statusCode)")
             }
             if let data = data, let raw = String(data: data, encoding: .utf8) {
-                print("[Onboarding] sendUserPreference response: \(raw)")
             }
         }
     }

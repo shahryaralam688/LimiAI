@@ -142,7 +142,6 @@ struct OrbMetalView: UIViewRepresentable {
             guard let library = try? device.makeDefaultLibrary(bundle: .main),
                   let vertexFunction = library.makeFunction(name: "vertex_main"),
                   let fragmentFunction = library.makeFunction(name: "fragment_main") else {
-                print("⚠️ FirstOrbView: Metal shader library unavailable")
                 return
             }
 
@@ -154,7 +153,6 @@ struct OrbMetalView: UIViewRepresentable {
             do {
                 pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
             } catch {
-                print("⚠️ FirstOrbView: failed to create pipeline state: \(error)")
                 return
             }
 

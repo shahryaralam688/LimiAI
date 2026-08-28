@@ -25,25 +25,32 @@ public final class BLELightWriter {
     ///   (firmware did not specify a binary pattern format).
     /// - Throws `LimiTransportError.doorUnavailable(.ble)` if no peripheral is
     ///   currently connected.
-    public func send(_ command: LimiCommand) throws {
+    public func send(_ command: LimiCommand, toPeripheralUUID uuid: String? = nil) throws {
         switch command {
         case .cct, .rgb:
             guard let data = command.toBLEBytes() else {
                 throw LimiTransportError.badCommand
             }
-            try writeRaw([UInt8](data), description: "binary command")
+            try writeRaw([UInt8](data), description: "binary command", toPeripheralUUID: uuid)
         case .power:
             guard let csv = command.toBLECSV() else {
                 throw LimiTransportError.badCommand
             }
-            try writeRaw(Array(csv.utf8), description: "power '\(csv)'")
+            try writeRaw(Array(csv.utf8), description: "power '\(csv)'", toPeripheralUUID: uuid)
         case .pattern:
-            print("⚠️ [BLELightWriter] Pattern commands are not supported on BLE; firmware spec defines no binary format.")
             throw LimiTransportError.operationNotSupported(door: .ble)
         }
     }
 
-    private func writeRaw(_ bytes: [UInt8], description: String) throws {
+    private func writeRaw(_ bytes: [UInt8], description: String, toPeripheralUUID uuid: String? = nil) throws {
+        if let uuid, !uuid.isEmpty {
+            let ble = BluetoothManager.shared
+            guard ble.isLiveConnected(forPeripheralUUID: uuid) || ble.isReady(forPeripheralUUID: uuid) else {
+                throw LimiTransportError.doorUnavailable(.ble)
+            }
+            ble.writeDataToFF03(bytes, toPeripheralUUID: uuid)
+            return
+        }
         guard bleTransport.isPeripheralConnected else {
             throw LimiTransportError.doorUnavailable(.ble)
         }

@@ -22,6 +22,9 @@ public final class DeviceWebSocketClient: NSObject {
         var task: URLSessionWebSocketTask?
         var connecting: Bool = false
         var receiveLoopStarted: Bool = false
+        /// After a handshake/protocol failure, block rapid reconnect spam.
+        var retryAfter: Date = .distantPast
+        var lastFailureReason: String?
         /// All callers waiting for the current handshake to finish.
         var connectWaiters: [CheckedContinuation<Void, Error>] = []
 
@@ -33,6 +36,8 @@ public final class DeviceWebSocketClient: NSObject {
 
     private var connections: [String: Connection] = [:]
     private let queueLock = NSLock()
+    /// Minimum wait before retrying a failed LAN WebSocket handshake for the same device.
+    private let connectFailureCooldown: TimeInterval = 30
 
     private lazy var session: URLSession = {
         let config = URLSessionConfiguration.default
@@ -125,6 +130,18 @@ public final class DeviceWebSocketClient: NSObject {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queueLock.lock()
 
+            let now = Date()
+            if now < connection.retryAfter {
+                let waitSec = Int(connection.retryAfter.timeIntervalSince(now).rounded(.up))
+                queueLock.unlock()
+                DeviceConsole.log(
+                    .lan,
+                    "LAN WS cooldown id=\(connection.deviceId) ip=\(connection.ipAddress) retryIn=\(waitSec)s reason=\(connection.lastFailureReason ?? "prior failure")"
+                )
+                continuation.resume(throwing: LimiTransportError.deviceUnreachable)
+                return
+            }
+
             if let existing = connection.task, existing.state == .running {
                 queueLock.unlock()
                 continuation.resume()
@@ -144,6 +161,7 @@ public final class DeviceWebSocketClient: NSObject {
                 return
             }
 
+            connection.task?.cancel(with: .goingAway, reason: nil)
             let task = session.webSocketTask(with: url)
             connection.task = task
             connection.connecting = true
@@ -151,6 +169,7 @@ public final class DeviceWebSocketClient: NSObject {
             connection.connectWaiters.append(continuation)
             queueLock.unlock()
 
+            DeviceConsole.log(.lan, "LAN WS connect id=\(connection.deviceId) url=\(url.absoluteString)")
             task.resume()
         }
 
@@ -172,7 +191,7 @@ public final class DeviceWebSocketClient: NSObject {
         task.receive { [weak self] result in
             switch result {
             case .failure(let error):
-                print("⚠️ [DeviceWebSocketClient] receive error for \(connection.deviceId): \(error.localizedDescription)")
+                self?.markConnectFailure(connection: connection, error: error, phase: "receive")
                 self?.disconnect(deviceId: connection.deviceId)
             case .success(let message):
                 self?.handleIncoming(message, on: connection)
@@ -194,28 +213,43 @@ public final class DeviceWebSocketClient: NSObject {
 
     private func log(data: Data, deviceId: String) {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            print("📩 [WS \(deviceId)] non-JSON response (\(data.count) bytes)")
             return
         }
         let success = json["success"] as? Bool ?? false
         let source = json["source"] as? String ?? "?"
         let error = json["error"] as? String ?? ""
-        print("📩 [WS \(deviceId)] success=\(success) source=\(source) error=\(error)")
     }
 
     private func mapError(_ error: Error) -> LimiTransportError {
         let nsError = error as NSError
+        if nsError.domain == NSPOSIXErrorDomain, nsError.code == 100 {
+            return .deviceUnreachable
+        }
         if nsError.domain == NSURLErrorDomain {
             switch nsError.code {
             case NSURLErrorCancelled, NSURLErrorNetworkConnectionLost,
                  NSURLErrorNotConnectedToInternet, NSURLErrorTimedOut,
-                 NSURLErrorCannotConnectToHost, NSURLErrorCannotFindHost:
+                 NSURLErrorCannotConnectToHost, NSURLErrorCannotFindHost,
+                 NSURLErrorBadServerResponse:
                 return .deviceUnreachable
             default:
                 break
             }
         }
         return .deviceUnreachable
+    }
+
+    private func markConnectFailure(connection: Connection, error: Error, phase: String) {
+        queueLock.lock()
+        connection.retryAfter = Date().addingTimeInterval(connectFailureCooldown)
+        connection.lastFailureReason = "\(phase): \(error.localizedDescription)"
+        connection.task = nil
+        connection.receiveLoopStarted = false
+        queueLock.unlock()
+        DeviceConsole.log(
+            .lan,
+            "LAN WS fail id=\(connection.deviceId) ip=\(connection.ipAddress) \(connection.lastFailureReason ?? "") — cooldown \(Int(connectFailureCooldown))s"
+        )
     }
 
     fileprivate func resolveContinuation(for task: URLSessionTask, with result: Result<Void, Error>) {
@@ -226,8 +260,25 @@ public final class DeviceWebSocketClient: NSObject {
         connection?.connecting = false
         if case .failure = result {
             connection?.receiveLoopStarted = false
+            connection?.task = nil
+            if let connection {
+                connection.retryAfter = Date().addingTimeInterval(connectFailureCooldown)
+                connection.lastFailureReason = "handshake failed"
+            }
         }
         queueLock.unlock()
+
+        if case .failure(let err) = result, let connection {
+            DeviceConsole.log(
+                .lan,
+                "LAN WS handshake fail id=\(connection.deviceId) ip=\(connection.ipAddress) \(err.localizedDescription) — cooldown \(Int(connectFailureCooldown))s"
+            )
+        } else if case .success = result, let connection {
+            queueLock.lock()
+            connection.retryAfter = .distantPast
+            connection.lastFailureReason = nil
+            queueLock.unlock()
+        }
 
         for waiter in waiters {
             switch result {
@@ -258,7 +309,6 @@ extension DeviceWebSocketClient: URLSessionWebSocketDelegate {
         reason: Data?
     ) {
         let reasonText = reason.flatMap { String(data: $0, encoding: .utf8) } ?? ""
-        print("🔴 [DeviceWebSocketClient] closed code=\(closeCode.rawValue) reason=\(reasonText)")
     }
 }
 

@@ -36,7 +36,6 @@ final class VoicePendantBackendRecorder: NSObject, ObservableObject {
         elapsed = 0
         startMetering()
         manager.start()
-        print("🎙️ [VoicePendantVoice] Live stream started -> \(deviceID)")
         return true
     }
 
@@ -48,7 +47,6 @@ final class VoicePendantBackendRecorder: NSObject, ObservableObject {
         let duration = elapsed
         elapsed = 0
         level = 0
-        print("🎙️ [VoicePendantVoice] Live stream stopped -> \(deviceID)")
         return (nil, duration)
     }
 
@@ -87,7 +85,6 @@ extension VoicePendantBackendRecorder: VoicePendantVoiceManagerDelegate {
     nonisolated func voiceManager(_ manager: VoicePendantVoiceManager, didFail message: String) {
         Task { @MainActor in
             self.permissionDenied = false
-            print("❌ [VoicePendantVoice] \(message)")
         }
     }
 }

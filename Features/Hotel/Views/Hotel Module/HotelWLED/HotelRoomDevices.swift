@@ -227,7 +227,6 @@ struct BLEDevicesView: View {
         // 🖨️ Console confirmation when a connection appears
         .onChange(of: viewModel.connectedDeviceItems.count) { _, _ in
             for item in viewModel.connectedDeviceItems {
-                print("🎉 Connected device listed: \(item.title)")
             }
         }
         // Auto open corresponding view when FF02 bytes update (DISABLED per requested flow)

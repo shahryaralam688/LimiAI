@@ -40,7 +40,6 @@ struct SearchBarView: View {
             
             // MARK: - Scan Button
             Button(action: {
-                print("AR Scan button tapped")
                 showARScan = true  // Trigger AR experience
                 withAnimation(.spring()) {
                     let impactMed = UIImpactFeedbackGenerator(style: .medium)

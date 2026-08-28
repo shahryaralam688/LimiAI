@@ -13,19 +13,79 @@ final class GlobalDevicePopup {
 
     private var window: UIWindow?
     private var isShowing = false
+    private var autoDismissWorkItem: DispatchWorkItem?
 
     private init() {}
 
-    func showDeviceFound(title: String, deviceName: String, deviceId: String, onConnect: @escaping () -> Void) {
-        guard !isShowing else { return }
-        isShowing = true
-
-        let root = HubFoundPopupView(
-            title: title,
+    func showDeviceFound(
+        deviceName: String,
+        deviceId: String,
+        modelName: String? = nil,
+        onConnect: @escaping () -> Void
+    ) {
+        let resolvedModel = modelName ?? LimiPairingAssets.bundledName(forDeviceId: deviceId)
+        present(
             deviceName: deviceName,
             deviceId: deviceId,
-            onConnect: { [weak self] in
-                onConnect()
+            modelName: resolvedModel,
+            mode: .discover,
+            autoDismissAfter: 30,
+            onPrimary: onConnect
+        )
+    }
+
+    func showConnecting(deviceName: String, deviceId: String, modelName: String = LimiPairingAssets.defaultModelName) {
+        present(
+            deviceName: deviceName,
+            deviceId: deviceId,
+            modelName: modelName,
+            mode: .connecting,
+            autoDismissAfter: nil,
+            onPrimary: nil
+        )
+    }
+
+    func showConnected(deviceName: String, deviceId: String, detail: String? = nil, onDone: (() -> Void)? = nil) {
+        present(
+            deviceName: deviceName,
+            deviceId: deviceId,
+            modelName: LimiPairingAssets.bundledName(forDeviceId: deviceId),
+            mode: .connected(detail),
+            autoDismissAfter: 8,
+            onPrimary: onDone
+        )
+    }
+
+    func dismiss() {
+        guard isShowing else { return }
+        autoDismissWorkItem?.cancel()
+        autoDismissWorkItem = nil
+        isShowing = false
+        UIView.animate(withDuration: 0.25, animations: {
+            self.window?.alpha = 0
+        }, completion: { _ in
+            self.window?.isHidden = true
+            self.window = nil
+        })
+    }
+
+    private func present(
+        deviceName: String,
+        deviceId: String,
+        modelName: String,
+        mode: LimiPairingCardMode,
+        autoDismissAfter: TimeInterval?,
+        onPrimary: (() -> Void)?
+    ) {
+        autoDismissWorkItem?.cancel()
+
+        let root = HubFoundPopupView(
+            deviceName: deviceName,
+            deviceId: deviceId,
+            modelName: modelName,
+            mode: mode,
+            onPrimary: { [weak self] in
+                onPrimary?()
                 self?.dismiss()
             },
             onDismiss: { [weak self] in
@@ -40,86 +100,58 @@ final class GlobalDevicePopup {
             .compactMap({ $0 as? UIWindowScene })
             .first(where: { $0.activationState == .foregroundActive })
         {
-            let window = UIWindow(windowScene: scene)
-            window.rootViewController = hosting
-            window.windowLevel = .alert + 1
-            window.backgroundColor = .clear
-            window.isHidden = false
-            window.makeKeyAndVisible()
-            self.window = window
+            let popupWindow = UIWindow(windowScene: scene)
+            popupWindow.rootViewController = hosting
+            popupWindow.windowLevel = .alert + 1
+            popupWindow.backgroundColor = .clear
+            popupWindow.isHidden = false
+            popupWindow.makeKeyAndVisible()
+            self.window = popupWindow
         } else {
-            // Fallback: present on a new window even if no active scene found
-            let window = UIWindow(frame: UIScreen.main.bounds)
-            window.rootViewController = hosting
-            window.windowLevel = .alert + 1
-            window.backgroundColor = .clear
-            window.isHidden = false
-            window.makeKeyAndVisible()
-            self.window = window
+            let popupWindow = UIWindow(frame: UIScreen.main.bounds)
+            popupWindow.rootViewController = hosting
+            popupWindow.windowLevel = .alert + 1
+            popupWindow.backgroundColor = .clear
+            popupWindow.isHidden = false
+            popupWindow.makeKeyAndVisible()
+            self.window = popupWindow
         }
 
-        // Auto-dismiss after a short delay if user does nothing
-        DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
-            self?.dismiss()
+        isShowing = true
+        window?.alpha = 0
+        UIView.animate(withDuration: 0.28) {
+            self.window?.alpha = 1
         }
-    }
 
-    private func dismiss() {
-        guard isShowing else { return }
-        isShowing = false
-        UIView.animate(withDuration: 0.25, animations: {
-            self.window?.alpha = 0
-        }, completion: { _ in
-            self.window?.isHidden = true
-            self.window = nil
-        })
+        if let autoDismissAfter {
+            let work = DispatchWorkItem { [weak self] in
+                self?.dismiss()
+            }
+            autoDismissWorkItem = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + autoDismissAfter, execute: work)
+        }
     }
 }
 
 // MARK: - SwiftUI popup content
 
 struct HubFoundPopupView: View {
-    let title: String
     let deviceName: String
     let deviceId: String
-    let onConnect: () -> Void
+    let modelName: String
+    let mode: LimiPairingCardMode
+    let onPrimary: () -> Void
     let onDismiss: () -> Void
 
     var body: some View {
-        ZStack {
-            Color.appOverlayScrimLight
-                .ignoresSafeArea()
-                .onTapGesture { onDismiss() }
-
-            VStack(spacing: 14) {
-                Text(title)
-                    .font(LimiTypography.title3)
-                    .foregroundColor(.appTextPrimary)
-
-                VStack(spacing: 6) {
-                    Text(deviceName)
-                        .font(LimiTypography.headline)
-                        .foregroundColor(.appTextPrimary)
-                    Text(deviceId)
-                        .font(LimiTypography.footnote)
-                        .foregroundColor(.appTextSecondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-
-                HStack(spacing: 12) {
-                    LimiSecondaryButton(title: "Dismiss", height: 46, action: onDismiss)
-                    LimiPrimaryButton(title: "Connect", height: 46, action: onConnect)
-                }
-            }
-            .padding(20)
-            .glassCard(cornerRadius: 18)
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(Color.appGlassStrokeLight, lineWidth: 1)
-            )
-            .padding(.horizontal, 28)
-            .transition(.scale.combined(with: .opacity))
-        }
+        LimiPairingOverlay(
+            deviceName: deviceName,
+            deviceId: deviceId,
+            mode: mode,
+            modelName: modelName,
+            placement: .bottomSheet,
+            onPrimary: onPrimary,
+            onDismiss: onDismiss
+        )
     }
 }

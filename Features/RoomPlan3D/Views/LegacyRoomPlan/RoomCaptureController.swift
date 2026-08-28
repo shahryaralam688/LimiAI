@@ -46,7 +46,6 @@ class RoomCaptureController: RoomCaptureViewDelegate, RoomCaptureSessionDelegate
     func startSession() {
         // Apple’s RoomPlan API — never run capture on non‑LiDAR / non‑Pro hardware.
         guard RoomPlanCapability.isCaptureSupported else {
-            print("⚠️ [RoomPlan] startSession blocked — RoomCaptureSession.isSupported == false")
             return
         }
         roomCaptureView.captureSession.run(configuration: sessionConfig)

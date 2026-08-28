@@ -71,11 +71,21 @@ public final class DeviceTransportRegistry {
             .receive(on: RunLoop.main)
             .sink { [weak self] update in
                 guard let self else { return }
-                self.state(for: update.deviceId).updateMQTTPresence(connected: update.connected)
-                self.lastPresence[update.deviceId] = update.connected
+                DeviceConsole.log(
+                    .presence,
+                    "registry update id=\(update.deviceId) mqttConnected=\(update.connected)"
+                )
+                let key = LimiDeviceNaming.normalizedHardwareId(update.deviceId)
+                self.state(for: key).updateMQTTPresence(connected: update.connected)
+                self.lastPresence[key] = update.connected
                 CloudPresenceMemory.shared.record(
-                    deviceId: update.deviceId,
+                    deviceId: key,
                     connected: update.connected
+                )
+                PresenceSnapshotStore.shared.record(
+                    deviceId: key,
+                    isOnline: update.connected,
+                    path: update.connected ? .cloud : .offline
                 )
                 self.presenceChangeSubject.send(update)
                 Task { @MainActor in
@@ -102,16 +112,37 @@ public final class DeviceTransportRegistry {
         return lastPresence.map { MQTTPresenceUpdate(deviceId: $0.key, connected: $0.value) }
     }
 
-    /// Apply UserDefaults presence into live registry (Case 3 remote reopen).
-    /// Does not override a presence value already received this session.
+    /// Seed device **ids** from UserDefaults so Home can list known boards.
+    /// Never treats disk presence as live Online — that caused ghost Online · Cloud
+    /// (and fake on/off) when the physical board was powered off.
     public func restorePersistedPresenceIfNeeded() {
         for id in CloudPresenceMemory.shared.knownDeviceIds() {
             let key = LimiDeviceNaming.normalizedHardwareId(id)
             guard !key.isEmpty else { continue }
             if lastPresence[key] != nil { continue }
-            let connected = CloudPresenceMemory.shared.lastConnected(deviceId: key) ?? false
-            lastPresence[key] = connected
-            state(for: key).updateMQTTPresence(connected: connected)
+            // List-only seed. Live Online requires a fresh Socket `device_status`.
+            lastPresence[key] = false
+        }
+    }
+
+    /// Clear live MQTT flags (e.g. Socket reconnect). Fresh `device_status` must re-prove Online.
+    public func clearLiveMQTTPresence() {
+        for (key, state) in states {
+            if state.mqttConnected {
+                state.updateMQTTPresence(connected: false)
+            }
+            lastPresence[key] = false
+        }
+        DeviceConsole.log(.presence, "cleared live MQTT — waiting for fresh device_status")
+    }
+
+    /// Drop registry bookkeeping when the user deletes the device from this phone.
+    public func forgetDevice(deviceId: String) {
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
+        guard !key.isEmpty else { return }
+        lastPresence.removeValue(forKey: key)
+        if let state = states.removeValue(forKey: key), state.mqttConnected {
+            state.updateMQTTPresence(connected: false)
         }
     }
 

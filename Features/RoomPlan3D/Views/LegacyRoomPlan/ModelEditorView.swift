@@ -106,13 +106,10 @@ struct TappableSceneView: UIViewRepresentable {
             let hits = scn.hitTest(location, options: nil)
             if let hit = hits.first {
                 let node = hit.node
-                print("🛠 Tapped node: \(node.name ?? "<unnamed>")")
                 if let geom = node.geometry {
-                    print("Geometry materials before: \(geom.materials)")
                 }
                 onNodeTap(node)
             } else {
-                print("🛠 No hit at location: \(location)")
             }
         }
 
@@ -384,9 +381,7 @@ struct ModelEditorView: View {
                 node.geometry?.firstMaterial?.isDoubleSided = true
             }
             scene = loaded
-        } catch {
-            print("Failed to load scene: \(error)")
-        }
+        } catch { /* ignored */ }
     }
     
     // MARK: - Wall Overlay Methods
@@ -427,7 +422,6 @@ struct ModelEditorView: View {
     private func removeWallOverlays() {
         for (name, overlay) in wallOverlays {
             overlay.removeFromParentNode()
-            print("Removed overlay for \(name)")
         }
         wallOverlays.removeAll()
     }
@@ -435,7 +429,6 @@ struct ModelEditorView: View {
     private func createOverlayForWall(_ wallNode: SCNNode) -> SCNNode? {
         // Get the wall's geometry
         guard let wallGeometry = wallNode.geometry else {
-            print("❌ Wall has no geometry")
             return nil
         }
         
@@ -513,7 +506,6 @@ struct ModelEditorView: View {
         // Add the plane as a child of the wall
         wallNode.addChildNode(planeNode)
         
-        print("✅ Created overlay for \(wallNode.name ?? "unnamed wall") with dimensions \(planeWidth) x \(planeHeight)")
         
         return planeNode
     }
@@ -521,13 +513,11 @@ struct ModelEditorView: View {
     private func applyBrickTextureToOverlay(_ node: SCNNode) {
         // Check if node has geometry
         guard let geometry = node.geometry else {
-            print("❌ Overlay has no geometry")
             return
         }
         
         // Load the texture image
         guard let image = UIImage(named: brickTextureName) else {
-            print("❌ Failed to load texture image")
             return
         }
         
@@ -547,7 +537,6 @@ struct ModelEditorView: View {
         // Apply the material
         geometry.materials = [material]
         
-        print("✅ Applied brick texture to overlay \(node.name ?? "unnamed")")
     }
     
     // MARK: - Original Methods (kept for compatibility)
@@ -614,13 +603,11 @@ struct ModelEditorView: View {
     private func applyBrickTextureToNode(_ node: SCNNode) {
         // Check if node has geometry
         guard let geometry = node.geometry else {
-            print("❌ Node has no geometry")
             return
         }
         
         // Load the texture image
         guard let image = UIImage(named: brickTextureName) else {
-            print("❌ Failed to load texture image")
             return
         }
         
@@ -636,14 +623,11 @@ struct ModelEditorView: View {
         geoCopy.materials = [material]
         node.geometry = geoCopy
         
-        print("✅ Applied brick texture to \(node.name ?? "unnamed")")
     }
 
     private func handleNodeTap(_ node: SCNNode) {
-        print("🔧 Tapped node: \(node.name ?? "<unnamed>")")
         
         guard let name = node.name else {
-            print("❌ Node has no name")
             return
         }
         
@@ -658,7 +642,6 @@ struct ModelEditorView: View {
     
     private func updateDebugMessage(_ message: String) {
         debugMessage = message
-        print(message)
     }
     
     private func move(_ direction: CameraMovement) {

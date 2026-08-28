@@ -28,7 +28,6 @@ class DeviceService: DeviceServiceProtocol {
 
             do {
                 if let jsonString = String(data: data, encoding: .utf8) {
-                    print("Raw API Response: \(jsonString)")
                 }
 
                 let decodedResponse = try JSONDecoder().decode(APIResponseHome.self, from: data)

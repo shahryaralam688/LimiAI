@@ -98,7 +98,6 @@ final class DemoVoicePendantDataService: VoicePendantDataServicing {
     func updateSettings(_ settings: VoicePendantSettings, for pendantID: String) async throws {
         try await Task.sleep(nanoseconds: 400_000_000)
         settingsStore[pendantID] = settings
-        print("⚙️ [DemoVoicePendantData] Saved settings for \(pendantID): volume=\(settings.volume), model=\(settings.aiModelID)")
     }
 
     // MARK: Status / Models
@@ -211,7 +210,6 @@ final class DemoVoicePendantDataService: VoicePendantDataServicing {
             voiceNotesStore[pendantID]?[index].sharedToPendant = true
         }
         let sizeInfo = audioData.map { "\($0.count) bytes (\(note.source.label))" } ?? "no local audio (demo note)"
-        print("🔊 [DemoVoicePendantData] Sending '\(note.title)' -> \(pendantID): \(sizeInfo)")
         let message = audioData != nil
             ? "Sent “\(note.title)” (\(byteString(audioData!.count))) to pendant."
             : "Sent “\(note.title)” to pendant."

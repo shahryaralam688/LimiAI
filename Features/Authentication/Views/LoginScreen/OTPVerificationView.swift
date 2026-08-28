@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OTPVerificationView: View {
     var email: String
+    var confirmationMessage: String?
     @Environment(\.dismiss) private var dismiss
 
     @EnvironmentObject var authManager: AuthManager
@@ -60,6 +61,14 @@ struct OTPVerificationView: View {
                         .padding(.horizontal)
                         .opacity(isAppearing ? 1.0 : 0.0)
                         .offset(y: isAppearing ? 0 : 20)
+
+                    if let confirmationMessage {
+                        Text(confirmationMessage)
+                            .font(LimiTypography.footnote)
+                            .foregroundColor(.appTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                 }
 
                 HStack(spacing: 12) {

@@ -27,12 +27,9 @@ class USDZAnalyzer {
     /// - Parameter fileName: Name of the USDZ file to analyze
     func analyzeUSDZFile(fileName: String) {
         guard let url = RoominatorFileManager.shared.getUSDZFileURL(for: fileName) else {
-            print("❌ Error: Could not find USDZ file: \(fileName)")
             return
         }
         
-        print("📊 ANALYZING ROOM: \(fileName)")
-        print("======================================")
         
         do {
             // Load the USDZ file as a SceneKit scene
@@ -51,9 +48,7 @@ class USDZAnalyzer {
             // Print summary
             printRoomSummary()
             
-        } catch {
-            print("❌ Error loading USDZ file: \(error.localizedDescription)")
-        }
+        } catch { /* ignored */ }
     }
     
     // MARK: - Private Methods
@@ -89,13 +84,10 @@ class USDZAnalyzer {
             }
         }
         
-        print("🔍 Found: \(walls.count) walls, \(floors.count) floors, \(ceilings.count) ceilings, \(doors.count) doors, \(windows.count) windows")
     }
     
     /// Analyzes wall dimensions and prints results
     private func analyzeWalls() {
-        print("\n📏 WALL DIMENSIONS")
-        print("--------------------------------------")
         
         var totalWallArea: Float = 0
         
@@ -116,21 +108,12 @@ class USDZAnalyzer {
             totalWallArea += area
             
             // Print wall information
-            print("Wall #\(index + 1) (\(wall.name ?? "unnamed")):")
-            print("  • Length: \(formatMeasurement(length)) m")
-            print("  • Height: \(formatMeasurement(wallHeight)) m")
-            print("  • Thickness: \(formatMeasurement(thickness)) m")
-            print("  • Area: \(formatMeasurement(area)) m²")
-            print("  • Position: (\(formatMeasurement(wall.position.x)), \(formatMeasurement(wall.position.y)), \(formatMeasurement(wall.position.z)))")
         }
         
-        print("\nTotal Wall Area: \(formatMeasurement(totalWallArea)) m²")
     }
     
     /// Analyzes floor dimensions and prints results
     private func analyzeFloors() {
-        print("\n🔲 FLOOR DIMENSIONS")
-        print("--------------------------------------")
         
         var totalFloorArea: Float = 0
         
@@ -148,20 +131,12 @@ class USDZAnalyzer {
             let area = width * length
             totalFloorArea += area
             
-            print("Floor #\(index + 1) (\(floor.name ?? "unnamed")):")
-            print("  • Width: \(formatMeasurement(width)) m")
-            print("  • Length: \(formatMeasurement(length)) m")
-            print("  • Thickness: \(formatMeasurement(thickness)) m")
-            print("  • Area: \(formatMeasurement(area)) m²")
         }
         
-        print("\nTotal Floor Area: \(formatMeasurement(totalFloorArea)) m²")
     }
     
     /// Analyzes ceiling dimensions and prints results
     private func analyzeCeilings() {
-        print("\n🔝 CEILING DIMENSIONS")
-        print("--------------------------------------")
         
         var totalCeilingArea: Float = 0
         var avgCeilingHeight: Float = 0
@@ -184,27 +159,17 @@ class USDZAnalyzer {
             let ceilingHeight = ceiling.position.y
             avgCeilingHeight += ceilingHeight
             
-            print("Ceiling #\(index + 1) (\(ceiling.name ?? "unnamed")):")
-            print("  • Width: \(formatMeasurement(width)) m")
-            print("  • Length: \(formatMeasurement(length)) m")
-            print("  • Thickness: \(formatMeasurement(thickness)) m")
-            print("  • Height from floor: \(formatMeasurement(ceilingHeight)) m")
-            print("  • Area: \(formatMeasurement(area)) m²")
         }
         
         if !ceilings.isEmpty {
             avgCeilingHeight /= Float(ceilings.count)
-            print("\nAverage Ceiling Height: \(formatMeasurement(avgCeilingHeight)) m")
         }
-        print("Total Ceiling Area: \(formatMeasurement(totalCeilingArea)) m²")
     }
     
     /// Analyzes door dimensions and prints results
     private func analyzeDoors() {
         if doors.isEmpty { return }
         
-        print("\n🚪 DOOR DIMENSIONS")
-        print("--------------------------------------")
         
         for (index, door) in doors.enumerated() {
             guard let geometry = door.geometry else { continue }
@@ -220,10 +185,6 @@ class USDZAnalyzer {
             // Determine door dimensions based on orientation
             let (doorWidth, doorHeight, doorThickness) = determineDoorDimensions(width, height, depth)
             
-            print("Door #\(index + 1) (\(door.name ?? "unnamed")):")
-            print("  • Width: \(formatMeasurement(doorWidth)) m")
-            print("  • Height: \(formatMeasurement(doorHeight)) m")
-            print("  • Thickness: \(formatMeasurement(doorThickness)) m")
         }
     }
     
@@ -231,8 +192,6 @@ class USDZAnalyzer {
     private func analyzeWindows() {
         if windows.isEmpty { return }
         
-        print("\n🪟 WINDOW DIMENSIONS")
-        print("--------------------------------------")
         
         for (index, window) in windows.enumerated() {
             guard let geometry = window.geometry else { continue }
@@ -248,17 +207,11 @@ class USDZAnalyzer {
             // Determine window dimensions based on orientation
             let (windowWidth, windowHeight, windowThickness) = determineWindowDimensions(width, height, depth)
             
-            print("Window #\(index + 1) (\(window.name ?? "unnamed")):")
-            print("  • Width: \(formatMeasurement(windowWidth)) m")
-            print("  • Height: \(formatMeasurement(windowHeight)) m")
-            print("  • Thickness: \(formatMeasurement(windowThickness)) m")
         }
     }
     
     /// Prints a summary of room measurements
     private func printRoomSummary() {
-        print("\n📊 ROOM SUMMARY")
-        print("======================================")
         
         // Calculate total floor area
         var totalFloorArea: Float = 0
@@ -295,13 +248,6 @@ class USDZAnalyzer {
         let roomWidth = maxX - minX
         let roomLength = maxZ - minZ
         
-        print("• Room Width: \(formatMeasurement(roomWidth)) m")
-        print("• Room Length: \(formatMeasurement(roomLength)) m")
-        print("• Ceiling Height: \(formatMeasurement(avgCeilingHeight)) m")
-        print("• Total Floor Area: \(formatMeasurement(totalFloorArea)) m²")
-        print("• Number of Walls: \(walls.count)")
-        print("• Number of Doors: \(doors.count)")
-        print("• Number of Windows: \(windows.count)")
     }
     
     // MARK: - Helper Methods

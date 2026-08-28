@@ -259,9 +259,7 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
         do {
             try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetoothHFP])
             try session.setActive(true)
-        } catch {
-            print("Failed to set audio session category to loudspeaker: \(error)")
-        }
+        } catch { /* ignored */ }
     }
 
     // MARK: Audio Session Observing & Route Handling
@@ -774,7 +772,6 @@ final class WebRTCVoiceClient: NSObject, ObservableObject {
             let line = "[\(Date())] \(message)"
             self.logs.append(line)
             // Also mirror to Xcode console
-            print(line)
         }
     }
 

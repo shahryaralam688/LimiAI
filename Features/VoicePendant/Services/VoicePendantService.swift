@@ -98,7 +98,6 @@ final class DemoVoicePendantService: VoicePendantServicing {
         guard pendants.contains(where: { $0.id == pendantID }) else {
             throw LimiAPIError.backend(message: "Pendant not found.")
         }
-        print("🎚️ [DemoVoicePendant] Relaying \(command.action) -> \(pendantID): \(command.payload)")
         return VoicePendantCommandResponse(
             success: true,
             message: "Queued: \(command.displayDescription)",

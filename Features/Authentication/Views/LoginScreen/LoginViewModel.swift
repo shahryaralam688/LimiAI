@@ -4,6 +4,70 @@ protocol LoginOTPRequesting {
     func requestOTP(email: String, completion: @escaping (Result<String, Error>) -> Void)
 }
 
+enum LoginOTPResponseParser {
+    static func normalizedEmail(_ email: String) -> String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    static func parseSendOTP(
+        data: Data,
+        http: HTTPURLResponse?,
+        requestError: Error? = nil
+    ) -> Result<String, Error> {
+        if let requestError {
+            return .failure(requestError)
+        }
+
+        if let http, !(200...299).contains(http.statusCode) {
+            let message = parseErrorMessage(from: data)
+                ?? "Could not send code (HTTP \(http.statusCode))"
+            return .failure(DefaultLoginOTPRequester.OTPRequestError.backend(message))
+        }
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return .failure(DefaultLoginOTPRequester.OTPRequestError.backend("Invalid server response"))
+        }
+
+        if let success = json["success"] as? Bool, success {
+            return .success(parseSuccessMessage(from: json))
+        }
+
+        let errorMessage = parseErrorMessage(from: data) ?? "Could not send verification code"
+        return .failure(DefaultLoginOTPRequester.OTPRequestError.backend(errorMessage))
+    }
+
+    private static func parseSuccessMessage(from json: [String: Any]) -> String {
+        if let otpObject = json["otp"] as? [String: Any],
+           let serverMessage = otpObject["message"] as? String,
+           !serverMessage.isEmpty {
+            return "\(serverMessage) Check your spam folder if you do not see it."
+        }
+
+        if let otpString = json["otp"] as? String, !otpString.isEmpty {
+            return "Verification code sent. Check your spam folder if you do not see it."
+        }
+
+        return "We sent a code to your email. Check your inbox and spam folder."
+    }
+
+    private static func parseErrorMessage(from data: Data) -> String? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let message = json["error_message"] as? String, !message.isEmpty {
+            return message
+        }
+        if let message = json["message"] as? String, !message.isEmpty {
+            return message
+        }
+        return nil
+    }
+
+    static func backendErrorMessage(from data: Data, fallback: String) -> String {
+        parseErrorMessage(from: data) ?? fallback
+    }
+}
+
 struct DefaultLoginOTPRequester: LoginOTPRequesting {
     enum OTPRequestError: LocalizedError {
         case invalidURL
@@ -26,36 +90,23 @@ struct DefaultLoginOTPRequester: LoginOTPRequesting {
     }
 
     func requestOTP(email: String, completion: @escaping (Result<String, Error>) -> Void) {
+        let normalizedEmail = LoginOTPResponseParser.normalizedEmail(email)
+        guard !normalizedEmail.isEmpty else {
+            completion(.failure(OTPRequestError.backend("Please enter a valid email address")))
+            return
+        }
+
         LimiHTTPClient.postJSON(
             urlString: APIConstants.sendOTP,
-            body: ["email": email],
+            body: ["email": normalizedEmail],
             auth: .none
-        ) { data, _, error in
-            if let error {
-                completion(.failure(error))
-                return
-            }
-
+        ) { data, response, error in
             guard let data else {
-                completion(.failure(OTPRequestError.noData))
+                completion(.failure(error ?? OTPRequestError.noData))
                 return
             }
 
-            do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    if let success = jsonResponse["success"] as? Bool, success {
-                        let otp = jsonResponse["otp"] as? String ?? ""
-                        completion(.success(otp))
-                    } else {
-                        let errorMessage = jsonResponse["error_message"] as? String ?? "Unknown error"
-                        completion(.failure(OTPRequestError.backend(errorMessage)))
-                    }
-                } else {
-                    completion(.failure(OTPRequestError.backend("Invalid server response")))
-                }
-            } catch {
-                completion(.failure(error))
-            }
+            completion(LoginOTPResponseParser.parseSendOTP(data: data, http: response, requestError: error))
         }
     }
 }
@@ -67,8 +118,9 @@ final class LoginViewModel: ObservableObject {
     @Published var enteredOTP = ""
     @Published var isOTPVerified = false
     @Published var appeared = false
+    @Published var otpRequestErrorMessage: String?
+    @Published var otpSentConfirmationMessage: String?
 
-    private(set) var generatedOTP = ""
     private let otpRequester: LoginOTPRequesting
 
     init(otpRequester: LoginOTPRequesting = DefaultLoginOTPRequester()) {
@@ -82,7 +134,10 @@ final class LoginViewModel: ObservableObject {
     }
 
     func requestOTP() {
+        email = LoginOTPResponseParser.normalizedEmail(email)
         guard isEmailValid, !isSigningIn else { return }
+        otpRequestErrorMessage = nil
+        otpSentConfirmationMessage = nil
         isSigningIn = true
 
         otpRequester.requestOTP(email: email) { [weak self] result in
@@ -91,11 +146,11 @@ final class LoginViewModel: ObservableObject {
                 self.isSigningIn = false
 
                 switch result {
-                case .success(let otp):
-                    self.generatedOTP = otp
+                case .success(let confirmationMessage):
+                    self.otpSentConfirmationMessage = confirmationMessage
                     self.isShowingOTPView = true
                 case .failure(let error):
-                    print("OTP request failed: \(error.localizedDescription)")
+                    self.otpRequestErrorMessage = error.localizedDescription
                 }
             }
         }

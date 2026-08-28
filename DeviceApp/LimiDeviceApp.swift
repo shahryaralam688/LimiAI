@@ -3,8 +3,8 @@
 //  LIMI AI Device
 //
 //  Entry point for the device-focused companion app.
-//  System light/dark with LIMI Emerald accent. Devices home uses a
-//  smart-home overview layout; control sheets stay native.
+//  Soft UI (Home UI 1). Heavy BLE/transport warm-up is deferred to first frame
+//  so force-quit → relaunch does not race UIKit scene restore.
 //
 
 import SwiftUI
@@ -16,27 +16,7 @@ struct LimiDeviceApp: App {
     private let modelContainer: ModelContainer
 
     init() {
-        // Companion app: BLE for control only — no random "Hub Found" popups / discovery bursts.
-        BluetoothManager.shared.configureForDeviceCompanionApp()
-
-        // Start the three-door transport stack (Bonjour + Socket.IO presence)
-        // at launch, same as the main LIMI AI app.
-        _ = LimiTransport.shared
-        _ = DeviceTransportRegistry.shared
-
-        do {
-            modelContainer = try ModelContainer(
-                for: WarmCoolSliderPreference.self,
-                DeviceNamePreference.self,
-                DeviceRoomAssignment.self,
-                DeviceSchedule.self,
-                RememberedLimiDevice.self
-            )
-        } catch {
-            fatalError("Failed to create model container: \(error)")
-        }
-
-        // Schedule engine shares the same store and fires due schedules.
+        modelContainer = Self.makeModelContainer()
         DeviceScheduleEngine.shared.configure(container: modelContainer)
     }
 
@@ -45,12 +25,13 @@ struct LimiDeviceApp: App {
             DeviceRootView()
                 .environment(\.appEnvironment, .live)
                 .environmentObject(LimiTransport.shared)
-                .tint(DeviceTheme.accent)
+                .tint(HomeUI1Color.accentGreen)
+                .preferredColorScheme(.dark)
+                // First paint = Soft UI canvas (not system white).
+                .background(HomeUI1Color.canvas.ignoresSafeArea())
         }
         .modelContainer(modelContainer)
         .onChange(of: scenePhase) { _, phase in
-            // Catch schedules that came due while the app was inactive
-            // (e.g. user opened it from the schedule notification).
             if phase == .active {
                 DeviceScheduleEngine.shared.checkNow()
             } else if phase == .background {
@@ -58,10 +39,66 @@ struct LimiDeviceApp: App {
             }
         }
     }
+
+    /// Recover from SwiftData migration failures after terminate (common crash cause).
+    private static func makeModelContainer() -> ModelContainer {
+        let schema = Schema([
+            WarmCoolSliderPreference.self,
+            DeviceNamePreference.self,
+            DeviceRoomAssignment.self,
+            DeviceSchedule.self,
+            RememberedLimiDevice.self,
+            VirtualDeviceGroup.self
+        ])
+
+        let configuration = ModelConfiguration(isStoredInMemoryOnly: false)
+
+        do {
+            return try ModelContainer(for: schema, configurations: [configuration])
+        } catch {
+            // Wipe incompatible store once, then retry — better than fatalError white crash.
+            #if DEBUG
+            print("[LimiDeviceApp] ModelContainer failed (\(error)). Resetting store…")
+            #endif
+            Self.deleteDefaultStoreFiles()
+            do {
+                return try ModelContainer(for: schema, configurations: [configuration])
+            } catch {
+                #if DEBUG
+                print("[LimiDeviceApp] ModelContainer retry failed (\(error)). Using in-memory store.")
+                #endif
+                let memory = ModelConfiguration(isStoredInMemoryOnly: true)
+                do {
+                    return try ModelContainer(for: schema, configurations: [memory])
+                } catch {
+                    fatalError("Failed to create model container: \(error)")
+                }
+            }
+        }
+    }
+
+    private static func deleteDefaultStoreFiles() {
+        let fm = FileManager.default
+        guard let appSupport = try? fm.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: false
+        ) else { return }
+
+        let candidates = [
+            "default.store",
+            "default.store-shm",
+            "default.store-wal"
+        ]
+        for name in candidates {
+            let url = appSupport.appendingPathComponent(name)
+            try? fm.removeItem(at: url)
+        }
+    }
 }
 
-/// The only brand color in this app. Everything else is system
-/// black/white/gray so light & dark mode come from iOS directly.
+/// Legacy accent used by older DeviceApp rows. Soft UI prefers `HomeUI1Color.accentGreen`.
 enum DeviceTheme {
     /// LIMI Emerald #54BB74.
     static let accent = Color(red: 0x54 / 255.0, green: 0xBB / 255.0, blue: 0x74 / 255.0)

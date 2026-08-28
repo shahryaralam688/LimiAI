@@ -38,7 +38,6 @@ final class HotelRoomDevicesViewModel: ObservableObject {
     func handleDeviceCardTap(_ item: DeviceItem, sharedDevice: SharedDevice) {
         guard let uuid = bluetooth.deviceUUID(matchingTitle: item.title),
               let match = bluetooth.connectedEntry(for: uuid) else {
-            print("❌ No matching connected device found for: \(item.title)")
             return
         }
 
@@ -56,7 +55,6 @@ final class HotelRoomDevicesViewModel: ObservableObject {
 
         bluetooth.startScanning { [weak self] devices in
             if let found = devices.first(where: { $0.name == "1 CH-HUB" }) {
-                print("🔍 Found newHub, attempting to connect...")
                 self?.bluetooth.connectToDevice(deviceId: found.id)
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
@@ -69,7 +67,6 @@ final class HotelRoomDevicesViewModel: ObservableObject {
 
     private func handleDeviceSelection(for deviceUUID: UUID, sharedDevice: SharedDevice) {
         guard let deviceEntry = bluetooth.connectedEntry(for: deviceUUID) else {
-            print("❌ Device not found in connected devices")
             return
         }
 

@@ -26,7 +26,6 @@ final class RoomCaptureViewModel {
     func saveAndUploadScan(dismiss: () -> Void) {
         guard let controller = captureController,
               let finalResult = controller.finalResult else {
-            print("No scan result to save.")
             return
         }
 
@@ -39,18 +38,14 @@ final class RoomCaptureViewModel {
 
             if let data = try? Data(contentsOf: tempURL),
                RoominatorFileManager.shared.saveUSDZFile(data, withName: fileNameWithExtension) {
-                print("✅ Local save complete.")
                 printCategorizedObjects(categorizedObjects)
 
                 if let fileURL = RoominatorFileManager.shared.getUSDZFileURL(for: fileNameWithExtension) {
                     uploadScan(fileURL: fileURL, displayName: fileName)
                 }
             } else {
-                print("❌ Failed to save processed scan file.")
             }
-        } catch {
-            print("❌ Error exporting and saving usdz scan: \(error)")
-        }
+        } catch { /* ignored */ }
 
         try? FileManager.default.removeItem(at: tempURL)
         dismiss()
@@ -64,10 +59,8 @@ final class RoomCaptureViewModel {
         ) { [weak self] success, message in
             DispatchQueue.main.async {
                 if success {
-                    print("📬 Upload response: \(message ?? "OK")")
                 } else {
                     self?.uploadError = message ?? "Upload failed"
-                    print("❌ Upload error: \(self?.uploadError ?? "unknown")")
                 }
             }
         }
@@ -79,12 +72,9 @@ final class RoomCaptureViewModel {
 
     func analyzeCurrentScan() {
         guard let finalResult = captureController?.finalResult else {
-            print("No scan result available to analyze.")
             return
         }
 
-        print("\n📊 ANALYZING CURRENT SCAN")
-        print("======================================")
         analyzeObjects(finalResult.objects)
     }
 
@@ -121,30 +111,20 @@ final class RoomCaptureViewModel {
     }
 
     private func printCategorizedObjects(_ categorizedObjects: [String: [CapturedRoom.Object]]) {
-        print("Categorized objects:")
         for (category, objects) in categorizedObjects {
-            print("  \(category): \(objects.count) items")
             for object in objects {
-                print("    - \(object.category): \(object.dimensions)")
             }
         }
     }
 
     private func analyzeObjects(_ objects: [CapturedRoom.Object]) {
-        print("\n🪑 OBJECTS")
-        print("--------------------------------------")
 
         let categorizedObjects = categorizeRoomObjects(objects)
 
         for (category, items) in categorizedObjects {
-            print("\n\(category) (\(items.count) items):")
 
             for (index, object) in items.enumerated() {
                 let dimensions = object.dimensions
-                print("  \(index + 1). \(object.category):")
-                print("    • Width: \(formatMeasurement(dimensions.x)) m")
-                print("    • Height: \(formatMeasurement(dimensions.y)) m")
-                print("    • Depth: \(formatMeasurement(dimensions.z)) m")
             }
         }
     }

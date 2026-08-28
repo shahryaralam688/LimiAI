@@ -3,7 +3,6 @@ import SwiftUI
 struct LoginSkipView: View {
     @State private var email: String = ""
     @State private var isShowingOTPView: Bool = false
-    @State private var generatedOTP: String = ""
     @State private var enteredOTP: String = ""
     @State private var isOTPVerified: Bool = false
     @Environment(\.dismiss) private var dismiss
@@ -12,6 +11,9 @@ struct LoginSkipView: View {
     @State private var showHomeView: Bool = false
     @FocusState private var isEmailFieldFocused: Bool
     @State private var isLoading = false
+    @State private var isSendingOTP = false
+    @State private var otpErrorMessage: String?
+    @State private var otpSentConfirmationMessage: String?
     @StateObject private var authManager = GoogleAuthManager()
 
     private var isEmailValid: Bool {
@@ -112,13 +114,19 @@ struct LoginSkipView: View {
                     HStack {
                         Spacer()
 
-                        Text("Sign in")
-                            .font(LimiTypography.button)
-                            .foregroundColor(.appTextInverse)
-                        Image("Monotone arrow right")
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(isEmailValid ? Color.appCanvasTertiary : Color.appOverlayTint)
+                        if isSendingOTP {
+                            ProgressView()
+                                .tint(.appTextInverse)
+                        } else {
+                            Text("Sign in")
+                                .font(LimiTypography.button)
+                                .foregroundColor(.appTextInverse)
+                            Image("Monotone arrow right")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(isEmailValid ? Color.appCanvasTertiary : Color.appOverlayTint)
+                        }
+
                         Spacer()
                     }
                     .padding(.horizontal, 20)
@@ -131,12 +139,26 @@ struct LoginSkipView: View {
                             .stroke(Color.appBorderPrimary, lineWidth: 2)
                     )
                 }
-                .disabled(!isEmailValid)
+                .disabled(!isEmailValid || isSendingOTP)
                 .padding(.horizontal, 20)
+
+                if let otpErrorMessage {
+                    Text(otpErrorMessage)
+                        .font(LimiTypography.footnote)
+                        .foregroundColor(.appDanger)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                }
             }
         }
         .sheet(isPresented: $isShowingOTPView) {
-            OTPVerificationView(email: email, enteredOTP: $enteredOTP, isOTPVerified: $isOTPVerified)
+            OTPVerificationView(
+                email: LoginOTPResponseParser.normalizedEmail(email),
+                confirmationMessage: otpSentConfirmationMessage,
+                enteredOTP: $enteredOTP,
+                isOTPVerified: $isOTPVerified
+            )
         }
         .fullScreenCover(isPresented: $isOTPVerified) {
             HomeView()
@@ -163,36 +185,22 @@ struct LoginSkipView: View {
     }
 
     func generateOTP() {
-        LimiHTTPClient.postJSON(
-            urlString: APIConstants.sendOTP,
-            body: ["email": email],
-            auth: .none
-        ) { data, _, error in
-            if let error = error {
-                print("Request failed: \(error.localizedDescription)")
-                return
-            }
+        email = LoginOTPResponseParser.normalizedEmail(email)
+        otpErrorMessage = nil
+        otpSentConfirmationMessage = nil
+        isSendingOTP = true
 
-            guard let data = data else {
-                print("No data received")
-                return
-            }
+        DefaultLoginOTPRequester().requestOTP(email: email) { result in
+            DispatchQueue.main.async {
+                self.isSendingOTP = false
 
-            do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    if let success = jsonResponse["success"] as? Bool, success {
-                        DispatchQueue.main.async {
-                            self.generatedOTP = jsonResponse["otp"] as? String ?? ""
-                            self.isShowingOTPView = true
-                            print("Generated OTP: \(self.generatedOTP)")
-                        }
-                    } else {
-                        let errorMessage = jsonResponse["error_message"] as? String ?? "Unknown error"
-                        print("Error: \(errorMessage)")
-                    }
+                switch result {
+                case .success(let confirmationMessage):
+                    self.otpSentConfirmationMessage = confirmationMessage
+                    self.isShowingOTPView = true
+                case .failure(let error):
+                    self.otpErrorMessage = error.localizedDescription
                 }
-            } catch {
-                print("JSON decoding error: \(error.localizedDescription)")
             }
         }
     }
@@ -207,45 +215,33 @@ struct LoginSkipView: View {
             DispatchQueue.main.async { isLoading = false }
 
             if let error = error {
-                print("API error:", error.localizedDescription)
                 return
             }
 
             if let http = response {
-                print("HTTP Status:", http.statusCode)
-                print("Content-Type:", http.value(forHTTPHeaderField: "Content-Type") ?? "-")
             }
 
             guard let data = data, !data.isEmpty else {
-                print("No data received")
                 return
             }
 
             do {
                 let decoded = try JSONDecoder().decode(InstallerUserResponse.self, from: data)
-                print("Decoded success:", decoded.success)
                 if decoded.success, let token = decoded.data?.token, !token.isEmpty {
                     if let username = decoded.data?.data, !username.isEmpty {
-                        print("Guest username:", username)
                     }
                     AuthManager.shared.saveToken(token)
                     let roleMessage = decoded.message ?? "Installer User created"
                     AuthManager.shared.saveRole(roleMessage)
-                    print("Token saved:", token, roleMessage)
                     DispatchQueue.main.async { showHomeView = true }
                     return
                 }
-            } catch {
-                print("Codable decode error:", error.localizedDescription)
-            }
+            } catch { /* ignored */ }
 
-            if let raw = String(data: data, encoding: .utf8) { print("Raw response string:\n", raw) }
+            if let raw = String(data: data, encoding: .utf8) { }
             do {
                 let any = try JSONSerialization.jsonObject(with: data, options: [.allowFragments])
-                print("Loose JSON object:", any)
-            } catch {
-                print("JSONSerialization fallback error:", error.localizedDescription)
-            }
+            } catch { /* ignored */ }
         }
     }
 }

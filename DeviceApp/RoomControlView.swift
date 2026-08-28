@@ -23,6 +23,7 @@ struct RoomControlView: View {
     private let roomName: String
 
     private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+    private var usesHomeUI2: Bool { homeUITheme.selected == .two }
 
     init(
         roomName: String,
@@ -54,6 +55,8 @@ struct RoomControlView: View {
         Group {
             if usesHomeUI1 {
                 homeUI1Body
+            } else if usesHomeUI2 {
+                homeUI2Body
             } else {
                 systemListBody
             }
@@ -61,6 +64,7 @@ struct RoomControlView: View {
         .navigationTitle(viewModel.roomName)
         .navigationBarTitleDisplayMode(.inline)
         .homeUI1ControlNavigationChrome(enabled: usesHomeUI1)
+        .homeUI2ControlNavigationChrome(enabled: usesHomeUI2)
         .onAppear { syncDevices() }
         .onChange(of: deviceSyncKey) { _, _ in
             syncDevices()
@@ -223,6 +227,167 @@ struct RoomControlView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(HomeUI1Motion.soft, value: viewModel.isBusy)
         .animation(HomeUI1Motion.soft, value: viewModel.statusMessage)
+    }
+
+    // MARK: - Home UI 2
+
+    private var homeUI2Body: some View {
+        ZStack {
+            HomeUI2ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    if socket.connectionStatus != .connected {
+                        HomeUI2ControlConnectionBanner()
+                    }
+
+                    HomeUI2ControlSectionCard(
+                        title: "Room Controls",
+                        footer: roomControlsFooter
+                    ) {
+                        VStack(spacing: 12) {
+                            HomeUI2ToggleRow(
+                                title: "Power",
+                                systemImage: viewModel.isOn ? "lightbulb.fill" : "lightbulb",
+                                isOn: Binding(
+                                    get: { viewModel.isOn },
+                                    set: { viewModel.setPower($0) }
+                                ),
+                                isEnabled: viewModel.canControl
+                            ) { _ in }
+
+                            HomeUI2SliderRow(
+                                title: "Brightness",
+                                systemImage: "sun.max.fill",
+                                value: $viewModel.brightness,
+                                valueLabel: "\(Int((viewModel.brightness * 100).rounded()))%",
+                                tint: HomeUI2Color.accent,
+                                isEnabled: viewModel.isOn && controlsEnabled
+                            ) {
+                                viewModel.applyBrightness()
+                            }
+
+                            if viewModel.hasCCTChannels {
+                                HomeUI2SliderRow(
+                                    title: "Color Temperature",
+                                    systemImage: "thermometer.medium",
+                                    value: $viewModel.temperature,
+                                    valueLabel: "",
+                                    tint: temperaturePreview,
+                                    isEnabled: viewModel.isOn && controlsEnabled
+                                ) {
+                                    viewModel.applyCCT()
+                                }
+                            }
+
+                            if viewModel.hasRGBChannels {
+                                HomeUI2SliderRow(
+                                    title: "Color",
+                                    systemImage: "paintpalette.fill",
+                                    value: $viewModel.hue,
+                                    valueLabel: "",
+                                    tint: Color(hue: viewModel.hue, saturation: 1, brightness: 1),
+                                    isEnabled: viewModel.isOn && controlsEnabled
+                                ) {
+                                    viewModel.applyRGB()
+                                }
+                            }
+
+                            homeUI2StatusBlock
+                        }
+                    }
+
+                    HomeUI2ControlSectionCard(
+                        title: "Individual Devices",
+                        footer: "Online devices open full dial control. Offline devices stay listed until they reconnect."
+                    ) {
+                        VStack(spacing: 10) {
+                            ForEach(viewModel.devices) { device in
+                                let row = HomeUI2ControlDeviceRow(
+                                    name: viewModel.displayName(for: device),
+                                    subtitle: deviceSubtitle(for: device),
+                                    isOnline: device.isOnline,
+                                    statusText: statusTextProvider(device)
+                                )
+
+                                if device.isOnline {
+                                    NavigationLink {
+                                        DeviceControlDestination(
+                                            device: device,
+                                            displayName: viewModel.displayName(for: device)
+                                        )
+                                    } label: {
+                                        row
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    row
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+            }
+        }
+    }
+
+    private var homeUI2StatusBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("\(viewModel.onlineDevices.count) of \(viewModel.devices.count) devices online")
+                .font(HomeUI2Type.caption(12))
+                .foregroundStyle(HomeUI2Color.textSecondary)
+
+            if viewModel.isBusy {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(HomeUI2Color.accent)
+                    Text("Sending…")
+                        .font(HomeUI2Type.caption(12))
+                        .foregroundStyle(HomeUI2Color.textSecondary)
+                }
+            }
+
+            if let status = viewModel.statusMessage {
+                Text(status)
+                    .font(HomeUI2Type.caption(12))
+                    .foregroundStyle(
+                        viewModel.statusIsError
+                            ? Color.orange
+                            : HomeUI2Color.textSecondary
+                    )
+            }
+
+            if viewModel.canRetry {
+                Button {
+                    DeviceAppGuidance.lightImpact()
+                    viewModel.retryLastCommand()
+                } label: {
+                    Text("Try Again")
+                        .font(HomeUI2Type.body(14))
+                        .foregroundStyle(HomeUI2Color.textOnAccent)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(HomeUI2Color.accent)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !viewModel.canControl {
+                Text(DeviceAppGuidance.noOnlineInRoom)
+                    .font(HomeUI2Type.caption(12))
+                    .foregroundStyle(HomeUI2Color.textSecondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .animation(HomeUI2Motion.soft, value: viewModel.isBusy)
+        .animation(HomeUI2Motion.soft, value: viewModel.statusMessage)
     }
 
     private var roomControlsFooter: String? {
@@ -456,14 +621,57 @@ struct RoomControlView: View {
     }
 }
 
-// MARK: - Room card (home list)
+// MARK: - Room card (home list + rooms hub)
 
 struct RoomGroupCard: View {
+    enum Style {
+        case system
+        case homeUI1
+    }
+
     let roomName: String
     let deviceCount: Int
     let onlineCount: Int
+    var style: Style = .system
 
     var body: some View {
+        switch style {
+        case .homeUI1:
+            homeUI1Body
+        case .system:
+            systemBody
+        }
+    }
+
+    private var homeUI1Body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "square.split.bottomrightquarter.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(HomeUI1Color.accentGreen)
+                .frame(width: 44, height: 44)
+                .homeUI1CircleElevation(.two)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(roomName)
+                    .font(HomeUI1Type.body(15))
+                    .foregroundStyle(HomeUI1Color.textPrimary)
+                Text(subtitle)
+                    .font(HomeUI1Type.caption(12))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+            }
+
+            Spacer(minLength: 8)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(HomeUI1Color.textSecondary.opacity(0.55))
+        }
+        .padding(14)
+        .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+        .contentShape(Rectangle())
+    }
+
+    private var systemBody: some View {
         HStack(spacing: 12) {
             Image(systemName: "square.split.bottomrightquarter.fill")
                 .font(.title3)
@@ -490,6 +698,6 @@ struct RoomGroupCard: View {
 
     private var subtitle: String {
         let devices = deviceCount == 1 ? "1 device" : "\(deviceCount) devices"
-        return "\(devices) • \(onlineCount) online"
+        return "\(devices) · \(onlineCount) online"
     }
 }

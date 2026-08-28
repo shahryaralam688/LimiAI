@@ -10,8 +10,13 @@ import UIKit
 // MARK: - Background scanning + interest device popup
 
 extension BluetoothManager {
-    // Only these get a popup
-    private var interestDeviceNames: Set<String> { ["1 CH-HUB", "4 CH-HUB"] }
+    // LIMI devices that trigger Apple-style proximity pairing cards.
+    private var interestDeviceNames: Set<String> {
+        [
+            "1 CH-HUB", "4 CH-HUB", "8 CH-HUB", "16 CH-HUB",
+            "Mini Controller", "LIMI Device", "limi1ch-EC3564"
+        ]
+    }
 
     /// Periodic scan bursts for hub popups when no screen owns an active scan session.
     /// Only runs while the app is in the foreground — unrestricted BLE scan in background
@@ -33,17 +38,13 @@ extension BluetoothManager {
     func pauseBackgroundDiscovery() {
         backgroundScanTimer?.invalidate()
         backgroundScanTimer = nil
-        if activeScanSessions == 0 {
-            centralManager?.stopScan()
-        }
-        print("⏸️ Background BLE discovery paused")
+        stopCentralScanIfIdle()
     }
 
     func resumeBackgroundDiscoveryIfNeeded() {
         guard backgroundDiscoveryDesired else { return }
         guard backgroundScanTimer == nil else { return }
         scheduleBackgroundScanTick()
-        print("▶️ Background BLE discovery resumed")
     }
 
     // MARK: - Internal helpers
@@ -63,12 +64,10 @@ extension BluetoothManager {
         // Never run discovery bursts when suspended / inactive — OS kill risk.
         guard UIApplication.shared.applicationState == .active else { return }
         guard activeScanSessions == 0 else {
-            print("⏭️ Skipping background BLE burst — foreground scan active (\(activeScanSessions) sessions)")
             return
         }
         guard let cm = centralManager else { return }
         if cm.state == .poweredOn {
-            print("🔁 Foreground BLE discovery burst (6s)")
             cm.stopScan()
             discoveredDevices.removeAll()
             // No AllowDuplicates — cuts CPU / memory pressure that triggers jetsam.
@@ -95,10 +94,10 @@ extension BluetoothManager {
     fileprivate func handleInterestDeviceDiscovered(name: String, id: String) {
         guard interestDeviceNames.contains(name) else { return }
         GlobalDevicePopup.shared.showDeviceFound(
-            title: "Hub Found",
             deviceName: name,
             deviceId: id
         ) { [weak self] in
+            GlobalDevicePopup.shared.showConnecting(deviceName: name, deviceId: id)
             self?.selectAndConnect(name: name, uuidString: id)
         }
     }

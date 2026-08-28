@@ -2,8 +2,7 @@
 //  HomeUI1Elevation.swift
 //  LIMI AI Device — Home UI 1
 //
-//  Stronger premium-v13 neumorphism — tactile raised / pressed depth
-//  without Metal blur overlays (safe for many simultaneous views).
+//  Dark charcoal-green neumorphism — soft blurred dual shadows, inset wells.
 //
 
 import SwiftUI
@@ -32,9 +31,8 @@ struct HomeUI1ElevationModifier<S: Shape>: ViewModifier {
                 .overlay { insetLightEdge }
                 .clipShape(shape)
                 .compositingGroup()
-                // Outer soft cradle so recessed wells still read on the canvas
-                .shadow(color: HomeUI1Color.shadowLight.opacity(0.55), radius: 1, x: -1, y: -1)
-                .shadow(color: HomeUI1Color.shadowDark.opacity(0.22), radius: 2, x: 1, y: 1)
+                .shadow(color: HomeUI1Color.shadowLight.opacity(0.18), radius: 2, x: -1, y: -1)
+                .shadow(color: HomeUI1Color.shadowDark.opacity(0.45), radius: 4, x: 2, y: 2)
         case .flat:
             content
                 .background(shape.fill(fill))
@@ -47,9 +45,9 @@ struct HomeUI1ElevationModifier<S: Shape>: ViewModifier {
                     shape.stroke(
                         LinearGradient(
                             colors: [
-                                HomeUI1Color.shadowLight.opacity(0.85),
+                                HomeUI1Color.shadowLight.opacity(0.42),
                                 Color.clear,
-                                HomeUI1Color.shadowDark.opacity(0.22)
+                                HomeUI1Color.shadowDark.opacity(0.35)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -77,7 +75,7 @@ struct HomeUI1ElevationModifier<S: Shape>: ViewModifier {
 
     private var insetDarkEdge: some View {
         shape
-            .stroke(HomeUI1Color.shadowDark.opacity(0.55), lineWidth: 6)
+            .stroke(HomeUI1Color.shadowDark.opacity(0.72), lineWidth: 6)
             .offset(x: 2.5, y: 2.5)
             .clipShape(shape)
             .allowsHitTesting(false)
@@ -85,7 +83,7 @@ struct HomeUI1ElevationModifier<S: Shape>: ViewModifier {
 
     private var insetLightEdge: some View {
         shape
-            .stroke(HomeUI1Color.shadowLight.opacity(0.95), lineWidth: 5)
+            .stroke(HomeUI1Color.shadowLight.opacity(0.38), lineWidth: 5)
             .offset(x: -2, y: -2)
             .clipShape(shape)
             .blendMode(.softLight)
@@ -97,15 +95,15 @@ struct HomeUI1ElevationModifier<S: Shape>: ViewModifier {
     ) -> (offset: CGFloat, blur: CGFloat, darkOpacity: Double, lightOpacity: Double) {
         switch level {
         case .one:
-            return (5, 5, 0.78, 0.95)
+            return (5, 8, 0.62, 0.28)
         case .two:
-            return (7, 7, 0.82, 0.98)
+            return (6, 10, 0.68, 0.32)
         case .three:
-            return (10, 10, 0.85, 1.0)
+            return (8, 14, 0.72, 0.36)
         case .four, .five:
-            return (14, 14, 0.88, 1.0)
+            return (10, 18, 0.78, 0.40)
         default:
-            return (8, 8, 0.8, 0.95)
+            return (7, 12, 0.65, 0.30)
         }
     }
 }

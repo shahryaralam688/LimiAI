@@ -54,9 +54,7 @@ enum ConfiguratorModelStore {
         do {
             try ensureDirectoryExists()
             try FileManager.default.moveItem(at: legacyURL, to: destinationURL)
-        } catch {
-            print("⚠️ Failed to migrate USDZ from Caches: \(error)")
-        }
+        } catch { /* ignored */ }
     }
 
     // MARK: - Safe AR model loading
@@ -86,14 +84,12 @@ enum ConfiguratorModelStore {
         do {
             return try Entity.load(contentsOf: url)
         } catch {
-            print("⚠️ ConfiguratorModelStore: failed to load \(url.lastPathComponent): \(error)")
             return nil
         }
     }
 
     static func loadEntity(downloadId: String?, bundledName: String) -> Entity? {
         guard let url = resolveModelURL(downloadId: downloadId, bundledName: bundledName) else {
-            print("⚠️ ConfiguratorModelStore: no model URL for bundled \(bundledName)")
             return nil
         }
         return loadEntity(from: url)
@@ -114,7 +110,6 @@ enum ConfiguratorModelStore {
     ) -> ModelEntity? {
         let bundled = bundledName ?? snapId
         guard let loaded = loadEntity(downloadId: snapId, bundledName: bundled) else {
-            print("❌ Model not found for objectName: \(snapId)")
             return nil
         }
 
@@ -122,7 +117,6 @@ enum ConfiguratorModelStore {
         container.name = "ModelContainer_\(snapId)"
         container.addChild(loaded)
         container.transform.scale = SIMD3<Float>(repeating: visualScale)
-        print("✅ Loaded model for placement (wrapped in container): \(snapId)")
         return container
     }
 }

@@ -28,9 +28,7 @@ final class RoomPlanListViewModel {
             if RoominatorFileManager.shared.deleteFile(named: fileName) {
                 RoomPlanUploadService.deleteModel(filename: fileName) { success in
                     if success {
-                        print("🗑️ Deleted '\(fileName)' from both local and backend.")
                     } else {
-                        print("⚠️ Deleted '\(fileName)' locally, but backend deletion failed.")
                     }
                 }
                 files.remove(at: index)
@@ -42,7 +40,6 @@ final class RoomPlanListViewModel {
         if RoominatorFileManager.shared.deleteFile(named: fileName) {
             RoomPlanUploadService.deleteModel(filename: fileName) { success in
                 if success {
-                    print("🗑️ Swipe deleted '\(fileName)' from backend too")
                 }
             }
             files.removeAll { $0 == fileName }

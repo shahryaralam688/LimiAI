@@ -242,7 +242,6 @@ struct DataRGBView: View {
                                 // Send color only when user releases the slider
                                 sendColorToLED(selectedColor)
                                 // Print the final selected color after slider is released
-                                print("Final Selected Color: \(selectedColor)")
                             })
                             .disabled(!isOn)
                             .opacity(isOn ? 1.0 : 0.4)
@@ -316,12 +315,9 @@ struct DataRGBView: View {
         if let pastedText = UIPasteboard.general.string {
             if let newColor = colorFromHex(pastedText) {
                 selectedColor = newColor
-                print("Pasted color: \(pastedText)")
             } else {
-                print("Invalid color code")
             }
         } else {
-            print("Clipboard is empty")
         }
     }
     func updateBrightness(_ brightness: Double, selectedColor: Color) {
@@ -445,7 +441,6 @@ struct DataRGBView: View {
             let data = Data(message)
             selectColorObj.sendMessageToDevice(to: hub.id, message: [UInt8](data)) // Convert Data back to [UInt8]
         } else {
-            print("Device not connected")
         }
     }
     
@@ -700,7 +695,6 @@ struct DataRGBWifiView: View {
                     VStack {
 
 
-
                         VerticalSlider(value: $RGBBrightness, isEnabled: isOn) { newValue in
                             updateBrightness(newValue, selectedColor: selectedColor)
                         }
@@ -783,7 +777,6 @@ struct DataRGBWifiView: View {
                                 // Send color only when user releases the slider
                                 sendColorToLED(selectedColor)
                                 // Print the final selected color after slider is released
-                                print("Final Selected Color: \(selectedColor)")
                             })
                             .disabled(!isOn)
                             .opacity(isOn ? 1.0 : 0.4)
@@ -838,12 +831,9 @@ struct DataRGBWifiView: View {
         if let pastedText = UIPasteboard.general.string {
             if let newColor = colorFromHex(pastedText) {
                 selectedColor = newColor
-                print("Pasted color: \(pastedText)")
             } else {
-                print("Invalid color code")
             }
         } else {
-            print("Clipboard is empty")
         }
     }
     func updateBrightness(_ brightness: Double, selectedColor: Color) {

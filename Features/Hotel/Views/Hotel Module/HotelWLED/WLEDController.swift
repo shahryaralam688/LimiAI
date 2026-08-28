@@ -52,7 +52,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     // MARK: - SSDP Discovery Methods
     
     func startDiscovery() {
-        print("🔍 SSDP - Starting device discovery...")
         
         DispatchQueue.main.async {
             self.isScanning = true
@@ -69,7 +68,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     }
     
     func stopDiscovery() {
-        print("🛑 SSDP - Stopping device discovery...")
         
         udpConnection?.cancel()
         udpConnection = nil
@@ -110,7 +108,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
             listener = try NWListener(using: parameters)
             
             listener?.newConnectionHandler = { [weak self] connection in
-                print("📡 SSDP - New connection received")
                 connection.start(queue: .global())
                 self?.handleIncomingConnection(connection)
             }
@@ -118,18 +115,16 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
             listener?.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
-                    print("✅ SSDP - Listener ready")
-                case .failed(let error):
-                    print("❌ SSDP - Listener failed: \(error)")
+                    break
+                case .failed:
+                    break
                 default:
                     break
                 }
             }
             
             listener?.start(queue: .global())
-        } catch {
-            print("❌ SSDP - Failed to create listener: \(error)")
-        }
+        } catch { /* ignored */ }
     }
     
     private func sendBroadcastMessage() {
@@ -147,10 +142,8 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
         udpConnection?.stateUpdateHandler = { [weak self] state in
             switch state {
             case .ready:
-                print("✅ SSDP - Broadcast connection ready")
                 self?.sendMSearchMessage()
             case .failed(let error):
-                print("❌ SSDP - Broadcast connection failed: \(error)")
                 DispatchQueue.main.async {
                     self?.errorMessage = "Network error: \(error.localizedDescription)"
                     self?.isScanning = false
@@ -166,13 +159,10 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     private func handleIncomingConnection(_ connection: NWConnection) {
         connection.receiveMessage { [weak self] data, context, isComplete, error in
             if let error = error {
-                print("❌ SSDP - Receive error: \(error)")
                 return
             }
             
             if let data = data, let response = String(data: data, encoding: .utf8) {
-                print("📥 SSDP - Received response:")
-                print(response)
                 self?.parseSSDPResponse(response)
             }
             
@@ -198,14 +188,10 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
             
             let data = mSearchMessage.data(using: .utf8)!
             
-            print("📤 SSDP - Sending M-SEARCH request for \(target):")
-            print(mSearchMessage)
             
             udpConnection?.send(content: data, completion: .contentProcessed { error in
                 if let error = error {
-                    print("❌ SSDP - Failed to send M-SEARCH for \(target): \(error)")
                 } else {
-                    print("✅ SSDP - M-SEARCH request sent successfully for \(target)")
                 }
             })
             
@@ -226,7 +212,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
         browser.delegate = self
         mdnsBrowser = browser
         // WLED advertises _wled._tcp. on local domain
-        print("🔎 mDNS - Starting Bonjour browse for _wled._tcp.")
         browser.searchForServices(ofType: "_Limi1Ch._udp.", inDomain: "local.")
         
         // Also browse HTTP services, then verify via /json/info
@@ -234,20 +219,16 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
         httpBrowser.includesPeerToPeer = false
         httpBrowser.delegate = self
         mdnsHTTPBrowser = httpBrowser
-        print("🔎 mDNS - Starting Bonjour browse for _http._tcp.")
         httpBrowser.searchForServices(ofType: "_http._tcp.", inDomain: "local.")
     }
     
     private func scanLocalNetwork() {
-        print("🔍 SSDP - Starting direct IP scan as fallback...")
         
         // Get local network IP range
         guard let localIP = getLocalIPAddress() else {
-            print("❌ SSDP - Could not determine local IP address")
             return
         }
         
-        print("📍 SSDP - Local IP: \(localIP)")
         
         // Extract network prefix (e.g., 192.168.1.x)
         let components = localIP.components(separatedBy: ".")
@@ -305,7 +286,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
                 return
             case .success(let json):
                 if let name = json["name"] as? String {
-                    print("🎯 SSDP - Found WLED device via direct scan: \(name) at \(ip)")
                     self?.addDevice(name: name, ip: ip, port: 80, location: AppURLs.WLED.deviceBase(ip: ip))
                 }
             }
@@ -334,9 +314,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
             server.lowercased().contains("esp") ||
             location.lowercased().contains("wled")) {
             
-            print("🎯 SSDP - Potential WLED device found:")
-            print("   Location: \(location)")
-            print("   Server: \(server)")
             
             extractDeviceInfo(from: location, server: server)
         }
@@ -344,7 +321,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
     
     private func extractDeviceInfo(from location: String, server: String) {
         guard let url = URL(string: location) else {
-            print("❌ SSDP - Invalid location URL: \(location)")
             return
         }
         
@@ -359,20 +335,16 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
         let deviceURL = AppURLs.WLED.deviceInfo(ip: ip, port: port)
         
         guard let url = URL(string: deviceURL) else {
-            print("❌ SSDP - Invalid device URL: \(deviceURL)")
             return
         }
         
-        print("📡 SSDP - Fetching device info from: \(deviceURL)")
         
         WLEDHTTPClient.probeJSONObject(urlString: deviceURL, timeout: 3) { [weak self] result in
             switch result {
             case .failure(let error):
-                print("❌ SSDP - Failed to fetch device info: \(error)")
                 self?.addDevice(name: "WLED Device", ip: ip, port: port, location: location)
             case .success(let json):
                 let deviceName = json["name"] as? String ?? "WLED Device"
-                print("✅ SSDP - Device name: \(deviceName)")
                 self?.addDevice(name: deviceName, ip: ip, port: port, location: location)
             }
         }
@@ -385,7 +357,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
             // Check if device already exists
             if !self.discoveredDevices.contains(where: { $0.ip == ip && $0.port == port }) {
                 self.discoveredDevices.append(device)
-                print("✅ SSDP - Added device: \(name) at \(ip):\(port)")
             }
         }
     }
@@ -395,7 +366,6 @@ class SSDPDiscoveryManager: NSObject, ObservableObject {
 
 extension SSDPDiscoveryManager: NetServiceBrowserDelegate, NetServiceDelegate {
     func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
-        print("🔎 mDNS - Found service: \(service.name) at type: \(service.type)")
         service.delegate = self
         resolvingServices.append(service)
         service.resolve(withTimeout: 5.0)
@@ -413,7 +383,6 @@ extension SSDPDiscoveryManager: NetServiceBrowserDelegate, NetServiceDelegate {
             if let (ip, port) = ipPortFrom(addressData: addressData) {
                 let name = sender.name
                 let location = AppURLs.WLED.deviceBase(ip: ip, port: port)
-                print("✅ mDNS - Resolved WLED service: \(name) -> \(ip):\(port)")
                 addDevice(name: name, ip: ip, port: port, location: location)
                 break
             }
@@ -421,18 +390,15 @@ extension SSDPDiscoveryManager: NetServiceBrowserDelegate, NetServiceDelegate {
     }
 
     func netService(_ sender: NetService, didNotResolve errorDict: [String : NSNumber]) {
-        print("❌ mDNS - Failed to resolve service: \(sender.name), error: \(errorDict)")
         if let idx = resolvingServices.firstIndex(where: { $0 === sender }) {
             resolvingServices.remove(at: idx)
         }
     }
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String : NSNumber]) {
-        print("❌ mDNS - Browser error: \(errorDict)")
     }
 
     func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser) {
-        print("🛑 mDNS - Stopped browsing")
     }
 
     // Extract IPv4 from sockaddr data

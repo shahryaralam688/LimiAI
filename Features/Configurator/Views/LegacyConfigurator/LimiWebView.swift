@@ -123,7 +123,6 @@ struct LimiWebView: UIViewRepresentable {
 
         // Load
         isLoading = true
-        print("[WebView] Loading URL: \(url.absoluteString)")
         webView.load(URLRequest(url: url))
 
         return webView
@@ -138,13 +137,11 @@ struct LimiWebView: UIViewRepresentable {
             self.isLoading = isLoading
         }
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            print("[WebView JS Console] \(message.body)")
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             if navigationAction.targetFrame == nil {
-                print("[WebView] Intercepted navigation with no targetFrame. Forcing load.")
                 webView.load(navigationAction.request)
                 decisionHandler(.cancel)
             } else {
@@ -153,29 +150,24 @@ struct LimiWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            print("[WebView] Started loading...")
             isLoading.wrappedValue = true
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            print("[WebView] Finished loading")
             isLoading.wrappedValue = false
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            print("[WebView] Navigation failed: \(error.localizedDescription)")
             isLoading.wrappedValue = false
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            print("[WebView] Failed provisional load: \(error.localizedDescription)")
             isLoading.wrappedValue = false
         }
 
         // Handle alert, confirm etc. if JS uses it
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                      initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-            print("[WebView] JS Alert: \(message)")
             completionHandler()
         }
     }
@@ -243,9 +235,7 @@ struct LimiContentView: View {
         .onAppear {
             if let token = AuthManager.shared.getToken() {
                 let url = AppURLs.Web.configurator(token: token)
-                print("Configurator URL: \(url)")
             } else {
-                print("No token found")
             }
         }
         .trackScreen("ConfiguratorWebView", metadata: ["surface": "web_configurator", "flow": "product_configurator"])
@@ -255,9 +245,6 @@ struct LimiContentView: View {
 #Preview {
     LimiContentView()
 }
-
-
-
 
 
 // MARK: - Preview

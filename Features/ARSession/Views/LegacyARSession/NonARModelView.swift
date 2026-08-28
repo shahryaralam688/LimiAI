@@ -69,7 +69,6 @@ struct NonARModelView: UIViewRepresentable {
             downloadId: card.objectName,
             bundledName: card.objectName
         ) else {
-            print("❌ NonARModelView: Model not found for objectName: \(card.objectName)")
             return
         }
 

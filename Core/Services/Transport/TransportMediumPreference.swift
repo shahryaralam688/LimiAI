@@ -9,10 +9,9 @@
 import Combine
 import Foundation
 
-/// Manual override for LimiTransport door selection (debug / testing).
-/// **Automatic** = firmware priority: MQTT → WebSocket → BLE from live state.
+/// **Automatic** = MQTT → BLE → WebSocket (Bonjour only after user allow).
 public enum TransportMediumPreference: String, CaseIterable, Codable, Hashable {
-    /// Use `DeviceTransportState.activeDoor` (Bonjour + MQTT presence).
+    /// Use `DeviceTransportState.activeDoor` (MQTT → BLE → allowed Bonjour/WS).
     case automatic
     /// Always try Socket.IO → backend → MQTT bridge.
     case mqtt

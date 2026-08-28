@@ -281,7 +281,6 @@ struct PendantLampControlView: View {
                 
 
 
-
             }
             .onChange(of: brightness) {
                 sendHapticFeedback()
@@ -378,7 +377,7 @@ struct PendantLampControlView: View {
         ]
 
         let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")
-        print("Sending Data: \(hexString)") // Debug output
+// Debug output
 
         sendMessage(hub: hub, message: byteArray)
         // Send device info to the API
@@ -400,13 +399,9 @@ struct PendantLampControlView: View {
         // Calculate step size (divide difference into 4 parts)
         let steps = 4
 
-        print("previousBrightness:\(previousBrightness)")
-        print("currentBrightness:\(currentBrightness)")
 
         let difference = currentBrightness - previousBrightness
-        print("defference:\(difference)")
         let stepSize = difference / steps
-        print("stepSize:\(stepSize)")
 
         // Send values gradually with delay
         for i in 1...steps {
@@ -414,7 +409,6 @@ struct PendantLampControlView: View {
 
             DispatchQueue.main.asyncAfter(deadline: .now() + delayTime) {
                 let intermediateValue = (stepSize * i) + previousBrightness
-                print("\(intermediateValue)")
 
                 let byteArray: [UInt8] = [
                     0x01,
@@ -424,7 +418,6 @@ struct PendantLampControlView: View {
                 ]
 
                 let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")
-                print("Step \(i): \(hexString)")
                 
                 
                 self.sendMessage(hub: self.hub, message: byteArray)
@@ -448,7 +441,6 @@ struct PendantLampControlView: View {
                 UInt8(currentBrightness & 0xFF)
             ]
 
-            print("Final current brightness: \(currentBrightness)")
             self.sendMessage(hub: self.hub, message: byteArray)
 
             let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")
@@ -467,7 +459,6 @@ struct PendantLampControlView: View {
             let data = Data(message)
             pwmIntensityObj.sendMessageToDevice(to: hub.id, message: [UInt8](data)) // Convert Data back to [UInt8]
         } else {
-            print("Device not connected")
         }
     }
     
@@ -710,7 +701,6 @@ struct PendantLampControlWifiView: View {
                 
 
 
-
             }
             .onChange(of: brightness) {
                 sendHapticFeedback()
@@ -810,7 +800,7 @@ struct PendantLampControlWifiView: View {
         
 
         let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")
-        print("Sending Data: \(hexString)") // Debug output
+// Debug output
 
         pwmIntensityObj.sendLightControl(message: byteArray)
         // Send device info to the API
@@ -832,13 +822,9 @@ struct PendantLampControlWifiView: View {
         // Calculate step size (divide difference into 4 parts)
         let steps = 4
 
-        print("previousBrightness:\(previousBrightness)")
-        print("currentBrightness:\(currentBrightness)")
 
         let difference = currentBrightness - previousBrightness
-        print("defference:\(difference)")
         let stepSize = difference / steps
-        print("stepSize:\(stepSize)")
 
         // Send values gradually with delay
         for i in 1...steps {
@@ -846,7 +832,6 @@ struct PendantLampControlWifiView: View {
 
             DispatchQueue.main.asyncAfter(deadline: .now() + delayTime) {
                 let intermediateValue = (stepSize * i) + previousBrightness
-                print("\(intermediateValue)")
 
                 let byteArray: [String] = [
                     String(channelMac ?? ""),
@@ -856,7 +841,6 @@ struct PendantLampControlWifiView: View {
                 ]
 
                 let hexString = byteArray
-                print("Step \(i): \(hexString)")
                 
                 
                 pwmIntensityObj.sendLightControl(message: byteArray)
@@ -881,7 +865,6 @@ struct PendantLampControlWifiView: View {
                 String(currentBrightness)
             ]
 
-            print("Final current brightness: \(currentBrightness)")
 //            self.sendMessage(hub: self.hub, message: byteArray)
 
             let hexString = byteArray.map { String(format: "0x%02X", $0) }.joined(separator: ", ")

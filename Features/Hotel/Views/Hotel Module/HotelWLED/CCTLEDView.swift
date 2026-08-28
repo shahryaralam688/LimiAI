@@ -12,9 +12,7 @@ import SwiftData
 // MARK: - WLED API Manager
 
 
-
 // MARK: - Color Extension for RGB Conversion
-
 
 
 // MARK: - Main WLED View
@@ -72,7 +70,7 @@ struct CCTLEDView: View {
     init(chennalMac: String?, chennelPosition: Int?) {
         self.chennalMac = chennalMac
         self.chennelPosition = chennelPosition
-        let id = (chennalMac ?? "unknown").uppercased()
+        let id = LimiDeviceNaming.normalizedHardwareId(chennalMac ?? "unknown")
         _throttle = StateObject(wrappedValue: ThrottledSender(deviceId: id))
         _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: id))
     }
@@ -374,7 +372,6 @@ struct CCTLEDView: View {
             let preference = try modelContext.fetch(descriptor).first
             isWarmCoolReversed = preference?.isReversed ?? false
         } catch {
-            print("Failed to load warm/cool slider preference: \(error)")
             isWarmCoolReversed = false
         }
     }
@@ -404,9 +401,7 @@ struct CCTLEDView: View {
             }
 
             try modelContext.save()
-        } catch {
-            print("Failed to save warm/cool slider preference: \(error)")
-        }
+        } catch { /* ignored */ }
     }
 
     private func warmCoolLevels(for sliderValue: Double) -> (cool: Int, warm: Int) {
@@ -438,7 +433,6 @@ struct CCTLEDView: View {
     /// Color slider drag — coalesce through ThrottledSender.
     private func sendColor() {
         let command = currentCCTCommand()
-        print("🔶 sendColor() -> \(command.commandPayload())")
         throttle.update(command)
     }
 
@@ -456,7 +450,6 @@ struct CCTLEDView: View {
             green: Int(green * 255),
             blue: Int(blue * 255)
         )
-        print("🔷 sendColorToLED() -> \(command.commandPayload())")
         throttle.sendOneShot(command)
     }
 
@@ -488,15 +481,11 @@ struct CCTLEDView: View {
         isBrightnessDragActive = false
 
         let sessionID = brightnessDragSessionID
-        print("📊 Brightness drag summary -> uiEvents=\(dragUIEventCount) sentMessages=\(dragSentMessageCount) ackedSoFar=\(dragAckCount)")
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             guard brightnessDragSessionID == sessionID else { return }
 
             let averageAckMs = dragAckCount > 0 ? dragAckTotalMs / Double(dragAckCount) : 0
-            print(
-                "📈 Brightness ack summary -> uiEvents=\(dragUIEventCount) sentMessages=\(dragSentMessageCount) ackCount=\(dragAckCount) avgAckMs=\(Int(averageAckMs.rounded()))"
-            )
         }
     }
 
@@ -533,7 +522,6 @@ struct CCTLEDView: View {
 
                 Button(action: {
                     isOn.toggle()
-                    print("🔌 User toggled power: \(isOn)")
                     sendLampState()
                 }) {
                     ZStack {
@@ -558,12 +546,10 @@ struct CCTLEDView: View {
         if isOn {
             // Restore last brightness/colour by sending a fresh CCT frame.
             let command = currentCCTCommand()
-            print("💡 Lamp ON -> \(command.commandPayload())")
             throttle.sendOneShot(command)
         } else {
             // Spec-compliant power-off; firmware preserves last colour state.
             let command: LimiCommand = .power(channel: channel, on: false)
-            print("💤 Lamp OFF -> \(command.commandPayload())")
             throttle.sendOneShot(command)
         }
     }

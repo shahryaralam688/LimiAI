@@ -81,15 +81,18 @@ final class SignInViewModel: ObservableObject {
     @Published private(set) var postLoginShowsHomeDirectly = false
 
     private let managesPostLoginNavigation: Bool
+    private let requiresPersonalizeGate: Bool
     private let googleSignInPerformer: GoogleSignInPerforming
     private let installerUserCreator: InstallerUserCreating
 
     init(
         managesPostLoginNavigation: Bool = true,
+        requiresPersonalizeGate: Bool = true,
         googleSignInPerformer: GoogleSignInPerforming = DefaultGoogleSignInPerformer(),
         installerUserCreator: InstallerUserCreating = DefaultInstallerUserCreator()
     ) {
         self.managesPostLoginNavigation = managesPostLoginNavigation
+        self.requiresPersonalizeGate = requiresPersonalizeGate
         self.googleSignInPerformer = googleSignInPerformer
         self.installerUserCreator = installerUserCreator
     }
@@ -119,12 +122,17 @@ final class SignInViewModel: ObservableObject {
     }
 
     func continueAsGuest() {
+        signInErrorMessage = nil
         isLoading = true
         installerUserCreator.createInstallerUser { [weak self] result in
             DispatchQueue.main.async {
-                self?.isLoading = false
-                if case .success = result {
-                    self?.handleSuccessfulSignIn()
+                guard let self else { return }
+                self.isLoading = false
+                switch result {
+                case .success:
+                    self.handleSuccessfulSignIn()
+                case .failure(let error):
+                    self.signInErrorMessage = error.localizedDescription
                 }
             }
         }
@@ -136,7 +144,7 @@ final class SignInViewModel: ObservableObject {
             return
         }
 
-        let personalizeCompleted = isPersonalizeCompleted()
+        let personalizeCompleted = requiresPersonalizeGate ? isPersonalizeCompleted() : true
         postLoginShowsHomeDirectly = personalizeCompleted
 
         if personalizeCompleted {

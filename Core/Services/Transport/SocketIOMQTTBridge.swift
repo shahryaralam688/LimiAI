@@ -83,9 +83,15 @@ public final class SocketIOMQTTBridge: NSObject, MQTTClient {
         registered = true
         LightControllingSocket.shared.registerPresenceHandler { [weak self] deviceId, status in
             guard let self else { return }
-            // Ignore ack-only device_status payloads (no real on/off status).
-            guard LimiDeviceNaming.isDefinitePresenceStatus(status) else { return }
+            guard LimiDeviceNaming.isDefinitePresenceStatus(status) else {
+                DeviceConsole.log(.presence, "ignore non-definite status id=\(deviceId) status=\(status)")
+                return
+            }
             let connected = LimiDeviceNaming.isOnlinePresenceStatus(status)
+            DeviceConsole.log(
+                .presence,
+                "MQTT bridge id=\(deviceId) connected=\(connected) raw=\(status)"
+            )
             self.presenceSubject.send(MQTTPresenceUpdate(deviceId: deviceId, connected: connected))
         }
     }
@@ -93,6 +99,7 @@ public final class SocketIOMQTTBridge: NSObject, MQTTClient {
     /// External hook: a 503 mqtt_active response from a WebSocket attempt
     /// is itself proof that MQTT is up.
     public func reportObservedMQTTActive(deviceId: String) {
+        DeviceConsole.log(.presence, "MQTT observed via WS 503 id=\(deviceId)")
         presenceSubject.send(MQTTPresenceUpdate(deviceId: deviceId, connected: true))
     }
 }

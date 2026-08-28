@@ -134,8 +134,8 @@ class HomeViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self?.linkedDevices = devices
                 }
-            case .failure(let error):
-                print("Error fetching linked devices: \(error)")
+            case .failure:
+                break
             }
         }
     }

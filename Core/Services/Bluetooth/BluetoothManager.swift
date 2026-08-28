@@ -49,12 +49,15 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     var fb05Characteristic: CBCharacteristic?
     var fb05ShouldRead: Bool = false
     var wifiListCompletion: (([String]) -> Void)?
+    /// Invalidates stale `readWifiList` timeouts when a newer read starts or completes.
+    var wifiListReadToken: UUID?
     var provisionCompletion: (((status: String, message: String)) -> Void)?
     var provisionTimeout: DispatchWorkItem?
     struct PendingWrite {
         var retriesLeft: Int
         let data: Data
         let completion: (Bool) -> Void
+        var timeoutWork: DispatchWorkItem?
     }
     var pendingWritesByUUID: [CBUUID: PendingWrite] = [:]
     // Queue messages to send when connection/characteristic becomes available
@@ -69,6 +72,9 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     var deferredScan: Bool = false
     /// Number of UI/features that requested an active BLE scan (Home, Add Device, etc.).
     private(set) var activeScanSessions: Int = 0
+    /// Always-current ad timestamps (not @Published — avoids per-frame SwiftUI churn).
+    private var advertisementSeenAt: [String: Date] = [:]
+    private var lastBleLastSeenPublishAt: Date = .distantPast
 
     private static let scanOptions: [String: Any] = [
         CBCentralManagerScanOptionAllowDuplicatesKey: true
@@ -87,19 +93,20 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         connectToDevice(deviceId: uuidString)
     }
     
+    /// Use this for Core Bluetooth commands — `isBluetoothOn` can lag one run-loop.
+    var isRadioPoweredOn: Bool {
+        centralManager?.state == .poweredOn
+    }
+
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        DispatchQueue.main.async {
-            self.isBluetoothOn = central.state == .poweredOn
-        }
+        isBluetoothOn = central.state == .poweredOn
         if central.state == .poweredOn {
             // If we have a device we want to reconnect to, try now
             if let targetId = desiredReconnectId {
-                print("⚙️ Bluetooth powered on — attempting reconnect to saved target: \(targetId)")
                 attemptReconnect()
             }
             // If a scan was deferred, begin it now
             if deferredScan {
-                print("🚀 Bluetooth powered on — starting deferred scan")
                 deferredScan = false
                 if activeScanSessions > 0 {
                     beginScanning(clearDiscovered: true)
@@ -112,7 +119,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         self.onDevicesUpdated = completion
         activeScanSessions += 1
 
-        if isBluetoothOn {
+        if isRadioPoweredOn {
             if activeScanSessions == 1 {
                 beginScanning(clearDiscovered: true)
             } else {
@@ -120,7 +127,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
                 resumeCentralScanIfNeeded()
             }
         } else {
-            print("⚠️ Bluetooth is off. Deferring scan until it powers on.")
             deferredScan = true
         }
     }
@@ -142,15 +148,26 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     private func resumeCentralScanIfNeeded() {
-        guard isBluetoothOn, activeScanSessions > 0 else { return }
+        guard isRadioPoweredOn, activeScanSessions > 0 else { return }
         centralManager?.scanForPeripherals(withServices: nil, options: Self.scanOptions)
     }
 
     /// Restarts the radio scan while keeping the current session alive (e.g. device booted after scan started).
     func refreshScan() {
-        guard activeScanSessions > 0, isBluetoothOn else { return }
+        guard activeScanSessions > 0, isRadioPoweredOn else { return }
         centralManager?.stopScan()
         centralManager?.scanForPeripherals(withServices: nil, options: Self.scanOptions)
+    }
+
+    /// Cold-start helper: wait until the radio is powered on before scanning.
+    func waitUntilPoweredOn(timeout: TimeInterval) async -> Bool {
+        if isRadioPoweredOn { return true }
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if isRadioPoweredOn { return true }
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+        return isRadioPoweredOn
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
@@ -172,13 +189,26 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
 //        }
 
         DispatchQueue.main.async { [weak self] in
-            self?.bleLastSeen[id] = Date()
+            self?.recordAdvertisementSeen(uuid: id)
         }
+
+        let isConfiguredTarget = ConfiguredBLEDeviceStore.shared.allRecords.contains {
+            $0.blePeripheralUUID.caseInsensitiveCompare(id) == .orderedSame
+        } || (desiredReconnectId?.uuidString.caseInsensitiveCompare(id) == .orderedSame)
+        DeviceConsole.bleAdvertisement(
+            name: name,
+            uuid: id,
+            rssi: RSSI,
+            isConfiguredTarget: isConfiguredTarget
+        )
 
         if !discoveredDevices.contains(where: { $0.id == id }) {
             discoveredDevices.append((name: name, id: id))
             dispatchDevicesUpdated()
             notifyInterestDeviceIfNeeded(name: name, id: id)
+            if LimiDeviceNaming.isAllowedDeviceName(name) {
+                DeviceConsole.log(.ble, "scan found name=\(name) uuid=\(id) rssi=\(RSSI)")
+            }
         } else if let index = discoveredDevices.firstIndex(where: { $0.id == id }),
                   discoveredDevices[index].name != name,
                   name != "Unknown Device" {
@@ -186,25 +216,31 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             dispatchDevicesUpdated()
         }
 
-        // Auto-connect if we're in a reconnect flow and this is the target
+        // Auto-connect if we're in a reconnect flow and this is the target.
+        // Do not stop a Home presence scan — other hubs may still be advertising.
         if let targetId = desiredReconnectId, peripheral.identifier == targetId {
-            print("🔎 Found desired peripheral during scan. Connecting...")
-            connectedPeripheral = peripheral
-            peripheral.delegate = self
-            centralManager?.stopScan()
-            centralManager?.connect(peripheral, options: nil)
+            if peripheral.state != .connected && peripheral.state != .connecting {
+                DeviceConsole.log(.ble, "auto-connect configured target uuid=\(id)")
+                peripheral.delegate = self
+                if activeScanSessions == 0 {
+                    centralManager?.stopScan()
+                }
+                centralManager?.connect(peripheral, options: nil)
+            }
         }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("✅ Connected to \(peripheral.name ?? "Unknown")")
         // Remember this for future reconnect attempts
         desiredReconnectId = peripheral.identifier
+        DeviceConsole.log(
+            .ble,
+            "connected name=\(peripheral.name ?? "?") uuid=\(peripheral.identifier.uuidString)"
+        )
         
         if !storedHubs.contains(where: { $0.id == peripheral.identifier }) {
             let hub = Hub(peripheral: peripheral)
             storedHubs.append(hub)
-            print("📌 Stored Hub: \(hub.name)")
         }
         
         connectedPeripheral = peripheral
@@ -226,35 +262,54 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        print("❌ Failed to connect to \(peripheral.name ?? "Unknown Device"): \(error?.localizedDescription ?? "Unknown error")")
+        DeviceConsole.log(
+            .ble,
+            "connect FAIL uuid=\(peripheral.identifier.uuidString) \(error?.localizedDescription ?? "")"
+        )
         resumeScanAfterConnectionEvent()
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         let disconnectedID = peripheral.identifier.uuidString
-        
-        print("🔴 Disconnected from \(peripheral.name ?? "Unknown Device")")
-        
-        targetCharacteristic = nil
-        connectedPeripheral = nil
-        
-        DispatchQueue.main.async {
-            self.isConnected = false
-            SharedDevice.shared.connectedDevice = nil
-            self.removeDisconnectedDevice(disconnectedID)
-            self.lastDisconnectedDeviceID = disconnectedID
+        DeviceConsole.log(
+            .ble,
+            "disconnected uuid=\(disconnectedID) \(error?.localizedDescription ?? "")"
+        )
+
+        connectedDevices.removeValue(forKey: peripheral.identifier)
+
+        let wasCurrent = connectedPeripheral?.identifier == peripheral.identifier
+        if wasCurrent {
+            connectedPeripheral = nil
+            targetCharacteristic = nil
+            clearProvisioningCharacteristics()
+        }
+
+        // Keep another still-connected hub as the current write target.
+        if let other = connectedDevices.first(where: { $0.value.peripheral.state == .connected }) {
+            connectedPeripheral = other.value.peripheral
+            targetCharacteristic = other.value.characteristic
+            DispatchQueue.main.async {
+                self.isConnected = true
+                self.removeDisconnectedDevice(disconnectedID)
+                self.lastDisconnectedDeviceID = disconnectedID
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.isConnected = false
+                SharedDevice.shared.connectedDevice = nil
+                self.removeDisconnectedDevice(disconnectedID)
+                self.lastDisconnectedDeviceID = disconnectedID
+            }
         }
 
         let shouldReconnect = !suppressAutoReconnect
         suppressAutoReconnect = false
         if shouldReconnect {
-            // Unexpected drop — remember and try to reconnect.
             desiredReconnectId = peripheral.identifier
             attemptReconnect()
-        } else {
-            // Intentional disconnect (e.g. cloud restored) — do not fight the door.
+        } else if desiredReconnectId == peripheral.identifier {
             desiredReconnectId = nil
-            print("🔌 Intentional BLE disconnect — auto-reconnect suppressed")
         }
         resumeScanAfterConnectionEvent()
     }
@@ -262,14 +317,12 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let services = peripheral.services else { return }
         for service in services {
-            print("Discovered Service: \(service.uuid)")
             peripheral.discoverCharacteristics(nil, for: service)
         }
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error = error {
-            print("❌ Error discovering characteristics: \(error.localizedDescription)")
             // Retry discovery after delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 peripheral.discoverCharacteristics(nil, for: service)
@@ -278,7 +331,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         }
         
         guard let characteristics = service.characteristics else {
-            print("❌ No characteristics found!")
             return
         }
         // Track if FF03 is within THIS service
@@ -292,10 +344,8 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
                 props.contains(.notify) ? "notify" : nil,
                 props.contains(.indicate) ? "indicate" : nil
             ].compactMap { $0 }
-            print("🔎 Discovered Characteristic: \(characteristic.uuid) props=[\(propsDesc.joined(separator: ","))]")
 
             if characteristic.uuid == CBUUID(string: "FF03") {
-                print("✅ FF03 characteristic found!")
                 // Always prefer FF03, overriding any previous fallback
                 self.targetCharacteristic = characteristic
                 connectedDevices[peripheral.identifier] = (peripheral: peripheral, characteristic: characteristic)
@@ -305,9 +355,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
 
             if characteristic.uuid == CBUUID(string: "FF02") {
-                print("✅ FF02 characteristic found!")
                 if characteristic.properties.contains(.read) {
-                    print("📤 Sending read request for FF02")
                     peripheral.readValue(for: characteristic)
                 }
             }
@@ -315,28 +363,21 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             if service.uuid == FB01 {
                 if characteristic.uuid == FB02 {
                     fbSSIDCharacteristic = characteristic
-                    print("✅ FB02 (SSID) characteristic found")
                 } else if characteristic.uuid == FB03 {
                     fbPasswordCharacteristic = characteristic
-                    print("✅ FB03 (Password) characteristic found")
                 } else if characteristic.uuid == FB04 {
                     fbWifiListCharacteristic = characteristic
-                    print("✅ FB04 (Wi-Fi List) characteristic found")
                     // If someone is waiting for a Wi‑Fi list read, trigger it now
                     if let _ = wifiListCompletion, characteristic.properties.contains(.read) {
-                        print("📤 Sending read request for FB04 (Wi‑Fi list)")
                         peripheral.readValue(for: characteristic)
                     }
                 } else if characteristic.uuid == FB05 {
                     fb05Characteristic = characteristic
                     fbAckCharacteristic = characteristic
-                    print("✅ FB05 (ACK/Notify) characteristic found")
                     if characteristic.properties.contains(.notify) {
                         peripheral.setNotifyValue(true, for: characteristic)
-                        print("✅ Subscribed to FB05 provisioning notifications")
                     }
                     if fb05ShouldRead && characteristic.properties.contains(.read) {
-                        print("📤 Sending read request for FB05")
                         peripheral.readValue(for: characteristic)
                         fb05ShouldRead = false
                     }
@@ -349,16 +390,13 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         if !foundFF03 {
             if self.targetCharacteristic == nil {
                 if let anyWritable = characteristics.first(where: { $0.properties.contains(.write) || $0.properties.contains(.writeWithoutResponse) }) {
-                    print("✅ Using writable characteristic as target (fallback): \(anyWritable.uuid)")
                     self.targetCharacteristic = anyWritable
                     connectedDevices[peripheral.identifier] = (peripheral: peripheral, characteristic: anyWritable)
                     flushPendingWrites()
                 } else {
-                    print("⚠️ No writable characteristic found on service \(service.uuid)")
                 }
             } else if let existing = self.targetCharacteristic {
                 // We already have a target (likely FF03 from another service); do not override.
-                print("ℹ️ Writable fallback skipped for service \(service.uuid) because targetCharacteristic already set to \(existing.uuid)")
             }
         }
     }
@@ -367,7 +405,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         let uuid = characteristic.uuid
         if var pending = pendingWritesByUUID[uuid] {
             if let error = error {
-                print("❌ Write error on \(uuid): \(error.localizedDescription)")
                 if pending.retriesLeft > 0 {
                     pending.retriesLeft -= 1
                     pendingWritesByUUID[uuid] = pending
@@ -376,26 +413,25 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
                     }
                     return
                 } else {
+                    pending.timeoutWork?.cancel()
                     pendingWritesByUUID.removeValue(forKey: uuid)
                     pending.completion(false)
                     return
                 }
             } else {
+                pending.timeoutWork?.cancel()
                 pendingWritesByUUID.removeValue(forKey: uuid)
                 pending.completion(true)
             }
         } else {
             if let error = error {
-                print("❌ Error writing to \(characteristic.uuid): \(error.localizedDescription)")
             } else {
-                print("✅ Successfully wrote to \(characteristic.uuid)")
             }
         }
     }
     
     func sendMessageToDevice(to deviceID: UUID, message: [UInt8]) {
         guard let deviceInfo = connectedDevices[deviceID] else {
-            print("⚠️ Device not found!")
             return
         }
         
@@ -403,7 +439,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         let characteristic = deviceInfo.characteristic
         
         if peripheral.state != .connected {
-            print("⚠️ Peripheral is disconnected! Attempting to reconnect...")
             enqueue(message)
             attemptReconnect()
             return
@@ -412,17 +447,14 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         let data = Data(message)
         let props = characteristic.properties
         let writeType: CBCharacteristicWriteType = props.contains(.write) ? .withResponse : (props.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse)
-        print("📤 Writing to \(characteristic) (type=\(writeType == .withResponse ? "withResponse" : "withoutResponse")): \(data)")
         peripheral.writeValue(data, for: characteristic, type: writeType)
     }
     
     func startKeepAlive() {
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
             if self.connectedPeripheral?.state == .connected {
-                print("🔄 Sending keep-alive ping...")
                 self.writeDataToFF03([0x01, 0x02, 0x03])
             } else {
-                print("⚠️ Cannot send keep-alive, peripheral disconnected!")
             }
         }
     }
@@ -432,14 +464,12 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         if let targetId = desiredReconnectId {
             let peripherals = centralManager?.retrievePeripherals(withIdentifiers: [targetId]) ?? []
             if let peripheral = peripherals.first {
-                print("♻️ Attempting to reconnect to \(peripheral.name ?? "Unknown Device")...")
                 connectedPeripheral = peripheral
                 peripheral.delegate = self
                 centralManager?.connect(peripheral, options: nil)
                 return
             }
             // If not in system cache, scan until we rediscover it (didDiscover will auto-connect)
-            print("⚠️ No system-cached peripheral. Scanning to find target again…")
             ensureScanForReconnect()
             return
         }
@@ -449,7 +479,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
            let uuid = UUID(uuidString: savedDevice.id) {
             let peripherals = centralManager?.retrievePeripherals(withIdentifiers: [uuid]) ?? []
             if let peripheral = peripherals.first {
-                print("♻️ Attempting to reconnect to \(savedDevice.name)...")
                 connectedPeripheral = peripheral
                 peripheral.delegate = self
                 centralManager?.connect(peripheral, options: nil)
@@ -457,12 +486,11 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
             }
         }
 
-        print("⚠️ No known peripheral to reconnect. Start scanning again.")
         ensureScanForReconnect()
     }
 
     private func ensureScanForReconnect() {
-        guard isBluetoothOn else {
+        guard isRadioPoweredOn else {
             deferredScan = true
             return
         }
@@ -473,7 +501,7 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     }
 
     private func resumeScanAfterConnectionEvent() {
-        guard activeScanSessions > 0, isBluetoothOn else { return }
+        guard activeScanSessions > 0, isRadioPoweredOn else { return }
         resumeCentralScanIfNeeded()
     }
     
@@ -490,47 +518,108 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
     ///   never start an unrestricted `scanForPeripherals` (iOS jetsam / background kill risk).
     func connectToDevice(deviceId: String, allowDiscoveryScan: Bool = true) {
         guard let uuid = UUID(uuidString: deviceId) else {
-            print("⚠️ Invalid UUID string: \(deviceId)")
+            DeviceConsole.log(.ble, "connectToDevice FAIL — bad uuid \(deviceId)")
             return
         }
 
         suppressAutoReconnect = false
         desiredReconnectId = uuid
+        DeviceConsole.log(
+            .ble,
+            "connectToDevice uuid=\(deviceId) allowScan=\(allowDiscoveryScan) stored=\(storedPeripherals.contains(where: { $0.identifier == uuid })) connectedCount=\(connectedDevices.count)"
+        )
 
         // Prefer a recently discovered peripheral (most reliable)
         if let peripheral = storedPeripherals.first(where: { $0.identifier == uuid }) {
-            print("🔗 Connecting to \(peripheral.name ?? "Unknown Device") (from discovery cache)")
-            connectedPeripheral = peripheral
             peripheral.delegate = self
-            centralManager?.connect(peripheral, options: nil)
+            if peripheral.state != .connected {
+                DeviceConsole.log(.ble, "connectToDevice — connect stored peripheral state=\(peripheral.state.rawValue)")
+                centralManager?.connect(peripheral, options: nil)
+            } else {
+                DeviceConsole.log(.ble, "connectToDevice — already connected (stored)")
+                connectedPeripheral = peripheral
+                DispatchQueue.main.async { self.isConnected = true }
+            }
             return
         }
 
         // Fallback to system cache
         if let peripheral = centralManager?.retrievePeripherals(withIdentifiers: [uuid]).first {
-            print("🔗 Connecting to \(peripheral.name ?? "Unknown Device") (from system cache)")
-            connectedPeripheral = peripheral
             peripheral.delegate = self
-            centralManager?.connect(peripheral, options: nil)
+            if !storedPeripherals.contains(where: { $0.identifier == peripheral.identifier }) {
+                storedPeripherals.append(peripheral)
+            }
+            if peripheral.state != .connected {
+                DeviceConsole.log(.ble, "connectToDevice — connect retrieved peripheral state=\(peripheral.state.rawValue)")
+                centralManager?.connect(peripheral, options: nil)
+            } else {
+                DeviceConsole.log(.ble, "connectToDevice — already connected (retrieved)")
+                connectedPeripheral = peripheral
+                DispatchQueue.main.async { self.isConnected = true }
+            }
             return
         }
 
         guard allowDiscoveryScan else {
-            print("⚠️ Device not in cache; skipping discovery scan (background-safe)")
+            DeviceConsole.log(.ble, "connectToDevice — not in cache and scan disallowed")
             return
         }
 
         // Final fallback: rescan until didDiscover auto-connects via desiredReconnectId.
-        print("⚠️ Device not found in discovery or system cache. Rescanning...")
+        DeviceConsole.log(.ble, "connectToDevice — scanning to rediscover \(deviceId)")
         ensureScanForReconnect()
+    }
+
+    /// True when this peripheral UUID was seen advertising within `seconds`.
+    /// Powered-off boards do not advertise — do not treat cache/GATT alone as online.
+    func hasRecentAdvertisement(forPeripheralUUID uuidString: String, within seconds: TimeInterval = 12) -> Bool {
+        let fromPrivate = advertisementSeenAt.first { $0.key.caseInsensitiveCompare(uuidString) == .orderedSame }?.value
+        let fromPublished = bleLastSeen.first { $0.key.caseInsensitiveCompare(uuidString) == .orderedSame }?.value
+        guard let seenAt = fromPrivate ?? fromPublished else { return false }
+        return Date().timeIntervalSince(seenAt) <= seconds
+    }
+
+    /// Live link to this hub — connected peripherals often stop advertising.
+    /// Checks the per-UUID map so one connected hub does not hide another.
+    func isLiveConnected(forPeripheralUUID uuidString: String) -> Bool {
+        if let entry = connectedEntry(forPeripheralUUID: uuidString),
+           entry.peripheral.state == .connected {
+            return true
+        }
+        if let connected = connectedPeripheral,
+           connected.identifier.uuidString.caseInsensitiveCompare(uuidString) == .orderedSame {
+            return connected.state == .connected
+        }
+        if let match = storedPeripherals.first(where: {
+            $0.identifier.uuidString.caseInsensitiveCompare(uuidString) == .orderedSame
+        }) {
+            return match.state == .connected
+        }
+        return false
+    }
+
+    func connectedEntry(forPeripheralUUID uuidString: String) -> (peripheral: CBPeripheral, characteristic: CBCharacteristic)? {
+        if let uuid = UUID(uuidString: uuidString), let entry = connectedDevices[uuid] {
+            return entry
+        }
+        return connectedDevices.first {
+            $0.key.uuidString.caseInsensitiveCompare(uuidString) == .orderedSame
+        }?.value
+    }
+
+    func recordAdvertisementSeen(uuid: String) {
+        let now = Date()
+        advertisementSeenAt[uuid] = now
+        if now.timeIntervalSince(lastBleLastSeenPublishAt) >= 0.4 {
+            lastBleLastSeenPublishAt = now
+            bleLastSeen = advertisementSeenAt
+        }
     }
 
     /// Stop orphan reconnect scanning after a timed-out ensureConnected attempt.
     func clearReconnectTargetAndStopOrphanScan() {
         desiredReconnectId = nil
-        if activeScanSessions == 0 {
-            centralManager?.stopScan()
-        }
+        stopCentralScanIfIdle()
     }
     
     func disconnectAllDevices() {
@@ -547,23 +636,19 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         desiredReconnectId = nil
         SharedDevice.shared.connectedDevice = nil
         isConnected = false
-        print("🔌 All devices have been disconnected.")
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if let error = error {
-            print("❌ Error reading value: \(error.localizedDescription)")
             return
         }
         
         guard let data = characteristic.value else {
-            print("❌ No data received")
             return
         }
         
         if characteristic.uuid == CBUUID(string: "FF02") {
             let bytes = [UInt8](data)  // Convert Data to byte array
-            print("📥 FF02 Raw bytes: \(bytes)")
             
             DispatchQueue.main.async {
                 // Store raw bytes directly
@@ -580,7 +665,6 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         if characteristic.uuid == FB05 {
             let bytes = [UInt8](data)
             let hex = bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
-            print("📥 FB05: bytes=\(bytes) hex=\(hex)")
             // FB05 status codes (firmware contract):
             // 0x00 = idle/ready, 0x01 = credentials received, 0x02 = Wi-Fi joined, 0x03 = Wi-Fi failed
             if bytes.first == 0x03, provisionCompletion != nil {
@@ -593,52 +677,123 @@ class BluetoothManager: NSObject, ObservableObject, CBCentralManagerDelegate, CB
         }
         if characteristic.uuid == FB04 {
             if let text = String(data: data, encoding: .utf8) {
-                print("📥 FB04 raw text: \(text)")
                 let ssids: [String] = Self.parseSSIDArrayString(text)
                 if !ssids.isEmpty {
-                    print("✅ Parsed SSID list (\(ssids.count))")
                 } else {
-                    print("⚠️ Parsed SSID list is empty")
                 }
                 DispatchQueue.main.async { [weak self] in
                     self?.wifiListCompletion?(ssids)
                     self?.wifiListCompletion = nil
+                    self?.wifiListReadToken = nil
                 }
             } else {
-                print("❌ Failed to decode FB04 data as UTF‑8 string")
                 DispatchQueue.main.async { [weak self] in
                     self?.wifiListCompletion?([])
                     self?.wifiListCompletion = nil
+                    self?.wifiListReadToken = nil
                 }
             }
             return
         }
     }
+    /// Disconnect only this hub. Other live BLE links stay up.
+    /// Drop cached FB01 characteristics (must run when switching BLE hubs during master provisioning).
+    func clearProvisioningCharacteristics() {
+        fbSSIDCharacteristic = nil
+        fbPasswordCharacteristic = nil
+        fbWifiListCharacteristic = nil
+        fb05Characteristic = nil
+        fbAckCharacteristic = nil
+        for pending in pendingWritesByUUID.values {
+            pending.timeoutWork?.cancel()
+        }
+        pendingWritesByUUID.removeAll()
+    }
+
+    /// FB02/FB03 must belong to the currently connected peripheral — stale refs hang writes.
+    func provisioningCharacteristicsReady(for peripheral: CBPeripheral) -> Bool {
+        guard let ssidChar = fbSSIDCharacteristic,
+              let passChar = fbPasswordCharacteristic else {
+            return false
+        }
+        let peripheralId = peripheral.identifier
+        return ssidChar.service?.peripheral?.identifier == peripheralId
+            && passChar.service?.peripheral?.identifier == peripheralId
+    }
+
+    /// Wait until FB02 + FB03 are discovered on the target peripheral.
+    @MainActor
+    func waitForProvisioningReady(peripheralUUID: String, timeout: TimeInterval = 25) async -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        var didRequestDiscovery = false
+
+        while Date() < deadline {
+            guard let peripheral = connectedPeripheral,
+                  peripheral.identifier.uuidString.caseInsensitiveCompare(peripheralUUID) == .orderedSame,
+                  peripheral.state == .connected else {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                continue
+            }
+
+            if provisioningCharacteristicsReady(for: peripheral) {
+                DeviceConsole.log(.ble, "provisioning ready uuid=\(peripheralUUID)")
+                return true
+            }
+
+            if !didRequestDiscovery {
+                didRequestDiscovery = true
+                DeviceConsole.log(.ble, "provisioning — discovering FB01 on uuid=\(peripheralUUID)")
+                clearProvisioningCharacteristics()
+                peripheral.discoverServices([FB01])
+            }
+
+            try? await Task.sleep(nanoseconds: 250_000_000)
+        }
+
+        DeviceConsole.log(.ble, "provisioning ready TIMEOUT uuid=\(peripheralUUID)")
+        return false
+    }
+
+    func disconnectPeripheral(uuidString: String, suppressReconnect: Bool = false) {
+        guard let uuid = UUID(uuidString: uuidString) else { return }
+        if suppressReconnect {
+            suppressAutoReconnect = true
+            if desiredReconnectId == uuid {
+                desiredReconnectId = nil
+            }
+        }
+        let peripheral = connectedDevices[uuid]?.peripheral
+            ?? storedPeripherals.first(where: { $0.identifier == uuid })
+            ?? (connectedPeripheral?.identifier == uuid ? connectedPeripheral : nil)
+        guard let peripheral else {
+            if suppressReconnect { suppressAutoReconnect = false }
+            return
+        }
+        centralManager?.cancelPeripheralConnection(peripheral)
+    }
+
     /// - Parameter suppressReconnect: Set true when disconnecting on purpose (cloud restored)
     ///   so `didDisconnect` does not immediately reconnect and fight MQTT.
     func disconnectCurrentDevice(suppressReconnect: Bool = false) {
-        if suppressReconnect {
-            suppressAutoReconnect = true
-            desiredReconnectId = nil
+        if let current = connectedPeripheral {
+            disconnectPeripheral(
+                uuidString: current.identifier.uuidString,
+                suppressReconnect: suppressReconnect
+            )
+            return
         }
-        if let peripheral = connectedPeripheral {
-            print("🔌 Disconnecting current device: \(peripheral.name ?? "Unknown Device")")
-            centralManager?.cancelPeripheralConnection(peripheral)
-            connectedPeripheral = nil
-            targetCharacteristic = nil
-            SharedDevice.shared.connectedDevice = nil
-            isConnected = false
-        } else if suppressReconnect {
+        if suppressReconnect {
             suppressAutoReconnect = false
         }
     }
     func stopScanning() {
         activeScanSessions = max(0, activeScanSessions - 1)
-        if activeScanSessions == 0 {
-            centralManager?.stopScan()
-            print("🔴 Stopped scanning for peripherals.")
-        } else {
-            print("🔵 BLE scan session ended (\(activeScanSessions) still active).")
-        }
+        stopCentralScanIfIdle()
+    }
+
+    func stopCentralScanIfIdle() {
+        guard activeScanSessions == 0 else { return }
+        guard isRadioPoweredOn else { return }
+        centralManager?.stopScan()
     }
 }

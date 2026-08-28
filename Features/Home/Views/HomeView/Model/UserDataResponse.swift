@@ -117,9 +117,7 @@ class UserDataManager: ObservableObject {
                 ImageCache.shared.set(image, for: urlString)
                 self.profileImage = image
             }
-        } catch {
-            print("❌ Failed to load profile image:", error)
-        }
+        } catch { /* ignored */ }
     }
     
     func refreshUserData() {

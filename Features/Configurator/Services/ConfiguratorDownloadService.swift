@@ -21,7 +21,6 @@ enum ConfiguratorDownloadService {
     ) {
         if isCached(snapId: snapId) {
             let url = ConfiguratorModelStore.resolvedURL(forSnapId: snapId)
-            print("✅ Model already exists at: \(url.path)")
             completion(.alreadyCached(url))
             return
         }
@@ -29,7 +28,6 @@ enum ConfiguratorDownloadService {
         if requireNetworkWhenMissing {
             checkNetwork { hasNetwork in
                 guard hasNetwork else {
-                    print("❌ No internet connection and no cached model for id: \(snapId)")
                     completion(.skippedNoNetwork)
                     return
                 }
@@ -50,14 +48,11 @@ enum ConfiguratorDownloadService {
                 do {
                     try ConfiguratorModelStore.save(data, forSnapId: snapId)
                     let url = ConfiguratorModelStore.url(forSnapId: snapId)
-                    print("✅ Model saved at: \(url.path)")
                     completion(.downloaded(url))
                 } catch {
-                    print("❌ Save error: \(error)")
                     completion(.failed(error))
                 }
             case .failure(let error):
-                print("❌ Download error: \(error.localizedDescription)")
                 completion(.failed(error))
             }
         }

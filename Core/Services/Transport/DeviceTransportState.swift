@@ -2,8 +2,8 @@
 //  DeviceTransportState.swift
 //  Limi
 //
-//  Per-device observable state. The `activeDoor` value is derived from
-//  `wifiConnected` + `mqttConnected` exactly as the firmware spec dictates.
+//  Per-device observable state. Door priority (app policy):
+//    MQTT → BLE → WebSocket (Bonjour only after user modal allow).
 //
 
 import Foundation
@@ -28,28 +28,61 @@ public final class DeviceTransportState: ObservableObject {
     /// Per spec: BLE is OFF when MQTT is connected.
     public var bleAdvertisingExpected: Bool { !mqttConnected }
 
-    /// True when the device can be controlled over Wi‑Fi / cloud / configured BLE.
+    /// Controllable on live MQTT, LAN WebSocket, or cloud path for Wi‑Fi provisioned hubs.
     public var isAvailableForControl: Bool {
-        wifiConnected || mqttConnected || ConfiguredBLEDeviceStore.shared.hasConfiguredBLE(for: deviceId)
+        if mqttConnected { return true }
+        if LocalNetworkAllowStore.shared.isAllowed(for: deviceId), wifiConnected {
+            return true
+        }
+        if isWiFiProvisionedHub {
+            switch LightControllingSocket.shared.connectionStatus {
+            case .connected, .connecting:
+                return true
+            case .disconnected:
+                // Definite cloud-offline from a prior device_status.
+                if CloudPresenceMemory.shared.lastConnected(deviceId: deviceId) == false {
+                    return false
+                }
+                // First connect / presence in flight — banner shows "Connecting…".
+                return true
+            }
+        }
+        return false
     }
 
-    /// The door that LimiTransport must use right now.
-    /// Decision logic (Case 3 aware + Cloud-first):
-    ///   1) MQTT connected (cloud presence)   -> .mqtt   (highest priority)
-    ///   2) Wi-Fi connected & MQTT NOT conn.  -> .webSocket
-    ///   3) Otherwise (incl. cloud miss)      -> .ble   (reconnect via stored UUID)
+    /// Door selection:
+    ///   1) MQTT live
+    ///   2) Cloud MQTT for Wi‑Fi provisioned hubs (firmware ignores BLE while MQTT is active)
+    ///   3) WebSocket when user allowed local network AND Bonjour reachable
+    ///   4) BLE for setup-only / never provisioned boards
     public var activeDoor: Door {
         if mqttConnected {
             return .mqtt
         }
-        if wifiConnected {
+        if isWiFiProvisionedHub {
+            return .mqtt
+        }
+        let localAllowed = LocalNetworkAllowStore.shared.isAllowed(for: deviceId)
+        if localAllowed, wifiConnected {
             return .webSocket
+        }
+        if LightControllingSocket.shared.isConnected {
+            return .mqtt
         }
         return .ble
     }
 
+    /// Hub completed BLE Wi‑Fi setup — commands must use cloud MQTT, not BLE GATT.
+    private var isWiFiProvisionedHub: Bool {
+        if ConfiguredBLEDeviceStore.shared.hasConfiguredBLE(for: deviceId) {
+            return true
+        }
+        // Seen on cloud before; firmware may ignore BLE while MQTT is active.
+        return CloudPresenceMemory.shared.lastConnected(deviceId: deviceId) != nil
+    }
+
     public init(deviceId: String) {
-        self.deviceId = deviceId.uppercased()
+        self.deviceId = LimiDeviceNaming.normalizedHardwareId(deviceId)
     }
 
     // MARK: - Mutators (called by DeviceTransportRegistry, always on main)

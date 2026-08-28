@@ -23,12 +23,12 @@ struct HomeUI1BottomBar: View {
         .background {
             Capsule(style: .continuous)
                 .fill(HomeUI1Color.surface)
-                .shadow(color: HomeUI1Color.shadowDark.opacity(0.40), radius: 6, x: 5, y: 6)
-                .shadow(color: HomeUI1Color.shadowLight.opacity(0.90), radius: 6, x: -5, y: -5)
+                .shadow(color: HomeUI1Color.shadowDark.opacity(0.65), radius: 10, x: 6, y: 8)
+                .shadow(color: HomeUI1Color.shadowLight.opacity(0.28), radius: 10, x: -6, y: -8)
         }
         .overlay {
             Capsule(style: .continuous)
-                .stroke(HomeUI1Color.shadowDark.opacity(0.12), lineWidth: 0.8)
+                .stroke(HomeUI1Color.border.opacity(0.45), lineWidth: 0.8)
         }
         .frame(maxWidth: 420)
         .frame(maxWidth: .infinity)

@@ -79,7 +79,7 @@ struct HomeUI1ControlConnectionBanner: View {
         switch socket.connectionStatus {
         case .connected: return "cloud.fill"
         case .connecting: return "cloud"
-        case .disconnected: return "cloud.slash"
+        case .disconnected: return "icloud.slash"
         }
     }
 
@@ -251,7 +251,6 @@ struct HomeUI1ControlDeviceRow: View {
         }
         .padding(14)
         .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
-        .opacity(isOnline ? 1 : 0.5)
     }
 }
 
@@ -286,15 +285,48 @@ struct HomeUI1ControlChannelRow: View {
     }
 }
 
+/// Soft UI page title for tab roots (Profile / Schedule / Rooms) — same language as Home.
+struct HomeUI1PageTitle: View {
+    let title: String
+    var subtitle: String? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(HomeUI1Type.display(28))
+                .foregroundStyle(HomeUI1Color.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let subtitle, !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(HomeUI1Type.regular(14))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
 extension View {
-    /// Navigation chrome for Home UI 1 control screens only.
+    /// Navigation chrome for Home UI 1 pushed control screens.
     func homeUI1ControlNavigationChrome(enabled: Bool) -> some View {
         Group {
             if enabled {
                 self
                     .toolbarBackground(HomeUI1Color.canvas, for: .navigationBar)
                     .toolbarBackground(.visible, for: .navigationBar)
-                    .toolbarColorScheme(.light, for: .navigationBar)
+                    .toolbarColorScheme(.dark, for: .navigationBar)
+            } else {
+                self
+            }
+        }
+    }
+
+    /// Tab roots match Home: hide the system nav bar; Soft UI title lives in content.
+    func homeUI1TabRootChrome(enabled: Bool) -> some View {
+        Group {
+            if enabled {
+                self.toolbar(.hidden, for: .navigationBar)
             } else {
                 self
             }

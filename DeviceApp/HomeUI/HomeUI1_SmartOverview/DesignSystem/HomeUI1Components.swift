@@ -41,7 +41,7 @@ struct HomeUI1PrimaryButton: View {
     private var foreground: Color {
         switch kind {
         case .raised: return HomeUI1Color.textSecondary
-        case .inset: return HomeUI1Color.accentRed
+        case .inset: return HomeUI1Color.accentGreen
         case .disabled: return HomeUI1Color.textSecondary.opacity(0.5)
         }
     }
@@ -126,7 +126,7 @@ struct HomeUI1SegmentedTabs: View {
                         .font(HomeUI1Type.body(13))
                         .foregroundStyle(
                             selectedIndex == index
-                                ? HomeUI1Color.accentRed
+                                ? HomeUI1Color.accentGreen
                                 : HomeUI1Color.textSecondary
                         )
                         .padding(.horizontal, 14)

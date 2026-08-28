@@ -98,57 +98,38 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         #if DEBUG
         // Print detailed location information to console (debug builds only)
-        print("📍 Location Updated:")
-        print("   Latitude: \(location.coordinate.latitude)")
-        print("   Longitude: \(location.coordinate.longitude)")
-        print("   Altitude: \(location.altitude) meters")
-        print("   Horizontal Accuracy: \(location.horizontalAccuracy) meters")
-        print("   Timestamp: \(location.timestamp)")
         
         // Reverse geocode to get readable location name (debug diagnostics)
         let geocoder = CLGeocoder()
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
             if let error = error {
-                print("   ❌ Reverse geocoding failed: \(error.localizedDescription)")
                 return
             }
             
             if let placemark = placemarks?.first {
-                print("   🏠 Address Details:")
                 if let name = placemark.name {
-                    print("      Name: \(name)")
                 }
                 if let thoroughfare = placemark.thoroughfare {
-                    print("      Street: \(thoroughfare)")
                 }
                 if let subThoroughfare = placemark.subThoroughfare {
-                    print("      Street Number: \(subThoroughfare)")
                 }
                 if let locality = placemark.locality {
-                    print("      City: \(locality)")
                 }
                 if let subLocality = placemark.subLocality {
-                    print("      Sub-locality: \(subLocality)")
                 }
                 if let administrativeArea = placemark.administrativeArea {
-                    print("      State/Province: \(administrativeArea)")
                 }
                 if let postalCode = placemark.postalCode {
-                    print("      Postal Code: \(postalCode)")
                 }
                 if let country = placemark.country {
-                    print("      Country: \(country)")
                 }
                 if let isoCountryCode = placemark.isoCountryCode {
-                    print("      Country Code: \(isoCountryCode)")
                 }
-                print("   📱 Full Location: \(placemark)")
             }
         }
         #endif
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location manager failed with error: \(error.localizedDescription)")
     }
 }

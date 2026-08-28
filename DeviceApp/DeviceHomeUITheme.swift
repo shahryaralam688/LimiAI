@@ -2,8 +2,7 @@
 //  DeviceHomeUITheme.swift
 //  LIMI AI Device
 //
-//  Shared Home UI variant switcher (temporary client review).
-//  Each variant owns an independent design system under DeviceApp/HomeUI/.
+//  Home UI theme store. App is locked to Home UI 1 (theme picker removed).
 //
 
 import SwiftUI
@@ -22,7 +21,7 @@ enum DeviceHomeUIVariant: Int, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .one: return "Smart overview (current)"
-        case .two: return "Dark emerald"
+        case .two: return "Dark sage home"
         case .three: return "Clean list"
         case .four: return "2-column grid"
         case .five: return "Minimal large tiles"
@@ -55,8 +54,8 @@ enum DeviceHomeUIVariant: Int, CaseIterable, Identifiable {
 final class DeviceHomeUIThemeStore: ObservableObject {
     static let shared = DeviceHomeUIThemeStore()
 
-    /// Default theme remains Home UI 1.
-    @Published var selected: DeviceHomeUIVariant = .one
+    /// Locked to Home UI 1 — side theme picker removed.
+    @Published private(set) var selected: DeviceHomeUIVariant = .one
 
     private init() {}
 }

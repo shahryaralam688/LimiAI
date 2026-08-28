@@ -38,7 +38,6 @@ struct HomeUI1PendantHero: View {
             )
             .allowsHitTesting(false)
         }
-        .opacity(isOnline ? 1 : 0.55)
         .animation(HomeUI1Motion.soft, value: lit)
         .accessibilityLabel(lit ? "Room lights on" : "Room lights off")
     }
@@ -58,7 +57,6 @@ struct HomeUI1PendantThumb: View {
             .scaledToFill()
             .frame(width: size, height: size, alignment: .top)
             .clipped()
-            .opacity(isOnline ? 1 : 0.45)
             .animation(HomeUI1Motion.soft, value: lit)
             .accessibilityHidden(true)
     }

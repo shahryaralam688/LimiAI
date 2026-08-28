@@ -253,25 +253,34 @@ struct DeviceControlUnavailableOverlay: View {
 
 private struct DeviceControlAvailabilityModifier: ViewModifier {
     @ObservedObject var transportState: DeviceTransportState
+    @ObservedObject private var socket = LightControllingSocket.shared
     @Binding var didShowOfflineNotice: Bool
+
+    private var shouldShowUnavailable: Bool {
+        if transportState.isAvailableForControl { return false }
+        // Wi‑Fi provisioned hubs always use cloud MQTT — don't block while reconnecting.
+        if transportState.activeDoor == .mqtt { return false }
+        if socket.connectionStatus == .connecting { return false }
+        return true
+    }
 
     func body(content: Content) -> some View {
         content
-            .disabled(!transportState.isAvailableForControl)
-            .opacity(transportState.isAvailableForControl ? 1 : 0.45)
+            .disabled(shouldShowUnavailable)
+            .opacity(shouldShowUnavailable ? 0.45 : 1)
             .overlay {
-                if !transportState.isAvailableForControl {
+                if shouldShowUnavailable {
                     DeviceControlUnavailableOverlay()
                 }
             }
-            .animation(.easeInOut(duration: 0.22), value: transportState.isAvailableForControl)
-            .onChange(of: transportState.isAvailableForControl) { _, available in
-                guard !available, !didShowOfflineNotice else { return }
+            .animation(.easeInOut(duration: 0.22), value: shouldShowUnavailable)
+            .onChange(of: shouldShowUnavailable) { _, unavailable in
+                guard unavailable, !didShowOfflineNotice else { return }
                 didShowOfflineNotice = true
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             }
             .onAppear {
-                if !transportState.isAvailableForControl {
+                if shouldShowUnavailable {
                     didShowOfflineNotice = true
                 }
             }

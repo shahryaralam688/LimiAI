@@ -41,7 +41,6 @@ struct NativeQuickLookView: UIViewControllerRepresentable {
         }
 
         func previewControllerWillDismiss(_ controller: QLPreviewController) {
-            print("QuickLook view dismissed.")
         }
     }
 }

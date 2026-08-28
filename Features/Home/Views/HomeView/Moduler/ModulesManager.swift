@@ -47,7 +47,6 @@ class ModulesManager: ObservableObject {
         let modulesData = modules.map { ["id": $0.id, "status": $0.status == .added ? 1 : 0] }
         UserDefaults.standard.set(modulesData, forKey: modulesStorageKey)
         UserDefaults.standard.synchronize()
-        print("✅ Modules saved to UserDefaults")
     }
     
     func loadModulesFromUserDefaults() {
@@ -58,7 +57,6 @@ class ModulesManager: ObservableObject {
                     modules[index].status = statusValue == 1 ? .added : .addModule
                 }
             }
-            print("✅ Modules loaded from UserDefaults")
         }
     }
     

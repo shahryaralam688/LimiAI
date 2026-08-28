@@ -124,7 +124,6 @@ final class VoicePendantAudioRecorder: NSObject, ObservableObject {
             startMetering()
             return true
         } catch {
-            print("❌ [VoicePendantAudioRecorder] start failed: \(error.localizedDescription)")
             return false
         }
     }

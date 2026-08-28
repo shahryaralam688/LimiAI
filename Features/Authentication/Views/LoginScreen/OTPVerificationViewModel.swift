@@ -30,14 +30,15 @@ struct DefaultLoginOTPVerifier: LoginOTPVerifying {
     }
 
     func verifyOTP(email: String, otp: String, completion: @escaping (Result<String, Error>) -> Void) {
+        let normalizedEmail = LoginOTPResponseParser.normalizedEmail(email)
         LimiHTTPClient.postJSON(
             urlString: APIConstants.verifyOTP,
             body: [
-                "email": email,
+                "email": normalizedEmail,
                 "otp": otp.trimmingCharacters(in: .whitespacesAndNewlines)
             ],
             auth: .none
-        ) { data, _, error in
+        ) { data, response, error in
             if let error {
                 completion(.failure(error))
                 return
@@ -45,6 +46,15 @@ struct DefaultLoginOTPVerifier: LoginOTPVerifying {
 
             guard let data else {
                 completion(.failure(OTPVerificationError.noData))
+                return
+            }
+
+            if let http = response, !(200...299).contains(http.statusCode) {
+                let message = LoginOTPResponseParser.backendErrorMessage(
+                    from: data,
+                    fallback: "Verification failed (HTTP \(http.statusCode))"
+                )
+                completion(.failure(OTPVerificationError.backend(message)))
                 return
             }
 
@@ -120,7 +130,7 @@ final class OTPVerificationViewModel: ObservableObject {
 
                 switch result {
                 case .success(let token):
-                    AuthManager.shared.saveToken(token, updateAuthState: false)
+                    AuthManager.shared.saveToken(token, updateAuthState: true)
                     AuthManager.shared.clearRole()
                     withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                         onVerified()
@@ -147,8 +157,8 @@ final class OTPVerificationViewModel: ObservableObject {
                 }
 
                 switch result {
-                case .success:
-                    self.errorMessage = "OTP sent successfully!"
+                case .success(let confirmationMessage):
+                    self.errorMessage = confirmationMessage
                     onReset()
                     self.digitBoxes = Array(repeating: false, count: 6)
                 case .failure(let error):

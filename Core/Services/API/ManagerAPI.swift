@@ -17,7 +17,6 @@ enum LimiAPIConfiguration {
         if let url = URL(string: baseURL) {
             return url
         }
-        print("⚠️ Invalid LIMI_API_BASE_URL '\(baseURL)'; using build fallback")
         #if DEBUG
         return URL(string: devFallback)!
         #else
@@ -72,6 +71,12 @@ struct APIConstants {
     static let deviceUser = baseURL + "client/devices/device_user" // add a device configurations
     static let getLinkDevices = baseURL + "client/devices/get_link_devices"
     static let processDeviceData = baseURL +  "client/devices/process_device_data"
+    static let virtualDevice = baseURL + "client/devices/virtual-device"
+
+    static func virtualDeviceDetail(_ virtualDeviceId: String) -> String {
+        let encoded = virtualDeviceId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? virtualDeviceId
+        return virtualDevice + "/" + encoded
+    }
 
     // AR 3d models download
     static let download3D = baseURL + "client/3d-models/web-configurator/download/"

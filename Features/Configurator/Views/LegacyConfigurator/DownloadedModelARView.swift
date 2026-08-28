@@ -55,7 +55,6 @@ struct ARQuickLookViewCon: UIViewControllerRepresentable {
 
         func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
             guard let finalURL = ConfiguratorModelStore.previewURL(forSnapId: parent.downloadId) else {
-                print("❌ DownloadedModelARView: model not found for \(parent.downloadId)")
                 return QLPreviewItemDummy()
             }
 

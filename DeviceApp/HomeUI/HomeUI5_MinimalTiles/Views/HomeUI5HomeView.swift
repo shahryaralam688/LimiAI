@@ -12,6 +12,7 @@ struct DeviceHomeUIVariantFiveView: View {
     var onOpen: (String) -> Void
     var onToggle: (String) -> Void
     var onAdd: () -> Void
+    var onConnectedDevices: (() -> Void)? = nil
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -30,54 +31,79 @@ struct DeviceHomeUIVariantFiveView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 20)
 
-                Button(action: onAdd) {
-                    Label("Add device", systemImage: "plus")
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 12)
-                        .background(Capsule().fill(HomeUI5Color.accent))
+                HStack(spacing: 12) {
+                    if onConnectedDevices != nil {
+                        Button {
+                            DeviceAppGuidance.lightImpact()
+                            onConnectedDevices?()
+                        } label: {
+                            Label("Connected", systemImage: "antenna.radiowaves.left.and.right")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .foregroundStyle(HomeUI5Color.accent)
+                                .padding(.horizontal, 18)
+                                .padding(.vertical, 12)
+                                .background(
+                                    Capsule()
+                                        .stroke(HomeUI5Color.accent, lineWidth: 1.5)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    Button(action: onAdd) {
+                        Label("Add device", systemImage: "plus")
+                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 12)
+                            .background(Capsule().fill(HomeUI5Color.accent))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
 
                 ForEach(items) { item in
-                    Button { onOpen(item.id) } label: {
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Text(item.name)
-                                    .font(HomeUI5Type.tileTitle)
-                                    .foregroundStyle(HomeUI5Color.text)
-                                Spacer()
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text(item.name)
+                                .font(HomeUI5Type.tileTitle)
+                                .foregroundStyle(HomeUI5Color.text)
+                            Spacer()
+                            if item.isOnline {
                                 Toggle("", isOn: Binding(
                                     get: { item.isPowerOn },
                                     set: { _ in onToggle(item.id) }
                                 ))
                                 .labelsHidden()
                                 .tint(HomeUI5Color.accent)
-                                .disabled(!item.isOnline)
+                            } else {
+                                Text("Offline")
+                                    .font(HomeUI5Type.caption)
+                                    .foregroundStyle(HomeUI5Color.secondary)
                             }
-                            Text(item.subtitle)
-                                .font(HomeUI5Type.caption)
-                                .foregroundStyle(HomeUI5Color.secondary)
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(HomeUI5Color.accent.opacity(item.isPowerOn && item.isOnline ? 0.18 : 0.06))
-                                .frame(height: 120)
-                                .overlay {
-                                    Image(systemName: "lightbulb.max.fill")
-                                        .font(.system(size: 44, weight: .ultraLight))
-                                        .foregroundStyle(HomeUI5Color.accent.opacity(item.isOnline ? 1 : 0.4))
-                                }
                         }
-                        .padding(20)
-                        .background {
-                            RoundedRectangle(cornerRadius: HomeUI5Radius.tile, style: .continuous)
-                                .fill(HomeUI5Color.tile)
-                                .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
-                        }
+                        Text(item.subtitle)
+                            .font(HomeUI5Type.caption)
+                            .foregroundStyle(HomeUI5Color.secondary)
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(HomeUI5Color.accent.opacity(item.isPowerOn && item.isOnline ? 0.18 : 0.06))
+                            .frame(height: 120)
+                            .overlay {
+                                Image(systemName: item.isOnline ? "lightbulb.max.fill" : "poweroff")
+                                    .font(.system(size: 44, weight: .ultraLight))
+                                    .foregroundStyle(HomeUI5Color.accent.opacity(item.isOnline ? 1 : 0.45))
+                            }
                     }
-                    .buttonStyle(.plain)
+                    .padding(20)
+                    .background {
+                        RoundedRectangle(cornerRadius: HomeUI5Radius.tile, style: .continuous)
+                            .fill(HomeUI5Color.tile)
+                            .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
+                    }
+                    .contentShape(RoundedRectangle(cornerRadius: HomeUI5Radius.tile, style: .continuous))
+                    .onTapGesture {
+                        onOpen(item.id)
+                    }
                     .padding(.horizontal, 20)
-                    .opacity(item.isOnline ? 1 : 0.55)
                 }
 
                 Spacer(minLength: 24)

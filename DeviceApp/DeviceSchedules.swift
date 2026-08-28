@@ -181,7 +181,6 @@ final class DeviceScheduleEngine: ObservableObject {
             ? Array(1...max(schedule.channelCount, 1))
             : [schedule.channel]
 
-        print("⏰ [Schedule] \(schedule.actionText) \(schedule.deviceName) ch \(channels)")
         for channel in channels {
             Task {
                 try? await LimiTransport.shared.sendCommand(

@@ -24,11 +24,13 @@ class LightControllingSocket: ObservableObject {
     private var wantsConnection = false
     private var authCancellable: AnyCancellable?
     private var authSessionCancellable: AnyCancellable?
+    private var lastConnectAttemptAt: Date = .distantPast
+    private let connectDebounce: TimeInterval = 1.5
 
     /// Side-channel taps that get notified whenever a `device_status` event
     /// arrives. Used by SocketIOMQTTBridge to surface MQTT presence into
     /// DeviceTransportState. Multiple handlers are supported.
-    private var presenceHandlers: [(String, String) -> Void] = []
+    private var presenceHandlers: [(UUID, (String, String) -> Void)] = []
 
     /// Published for UI banners (DeviceApp / home). Updated on main thread.
     @Published private(set) var connectionStatus: ConnectionStatus = .disconnected
@@ -54,7 +56,7 @@ class LightControllingSocket: ObservableObject {
         let manager = SocketManager(
             socketURL: url,
             config: [
-                .log(true),
+                .log(false),
                 .compress,
                 .connectParams(["auth": authToken]),
             ]
@@ -118,93 +120,116 @@ class LightControllingSocket: ObservableObject {
     private func setupSocketEvents() {
         // Listen for connection
         socket.on(clientEvent: .connect) { [weak self] data, ack in
-            print("Socket connected successfully")
+            DeviceConsole.log(.socket, "connected → \(AppURLs.Realtime.socketIOURL.absoluteString)")
             self?.publishConnectionStatus(.connected)
         }
 
         socket.on(clientEvent: .reconnect) { [weak self] data, ack in
+            DeviceConsole.log(.socket, "reconnected")
             self?.publishConnectionStatus(.connected)
         }
 
         // Listen for disconnection
         socket.on(clientEvent: .disconnect) { [weak self] data, ack in
-            print("Socket disconnected")
+            DeviceConsole.log(.socket, "disconnected reason=\(data)")
             self?.publishConnectionStatus(.disconnected)
         }
 
         // Listen for server_hello event
         socket.on("server_hello") { data, ack in
-            print("Received server_hello event: \(data)")
+            DeviceConsole.log(.socket, "← server_hello \(Self.compactPayload(data))")
         }
 
         // Listen for light control responses
         socket.on("light_controll_response") { data, ack in
-            print("Received light control response: \(data)")
+            DeviceConsole.log(.socket, "← light_controll_response \(Self.compactPayload(data))")
+        }
+
+        socket.on("virtual_light_control_response") { data, ack in
+            DeviceConsole.log(.socket, "← virtual_light_control_response \(Self.compactPayload(data))")
         }
 
         // Listen for any general responses
         socket.on("response") { data, ack in
-            print("Received general response: \(data)")
+            DeviceConsole.log(.socket, "← response \(Self.compactPayload(data))")
         }
 
         // Listen for acknowledgments or status updates
         socket.on("status") { data, ack in
-            print("Received status update: \(data)")
+            DeviceConsole.log(.socket, "← status \(Self.compactPayload(data))")
         }
 
         socket.on("device_status") { [weak self] data, ack in
+            DeviceConsole.log(.socket, "← SOCKET REPLY event=device_status raw=\(Self.compactPayload(data))")
             guard let raw = data.first else {
-                print("Received device_status with no payload: \(data)")
+                DeviceConsole.log(.presence, "← device_status (empty payload) — no id/status")
                 return
             }
             var parsed: (deviceId: String, status: String, pendantTypes: String?)?
             if let dict = raw as? [String: Any] {
                 parsed = Self.parseDeviceStatusDict(dict)
-                if let parsed {
-                    print("📩 device_status => deviceId: \(parsed.deviceId), status: \(parsed.status), pendantTypes: \(parsed.pendantTypes ?? "nil")")
-                }
             } else if let jsonString = raw as? String,
                       let jsonData = jsonString.data(using: .utf8),
                       let dict = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
                 parsed = Self.parseDeviceStatusDict(dict)
-                if let parsed {
-                    print("📩 device_status (string JSON) => deviceId: \(parsed.deviceId), status: \(parsed.status), pendantTypes: \(parsed.pendantTypes ?? "nil")")
-                }
             } else {
-                print("Received device_status with unexpected payload: \(data)")
+                DeviceConsole.log(.presence, "← device_status (unparsed) \(raw)")
             }
             if let parsed {
+                let hw = LimiDeviceNaming.normalizedHardwareId(parsed.deviceId)
+                let pendant = parsed.pendantTypes.map { " pendant=\($0)" } ?? ""
+                DeviceConsole.log(
+                    .presence,
+                    "← SOCKET device_status id=\(parsed.deviceId) hw=\(hw) status=\(parsed.status)\(pendant)"
+                )
                 DevicePendantTypeStore.shared.update(
                     deviceId: parsed.deviceId,
                     pendantTypes: parsed.pendantTypes
                 )
                 if let self {
-                    for handler in self.presenceHandlers {
+                    for (_, handler) in self.presenceHandlers {
                         handler(parsed.deviceId, parsed.status)
                     }
                 }
             }
         }
+
+        // Log every other server→client event so missing device_status is obvious in console.
+        listenForAllEvents()
         // Listen for any errors
         socket.on(clientEvent: .error) { [weak self] data, ack in
-            print("Socket error: \(data)")
+            let detail = Self.compactPayload(data)
+            DeviceConsole.log(.socket, "error \(detail)")
             guard let self else { return }
-            if self.socket.status != .connected {
-                self.publishConnectionStatus(self.wantsConnection ? .connecting : .disconnected)
+            // Socket.IO can emit transient errors while still connected — avoid UI flicker.
+            if self.socket.status == .connected {
+                return
             }
+            self.publishConnectionStatus(self.wantsConnection ? .connecting : .disconnected)
         }
     }
 
     func connect() {
         wantsConnection = true
-        if socket.status != .connected {
-            publishConnectionStatus(.connecting)
+        let now = Date()
+        if socket.status == .connected {
+            publishConnectionStatus(.connected)
+            return
         }
+        if socket.status == .connecting,
+           now.timeIntervalSince(lastConnectAttemptAt) < connectDebounce {
+            publishConnectionStatus(.connecting)
+            return
+        }
+        lastConnectAttemptAt = now
+        publishConnectionStatus(.connecting)
+        DeviceConsole.log(.socket, "connecting…")
         refreshSocketWithCurrentAuth(andConnect: true)
     }
 
     func disconnect() {
         wantsConnection = false
+        DeviceConsole.log(.socket, "disconnect() called")
         socket.disconnect()
         publishConnectionStatus(.disconnected)
     }
@@ -221,9 +246,42 @@ class LightControllingSocket: ObservableObject {
         }
     }
 
+    /// Virtual master device control — backend fans out to member hubs over MQTT.
+    func sendVirtualLightControl(
+        virtualDeviceId: String,
+        command: [String: Any],
+        acknowledgment: ((TimeInterval, Bool) -> Void)? = nil
+    ) {
+        let trimmedID = virtualDeviceId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedID.isEmpty else { return }
+        guard socket.status == .connected else {
+            DeviceConsole.log(.socket, "skip virtual_light_control — socket not connected id=\(trimmedID)")
+            return
+        }
+
+        let payload: [String: Any] = [
+            "virtual_device_id": trimmedID,
+            "command": command,
+        ]
+
+        let sentAt = Date()
+        DeviceConsole.log(
+            .socket,
+            "→ virtual_light_control id=\(trimmedID) \(Self.compactDict(payload))"
+        )
+        socket.emitWithAck("virtual_light_control", payload).timingOut(after: 5.0) { data in
+            let roundTrip = Date().timeIntervalSince(sentAt)
+            let didReceiveAck = !data.isEmpty
+            DeviceConsole.log(
+                .socket,
+                "← virtual_light_control ack rtt=\(String(format: "%.0f", roundTrip * 1000))ms ok=\(didReceiveAck)"
+            )
+            acknowledgment?(roundTrip, didReceiveAck)
+        }
+    }
+
     func sendLightControlOnOff(message: [String]) {
         guard message.count >= 2 else {
-            print("⚠️ Invalid message format: \(message)")
             return
         }
 
@@ -239,22 +297,21 @@ class LightControllingSocket: ObservableObject {
 
         ]
 
+        DeviceConsole.log(.socket, "→ light_controll onoff id=\(deviceId) onoff=\(onoff)")
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
-//            ??print("✅ Light control acknowledgment received: \(data)")
+            DeviceConsole.log(.socket, "← light_controll ack \(Self.compactPayload(data))")
         }
 
-        print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControl(
         message: [String],
         acknowledgment: ((TimeInterval, Bool) -> Void)? = nil
     ) {
         guard message.count >= 5 else {
-            print("⚠️ Invalid message format: \(message)")
             return
         }
         guard socket.status == .connected else {
-            print("⚠️ Socket not connected (status = \(socket.status)), skipping light_controll emit")
+            DeviceConsole.log(.socket, "skip light_controll — socket not connected")
             return
         }
 
@@ -275,22 +332,27 @@ class LightControllingSocket: ObservableObject {
         ]
 
         let sentAt = Date()
+        DeviceConsole.log(
+            .socket,
+            "→ light_controll cct id=\(deviceId) ch=\(channelPosition) ww=\(red) cw=\(green) bri=\(blue)"
+        )
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
             let roundTrip = Date().timeIntervalSince(sentAt)
             let didReceiveAck = !data.isEmpty
-//            print("✅ Light control acknowledgment received: \(data)")
+            DeviceConsole.log(
+                .socket,
+                "← light_controll ack rtt=\(String(format: "%.0f", roundTrip * 1000))ms ok=\(didReceiveAck)"
+            )
             acknowledgment?(roundTrip, didReceiveAck)
         }
 
-        print("📤 Sent light control data: \(lightData)")
     }
     func sendLightControlRGB(message: [String]) {
         guard message.count >= 6 else {
-            print("⚠️ Invalid message format: \(message)")
             return
         }
         guard socket.status == .connected else {
-            print("⚠️ Socket not connected (status = \(socket.status)), skipping light_controll RGB emit")
+            DeviceConsole.log(.socket, "skip light_controll RGB — socket not connected")
             return
         }
 
@@ -312,11 +374,14 @@ class LightControllingSocket: ObservableObject {
             ]
         ]
 
+        DeviceConsole.log(
+            .socket,
+            "→ light_controll rgb id=\(deviceId) ch=\(channelPosition) r=\(red) g=\(green) b=\(blue) bri=\(brightness)"
+        )
         socket.emitWithAck("light_controll", lightData).timingOut(after: 5.0) { data in
-//            print("✅ Light control acknowledgment received: \(data)")
+            DeviceConsole.log(.socket, "← light_controll ack \(Self.compactPayload(data))")
         }
 
-        print("📤 Sent light control data: \(lightData)")
     }
     func sendSampleData() {
         // Dummy data in the same format as your message array
@@ -358,7 +423,6 @@ class LightControllingSocket: ObservableObject {
         intensity: Int
     ) {
         guard socket.status == .connected else {
-            print("⚠️ Socket not connected (status = \(socket.status)), skipping pattern control emit")
             return
         }
 
@@ -378,22 +442,30 @@ class LightControllingSocket: ObservableObject {
         ]
 
         socket.emitWithAck("light_controll", patternData).timingOut(after: 5.0) { data in
-            print("✅ Pattern control acknowledgment received: \(data)")
         }
 
-        print("📤 Sent pattern control data: \(patternData)")
     }
     // Method to add custom event listeners
     func listenForCustomEvent(_ eventName: String) {
         socket.on(eventName) { data, ack in
-            print("Received custom event '\(eventName)': \(data)")
         }
     }
 
     // Method to listen for all events (useful for debugging)
     func listenForAllEvents() {
+        let skip = Set([
+            "connect", "disconnect", "reconnect", "error",
+            "ping", "pong", "device_status"
+        ])
         socket.onAny { event in
-            print("Received any event: \(event.event) with data: \(event.items ?? [])")
+            let name = event.event
+            if skip.contains(name) { return }
+            if name.hasPrefix("websocket") || name.hasPrefix("engine") { return }
+            let items = event.items ?? []
+            DeviceConsole.log(
+                .socket,
+                "← SOCKET REPLY event=\(name) payload=\(Self.compactPayload(items))"
+            )
         }
     }
 
@@ -401,8 +473,16 @@ class LightControllingSocket: ObservableObject {
 
     /// Register a tap that fires every time a `device_status` event arrives.
     /// Passes `(deviceId, status)` as raw strings.
-    func registerPresenceHandler(_ handler: @escaping (String, String) -> Void) {
-        presenceHandlers.append(handler)
+    /// - Returns: Token for `unregisterPresenceHandler` (provisioning must remove itself on finish).
+    @discardableResult
+    func registerPresenceHandler(_ handler: @escaping (String, String) -> Void) -> UUID {
+        let id = UUID()
+        presenceHandlers.append((id, handler))
+        return id
+    }
+
+    func unregisterPresenceHandler(_ id: UUID) {
+        presenceHandlers.removeAll { $0.0 == id }
     }
 
     private static func parseDeviceStatusDict(_ dict: [String: Any]) -> (deviceId: String, status: String, pendantTypes: String?) {
@@ -423,13 +503,38 @@ class LightControllingSocket: ObservableObject {
         completion: @escaping ([Any]) -> Void
     ) {
         guard socket.status == .connected else {
-            print("⚠️ emitWithAck '\(event)' skipped — socket status \(socket.status)")
+            DeviceConsole.log(.socket, "skip emit \(event) — socket not connected")
             completion([])
             return
         }
+        let deviceId = (payload["deviceId"] as? String) ?? "?"
+        DeviceConsole.log(.socket, "→ \(event) id=\(deviceId) \(Self.compactDict(payload))")
         socket.emitWithAck(event, payload).timingOut(after: timeoutSeconds) { data in
+            DeviceConsole.log(.socket, "← \(event) ack \(Self.compactPayload(data))")
             completion(data)
         }
+    }
+
+    private static func compactPayload(_ data: [Any]) -> String {
+        guard !data.isEmpty else { return "(empty)" }
+        if let dict = data.first as? [String: Any] {
+            return compactDict(dict)
+        }
+        return String(describing: data.first ?? data)
+    }
+
+    private static func compactDict(_ dict: [String: Any]) -> String {
+        let keys = ["deviceId", "virtual_device_id", "status", "pendantTypes", "pendantType", "firmwareVersion", "command", "reset", "channel", "onoff", "power"]
+        var parts: [String] = []
+        for key in keys {
+            if let value = dict[key] {
+                parts.append("\(key)=\(value)")
+            }
+        }
+        if parts.isEmpty {
+            return String(describing: dict)
+        }
+        return parts.joined(separator: " ")
     }
 }
 

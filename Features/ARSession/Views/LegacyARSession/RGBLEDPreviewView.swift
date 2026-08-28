@@ -199,7 +199,6 @@ struct RGBLEDPreviewView: View {
         VStack(spacing: 6) {
             Button {
                 isOn.toggle()
-                print("🔌 User toggled power: \(isOn)")
                 sendPower(isOn)
                 persistUIState()
                 scheduleAutoHide()
@@ -791,7 +790,6 @@ struct RGBLEDPreviewContainer: UIViewRepresentable {
             downloadId: downloadId,
             bundledName: bundledName
         ) else {
-            print("❌ RGBLEDPreviewView: model not found (downloadId: \(downloadId ?? "nil"), bundledName: \(bundledName))")
             return arView
         }
 

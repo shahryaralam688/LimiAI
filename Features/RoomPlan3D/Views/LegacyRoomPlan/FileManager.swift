@@ -22,7 +22,6 @@ class RoominatorFileManager {
     
     func usdzFileExists(named filename: String) -> Bool {
             guard let folderURL = ForRealScansFolderURL else {
-                print("❌ Folder URL not found")
                 return false
             }
             let fileURL = folderURL.appendingPathComponent(filename)
@@ -31,7 +30,6 @@ class RoominatorFileManager {
     
     private func createForRealScansFolder() {
         guard var folderURL = ForRealScansFolderURL else {
-            print("Unable to access documents directory")
             return
         }
         
@@ -41,18 +39,13 @@ class RoominatorFileManager {
                 var resourceValues = URLResourceValues()
                 resourceValues.isExcludedFromBackup = true
                 try folderURL.setResourceValues(resourceValues)
-                print("ForRealScans folder created successfully")
-            } catch {
-                print("Error creating ForRealScans folder: \(error)")
-            }
+            } catch { /* ignored */ }
         } else {
-            print("ForRealScans folder already exists")
         }
     }
     
     func saveUSDZFile(_ data: Data, withName fileName: String) -> Bool {
         guard let folderURL = ForRealScansFolderURL else {
-            print("Unable to access ForRealScans folder")
             return false
         }
         
@@ -61,10 +54,8 @@ class RoominatorFileManager {
         
         do {
             try data.write(to: fileURL)
-            print("File saved successfully: \(fileNameWithExtension)")
             return true
         } catch {
-            print("Error saving file: \(error)")
             return false
         }
     }
@@ -77,7 +68,6 @@ class RoominatorFileManager {
     
     func listFiles() -> [String] {
         guard let folderURL = ForRealScansFolderURL else {
-            print("Unable to access ForRealScans folder")
             
             return []
         }
@@ -86,23 +76,19 @@ class RoominatorFileManager {
             let fileURLs = try FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: nil)
             return fileURLs.map { $0.lastPathComponent }.filter { $0.hasSuffix(".usdz") }
         } catch {
-            print("Error listing files: \(error)")
             return []
         }
     }
     
     func deleteFile(named fileName: String) -> Bool {
         guard let fileURL = getUSDZFileURL(for: fileName) else {
-            print("Unable to locate file: \(fileName)")
             return false
         }
         
         do {
             try FileManager.default.removeItem(at: fileURL)
-            print("File deleted successfully: \(fileName)")
             return true
         } catch {
-            print("Error deleting file: \(error)")
             return false
         }
     }
@@ -112,6 +98,5 @@ class RoominatorFileManager {
         for file in files {
             _ = deleteFile(named: file)
         }
-        print("🗑️ All local USDZ files deleted from ForRealScans.")
     }
 }

@@ -12,7 +12,6 @@ final class ARSnapshotManager {
             .first,
               let window = windowScene.windows.first(where: { $0.isKeyWindow })
         else {
-            print("❌ ARSnapshotManager: No key window found")
             return
         }
 
@@ -30,7 +29,6 @@ final class ARSnapshotManager {
         do {
             let docs = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
             guard let docs else {
-                print("❌ ARSnapshotManager: Documents directory unavailable")
                 return
             }
             let folderURL = docs.appendingPathComponent("AR Experience", isDirectory: true)
@@ -46,12 +44,9 @@ final class ARSnapshotManager {
 
             if let pngData = image.pngData() {
                 try pngData.write(to: fileURL)
-                print("✅ Saved AR screenshot to folder: \(fileURL.path)")
                 showThumbnailPreview(image)
             }
-        } catch {
-            print("❌ Failed to save AR screenshot to folder: \(error)")
-        }
+        } catch { /* ignored */ }
 
         // 2) Save into Photos gallery
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)

@@ -2,33 +2,38 @@
 //  HomeUI1Tokens.swift
 //  LIMI AI Device — Home UI 1 (default)
 //
-//  Exact tokens from neumorphism/premium-v13.css:
-//  --bg-main, --text-*, --accent-*, --shadow-*, Nunito, radius 20px.
+//  Dark charcoal-green neumorphism — soft dual shadows on a matte green-black canvas.
 //
 
 import SwiftUI
 
 enum HomeUI1Color {
-    /// --bg-main
-    static let canvas = Color(hex: "EDEDED")
-    /// Same material as canvas (true neumorphism)
-    static let surface = Color(hex: "EDEDED")
-    /// Soft cream wash for animated ambient canvas (theme-safe, low contrast)
-    static let ambientWarm = Color(hex: "F5F5EF")
-    /// Pale mint wash — desaturated tint of accent green
-    static let ambientMint = Color(hex: "E6F1EA")
-    /// --text-primary
-    static let textPrimary = Color(hex: "3D3D3D")
-    /// --text-secondary
-    static let textSecondary = Color(hex: "707070")
-    /// --accent-green
-    static let accentGreen = Color(hex: "10B981")
-    /// --accent-red
-    static let accentRed = Color(hex: "EF4444")
-    /// --shadow-light
-    static let shadowLight = Color(hex: "FFFFFF")
-    /// --shadow-dark
-    static let shadowDark = Color(hex: "C7C7C7")
+    /// Main canvas — charcoal green-black
+    static let canvas = Color(hex: "1A201E")
+    /// Raised neumorphic material (same plane as canvas; depth from shadows)
+    static let surface = Color(hex: "1E2422")
+    /// Slightly lifted plane for nested wells
+    static let surfaceRaised = Color(hex: "252B28")
+    /// Deep well for inset controls
+    static let well = Color(hex: "151A18")
+    /// Subtle warm charcoal wash for animated ambient canvas
+    static let ambientWarm = Color(hex: "232A27")
+    /// Deep emerald pool — desaturated accent glow
+    static let ambientMint = Color(hex: "172420")
+    /// Primary copy on dark
+    static let textPrimary = Color(hex: "E8EDEA")
+    /// Secondary / metadata
+    static let textSecondary = Color(hex: "8A9490")
+    /// Brand green — brighter for dark surfaces
+    static let accentGreen = Color(hex: "12C488")
+    /// Warm accent for primary CTAs (reference play-button orange)
+    static let accentWarm = Color(hex: "F97316")
+    /// Destructive / alert red
+    static let accentRed = Color(hex: "F87171")
+    /// Top-left highlight edge (charcoal lift, not pure white)
+    static let shadowLight = Color(hex: "38423E")
+    /// Bottom-right depth shadow
+    static let shadowDark = Color(hex: "0A0E0C")
 
     // Semantic aliases used by Home UI 1 chrome
     static let primary = accentGreen
@@ -36,7 +41,7 @@ enum HomeUI1Color {
     static let success = accentGreen
     static let warning = Color(hex: "FBBF24")
     static let error = accentRed
-    static let border = shadowDark
+    static let border = Color(hex: "2F3834")
 }
 
 enum HomeUI1Radius {
@@ -91,8 +96,10 @@ enum HomeUI1Type {
 }
 
 enum HomeUI1Motion {
-    /// --transition: all 0.3s ease-in-out
-    static let soft = Animation.easeInOut(duration: 0.3)
-    static let quick = Animation.easeOut(duration: 0.18)
-    static let standard = Animation.easeInOut(duration: 0.3)
+    /// Warm, smooth springs for pressed states and tab changes
+    static let soft = Animation.spring(response: 0.42, dampingFraction: 0.86)
+    static let quick = Animation.spring(response: 0.28, dampingFraction: 0.88)
+    static let standard = Animation.easeInOut(duration: 0.35)
+    /// Slow ambient / canvas drift
+    static let ambient = Animation.easeInOut(duration: 14)
 }

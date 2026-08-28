@@ -13,6 +13,21 @@ struct WifiDevice: Identifiable {
     let channelTypes: [String]  // Array of "CCT" or "RGB" for each channel
     let deviceName: String
     var isOnline: Bool
+    /// When set, this row is a virtual master — each entry is the hardware MAC for that channel.
+    var memberChannelMacs: [String]? = nil
+
+    var isVirtualMaster: Bool {
+        guard let memberChannelMacs, !memberChannelMacs.isEmpty else { return false }
+        return true
+    }
+
+    /// MAC used for transport on a given 1-based channel (master maps channels → member hubs).
+    func macForChannel(_ channel: Int) -> String {
+        guard let memberChannelMacs, channel >= 1, channel <= memberChannelMacs.count else {
+            return chennalMac
+        }
+        return memberChannelMacs[channel - 1]
+    }
 }
 
 // MARK: - BLE scan helper (unchanged)
@@ -295,7 +310,6 @@ private struct HomeViewContent: View {
         }
         .onAppear {
             let role = roleProvider.role()
-                print("🔹 Current Role:", role)
 
             
 

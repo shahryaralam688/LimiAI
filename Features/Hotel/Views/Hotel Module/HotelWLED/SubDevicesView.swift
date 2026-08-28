@@ -66,7 +66,6 @@ struct SubDevicesView: View {
     // MARK: - Device Card Function
     private func deviceCard(deviceID: String, deviceName: String, channelCount: Int, status: Bool) -> some View {
         Button(action: {
-            print("\(deviceID) tapped")
         }) {
             VStack(alignment: .leading, spacing: 16) {
                 

@@ -11,6 +11,7 @@ struct DeviceHomeUIVariantFourView: View {
     var onOpen: (String) -> Void
     var onToggle: (String) -> Void
     var onAdd: () -> Void
+    var onConnectedDevices: (() -> Void)? = nil
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -30,6 +31,20 @@ struct DeviceHomeUIVariantFourView: View {
                             .foregroundStyle(HomeUI4Color.secondary)
                     }
                     Spacer()
+                    if onConnectedDevices != nil {
+                        Button {
+                            DeviceAppGuidance.lightImpact()
+                            onConnectedDevices?()
+                        } label: {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundStyle(HomeUI4Color.accent)
+                                .frame(width: 36, height: 36)
+                                .background(Circle().fill(HomeUI4Color.card))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Connected Devices")
+                    }
                     Button(action: onAdd) {
                         Image(systemName: "plus")
                             .font(.system(size: 14, weight: .bold))
@@ -44,38 +59,43 @@ struct DeviceHomeUIVariantFourView: View {
 
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(items) { item in
-                        Button { onOpen(item.id) } label: {
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack {
-                                    Image(systemName: "lightbulb.led.fill")
-                                        .foregroundStyle(item.isOnline ? HomeUI4Color.accent : HomeUI4Color.secondary)
-                                    Spacer()
-                                    Circle()
-                                        .fill(item.isOnline ? HomeUI4Color.accent : HomeUI4Color.secondary.opacity(0.4))
-                                        .frame(width: 8, height: 8)
-                                }
-                                Text(item.name)
-                                    .font(HomeUI4Type.cardTitle)
-                                    .foregroundStyle(HomeUI4Color.text)
-                                    .lineLimit(2)
-                                    .multilineTextAlignment(.leading)
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Image(systemName: item.isOnline ? "lightbulb.led.fill" : "poweroff")
+                                    .foregroundStyle(item.isOnline ? HomeUI4Color.accent : HomeUI4Color.secondary)
+                                Spacer()
+                                Text(item.isOnline ? "Online" : "Offline")
+                                    .font(HomeUI4Type.caption)
+                                    .foregroundStyle(item.isOnline ? HomeUI4Color.accent : HomeUI4Color.secondary)
+                            }
+                            Text(item.name)
+                                .font(HomeUI4Type.cardTitle)
+                                .foregroundStyle(HomeUI4Color.text)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                            if item.isOnline {
                                 Toggle(item.isPowerOn ? "On" : "Off", isOn: Binding(
                                     get: { item.isPowerOn },
                                     set: { _ in onToggle(item.id) }
                                 ))
                                 .tint(HomeUI4Color.accent)
-                                .disabled(!item.isOnline)
-                            }
-                            .padding(14)
-                            .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
-                            .background {
-                                RoundedRectangle(cornerRadius: HomeUI4Radius.card, style: .continuous)
-                                    .fill(HomeUI4Color.card)
-                                    .shadow(color: .black.opacity(0.06), radius: 8, y: 3)
+                            } else {
+                                Text("Powered off")
+                                    .font(HomeUI4Type.caption)
+                                    .foregroundStyle(HomeUI4Color.secondary)
                             }
                         }
-                        .buttonStyle(.plain)
-                        .opacity(item.isOnline ? 1 : 0.55)
+                        .padding(14)
+                        .frame(maxWidth: .infinity, minHeight: 140, alignment: .topLeading)
+                        .background {
+                            RoundedRectangle(cornerRadius: HomeUI4Radius.card, style: .continuous)
+                                .fill(HomeUI4Color.card)
+                                .shadow(color: .black.opacity(0.06), radius: 8, y: 3)
+                        }
+                        .contentShape(RoundedRectangle(cornerRadius: HomeUI4Radius.card, style: .continuous))
+                        .onTapGesture {
+                            onOpen(item.id)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)

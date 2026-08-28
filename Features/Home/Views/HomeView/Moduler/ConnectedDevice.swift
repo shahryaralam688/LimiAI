@@ -106,9 +106,7 @@ struct ConnectedDevicesView: View {
 
             try modelContext.save()
             loadSavedDeviceNames()
-        } catch {
-            print("❌ Failed to save local device name: \(error.localizedDescription)")
-        }
+        } catch { /* ignored */ }
     }
 
     private func loadSavedDeviceNames() {
@@ -119,9 +117,7 @@ struct ConnectedDevicesView: View {
             customDeviceNames = Dictionary(
                 uniqueKeysWithValues: storedPreferences.map { ($0.deviceID, $0.customName) }
             )
-        } catch {
-            print("❌ Failed to load local device names: \(error.localizedDescription)")
-        }
+        } catch { /* ignored */ }
     }
 
     var body: some View {
@@ -277,7 +273,6 @@ struct ConnectedDevicesView: View {
                    !allocatedWifiDeviceIds.contains(deviceId) {
                     
                     allocatedWifiDeviceIds.insert(deviceId)
-                    print("🌐 [Bonjour] New online device discovered, allocating: \(deviceId)")
                     DeviceAllocationService.shared.allocateDevice(deviceId: deviceId)
                 }
                 
@@ -300,7 +295,6 @@ struct ConnectedDevicesView: View {
                             deviceName: w.deviceName,
                             isOnline: w.isOnline
                         )
-                        print("⬆️ [Banpur] Uploading device to backend: \(upload)")
                         sendDeviceToBackend(device: upload)
                         banpurUploadedDeviceIds.insert(deviceId)
                     }
@@ -491,13 +485,10 @@ struct ConnectedDevicesView: View {
             .sorted { $0.deviceName.localizedCaseInsensitiveCompare($1.deviceName) == .orderedAscending }
         self.wifiDevices = list
         
-        print("✅ Updated \(list.count) connected devices")
     }
     
 
     func sendDeviceToBackend(device: WifiDevice) {
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("📡 [ConnectedDevice] sendDeviceToBackend STARTED")
 
         let body: [String: Any] = [
             "deviceId": device.chennalMac,
@@ -513,11 +504,9 @@ struct ConnectedDevicesView: View {
 
         if let data = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted),
            let json = String(data: data, encoding: .utf8) {
-            print("📤 [ConnectedDevice] Body:\n\(json)")
         }
 
         LimiDeviceAPI.postDeviceUser(body: body, logPrefix: "ConnectedDevice") { _, _, _ in
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         }
     }
 
@@ -622,14 +611,10 @@ struct WifiDeviceSpace: View {
     private func logResolvedDevice() {
         guard isAllowedDeviceName(deviceName) else { return }
         if let dev = bonjourBrowser.discoveredWiFiDevices.first(where: { $0.name == deviceName }) {
-            print("Resolved Bonjour service: \(dev.name)")
             let ip = dev.ipAddress ?? "unknown"
-            print("Service \(dev.name) resolved to IP: \(ip)")
             if let txt = dev.txtRecord, !txt.isEmpty {
-                print("TXT Record for \(dev.name):")
                 for key in txt.keys.sorted() {
                     if let value = txt[key] {
-                        print("  \(key): \(value)")
                     }
                 }
             }

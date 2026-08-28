@@ -130,7 +130,6 @@ struct RequestSummaryView: View {
                 
                 // Feedback Button
                 LimiPrimaryButton(title: "Feedback") {
-                    print("Feedback tapped")
                 }
                 .padding(.bottom, 34)
             }

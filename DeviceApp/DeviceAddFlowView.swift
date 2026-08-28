@@ -14,24 +14,32 @@ struct DeviceAddFlowView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = AddDeviceFlowViewModel()
+    @ObservedObject private var virtualDeviceStore = VirtualDeviceStore.shared
 
     var body: some View {
         NavigationStack {
             stepContent
                 .navigationTitle(navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
+                .deviceNeumorphicNavigationChrome()
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") { closeEntireFlow() }
+                            .foregroundStyle(HomeUI1Color.accentGreen)
                     }
                 }
         }
+        .preferredColorScheme(.dark)
         .interactiveDismissDisabled(isProvisioning)
         .onAppear { viewModel.onAppear() }
-        .onDisappear {
-            if scenePhase == .active {
-                viewModel.finish()
-            }
+        .onAppear {
+            AddDeviceVirtualGroupingBridge.sync(into: viewModel.scanViewModel)
+        }
+        .onChange(of: virtualDeviceStore.enabledHardwareIds) { _, _ in
+            AddDeviceVirtualGroupingBridge.sync(into: viewModel.scanViewModel)
+        }
+        .onChange(of: virtualDeviceStore.virtualDeviceID) { _, _ in
+            AddDeviceVirtualGroupingBridge.sync(into: viewModel.scanViewModel)
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
@@ -56,6 +64,7 @@ struct DeviceAddFlowView: View {
     private var navigationTitle: String {
         switch viewModel.step {
         case .success: return "All Set"
+        case .wifiList, .password, .provisioning: return ""
         default: return "Add Device"
         }
     }
@@ -84,112 +93,95 @@ struct DeviceAddFlowView: View {
     // MARK: - Wi-Fi list
 
     private var wifiListStep: some View {
-        List {
-            Section {
-                ForEach(Array(viewModel.wifiNetworks.enumerated()), id: \.offset) { _, ssid in
-                    Button {
-                        viewModel.selectSSID(ssid)
-                    } label: {
-                        HStack {
-                            Text(ssid)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Image(systemName: "wifi")
-                                .foregroundStyle(DeviceTheme.accent)
-                        }
-                    }
-                }
-            } header: {
-                Text("Choose a Wi-Fi network for \(viewModel.selectedDeviceName)")
-            } footer: {
-                if viewModel.wifiNetworks.isEmpty {
-                    Text("No Wi-Fi networks detected. Grant location permission or move closer to your router.")
-                }
-            }
-        }
+        LimiAppleDeviceSetupView(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .wifiList,
+            networks: viewModel.wifiNetworks,
+            password: $viewModel.passwordInput,
+            onSelectSSID: { viewModel.selectSSID($0) },
+            onConnect: {},
+            onBack: {}
+        )
     }
 
     // MARK: - Password
 
     private func passwordStep(ssid: String) -> some View {
-        DevicePasswordForm(
-            ssid: ssid,
+        LimiAppleDeviceSetupView(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .password(ssid),
+            networks: viewModel.wifiNetworks,
             password: $viewModel.passwordInput,
-            onConnect: { viewModel.startProvisioning(ssid: ssid) }
+            onSelectSSID: { _ in },
+            onConnect: { viewModel.startProvisioning(ssid: ssid) },
+            onBack: { viewModel.returnToWifiList() }
         )
     }
 
     // MARK: - Provisioning
 
     private func provisioningStep(phase: String) -> some View {
-        VStack(spacing: 16) {
-            Spacer()
-            ProgressView()
-                .controlSize(.large)
-            Text("Connecting to Wi-Fi")
-                .font(.headline)
-            Text(phase)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Spacer()
-        }
+        LimiPairingOverlay(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .provisioning(phase),
+            modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId),
+            placement: .centered,
+            onPrimary: nil,
+            onDismiss: nil
+        )
     }
 
     // MARK: - Success
 
     private var successStep: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(DeviceTheme.accent)
-            Text("Device Connected")
-                .font(.title2.bold())
-            Text("\(viewModel.selectedDeviceName) is now on your Wi-Fi network.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Spacer()
-            Button {
-                finishFlow(outcome: .showDevices)
-            } label: {
-                Text("Done")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 24)
-        }
+        LimiPairingOverlay(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .connected(viewModel.successDetailMessage),
+            modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId),
+            placement: .centered,
+            onPrimary: { finishFlow(outcome: .showDevices) },
+            onDismiss: { finishFlow(outcome: .showDevices) }
+        )
     }
 
     // MARK: - Failure
 
     private func failureStep(message: String) -> some View {
-        ContentUnavailableView {
-            Label("Couldn't Connect", systemImage: "wifi.exclamationmark")
-        } description: {
-            Text(message)
-        } actions: {
-            Button("Try Again") {
-                viewModel.retryPasswordEntry()
+        DeviceNeumorphicScreen {
+            VStack(spacing: 20) {
+                Spacer()
+                DeviceNeumorphicStatusCard(
+                    title: "Couldn't Connect",
+                    message: message,
+                    systemImage: "wifi.exclamationmark"
+                )
+                DeviceNeumorphicButton(
+                    title: "Try Again",
+                    systemImage: "arrow.clockwise",
+                    kind: .accent
+                ) {
+                    viewModel.retryPasswordEntry()
+                }
+                Spacer()
             }
-            .buttonStyle(.borderedProminent)
+            .padding(.horizontal, 24)
         }
+        .deviceNeumorphicNavigationChrome()
     }
 
     // MARK: - Close
 
     private func closeEntireFlow() {
-        viewModel.finish()
+        viewModel.finish(force: true)
         dismiss()
     }
 
     private func finishFlow(outcome: AddDeviceFlowOutcome) {
-        viewModel.finish()
+        viewModel.finish(force: true)
         dismiss()
     }
 }
@@ -207,37 +199,35 @@ private struct DeviceScanList: View {
     }
 
     var body: some View {
-        Group {
-            if !bluetoothManager.isBluetoothOn {
-                ContentUnavailableView {
-                    Label("Bluetooth Is Off", systemImage: "antenna.radiowaves.left.and.right.slash")
-                } description: {
-                    Text("Turn on Bluetooth to find nearby LIMI devices.")
-                } actions: {
-                    Button("Open Settings") {
+        DeviceNeumorphicScreen {
+            Group {
+                if !bluetoothManager.isBluetoothOn {
+                    statusBody(
+                        title: "Bluetooth Is Off",
+                        message: "Turn on Bluetooth to find nearby LIMI devices.",
+                        systemImage: "antenna.radiowaves.left.and.right.slash",
+                        actionTitle: "Open Settings"
+                    ) {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .buttonStyle(.borderedProminent)
+                } else if visibleDevices.isEmpty && hasWaitedForScan {
+                    statusBody(
+                        title: "No Devices Nearby",
+                        message: DeviceAppGuidance.scanEmpty,
+                        systemImage: "lightbulb.slash"
+                    )
+                } else if visibleDevices.isEmpty {
+                    statusBody(
+                        title: "Scanning",
+                        message: "Looking for LIMI devices over Bluetooth…",
+                        systemImage: "dot.radiowaves.left.and.right",
+                        showsProgress: true
+                    )
+                } else {
+                    deviceList
                 }
-            } else if visibleDevices.isEmpty && hasWaitedForScan {
-                ContentUnavailableView {
-                    Label("No Devices Nearby", systemImage: "lightbulb.slash")
-                } description: {
-                    Text(DeviceAppGuidance.scanEmpty)
-                }
-            } else if visibleDevices.isEmpty {
-                ContentUnavailableView {
-                    Label("Scanning", systemImage: "dot.radiowaves.left.and.right")
-                } description: {
-                    Text("Looking for LIMI devices over Bluetooth…")
-                } actions: {
-                    ProgressView()
-                        .padding(.top, 8)
-                }
-            } else {
-                deviceList
             }
         }
         .onAppear {
@@ -248,125 +238,135 @@ private struct DeviceScanList: View {
         }
         .overlay {
             if scanViewModel.isConnectingToBLE {
-                ZStack {
-                    Color.black.opacity(0.15).ignoresSafeArea()
-                    ProgressView("Connecting to device…")
-                        .padding(20)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                }
+                LimiPairingOverlay(
+                    deviceName: scanViewModel.selectedName ?? "LIMI Device",
+                    deviceId: scanViewModel.selectedId,
+                    mode: .connecting,
+                    modelName: LimiPairingAssets.bundledName(forDeviceId: scanViewModel.selectedId),
+                    onPrimary: nil,
+                    onDismiss: nil
+                )
             }
         }
     }
 
+    @ViewBuilder
+    private func statusBody(
+        title: String,
+        message: String,
+        systemImage: String,
+        showsProgress: Bool = false,
+        actionTitle: String? = nil,
+        action: (() -> Void)? = nil
+    ) -> some View {
+        VStack(spacing: 18) {
+            Spacer(minLength: 40)
+            DeviceNeumorphicStatusCard(
+                title: title,
+                message: message,
+                systemImage: systemImage,
+                showsProgress: showsProgress
+            )
+            if let actionTitle, let action {
+                DeviceNeumorphicButton(
+                    title: actionTitle,
+                    systemImage: "gear",
+                    kind: .accent,
+                    action: action
+                )
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+
     private var deviceList: some View {
-        List {
-            Section {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Text("Available Devices")
+                        .font(HomeUI1Type.body(14))
+                        .foregroundStyle(HomeUI1Color.textSecondary)
+                    Spacer()
+                    if scanViewModel.isConnectingToBLE {
+                        ProgressView()
+                            .tint(HomeUI1Color.accentGreen)
+                            .controlSize(.small)
+                    }
+                }
+                .padding(.top, 8)
+
                 ForEach(visibleDevices) { device in
                     Button {
                         onSelectDevice(device)
                     } label: {
                         scanRow(device)
                     }
+                    .buttonStyle(.plain)
                     .opacity(scanViewModel.deviceOpacity(device))
                     .disabled(scanViewModel.isDeviceDisabled(device))
                 }
-            } header: {
-                HStack {
-                    Text("Available Devices")
-                    Spacer()
-                    ProgressView()
-                        .controlSize(.small)
-                }
-            } footer: {
+
                 Text("Make sure your LIMI device is powered on and nearby.")
+                    .font(HomeUI1Type.caption(12))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+                    .padding(.top, 4)
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
         }
     }
 
     private func scanRow(_ device: BLEDevice) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: device.deviceType == .bluetooth ? "lamp.table" : "wifi")
-                .foregroundStyle(DeviceTheme.accent)
-                .frame(width: 28)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(device.name)
-                    .foregroundStyle(.primary)
-                Text(statusText(device))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            if scanViewModel.isDeviceConnected(device) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(DeviceTheme.accent)
-            }
-        }
+        DeviceNeumorphicListRow(
+            title: device.name,
+            subtitle: statusText(device),
+            systemImage: device.isVirtualMaster
+                ? "link.circle.fill"
+                : (device.deviceType == .bluetooth ? "lamp.table" : "wifi"),
+            isAccent: scanViewModel.isDeviceConnected(device),
+            showsChevron: !scanViewModel.isDeviceConnected(device),
+            trailing: scanViewModel.isDeviceConnected(device)
+                ? AnyView(
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(HomeUI1Color.accentGreen)
+                )
+                : nil
+        )
     }
 
     private func statusText(_ device: BLEDevice) -> String {
-        if device.deviceType == .bluetooth { return "Bluetooth" }
+        if let master = device.virtualMaster {
+            let count = master.memberHardwareIds.count
+            let hubs = count == 1 ? "1 hub" : "\(count) hubs"
+            let bleCandidates = master.memberDevices.filter { $0.deviceType == .bluetooth }
+            let presence = VirtualMasterPresence.evaluate(
+                memberHardwareIds: master.memberHardwareIds,
+                isMQTTOnline: VirtualMasterPresence.defaultMQTTCheck,
+                isBLEVisible: { hw in
+                    VirtualMasterPresence.isBLEVisible(hardwareId: hw, scannedBLEDevices: bleCandidates)
+                },
+                isWiFiLANOnline: { hw in
+                    if let member = master.memberDevices.first(where: { $0.resolvedHardwareId() == hw }) {
+                        return member.deviceType == .wifi && member.reachability == .online
+                    }
+                    return VirtualMasterPresence.defaultWiFiLANCheck(hardwareId: hw)
+                }
+            )
+            return "\(presence.scanSubtitleSuffix) · Master · \(hubs)"
+        }
+        if device.deviceType == .bluetooth {
+            let hw = device.resolvedHardwareId()
+            if !hw.isEmpty, VirtualMasterPresence.isMemberCloudOnline(hardwareId: hw) {
+                return "Connected · Cloud"
+            }
+            return "Bluetooth"
+        }
         let status = device.reachability == .online ? "Online" : "Offline"
         if let ip = device.ipAddress, !ip.isEmpty {
             return "\(status) • \(ip)"
         }
         return status
-    }
-}
-
-// MARK: - Password form
-
-private struct DevicePasswordForm: View {
-    let ssid: String
-    @Binding var password: String
-    let onConnect: () -> Void
-
-    @State private var isPasswordVisible = false
-    @FocusState private var passwordFocused: Bool
-
-    var body: some View {
-        Form {
-            Section {
-                HStack {
-                    Group {
-                        if isPasswordVisible {
-                            TextField("Wi-Fi password", text: $password)
-                        } else {
-                            SecureField("Wi-Fi password", text: $password)
-                        }
-                    }
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($passwordFocused)
-
-                    Button {
-                        isPasswordVisible.toggle()
-                    } label: {
-                        Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
-                }
-            } header: {
-                Text(ssid)
-            } footer: {
-                Text("Enter the password for your Wi-Fi network. The device will join this network.")
-            }
-
-            Section {
-                Button("Connect Device") {
-                    onConnect()
-                }
-                .disabled(password.isEmpty)
-            }
-        }
-        .onAppear {
-            isPasswordVisible = false
-            passwordFocused = true
-        }
     }
 }
 

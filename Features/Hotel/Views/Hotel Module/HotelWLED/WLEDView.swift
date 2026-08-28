@@ -144,16 +144,12 @@ class WLEDAPIManager: ObservableObject {
     /// Set power state
     func setPower(_ isOn: Bool) async {
         let payload = ["on": isOn]
-        print("🔌 WLED API - Setting power: \(isOn)")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
     /// Set brightness (0-255)
     func setBrightness(_ brightness: Int) async {
         let payload = ["bri": max(0, min(255, brightness))]
-        print("💡 WLED API - Setting brightness: \(brightness)")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -169,8 +165,6 @@ class WLEDAPIManager: ObservableObject {
                 ]
             ]
         ]
-        print("🎨 WLED API - Setting color for all 256 LEDs: RGB(\(red), \(green), \(blue))")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -186,8 +180,6 @@ class WLEDAPIManager: ObservableObject {
                 ]
             ]
         ]
-        print("🌈 WLED API - Setting color pattern for all 256 LEDs: \(colors.count) colors")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -203,8 +195,6 @@ class WLEDAPIManager: ObservableObject {
                 ]
             ]
         ]
-        print("✨ WLED API - Setting effect ID \(effectId) for all 256 LEDs")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -220,8 +210,6 @@ class WLEDAPIManager: ObservableObject {
                 ]
             ]
         ]
-        print("🎨 WLED API - Setting palette ID \(paletteId) for all 256 LEDs")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -250,8 +238,6 @@ class WLEDAPIManager: ObservableObject {
     /// Load preset
     func loadPreset(_ presetId: Int) async {
         let payload = ["ps": presetId]
-        print("💾 WLED API - Loading preset ID: \(presetId)")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -267,8 +253,6 @@ class WLEDAPIManager: ObservableObject {
                 ]
             ]
         ]
-        print("🔧 WLED API - Initializing segment for all 256 LEDs")
-        print("📤 Payload: \(payload)")
         await sendCommand(payload: payload)
     }
     
@@ -276,7 +260,6 @@ class WLEDAPIManager: ObservableObject {
     
     private func performRequest<T: Codable>(endpoint: String, completion: @escaping (T) -> Void) async {
         guard let url = URL(string: baseURL + endpoint) else {
-            print("❌ WLED API - Invalid URL: \(baseURL + endpoint)")
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
                 self.isConnected = false
@@ -284,7 +267,6 @@ class WLEDAPIManager: ObservableObject {
             return
         }
         
-        print("📡 WLED API - GET Request to: \(url.absoluteString)")
         
         DispatchQueue.main.async {
             self.isLoading = true
@@ -294,18 +276,14 @@ class WLEDAPIManager: ObservableObject {
             let (data, response) = try await WLEDHTTPClient.get(urlString: baseURL + endpoint)
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("📥 WLED API - Response Status: \(httpResponse.statusCode)")
             }
             
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("📥 WLED API - Response Data: \(jsonString)")
             }
             
             let decodedData = try JSONDecoder().decode(T.self, from: data)
             completion(decodedData)
-            print("✅ WLED API - Request successful")
         } catch {
-            print("❌ WLED API - Network error: \(error.localizedDescription)")
             DispatchQueue.main.async {
                 self.errorMessage = "Network error: \(error.localizedDescription)"
                 self.isConnected = false
@@ -319,7 +297,6 @@ class WLEDAPIManager: ObservableObject {
     
     private func sendCommand(payload: [String: Any]) async {
         guard let url = URL(string: baseURL + "/json/state") else {
-            print("❌ WLED API - Invalid URL for command: \(baseURL + "/json/state")")
             DispatchQueue.main.async {
                 self.errorMessage = "Invalid URL"
             }
@@ -330,12 +307,10 @@ class WLEDAPIManager: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        print("📡 WLED API - POST Request to: \(url.absoluteString)")
         
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: payload)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("📤 WLED API - Sending JSON: \(jsonString)")
             }
             
             request.httpBody = jsonData
@@ -345,25 +320,20 @@ class WLEDAPIManager: ObservableObject {
             )
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("📥 WLED API - Command Response Status: \(httpResponse.statusCode)")
                 
                 if let responseString = String(data: data, encoding: .utf8) {
-                    print("📥 WLED API - Command Response Data: \(responseString)")
                 }
                 
                 if httpResponse.statusCode == 200 {
-                    print("✅ WLED API - Command successful")
                     // Refresh state after successful command
                     await fetchState()
                 } else {
-                    print("❌ WLED API - Command failed with status: \(httpResponse.statusCode)")
                     DispatchQueue.main.async {
                         self.errorMessage = "Command failed with status: \(httpResponse.statusCode)"
                     }
                 }
             }
         } catch {
-            print("❌ WLED API - Send error: \(error.localizedDescription)")
             DispatchQueue.main.async {
                 self.errorMessage = "Send error: \(error.localizedDescription)"
             }
@@ -740,7 +710,6 @@ struct WLEDView: View {
 
                 Button(action: {
                     isOn.toggle()
-                    print("🔌 User toggled power: \(isOn)")
                     Task {
                         sendLampState()
                     }
@@ -841,12 +810,10 @@ struct WLEDView: View {
     private func sendLampState() {
         if isOn {
             let command = currentRGBCommand()
-            print("💡 Lamp ON -> \(command.commandPayload())")
             throttle.sendOneShot(command)
         } else {
             // Spec-compliant power-off; firmware preserves last RGB state.
             let command: LimiCommand = .power(channel: channel, on: false)
-            print("💤 Lamp OFF -> \(command.commandPayload())")
             throttle.sendOneShot(command)
         }
     }
@@ -900,12 +867,10 @@ struct WLEDView: View {
                             let newHue = max(0, min(1, (value.location.x - 15) / width))
                             selectedHue = newHue
                             
-                            print("🌈 User selected hue: \(selectedHue) (0.0 = Red, 0.33 = Green, 0.66 = Blue)")
                             
                             // Convert hue to RGB and send to WLED
                             let color = Color(hue: selectedHue, saturation: 1.0, brightness: 1.0)
                             let rgb = color.toRGB()
-                            print("🎨 Converted to RGB: (\(rgb.red), \(rgb.green), \(rgb.blue))")
                             
                             Task {
                                 await viewModel.setColor(red: rgb.red, green: rgb.green, blue: rgb.blue)

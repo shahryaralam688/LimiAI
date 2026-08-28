@@ -221,13 +221,20 @@ struct DemoAddingWifiView: View {
                 switch result {
                 case .success(let outcome):
                     SelectedDevicesStorage.shared.addOrUpdate(name: deviceName, uuid: deviceId)
+                    LocallyRemovedDeviceStore.shared.clearRemoved(outcome.deviceId)
+                    DeviceConsole.log(
+                        .add,
+                        "DemoAddingWifi SUCCESS deviceId=\(outcome.deviceId) bleUUID=\(deviceId) name=\(outcome.deviceName)"
+                    )
                     ConfiguredBLEDeviceStore.shared.remember(
                         hardwareId: outcome.deviceId,
                         blePeripheralUUID: deviceId,
                         displayName: outcome.deviceName.isEmpty ? deviceName : outcome.deviceName
                     )
+                    DeviceConsole.dumpConfiguredStore(reason: "DemoAddingWifi after success")
                     step = .success
                 case .failure(let failure):
+                    DeviceConsole.log(.add, "DemoAddingWifi FAILURE \(failure.userMessage)")
                     step = .failure(message: failure.userMessage)
                 }
             }

@@ -139,70 +139,348 @@ struct DeviceConnectionBanner: View {
 struct DeviceSchedulesHubView: View {
     @Query(sort: \DeviceSchedule.hour) private var schedules: [DeviceSchedule]
     @Query(sort: \RememberedLimiDevice.displayName) private var remembered: [RememberedLimiDevice]
+    @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
+
+    private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+    private var usesHomeUI2: Bool { homeUITheme.selected == .two }
 
     var body: some View {
         NavigationStack {
             Group {
-                if schedules.isEmpty && remembered.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Schedules", systemImage: "calendar")
-                    } description: {
-                        Text("Open a device from Home, then add a schedule. Schedules appear here.")
-                    }
-                } else if schedules.isEmpty {
-                    List {
-                        Section {
-                            ForEach(remembered, id: \.deviceID) { device in
-                                NavigationLink {
-                                    DeviceSchedulesView(
-                                        device: wifiDevice(from: device),
-                                        displayName: device.displayName
-                                    )
-                                } label: {
-                                    Label(device.displayName, systemImage: "lightbulb.led")
+                if usesHomeUI1 {
+                    homeUI1Body
+                        .transition(.opacity.combined(with: .scale(scale: 0.985)))
+                } else if usesHomeUI2 {
+                    homeUI2Body
+                        .transition(.opacity.combined(with: .scale(scale: 0.985)))
+                } else {
+                    systemBody
+                }
+            }
+            .animation(HomeUI1Motion.soft, value: usesHomeUI1)
+            .animation(HomeUI2Motion.soft, value: usesHomeUI2)
+            .animation(HomeUI1Motion.soft, value: schedules.count)
+            .navigationTitle("Schedule")
+            .navigationBarTitleDisplayMode(.inline)
+            .homeUI1TabRootChrome(enabled: usesHomeUI1)
+            .homeUI2TabRootChrome(enabled: usesHomeUI2)
+        }
+    }
+
+    // MARK: - Home UI 1
+
+    private var homeUI1Body: some View {
+        ZStack {
+            HomeUI1ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HomeUI1PageTitle(
+                        title: "Schedule",
+                        subtitle: "Timers for your LIMI lights"
+                    )
+                    .padding(.top, 8)
+
+                    if schedules.isEmpty && remembered.isEmpty {
+                        HomeUI1EmptyStateCard(
+                            title: "No Schedules",
+                            message: "Open a device from Home, then add a schedule. Schedules appear here.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                    } else if schedules.isEmpty {
+                        HomeUI1ControlSectionCard(
+                            title: "Devices",
+                            footer: "No schedules yet. Pick a device to create one."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(remembered, id: \.deviceID) { device in
+                                    NavigationLink {
+                                        DeviceSchedulesView(
+                                            device: wifiDevice(from: device),
+                                            displayName: device.displayName
+                                        )
+                                    } label: {
+                                        homeUI1DeviceLinkRow(
+                                            title: device.displayName,
+                                            systemImage: "lightbulb.led.fill"
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
-                        } header: {
-                            Text("Devices")
-                        } footer: {
-                            Text("No schedules yet. Pick a device to create one.")
                         }
-                    }
-                } else {
-                    List {
-                        Section("Active Schedules") {
-                            ForEach(schedules, id: \.scheduleID) { schedule in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(schedule.deviceName)
-                                            .font(.body)
-                                        Text("\(schedule.timeText) · \(schedule.repeatText) · \(schedule.turnOn ? "On" : "Off")")
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: schedule.isEnabled ? "checkmark.circle.fill" : "pause.circle")
-                                        .foregroundStyle(schedule.isEnabled ? DeviceTheme.accent : .secondary)
+                    } else {
+                        HomeUI1ControlSectionCard(title: "Active Schedules") {
+                            VStack(spacing: 10) {
+                                ForEach(schedules, id: \.scheduleID) { schedule in
+                                    homeUI1ActiveScheduleRow(schedule)
+                                        .transition(.asymmetric(
+                                            insertion: .opacity.combined(with: .move(edge: .top)),
+                                            removal: .opacity
+                                        ))
                                 }
                             }
                         }
 
-                        Section("Add / Edit") {
-                            ForEach(remembered, id: \.deviceID) { device in
-                                NavigationLink {
-                                    DeviceSchedulesView(
-                                        device: wifiDevice(from: device),
-                                        displayName: device.displayName
-                                    )
-                                } label: {
-                                    Label(device.displayName, systemImage: "clock")
+                        HomeUI1ControlSectionCard(
+                            title: "Add / Edit",
+                            footer: "Open a device to manage its schedules."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(remembered, id: \.deviceID) { device in
+                                    NavigationLink {
+                                        DeviceSchedulesView(
+                                            device: wifiDevice(from: device),
+                                            displayName: device.displayName
+                                        )
+                                    } label: {
+                                        homeUI1DeviceLinkRow(
+                                            title: device.displayName,
+                                            systemImage: "clock.fill"
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
             }
-            .navigationTitle("Schedule")
+        }
+    }
+
+    private func homeUI1ActiveScheduleRow(_ schedule: DeviceSchedule) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: schedule.isEnabled ? "checkmark.circle.fill" : "pause.circle")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(
+                    schedule.isEnabled
+                        ? HomeUI1Color.accentGreen
+                        : HomeUI1Color.textSecondary
+                )
+                .frame(width: 44, height: 44)
+                .homeUI1CircleElevation(schedule.isEnabled ? .recessed : .one)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(schedule.deviceName)
+                    .font(HomeUI1Type.body(15))
+                    .foregroundStyle(HomeUI1Color.textPrimary)
+                    .lineLimit(1)
+                Text("\(schedule.timeText) · \(schedule.repeatText) · \(schedule.turnOn ? "On" : "Off")")
+                    .font(HomeUI1Type.caption(12))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 8)
+        }
+        .padding(14)
+        .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+        .animation(HomeUI1Motion.soft, value: schedule.isEnabled)
+    }
+
+    private func homeUI1DeviceLinkRow(title: String, systemImage: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(HomeUI1Color.accentGreen)
+                .frame(width: 44, height: 44)
+                .homeUI1CircleElevation(.two)
+
+            Text(title)
+                .font(HomeUI1Type.body(15))
+                .foregroundStyle(HomeUI1Color.textPrimary)
+                .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(HomeUI1Color.textSecondary.opacity(0.55))
+        }
+        .padding(14)
+        .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+    }
+
+    // MARK: - Home UI 2
+
+    private var homeUI2Body: some View {
+        ZStack {
+            HomeUI2ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HomeUI2PageTitle(
+                        title: "Schedule",
+                        subtitle: "Timers for your LIMI lights"
+                    )
+                    .padding(.top, 8)
+
+                    if schedules.isEmpty && remembered.isEmpty {
+                        HomeUI2EmptyStateCard(
+                            title: "No Schedules",
+                            message: "Open a device from Home, then add a schedule. Schedules appear here.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                    } else if schedules.isEmpty {
+                        HomeUI2ControlSectionCard(
+                            title: "Devices",
+                            footer: "No schedules yet. Pick a device to create one."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(remembered, id: \.deviceID) { device in
+                                    NavigationLink {
+                                        DeviceSchedulesView(
+                                            device: wifiDevice(from: device),
+                                            displayName: device.displayName
+                                        )
+                                    } label: {
+                                        HomeUI2LinkRow(
+                                            title: device.displayName,
+                                            systemImage: "lightbulb.led.fill"
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    } else {
+                        HomeUI2ControlSectionCard(title: "Active Schedules") {
+                            VStack(spacing: 10) {
+                                ForEach(schedules, id: \.scheduleID) { schedule in
+                                    homeUI2ActiveScheduleRow(schedule)
+                                }
+                            }
+                        }
+
+                        HomeUI2ControlSectionCard(
+                            title: "Add / Edit",
+                            footer: "Open a device to manage its schedules."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(remembered, id: \.deviceID) { device in
+                                    NavigationLink {
+                                        DeviceSchedulesView(
+                                            device: wifiDevice(from: device),
+                                            displayName: device.displayName
+                                        )
+                                    } label: {
+                                        HomeUI2LinkRow(
+                                            title: device.displayName,
+                                            systemImage: "clock.fill"
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
+            }
+        }
+    }
+
+    private func homeUI2ActiveScheduleRow(_ schedule: DeviceSchedule) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: schedule.isEnabled ? "checkmark.circle.fill" : "pause.circle")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(
+                    schedule.isEnabled
+                        ? HomeUI2Color.accent
+                        : HomeUI2Color.textSecondary
+                )
+                .frame(width: 44, height: 44)
+                .background(
+                    RoundedRectangle(cornerRadius: HomeUI2Radius.sm, style: .continuous)
+                        .fill(HomeUI2Color.surfaceRaised)
+                )
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(schedule.deviceName)
+                    .font(HomeUI2Type.body(15))
+                    .foregroundStyle(HomeUI2Color.textPrimary)
+                    .lineLimit(1)
+                Text("\(schedule.timeText) · \(schedule.repeatText) · \(schedule.turnOn ? "On" : "Off")")
+                    .font(HomeUI2Type.caption(12))
+                    .foregroundStyle(HomeUI2Color.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 8)
+        }
+        .padding(14)
+        .homeUI2Card(cornerRadius: HomeUI2Radius.sm, fill: HomeUI2Color.surfaceRaised)
+    }
+
+    // MARK: - System
+
+    @ViewBuilder
+    private var systemBody: some View {
+        if schedules.isEmpty && remembered.isEmpty {
+            ContentUnavailableView {
+                Label("No Schedules", systemImage: "calendar")
+            } description: {
+                Text("Open a device from Home, then add a schedule. Schedules appear here.")
+            }
+        } else if schedules.isEmpty {
+            List {
+                Section {
+                    ForEach(remembered, id: \.deviceID) { device in
+                        NavigationLink {
+                            DeviceSchedulesView(
+                                device: wifiDevice(from: device),
+                                displayName: device.displayName
+                            )
+                        } label: {
+                            Label(device.displayName, systemImage: "lightbulb.led")
+                        }
+                    }
+                } header: {
+                    Text("Devices")
+                } footer: {
+                    Text("No schedules yet. Pick a device to create one.")
+                }
+            }
+        } else {
+            List {
+                Section("Active Schedules") {
+                    ForEach(schedules, id: \.scheduleID) { schedule in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(schedule.deviceName)
+                                    .font(.body)
+                                Text("\(schedule.timeText) · \(schedule.repeatText) · \(schedule.turnOn ? "On" : "Off")")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: schedule.isEnabled ? "checkmark.circle.fill" : "pause.circle")
+                                .foregroundStyle(schedule.isEnabled ? DeviceTheme.accent : .secondary)
+                        }
+                    }
+                }
+
+                Section("Add / Edit") {
+                    ForEach(remembered, id: \.deviceID) { device in
+                        NavigationLink {
+                            DeviceSchedulesView(
+                                device: wifiDevice(from: device),
+                                displayName: device.displayName
+                            )
+                        } label: {
+                            Label(device.displayName, systemImage: "clock")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -220,9 +498,14 @@ struct DeviceSchedulesHubView: View {
 }
 
 /// Rooms assigned on this phone — opened from the floating grid tab.
+/// Home UI 1: neumorphic Soft UI. Other themes keep the system List.
 struct DeviceRoomsHubView: View {
     @Query private var assignments: [DeviceRoomAssignment]
     @Query(sort: \RememberedLimiDevice.displayName) private var remembered: [RememberedLimiDevice]
+    @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
+
+    private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+    private var usesHomeUI2: Bool { homeUITheme.selected == .two }
 
     private var rooms: [String] {
         Array(Set(assignments.map(\.roomName))).sorted()
@@ -231,36 +514,212 @@ struct DeviceRoomsHubView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if rooms.isEmpty {
-                    ContentUnavailableView {
-                        Label("No Rooms", systemImage: "square.grid.2x2")
-                    } description: {
-                        Text("On Home, long-press a device and choose Room to group lights.")
-                    }
+                if usesHomeUI1 {
+                    homeUI1Body
+                        .transition(.opacity.combined(with: .scale(scale: 0.985)))
+                } else if usesHomeUI2 {
+                    homeUI2Body
+                        .transition(.opacity.combined(with: .scale(scale: 0.985)))
                 } else {
-                    List {
-                        ForEach(rooms, id: \.self) { roomName in
-                            let roomDevices = devices(in: roomName)
-                            NavigationLink {
-                                RoomControlView(
-                                    roomName: roomName,
-                                    allDevices: allWifiDevices,
-                                    roomAssignments: assignmentMap,
-                                    displayNameProvider: { $0.deviceName },
-                                    statusTextProvider: { $0.isOnline ? "Online" : "Offline" }
-                                )
-                            } label: {
-                                RoomGroupCard(
-                                    roomName: roomName,
-                                    deviceCount: roomDevices.count,
-                                    onlineCount: 0
-                                )
+                    systemBody
+                }
+            }
+            .animation(HomeUI1Motion.soft, value: usesHomeUI1)
+            .animation(HomeUI2Motion.soft, value: usesHomeUI2)
+            .animation(HomeUI1Motion.soft, value: rooms.count)
+            .navigationTitle("Rooms")
+            .navigationBarTitleDisplayMode(.inline)
+            .homeUI1TabRootChrome(enabled: usesHomeUI1)
+            .homeUI2TabRootChrome(enabled: usesHomeUI2)
+        }
+    }
+
+    // MARK: - Home UI 1
+
+    private var homeUI1Body: some View {
+        ZStack {
+            HomeUI1ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HomeUI1PageTitle(
+                        title: "Rooms",
+                        subtitle: "Group lights and control them together"
+                    )
+                    .padding(.top, 8)
+
+                    if rooms.isEmpty {
+                        HomeUI1EmptyStateCard(
+                            title: "No Rooms",
+                            message: "On Home, long-press a device and choose Room to group lights.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                    } else {
+                        HomeUI1ControlSectionCard(
+                            title: "Your Rooms",
+                            footer: "Open a room to control all lights together."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(rooms, id: \.self) { roomName in
+                                    let roomDevices = devices(in: roomName)
+                                    NavigationLink {
+                                        RoomControlView(
+                                            roomName: roomName,
+                                            allDevices: allWifiDevices,
+                                            roomAssignments: assignmentMap,
+                                            displayNameProvider: { $0.deviceName },
+                                            statusTextProvider: { $0.isOnline ? "Online" : "Offline" }
+                                        )
+                                    } label: {
+                                        homeUI1RoomRow(
+                                            roomName: roomName,
+                                            deviceCount: roomDevices.count,
+                                            onlineCount: roomDevices.filter(\.isOnline).count
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
             }
-            .navigationTitle("Rooms")
+        }
+    }
+
+    private func homeUI1RoomRow(
+        roomName: String,
+        deviceCount: Int,
+        onlineCount: Int
+    ) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: "square.split.bottomrightquarter.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(HomeUI1Color.accentGreen)
+                .frame(width: 44, height: 44)
+                .homeUI1CircleElevation(.two)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(roomName)
+                    .font(HomeUI1Type.body(15))
+                    .foregroundStyle(HomeUI1Color.textPrimary)
+                    .lineLimit(1)
+                Text(roomSubtitle(deviceCount: deviceCount, onlineCount: onlineCount))
+                    .font(HomeUI1Type.caption(12))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 8)
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(HomeUI1Color.textSecondary.opacity(0.55))
+        }
+        .padding(14)
+        .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+    }
+
+    // MARK: - Home UI 2
+
+    private var homeUI2Body: some View {
+        ZStack {
+            HomeUI2ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HomeUI2PageTitle(
+                        title: "Rooms",
+                        subtitle: "Group lights and control them together"
+                    )
+                    .padding(.top, 8)
+
+                    if rooms.isEmpty {
+                        HomeUI2EmptyStateCard(
+                            title: "No Rooms",
+                            message: "On Home, long-press a device and choose Room to group lights.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                    } else {
+                        HomeUI2ControlSectionCard(
+                            title: "Your Rooms",
+                            footer: "Open a room to control all lights together."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(rooms, id: \.self) { roomName in
+                                    let roomDevices = devices(in: roomName)
+                                    NavigationLink {
+                                        RoomControlView(
+                                            roomName: roomName,
+                                            allDevices: allWifiDevices,
+                                            roomAssignments: assignmentMap,
+                                            displayNameProvider: { $0.deviceName },
+                                            statusTextProvider: { $0.isOnline ? "Online" : "Offline" }
+                                        )
+                                    } label: {
+                                        HomeUI2LinkRow(
+                                            title: roomName,
+                                            subtitle: roomSubtitle(
+                                                deviceCount: roomDevices.count,
+                                                onlineCount: roomDevices.filter(\.isOnline).count
+                                            ),
+                                            systemImage: "square.split.bottomrightquarter.fill"
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
+            }
+        }
+    }
+
+    private func roomSubtitle(deviceCount: Int, onlineCount: Int) -> String {
+        let devices = deviceCount == 1 ? "1 device" : "\(deviceCount) devices"
+        return "\(devices) · \(onlineCount) online"
+    }
+
+    // MARK: - System
+
+    @ViewBuilder
+    private var systemBody: some View {
+        if rooms.isEmpty {
+            ContentUnavailableView {
+                Label("No Rooms", systemImage: "square.grid.2x2")
+            } description: {
+                Text("On Home, long-press a device and choose Room to group lights.")
+            }
+        } else {
+            List {
+                ForEach(rooms, id: \.self) { roomName in
+                    let roomDevices = devices(in: roomName)
+                    NavigationLink {
+                        RoomControlView(
+                            roomName: roomName,
+                            allDevices: allWifiDevices,
+                            roomAssignments: assignmentMap,
+                            displayNameProvider: { $0.deviceName },
+                            statusTextProvider: { $0.isOnline ? "Online" : "Offline" }
+                        )
+                    } label: {
+                        RoomGroupCard(
+                            roomName: roomName,
+                            deviceCount: roomDevices.count,
+                            onlineCount: 0
+                        )
+                    }
+                }
+            }
         }
     }
 

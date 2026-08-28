@@ -63,7 +63,6 @@ struct WifiList: View {
                         .padding()
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            print("Selected SSID: \(ssid)")
                         }
                         .listRowBackground(Color.clear)
                     }

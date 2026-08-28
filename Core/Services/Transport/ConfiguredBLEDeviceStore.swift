@@ -52,11 +52,23 @@ public final class ConfiguredBLEDeviceStore {
     }
 
     public func blePeripheralUUID(for hardwareId: String) -> String? {
-        record(for: hardwareId)?.blePeripheralUUID
+        guard let uuid = record(for: hardwareId)?.blePeripheralUUID,
+              Self.isUsablePeripheralUUID(uuid, forHardwareId: hardwareId) else {
+            return nil
+        }
+        return uuid
+    }
+
+    /// Reject MAC-as-UUID corruption (`80B54EC1C270 ↔ 80B54EC1C270`).
+    static func isUsablePeripheralUUID(_ uuid: String, forHardwareId hardwareId: String = "") -> Bool {
+        guard LimiDeviceNaming.isValidPeripheralUUID(uuid) else { return false }
+        let hw = LimiDeviceNaming.normalizedHardwareId(hardwareId)
+        if !hw.isEmpty, uuid.uppercased() == hw { return false }
+        return true
     }
 
     public func hasConfiguredBLE(for hardwareId: String) -> Bool {
-        record(for: hardwareId) != nil
+        blePeripheralUUID(for: hardwareId) != nil
     }
 
     public var allRecords: [ConfiguredBLEDevice] {
@@ -66,6 +78,7 @@ public final class ConfiguredBLEDeviceStore {
     }
 
     /// Call on successful BLE provisioning with hardware id + the BLE UUID used to configure.
+    /// One CBPeripheral UUID maps to at most one hardware id (clears stale twin mappings).
     public func remember(
         hardwareId: String,
         blePeripheralUUID: String,
@@ -73,16 +86,42 @@ public final class ConfiguredBLEDeviceStore {
     ) {
         let key = LimiDeviceNaming.normalizedHardwareId(hardwareId)
         guard !key.isEmpty, !blePeripheralUUID.isEmpty else { return }
+        guard Self.isUsablePeripheralUUID(blePeripheralUUID, forHardwareId: key) else {
+            DeviceConsole.log(
+                .config,
+                "reject save hardwareId=\(key) — invalid bleUUID=\(blePeripheralUUID) (need CBPeripheral UUID)"
+            )
+            return
+        }
         let entry = ConfiguredBLEDevice(
             hardwareId: key,
             blePeripheralUUID: blePeripheralUUID,
             displayName: displayName
         )
         lock.lock()
+        let conflictingKeys = records.compactMap { hw, record -> String? in
+            guard hw != key else { return nil }
+            guard record.blePeripheralUUID.caseInsensitiveCompare(blePeripheralUUID) == .orderedSame else {
+                return nil
+            }
+            return hw
+        }
+        for otherKey in conflictingKeys {
+            records.removeValue(forKey: otherKey)
+        }
         records[key] = entry
         lock.unlock()
+        for otherKey in conflictingKeys {
+            DeviceConsole.log(
+                .config,
+                "cleared stale map hardwareId=\(otherKey) (BLE UUID reused by \(key))"
+            )
+        }
         persist()
-        print("💾 [ConfiguredBLE] Stored \(key) → BLE \(blePeripheralUUID)")
+        DeviceConsole.log(
+            .config,
+            "saved hardwareId=\(key) bleUUID=\(blePeripheralUUID) name=\(displayName)"
+        )
     }
 
     public func remove(hardwareId: String) {
@@ -92,6 +131,7 @@ public final class ConfiguredBLEDeviceStore {
         records.removeValue(forKey: key)
         lock.unlock()
         persist()
+        DeviceConsole.log(.config, "removed hardwareId=\(key)")
     }
 
     private func persist() {
@@ -107,14 +147,33 @@ public final class ConfiguredBLEDeviceStore {
               let decoded = try? JSONDecoder().decode([ConfiguredBLEDevice].self, from: data)
         else {
             records = [:]
+            DeviceConsole.log(.config, "loaded 0 configured BLE devices")
             return
         }
         var map: [String: ConfiguredBLEDevice] = [:]
         for item in decoded {
             let key = LimiDeviceNaming.normalizedHardwareId(item.hardwareId)
             guard !key.isEmpty else { continue }
+            guard Self.isUsablePeripheralUUID(item.blePeripheralUUID, forHardwareId: key) else {
+                DeviceConsole.log(
+                    .config,
+                    "purged corrupt map hardwareId=\(key) bleUUID=\(item.blePeripheralUUID)"
+                )
+                continue
+            }
             map[key] = item
         }
         records = map
+        DeviceConsole.log(.config, "loaded \(map.count) configured BLE device(s)")
+        for item in map.values {
+            DeviceConsole.log(
+                .config,
+                "  • \(item.hardwareId) ↔ \(item.blePeripheralUUID) (\(item.displayName))"
+            )
+        }
+        if map.count != decoded.count {
+            persist()
+            DeviceConsole.log(.config, "persisted after purging \(decoded.count - map.count) corrupt BLE map(s)")
+        }
     }
 }

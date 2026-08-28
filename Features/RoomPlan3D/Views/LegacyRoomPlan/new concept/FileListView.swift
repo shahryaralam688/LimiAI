@@ -76,7 +76,6 @@ struct FileListView: View {
     private func isValidUSDZFile(at url: URL) -> Bool {
         // Check if file exists
         guard FileManager.default.fileExists(atPath: url.path) else {
-            print("❌ File does not exist at path: \(url.path)")
             return false
         }
         
@@ -85,16 +84,13 @@ struct FileListView: View {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
             if let fileSize = attributes[.size] as? UInt64 {
                 let fileSizeMB = Double(fileSize) / 1024.0 / 1024.0
-                print("📊 File size: \(String(format: "%.2f", fileSizeMB)) MB")
                 
                 // If file is too small, it's probably corrupted
                 if fileSize < 1024 { // Less than 1KB
-                    print("❌ File is too small, likely corrupted")
                     return false
                 }
             }
         } catch {
-            print("❌ Error checking file attributes: \(error)")
             return false
         }
         

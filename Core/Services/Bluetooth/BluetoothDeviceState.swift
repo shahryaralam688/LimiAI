@@ -56,6 +56,18 @@ class SelectedDevicesStorage: ObservableObject {
         UserDefaults.standard.set(uuid, forKey: lastUUIDKey)
     }
 
+    func remove(uuid: String) {
+        let target = uuid.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !target.isEmpty else { return }
+        items.removeAll { $0.uuid.caseInsensitiveCompare(target) == .orderedSame }
+        save()
+        if let last = UserDefaults.standard.string(forKey: lastUUIDKey),
+           last.caseInsensitiveCompare(target) == .orderedSame {
+            UserDefaults.standard.removeObject(forKey: lastUUIDKey)
+            UserDefaults.standard.removeObject(forKey: lastNameKey)
+        }
+    }
+
     func lastSelected() -> SelectedDevice? {
         if let uuid = UserDefaults.standard.string(forKey: lastUUIDKey),
            let name = UserDefaults.standard.string(forKey: lastNameKey) {
@@ -91,8 +103,6 @@ class SharedDevice: ObservableObject {
             if lastReceivedBytes.count == 2 {
                 let mode = lastReceivedBytes[0]
                 let flags = lastReceivedBytes[1]
-                print("📊 Received Mode: \(mode == 91 ? "Normal" : mode == 90 ? "Developer" : "Unknown")")
-                print("📊 Flags Byte: \(String(format: "%08b", flags))")
             }
         }
     }

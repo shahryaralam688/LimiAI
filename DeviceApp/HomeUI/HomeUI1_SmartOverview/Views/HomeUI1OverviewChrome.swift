@@ -66,6 +66,7 @@ struct DeviceSmartHomeHeader: View {
     let greeting: String
     var avatarImage: UIImage?
     var onNotifications: (() -> Void)?
+    var onConnectedDevices: (() -> Void)?
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -79,6 +80,12 @@ struct DeviceSmartHomeHeader: View {
                     .foregroundStyle(HomeUI1Color.textSecondary)
             }
             Spacer(minLength: 8)
+            if onConnectedDevices != nil {
+                DeviceSoftIconButton(systemImage: "antenna.radiowaves.left.and.right") {
+                    onConnectedDevices?()
+                }
+                .accessibilityLabel("Connected Devices")
+            }
             DeviceSoftIconButton(systemImage: "bell") {
                 onNotifications?()
             }
@@ -254,38 +261,75 @@ struct DeviceFeaturedCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(name)
-                        .font(HomeUI1Type.title(20))
-                        .foregroundStyle(HomeUI1Color.textPrimary)
-                    Text(subtitle)
-                        .font(HomeUI1Type.regular(13))
-                        .foregroundStyle(HomeUI1Color.textSecondary)
+                Button(action: onOpen) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(name)
+                            .font(HomeUI1Type.title(20))
+                            .foregroundStyle(HomeUI1Color.textPrimary)
+                        Text(subtitle)
+                            .font(HomeUI1Type.regular(13))
+                            .foregroundStyle(HomeUI1Color.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .buttonStyle(.plain)
                 Spacer(minLength: 8)
-                powerToggle
+                if isOnline {
+                    powerToggle
+                } else {
+                    offlineBadge
+                }
             }
 
-            Button(action: onOpen) {
-                featuredVisual
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 188)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .homeUI1Elevation(.recessed, cornerRadius: 18, fill: HomeUI1Color.canvas)
+            Group {
+                Button(action: onOpen) {
+                    featuredVisual
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
 
-            moodBar
+            if isOnline {
+                moodBar
+            } else {
+                offlineNotice
+            }
         }
         .padding(20)
         .homeUI1Elevation(.four, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(name), \(isOnline ? "online" : "offline")")
+        .accessibilityAddTraits(isOnline ? [] : .isStaticText)
+    }
+
+    private var offlineBadge: some View {
+        Text("Offline")
+            .font(HomeUI1Type.caption(12))
+            .foregroundStyle(HomeUI1Color.textSecondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .homeUI1CapsuleElevation(.recessed, fill: HomeUI1Color.canvas)
+            .accessibilityHidden(true)
+    }
+
+    private var offlineNotice: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "poweroff")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(HomeUI1Color.textSecondary)
+            Text("Powered off — turn the device on to control it")
+                .font(HomeUI1Type.caption(12))
+                .foregroundStyle(HomeUI1Color.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 14)
+        .padding(.horizontal, 14)
+        .homeUI1Elevation(.recessed, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.canvas)
+        .allowsHitTesting(false)
     }
 
     private var powerToggle: some View {
-        Button {
-            guard isOnline else { return }
-            onTogglePower()
-        } label: {
+        Button(action: onTogglePower) {
             ZStack(alignment: isPowerOn ? .trailing : .leading) {
                 Capsule()
                     .fill(HomeUI1Color.canvas)
@@ -297,28 +341,45 @@ struct DeviceFeaturedCard: View {
                     .background {
                         Circle()
                             .fill(HomeUI1Color.surface)
-                            .shadow(color: HomeUI1Color.shadowDark.opacity(0.55), radius: 3, x: 2, y: 2)
-                            .shadow(color: HomeUI1Color.shadowLight.opacity(1), radius: 3, x: -2, y: -2)
+                            .shadow(color: HomeUI1Color.shadowDark.opacity(0.68), radius: 4, x: 2, y: 3)
+                            .shadow(color: HomeUI1Color.shadowLight.opacity(0.32), radius: 4, x: -2, y: -3)
                     }
                     .padding(4)
             }
             .homeUI1CapsuleElevation(isPowerOn ? .recessed : .two, fill: HomeUI1Color.surface)
         }
         .buttonStyle(.plain)
-        .opacity(isOnline ? 1 : 0.45)
         .accessibilityLabel(isPowerOn ? "Turn off" : "Turn on")
         .animation(HomeUI1Motion.soft, value: isPowerOn)
     }
 
     private var featuredVisual: some View {
         HomeUI1PendantHero(isOn: isPowerOn, isOnline: isOnline)
+            .frame(maxWidth: .infinity)
+            .frame(height: 188)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .homeUI1Elevation(.recessed, cornerRadius: 18, fill: HomeUI1Color.canvas)
+            .overlay {
+                if !isOnline {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(HomeUI1Color.canvas.opacity(0.28))
+                    VStack(spacing: 8) {
+                        Image(systemName: "poweroff")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(HomeUI1Color.textSecondary)
+                        Text("Unavailable")
+                            .font(HomeUI1Type.body(13))
+                            .foregroundStyle(HomeUI1Color.textSecondary)
+                    }
+                    .allowsHitTesting(false)
+                }
+            }
     }
 
     private var moodBar: some View {
         HStack(spacing: 4) {
             ForEach(DeviceLightMood.allCases) { mood in
                 Button {
-                    guard isOnline else { return }
                     onSelectMood(mood)
                 } label: {
                     VStack(spacing: 6) {
@@ -352,7 +413,6 @@ struct DeviceFeaturedCard: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 8)
         .homeUI1Elevation(.recessed, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.canvas)
-        .opacity(isOnline ? 1 : 0.45)
         .animation(HomeUI1Motion.soft, value: selectedMood)
     }
 }
@@ -370,37 +430,55 @@ struct DeviceManageRowCard: View {
         HStack(spacing: 14) {
             Button(action: onOpen) {
                 HStack(spacing: 14) {
-                    HomeUI1PendantThumb(isOn: isPowerOn, isOnline: isOnline, size: 44)
-                        .frame(width: 50, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .homeUI1Elevation(.two, cornerRadius: 14, fill: HomeUI1Color.surface)
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(name)
-                            .font(HomeUI1Type.body(16))
-                            .foregroundStyle(HomeUI1Color.textPrimary)
-                            .lineLimit(1)
-                        Text(subtitle)
-                            .font(HomeUI1Type.caption(12))
-                            .foregroundStyle(HomeUI1Color.textSecondary)
-                            .lineLimit(1)
-                    }
+                    identity
                     Spacer(minLength: 4)
+                    if let statusBadge, isOnline {
+                        Text(statusBadge)
+                            .font(HomeUI1Type.body(12))
+                            .foregroundStyle(HomeUI1Color.accentGreen)
+                    }
                 }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
 
-            if let statusBadge {
-                Text(statusBadge)
-                    .font(HomeUI1Type.body(12))
-                    .foregroundStyle(HomeUI1Color.accentGreen)
+            if isOnline {
+                compactPowerToggle
+            } else {
+                Text("Offline")
+                    .font(HomeUI1Type.caption(11))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .homeUI1CapsuleElevation(.recessed, fill: HomeUI1Color.canvas)
             }
-
-            compactPowerToggle
         }
         .padding(16)
         .homeUI1Elevation(.three, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
-        .opacity(isOnline ? 1 : 0.55)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(name), \(isOnline ? "online" : "offline")")
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var identity: some View {
+        HStack(spacing: 14) {
+            HomeUI1PendantThumb(isOn: isPowerOn, isOnline: isOnline, size: 44)
+                .frame(width: 50, height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .homeUI1Elevation(.two, cornerRadius: 14, fill: HomeUI1Color.surface)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name)
+                    .font(HomeUI1Type.body(16))
+                    .foregroundStyle(HomeUI1Color.textPrimary)
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(HomeUI1Type.caption(12))
+                    .foregroundStyle(HomeUI1Color.textSecondary)
+                    .lineLimit(1)
+            }
+        }
+        .allowsHitTesting(false)
     }
 
     private var compactPowerToggle: some View {
@@ -415,8 +493,8 @@ struct DeviceManageRowCard: View {
                 Circle()
                     .fill(HomeUI1Color.surface)
                     .frame(width: 26, height: 26)
-                    .shadow(color: HomeUI1Color.shadowDark.opacity(0.5), radius: 2, x: 2, y: 2)
-                    .shadow(color: HomeUI1Color.shadowLight.opacity(1), radius: 2, x: -2, y: -2)
+                    .shadow(color: HomeUI1Color.shadowDark.opacity(0.65), radius: 3, x: 2, y: 2)
+                    .shadow(color: HomeUI1Color.shadowLight.opacity(0.30), radius: 3, x: -2, y: -2)
                     .padding(4)
                     .overlay {
                         if isPowerOn {
@@ -429,7 +507,6 @@ struct DeviceManageRowCard: View {
             .homeUI1CapsuleElevation(isPowerOn ? .recessed : .two, fill: HomeUI1Color.surface)
         }
         .buttonStyle(.plain)
-        .disabled(!isOnline)
         .animation(HomeUI1Motion.soft, value: isPowerOn)
     }
 }

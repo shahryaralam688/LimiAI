@@ -3,6 +3,7 @@
 //  LIMI AI Device
 //
 //  Native per-device schedule list + editor (iOS Clock alarm style).
+//  Home UI 1: neumorphic Soft UI with smooth transitions.
 //
 
 import SwiftUI
@@ -14,8 +15,13 @@ struct DeviceSchedulesView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var allSchedules: [DeviceSchedule]
+    @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
+
     @State private var editingSchedule: DeviceSchedule?
     @State private var showNewSchedule = false
+
+    private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+    private var usesHomeUI2: Bool { homeUITheme.selected == .two }
 
     private var schedules: [DeviceSchedule] {
         allSchedules
@@ -23,44 +29,63 @@ struct DeviceSchedulesView: View {
             .sorted { ($0.hour, $0.minute) < ($1.hour, $1.minute) }
     }
 
+    private var morphAnimation: Animation {
+        .spring(response: 0.38, dampingFraction: 0.88)
+    }
+
     var body: some View {
         Group {
-            if schedules.isEmpty {
-                ContentUnavailableView {
-                    Label("No Schedules", systemImage: "clock")
-                } description: {
-                    Text("Schedule \(displayName) to turn on or off automatically at a set time.")
-                } actions: {
-                    Button {
-                        showNewSchedule = true
-                    } label: {
-                        Label("Add Schedule", systemImage: "plus")
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
+            if usesHomeUI1 {
+                homeUI1Body
+            } else if usesHomeUI2 {
+                homeUI2Body
             } else {
-                List {
-                    Section {
-                        ForEach(schedules, id: \.scheduleID) { schedule in
-                            scheduleRow(schedule)
-                        }
-                        .onDelete(perform: deleteSchedules)
-                    } footer: {
-                        Text("Schedules run while the app is open or recently active. A notification reminds you at the scheduled time.")
-                    }
-                }
+                systemBody
             }
         }
         .navigationTitle("Schedules")
         .navigationBarTitleDisplayMode(.inline)
+        .homeUI1ControlNavigationChrome(enabled: usesHomeUI1)
+        .homeUI2ControlNavigationChrome(enabled: usesHomeUI2)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showNewSchedule = true
-                } label: {
-                    Image(systemName: "plus")
+                if usesHomeUI1 {
+                    Button {
+                        DeviceAppGuidance.lightImpact()
+                        showNewSchedule = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(HomeUI1Color.accentGreen)
+                            .frame(width: 34, height: 34)
+                            .homeUI1CircleElevation(.two)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add Schedule")
+                } else if usesHomeUI2 {
+                    Button {
+                        DeviceAppGuidance.lightImpact()
+                        showNewSchedule = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(HomeUI2Color.textOnAccent)
+                            .frame(width: 34, height: 34)
+                            .background(
+                                Circle()
+                                    .fill(HomeUI2Color.accent)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add Schedule")
+                } else {
+                    Button {
+                        showNewSchedule = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add Schedule")
                 }
-                .accessibilityLabel("Add Schedule")
             }
         }
         .sheet(isPresented: $showNewSchedule) {
@@ -69,9 +94,265 @@ struct DeviceSchedulesView: View {
         .sheet(item: $editingSchedule) { schedule in
             DeviceScheduleEditView(device: device, displayName: displayName, schedule: schedule)
         }
+        .animation(morphAnimation, value: schedules.count)
+        .animation(HomeUI1Motion.soft, value: usesHomeUI1)
+        .animation(HomeUI2Motion.soft, value: usesHomeUI2)
     }
 
-    private func scheduleRow(_ schedule: DeviceSchedule) -> some View {
+    // MARK: - Home UI 1
+
+    private var homeUI1Body: some View {
+        ZStack {
+            HomeUI1ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    if schedules.isEmpty {
+                        HomeUI1EmptyStateCard(
+                            title: "No Schedules",
+                            message: "Schedule \(displayName) to turn on or off automatically at a set time.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                        Button {
+                            DeviceAppGuidance.lightImpact()
+                            showNewSchedule = true
+                        } label: {
+                            Label("Add Schedule", systemImage: "plus")
+                                .font(HomeUI1Type.body(15))
+                                .foregroundStyle(HomeUI1Color.accentGreen)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        HomeUI1ControlSectionCard(
+                            title: displayName,
+                            footer: "Schedules run while the app is open or recently active. A notification reminds you at the scheduled time."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(schedules, id: \.scheduleID) { schedule in
+                                    homeUI1ScheduleRow(schedule)
+                                        .transition(.asymmetric(
+                                            insertion: .opacity.combined(with: .move(edge: .bottom)),
+                                            removal: .opacity.combined(with: .scale(scale: 0.96))
+                                        ))
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                deleteSchedule(schedule)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+            }
+        }
+    }
+
+    private func homeUI1ScheduleRow(_ schedule: DeviceSchedule) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                DeviceAppGuidance.lightImpact()
+                editingSchedule = schedule
+            } label: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(schedule.timeText)
+                        .font(HomeUI1Type.title(22))
+                        .foregroundStyle(
+                            schedule.isEnabled
+                                ? HomeUI1Color.textPrimary
+                                : HomeUI1Color.textSecondary
+                        )
+                    Text(rowSubtitle(schedule))
+                        .font(HomeUI1Type.caption(12))
+                        .foregroundStyle(HomeUI1Color.textSecondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                DeviceAppGuidance.lightImpact()
+                withAnimation(morphAnimation) {
+                    schedule.isEnabled.toggle()
+                    schedule.lastFiredAt = nil
+                    try? modelContext.save()
+                }
+                DeviceScheduleEngine.shared.syncNotifications(for: schedule)
+            } label: {
+                Text(schedule.isEnabled ? "On" : "Off")
+                    .font(HomeUI1Type.body(13))
+                    .foregroundStyle(
+                        schedule.isEnabled
+                            ? HomeUI1Color.accentGreen
+                            : HomeUI1Color.textSecondary
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .homeUI1Elevation(
+                        schedule.isEnabled ? .recessed : .one,
+                        cornerRadius: HomeUI1Radius.nav,
+                        fill: HomeUI1Color.surface
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
+        .animation(morphAnimation, value: schedule.isEnabled)
+    }
+
+    // MARK: - Home UI 2
+
+    private var homeUI2Body: some View {
+        ZStack {
+            HomeUI2ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    if schedules.isEmpty {
+                        HomeUI2EmptyStateCard(
+                            title: "No Schedules",
+                            message: "Schedule \(displayName) to turn on or off automatically at a set time.",
+                            showsProgress: false,
+                            onAdd: nil
+                        )
+                        Button {
+                            DeviceAppGuidance.lightImpact()
+                            showNewSchedule = true
+                        } label: {
+                            Label("Add Schedule", systemImage: "plus")
+                                .font(HomeUI2Type.body(15))
+                                .foregroundStyle(HomeUI2Color.textOnAccent)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: HomeUI2Radius.sm, style: .continuous)
+                                        .fill(HomeUI2Color.accent)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        HomeUI2ControlSectionCard(
+                            title: displayName,
+                            footer: "Schedules run while the app is open or recently active. A notification reminds you at the scheduled time."
+                        ) {
+                            VStack(spacing: 10) {
+                                ForEach(schedules, id: \.scheduleID) { schedule in
+                                    homeUI2ScheduleRow(schedule)
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                deleteSchedule(schedule)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+            }
+        }
+    }
+
+    private func homeUI2ScheduleRow(_ schedule: DeviceSchedule) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                DeviceAppGuidance.lightImpact()
+                editingSchedule = schedule
+            } label: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(schedule.timeText)
+                        .font(HomeUI2Type.title(22))
+                        .foregroundStyle(
+                            schedule.isEnabled
+                                ? HomeUI2Color.textPrimary
+                                : HomeUI2Color.textSecondary
+                        )
+                    Text(rowSubtitle(schedule))
+                        .font(HomeUI2Type.caption(12))
+                        .foregroundStyle(HomeUI2Color.textSecondary)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                DeviceAppGuidance.lightImpact()
+                withAnimation(morphAnimation) {
+                    schedule.isEnabled.toggle()
+                    schedule.lastFiredAt = nil
+                    try? modelContext.save()
+                }
+                DeviceScheduleEngine.shared.syncNotifications(for: schedule)
+            } label: {
+                Text(schedule.isEnabled ? "On" : "Off")
+                    .font(HomeUI2Type.body(13))
+                    .foregroundStyle(
+                        schedule.isEnabled
+                            ? HomeUI2Color.textOnAccent
+                            : HomeUI2Color.textSecondary
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(schedule.isEnabled ? HomeUI2Color.accent : HomeUI2Color.surfaceRaised)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .homeUI2Card(cornerRadius: HomeUI2Radius.sm, fill: HomeUI2Color.surfaceRaised)
+        .animation(morphAnimation, value: schedule.isEnabled)
+    }
+
+    // MARK: - System
+
+    @ViewBuilder
+    private var systemBody: some View {
+        if schedules.isEmpty {
+            ContentUnavailableView {
+                Label("No Schedules", systemImage: "clock")
+            } description: {
+                Text("Schedule \(displayName) to turn on or off automatically at a set time.")
+            } actions: {
+                Button {
+                    showNewSchedule = true
+                } label: {
+                    Label("Add Schedule", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            List {
+                Section {
+                    ForEach(schedules, id: \.scheduleID) { schedule in
+                        systemScheduleRow(schedule)
+                    }
+                    .onDelete(perform: deleteSchedules)
+                } footer: {
+                    Text("Schedules run while the app is open or recently active. A notification reminds you at the scheduled time.")
+                }
+            }
+        }
+    }
+
+    private func systemScheduleRow(_ schedule: DeviceSchedule) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(schedule.timeText)
@@ -107,6 +388,14 @@ struct DeviceSchedulesView: View {
         return parts.joined(separator: " • ")
     }
 
+    private func deleteSchedule(_ schedule: DeviceSchedule) {
+        withAnimation(morphAnimation) {
+            DeviceScheduleEngine.shared.removeNotifications(for: schedule)
+            modelContext.delete(schedule)
+            try? modelContext.save()
+        }
+    }
+
     private func deleteSchedules(at offsets: IndexSet) {
         let items = schedules
         for index in offsets {
@@ -132,79 +421,229 @@ struct DeviceScheduleEditView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
 
     @State private var time = Date()
     @State private var turnOn = true
     @State private var channel = 0
     @State private var repeatDays: Set<Int> = []
 
+    private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
-                        .datePickerStyle(.wheel)
-                        .labelsHidden()
-                        .frame(maxWidth: .infinity)
-                }
-
-                Section {
-                    Picker("Action", selection: $turnOn) {
-                        Text("Turn On").tag(true)
-                        Text("Turn Off").tag(false)
-                    }
-                    .pickerStyle(.segmented)
-
-                    if device.chennalCount > 1 {
-                        Picker("Channel", selection: $channel) {
-                            Text("All channels").tag(0)
-                            ForEach(1...device.chennalCount, id: \.self) { ch in
-                                Text("Channel \(ch)").tag(ch)
-                            }
-                        }
-                    }
-                }
-
-                Section("Repeat") {
-                    ForEach(1...7, id: \.self) { weekday in
-                        Button {
-                            if repeatDays.contains(weekday) {
-                                repeatDays.remove(weekday)
-                            } else {
-                                repeatDays.insert(weekday)
-                            }
-                        } label: {
-                            HStack {
-                                Text(Calendar.current.weekdaySymbols[weekday - 1])
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if repeatDays.contains(weekday) {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(DeviceTheme.accent)
-                                }
-                            }
-                        }
-                    }
-                } 
-
-                Section {
-                } footer: {
-                    Text(repeatDays.isEmpty
-                         ? "Runs once at the next \(timeOnlyText)."
-                         : "Repeats every \(DeviceScheduleEditView.repeatSummary(repeatDays)).")
+            Group {
+                if usesHomeUI1 {
+                    homeUI1Editor
+                } else {
+                    systemEditor
                 }
             }
             .navigationTitle(schedule == nil ? "New Schedule" : "Edit Schedule")
             .navigationBarTitleDisplayMode(.inline)
+            .homeUI1ControlNavigationChrome(enabled: usesHomeUI1)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
+                    Button("Save") {
+                        DeviceAppGuidance.lightImpact()
+                        save()
+                    }
+                    .fontWeight(usesHomeUI1 ? .semibold : .regular)
+                    .foregroundStyle(usesHomeUI1 ? HomeUI1Color.accentGreen : Color.accentColor)
                 }
             }
             .onAppear(perform: loadExisting)
+        }
+    }
+
+    // MARK: - Home UI 1 editor
+
+    private var homeUI1Editor: some View {
+        ZStack {
+            HomeUI1ControlScreenBackground()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HomeUI1ControlSectionCard(title: "Time") {
+                        DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
+                            .datePickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
+                            .colorScheme(.light)
+                    }
+
+                    HomeUI1ControlSectionCard(title: "Action") {
+                        HStack(spacing: 8) {
+                            actionChip(title: "Turn On", selected: turnOn) {
+                                withAnimation(HomeUI1Motion.soft) { turnOn = true }
+                            }
+                            actionChip(title: "Turn Off", selected: !turnOn) {
+                                withAnimation(HomeUI1Motion.soft) { turnOn = false }
+                            }
+                        }
+
+                        if device.chennalCount > 1 {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Channel")
+                                    .font(HomeUI1Type.caption(12))
+                                    .foregroundStyle(HomeUI1Color.textSecondary)
+
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        channelChip(title: "All", value: 0)
+                                        ForEach(1...device.chennalCount, id: \.self) { ch in
+                                            channelChip(title: "Ch \(ch)", value: ch)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    HomeUI1ControlSectionCard(
+                        title: "Repeat",
+                        footer: repeatDays.isEmpty
+                            ? "Runs once at the next \(timeOnlyText)."
+                            : "Repeats every \(DeviceScheduleEditView.repeatSummary(repeatDays))."
+                    ) {
+                        VStack(spacing: 8) {
+                            ForEach(1...7, id: \.self) { weekday in
+                                let selected = repeatDays.contains(weekday)
+                                Button {
+                                    DeviceAppGuidance.lightImpact()
+                                    withAnimation(HomeUI1Motion.soft) {
+                                        if selected {
+                                            repeatDays.remove(weekday)
+                                        } else {
+                                            repeatDays.insert(weekday)
+                                        }
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(Calendar.current.weekdaySymbols[weekday - 1])
+                                            .font(HomeUI1Type.body(15))
+                                            .foregroundStyle(HomeUI1Color.textPrimary)
+                                        Spacer()
+                                        if selected {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 13, weight: .bold))
+                                                .foregroundStyle(HomeUI1Color.accentGreen)
+                                        }
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 12)
+                                    .homeUI1Elevation(
+                                        selected ? .recessed : .one,
+                                        cornerRadius: HomeUI1Radius.nav,
+                                        fill: HomeUI1Color.surface
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
+            }
+        }
+    }
+
+    private func actionChip(title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(HomeUI1Type.body(13))
+                .foregroundStyle(selected ? HomeUI1Color.accentGreen : HomeUI1Color.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .homeUI1Elevation(
+                    selected ? .recessed : .one,
+                    cornerRadius: HomeUI1Radius.nav,
+                    fill: HomeUI1Color.surface
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func channelChip(title: String, value: Int) -> some View {
+        let selected = channel == value
+        return Button {
+            withAnimation(HomeUI1Motion.soft) { channel = value }
+        } label: {
+            Text(title)
+                .font(HomeUI1Type.body(12))
+                .foregroundStyle(selected ? HomeUI1Color.accentGreen : HomeUI1Color.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .homeUI1Elevation(
+                    selected ? .recessed : .one,
+                    cornerRadius: HomeUI1Radius.nav,
+                    fill: HomeUI1Color.surface
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - System editor
+
+    private var systemEditor: some View {
+        Form {
+            Section {
+                DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity)
+            }
+
+            Section {
+                Picker("Action", selection: $turnOn) {
+                    Text("Turn On").tag(true)
+                    Text("Turn Off").tag(false)
+                }
+                .pickerStyle(.segmented)
+
+                if device.chennalCount > 1 {
+                    Picker("Channel", selection: $channel) {
+                        Text("All channels").tag(0)
+                        ForEach(1...device.chennalCount, id: \.self) { ch in
+                            Text("Channel \(ch)").tag(ch)
+                        }
+                    }
+                }
+            }
+
+            Section("Repeat") {
+                ForEach(1...7, id: \.self) { weekday in
+                    Button {
+                        if repeatDays.contains(weekday) {
+                            repeatDays.remove(weekday)
+                        } else {
+                            repeatDays.insert(weekday)
+                        }
+                    } label: {
+                        HStack {
+                            Text(Calendar.current.weekdaySymbols[weekday - 1])
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if repeatDays.contains(weekday) {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(DeviceTheme.accent)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section {
+            } footer: {
+                Text(repeatDays.isEmpty
+                     ? "Runs once at the next \(timeOnlyText)."
+                     : "Repeats every \(DeviceScheduleEditView.repeatSummary(repeatDays)).")
+            }
         }
     }
 

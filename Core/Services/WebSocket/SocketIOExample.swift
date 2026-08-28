@@ -14,7 +14,7 @@ final class SocketIOExample {
         let url = AppURLs.Realtime.socketIOURL
         // Make the configuration type explicit to avoid Any/ambiguity issues
         let config: SocketIOClientConfiguration = [
-            .log(true),
+            .log(false),
             .compress,
             // Useful with Cloudflare tunnels / proxies:
             .secure(true),              // because you're using https
@@ -39,38 +39,30 @@ final class SocketIOExample {
 
     private func setupListeners() {
         socket.on(clientEvent: .connect) { _, _ in
-            print("Socket connected")
         }
 
         socket.on("ID") { data, _ in
-            print("Received 'ID' event:", data)
         }
 
         socket.on("order_update") { data, _ in
-            print("Received 'order_update' event:", data)
 
             // Parse: { extracted: { light: { action: "..." } } }
             if let dict = (data.first as? [String: Any]),
                let extracted = dict["extracted"] as? [String: Any],
                let light = extracted["light"] as? [String: Any],
                let action = light["action"] as? String {
-                print("Parsed action: \(action)")
                 self.onOrderUpdate?(action)
             } else {
-                print("Could not parse 'action' from order_update")
             }
         }
 
         socket.on("server_hello") { data, _ in
-            print("Received 'server_hello' event:", data)
         }
 
         socket.on(clientEvent: .error) { data, _ in
-            print("Socket error:", data)
         }
 
         socket.on(clientEvent: .disconnect) { data, _ in
-            print("Socket disconnected:", data)
         }
     }
 

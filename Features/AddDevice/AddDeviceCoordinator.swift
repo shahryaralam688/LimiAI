@@ -47,6 +47,7 @@ final class AddDeviceFlowViewModel: ObservableObject {
 
     @Published private(set) var step: Step = .scan
     @Published var passwordInput: String = ""
+    @Published private(set) var successDetailMessage: String = "Credentials confirmed"
     @Published private(set) var scanViewModel = DemoScanDevicesViewModel()
 
     private var cancellables = Set<AnyCancellable>()
@@ -74,9 +75,24 @@ final class AddDeviceFlowViewModel: ObservableObject {
                 self.step = .wifiList
             }
             .store(in: &cancellables)
+
+        scanViewModel.$bleConnectError
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                guard let self else { return }
+                guard self.step == .scan else { return }
+                self.scanViewModel.clearBLEConnectError()
+                self.step = .failure(message: message)
+            }
+            .store(in: &cancellables)
     }
 
     func onAppear() {
+        if WiFiProvisioningActivityGate.isActive {
+            scanViewModel.onAppear()
+            return
+        }
         if !hasStartedFlow {
             step = .scan
             passwordInput = ""
@@ -87,6 +103,7 @@ final class AddDeviceFlowViewModel: ObservableObject {
     }
 
     func pauseForBackground() {
+        guard !WiFiProvisioningActivityGate.isActive else { return }
         scanViewModel.onDisappear()
     }
 
@@ -97,6 +114,18 @@ final class AddDeviceFlowViewModel: ObservableObject {
 
     func selectDevice(_ device: BLEDevice) {
         guard step == .scan else { return }
+
+        DeviceConsole.banner("ADD FLOW — select device")
+        DeviceConsole.log(
+            .add,
+            "selected type=\(device.deviceType) name=\(device.name) uuid=\(device.uuid) reach=\(String(describing: device.reachability)) deviceId=\(device.txtRecord?["deviceId"] ?? "-") master=\(device.isVirtualMaster)"
+        )
+        DeviceConsole.dumpConfiguredStore(reason: "at select")
+
+        if let master = device.virtualMaster {
+            selectVirtualMasterDevice(device, master: master)
+            return
+        }
 
         switch device.deviceType {
         case .bluetooth:
@@ -109,10 +138,42 @@ final class AddDeviceFlowViewModel: ObservableObject {
         }
     }
 
-    func finish() {
+    private func selectVirtualMasterDevice(_ device: BLEDevice, master: VirtualMasterScanMetadata) {
+        scanViewModel.selectedName = device.name
+        scanViewModel.selectedId = master.virtualDeviceID
+
+        let allMembersOnline = master.memberHardwareIds.allSatisfy { hw in
+            VirtualMasterPresence.isMemberCloudOnline(hardwareId: hw)
+                || VirtualMasterPresence.defaultWiFiLANCheck(hardwareId: hw)
+        }
+        if allMembersOnline {
+            DeviceConsole.log(.add, "master select — all \(master.memberHardwareIds.count) members online")
+            step = .success
+            return
+        }
+
+        guard let bleMember = scanViewModel.preferredBLEMember(for: master) else {
+            DeviceConsole.log(.add, "master select — no BLE member available for provisioning")
+            step = .failure(message: "No nearby master hub found over Bluetooth. Move closer and try again.")
+            return
+        }
+
+        scanViewModel.connectBLEDevice(
+            name: bleMember.name,
+            id: bleMember.uuid,
+            virtualMaster: master
+        )
+    }
+
+    func finish(force: Bool = false) {
         guard !hasFinished else { return }
+        if WiFiProvisioningActivityGate.isActive && !force {
+            DeviceConsole.log(.add, "finish() skipped — provisioning active")
+            return
+        }
         hasFinished = true
         hasStartedFlow = false
+        AddDeviceFlowActivityGate.setActive(false)
         WiFiProvisioningCoordinator.shared.cancel()
         scanViewModel.onDisappear()
     }
@@ -120,11 +181,24 @@ final class AddDeviceFlowViewModel: ObservableObject {
     func selectSSID(_ ssid: String) {
         lastSelectedSSID = ssid
         passwordInput = ""
+        DeviceConsole.log(.add, "SSID selected=\(ssid) for ble=\(selectedDeviceName) uuid=\(selectedDeviceId)")
         step = .password(ssid: ssid)
     }
 
     func startProvisioning(ssid: String) {
         guard !ssid.isEmpty else { return }
+        DeviceConsole.banner("ADD FLOW — start provisioning")
+        DeviceConsole.log(
+            .add,
+            "startProvisioning SSID=\(ssid) passwordLen=\(passwordInput.count) bleName=\(selectedDeviceName) bleUUID=\(selectedDeviceId) master=\(scanViewModel.selectedVirtualMaster != nil)"
+        )
+        DeviceConsole.dumpConfiguredStore(reason: "before startProvisioning")
+
+        if let master = scanViewModel.selectedVirtualMaster {
+            startMasterProvisioning(ssid: ssid, master: master)
+            return
+        }
+
         step = .provisioning(phase: "Sending Wi-Fi credentials…")
 
         WiFiProvisioningCoordinator.shared.provisionAndVerify(
@@ -133,16 +207,22 @@ final class AddDeviceFlowViewModel: ObservableObject {
             ssid: ssid,
             password: passwordInput,
             onPhaseUpdate: { [weak self] phase in
+                DeviceConsole.log(.add, "phase → \(phase)")
                 self?.step = .provisioning(phase: phase)
             },
             completion: { [weak self] result in
                 guard let self else { return }
                 switch result {
                 case .success(let outcome):
+                    DeviceConsole.log(
+                        .add,
+                        "SUCCESS outcome deviceId=\(outcome.deviceId) name=\(outcome.deviceName) → remember bleUUID=\(self.selectedDeviceId)"
+                    )
                     SelectedDevicesStorage.shared.addOrUpdate(
                         name: self.selectedDeviceName,
                         uuid: self.selectedDeviceId
                     )
+                    LocallyRemovedDeviceStore.shared.clearRemoved(outcome.deviceId)
                     // Persist hardwareId ↔ BLE UUID so Cloud-miss can reconnect smoothly.
                     ConfiguredBLEDeviceStore.shared.remember(
                         hardwareId: outcome.deviceId,
@@ -151,8 +231,68 @@ final class AddDeviceFlowViewModel: ObservableObject {
                             ? self.selectedDeviceName
                             : outcome.deviceName
                     )
+                    // Free BLE radio for the next single hub (device #2) in the same test session.
+                    BluetoothManager.shared.disconnectPeripheral(
+                        uuidString: self.selectedDeviceId,
+                        suppressReconnect: true
+                    )
+                    DeviceConsole.dumpConfiguredStore(reason: "after SUCCESS remember")
+                    DeviceConsole.dumpBonjourOnline(reason: "after SUCCESS")
+                    DeviceConsole.banner("ADD FLOW — done (success)")
+                    self.successDetailMessage = "Credentials confirmed"
                     self.step = .success
                 case .failure(let failure):
+                    DeviceConsole.log(.add, "FAILURE \(failure.userMessage)")
+                    DeviceConsole.log(
+                        .add,
+                        "BLE after fail live=\(BluetoothManager.shared.isLiveConnected(forPeripheralUUID: self.selectedDeviceId)) current=\(BluetoothManager.shared.connectedPeripheral?.identifier.uuidString ?? "nil")"
+                    )
+                    DeviceConsole.dumpConfiguredStore(reason: "after FAILURE")
+                    DeviceConsole.dumpBonjourOnline(reason: "after FAILURE")
+                    DeviceConsole.banner("ADD FLOW — done (failure)")
+                    self.step = .failure(message: failure.userMessage)
+                }
+            }
+        )
+    }
+
+    private func startMasterProvisioning(ssid: String, master: VirtualMasterScanMetadata) {
+        let hubCount = master.memberHardwareIds.count
+        step = .provisioning(phase: "Preparing Master Device (0 of \(hubCount))…")
+
+        WiFiProvisioningCoordinator.shared.provisionMasterGroup(
+            master: master,
+            ssid: ssid,
+            password: passwordInput,
+            skipAlreadyOnline: true,
+            networkJoinTimeout: WiFiProvisioningCoordinator.masterNetworkJoinTimeout,
+            onPhaseUpdate: { [weak self] phase in
+                DeviceConsole.log(.add, "master phase → \(phase)")
+                self?.step = .provisioning(phase: phase)
+            },
+            completion: { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let outcomes):
+                    DeviceConsole.log(.add, "MASTER SUCCESS hubs=\(outcomes.count)")
+                    for outcome in outcomes {
+                        SelectedDevicesStorage.shared.addOrUpdate(
+                            name: outcome.deviceName,
+                            uuid: outcome.blePeripheralUUID
+                        )
+                        LocallyRemovedDeviceStore.shared.clearRemoved(outcome.deviceId)
+                        ConfiguredBLEDeviceStore.shared.remember(
+                            hardwareId: outcome.deviceId,
+                            blePeripheralUUID: outcome.blePeripheralUUID,
+                            displayName: outcome.deviceName
+                        )
+                    }
+                    DeviceConsole.dumpConfiguredStore(reason: "after MASTER SUCCESS")
+                    self.scanViewModel.clearSelectedVirtualMaster()
+                    self.successDetailMessage = "Credentials confirmed"
+                    self.step = .success
+                case .failure(let failure):
+                    DeviceConsole.log(.add, "MASTER FAILURE \(failure.userMessage)")
                     self.step = .failure(message: failure.userMessage)
                 }
             }
@@ -169,6 +309,10 @@ final class AddDeviceFlowViewModel: ObservableObject {
             scanViewModel.resetProvisioningSession()
         }
     }
+
+    func returnToWifiList() {
+        step = .wifiList
+    }
 }
 
 // MARK: - Flow view
@@ -177,7 +321,6 @@ struct AddDeviceFlowView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = AddDeviceFlowViewModel()
-    @State private var isPasswordVisible = false
     var onFinished: ((AddDeviceFlowOutcome) -> Void)? = nil
 
     var body: some View {
@@ -189,12 +332,6 @@ struct AddDeviceFlowView: View {
             .limiModalNavigationBar(title: navigationTitle, onClose: closeEntireFlow)
         }
         .onAppear { viewModel.onAppear() }
-        .onDisappear {
-            // App switcher also triggers onDisappear — only tear down when the modal is dismissed.
-            if scenePhase == .active {
-                viewModel.finish()
-            }
-        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background, .inactive:
@@ -214,6 +351,7 @@ struct AddDeviceFlowView: View {
     private var navigationTitle: String {
         switch viewModel.step {
         case .success: return "All Set"
+        case .wifiList, .password, .provisioning: return ""
         default: return "Add Device"
         }
     }
@@ -239,147 +377,78 @@ struct AddDeviceFlowView: View {
                 onSelectDevice: { viewModel.selectDevice($0) }
             )
         }
-        .overlay { AddDeviceConnectingOverlay(scanViewModel: viewModel.scanViewModel) }
+        .overlay {
+            if viewModel.scanViewModel.isConnectingToBLE {
+                LimiPairingOverlay(
+                    deviceName: viewModel.scanViewModel.selectedName ?? "LIMI Device",
+                    deviceId: viewModel.scanViewModel.selectedId,
+                    mode: .connecting,
+                    modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.scanViewModel.selectedId),
+                    onPrimary: nil,
+                    onDismiss: nil
+                )
+            }
+        }
     }
 
     private var wifiListStep: some View {
-        VStack(spacing: 0) {
-            LimiModuleSubtitle(text: "Choose a Wi-Fi network for your device")
-
-            HStack {
-                Image(systemName: "wifi")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 60, height: 60)
-                    .foregroundColor(.appTextPrimary)
-            }
-            .padding(.vertical, 12)
-
-            List {
-                ForEach(Array(viewModel.wifiNetworks.enumerated()), id: \.offset) { _, ssid in
-                    HStack(spacing: 12) {
-                        Text(ssid)
-                            .font(LimiTypography.button)
-                            .foregroundColor(.appTextPrimary)
-                        Spacer()
-                        Image(systemName: "wifi")
-                            .foregroundColor(.appTextPrimary)
-                    }
-                    .padding()
-                    .contentShape(Rectangle())
-                    .onTapGesture { viewModel.selectSSID(ssid) }
-                    .listRowBackground(Color.clear)
-                }
-                if viewModel.wifiNetworks.isEmpty {
-                    HStack {
-                        Text("No Wi‑Fi detected. Grant location permission or connect to a network.")
-                            .foregroundColor(.appTextMuted)
-                        Spacer()
-                    }
-                    .listRowBackground(Color.clear)
-                }
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(
-                Rectangle()
-                    .fill(Color.appSurfacePrimary)
-                    .cornerRadius(24)
-            )
-            .limiFloatingOrbClearance()
-        }
+        LimiAppleDeviceSetupView(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .wifiList,
+            networks: viewModel.wifiNetworks,
+            password: $viewModel.passwordInput,
+            onSelectSSID: { viewModel.selectSSID($0) },
+            onConnect: {},
+            onBack: {},
+            modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId)
+        )
+        .limiFloatingOrbClearance()
     }
 
     private func passwordStep(ssid: String) -> some View {
-        VStack(spacing: 0) {
-            LimiModuleSubtitle(text: "Enter the password for your Wi-Fi network")
-
-            VStack(spacing: 16) {
-                HStack {
-                    Text("Wifi Password")
-                        .font(LimiTypography.title3)
-                        .foregroundColor(.appTextPrimary)
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-
-                HStack {
-                    Text(ssid)
-                        .font(LimiTypography.title2)
-                        .foregroundColor(.appTextPrimary)
-                        .padding(.horizontal, 16)
-                    Spacer()
-                }
-                .padding(.bottom, 34)
-
-                HStack {
-                    Group {
-                        if isPasswordVisible {
-                            TextField("Enter your Wi-Fi password", text: $viewModel.passwordInput)
-                        } else {
-                            SecureField("Enter your Wi-Fi password", text: $viewModel.passwordInput)
-                        }
-                    }
-                    .font(LimiTypography.headline)
-                    .foregroundColor(Color.appTextSoft)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-                    .padding(.leading, 16)
-
-                    Button {
-                        isPasswordVisible.toggle()
-                    } label: {
-                        Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
-                            .foregroundColor(.appTextPrimary)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
-                }
-                .frame(height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.appSurfacePrimary)
-                )
-                .padding(.horizontal, 16)
-            }
-            .onAppear { isPasswordVisible = false }
-
-            Spacer()
-
-            LimiPrimaryButton(title: "Connect Device") {
-                viewModel.startProvisioning(ssid: ssid)
-            }
-            .disabled(viewModel.passwordInput.isEmpty)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
-            .limiFloatingOrbClearance()
-        }
+        LimiAppleDeviceSetupView(
+            deviceName: viewModel.selectedDeviceName,
+            deviceId: viewModel.selectedDeviceId,
+            mode: .password(ssid),
+            networks: viewModel.wifiNetworks,
+            password: $viewModel.passwordInput,
+            onSelectSSID: { _ in },
+            onConnect: { viewModel.startProvisioning(ssid: ssid) },
+            onBack: { viewModel.returnToWifiList() },
+            modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId)
+        )
+        .limiFloatingOrbClearance()
     }
 
     private func provisioningStep(phase: String) -> some View {
-        VStack(spacing: 20) {
-            Spacer()
-            ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
-                .scaleEffect(1.5)
-            Text("Connecting to Wi-Fi")
-                .font(LimiTypography.title3)
-                .foregroundColor(.appTextPrimary)
-            Text(phase)
-                .font(LimiTypography.subheadline)
-                .foregroundColor(.appTextMuted)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Spacer()
+        ZStack {
+            Color.appCanvasPrimary.ignoresSafeArea()
+            LimiPairingOverlay(
+                deviceName: viewModel.selectedDeviceName,
+                deviceId: viewModel.selectedDeviceId,
+                mode: .provisioning(phase),
+                modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId),
+                placement: .centered,
+                onPrimary: nil,
+                onDismiss: nil
+            )
         }
         .limiFloatingOrbClearance()
     }
 
     private var successStep: some View {
-        DemoConnectedWifiView(deviceName: viewModel.selectedDeviceName) {
-            finishFlow(outcome: .showDevices)
+        ZStack {
+            Color.appCanvasPrimary.ignoresSafeArea()
+            LimiPairingOverlay(
+                deviceName: viewModel.selectedDeviceName,
+                deviceId: viewModel.selectedDeviceId,
+                mode: .connected(viewModel.successDetailMessage),
+                modelName: LimiPairingAssets.bundledName(forDeviceId: viewModel.selectedDeviceId),
+                placement: .centered,
+                onPrimary: { finishFlow(outcome: .showDevices) },
+                onDismiss: { finishFlow(outcome: .showDevices) }
+            )
         }
     }
 
@@ -408,13 +477,13 @@ struct AddDeviceFlowView: View {
     }
 
     private func closeEntireFlow() {
-        viewModel.finish()
+        viewModel.finish(force: true)
         onFinished?(.cancelled)
         dismiss()
     }
 
     private func finishFlow(outcome: AddDeviceFlowOutcome) {
-        viewModel.finish()
+        viewModel.finish(force: true)
         onFinished?(outcome)
         dismiss()
     }
@@ -459,26 +528,6 @@ private struct AddDeviceScanDeviceList: View {
             }
 
             Spacer()
-        }
-    }
-}
-
-private struct AddDeviceConnectingOverlay: View {
-    @ObservedObject var scanViewModel: DemoScanDevicesViewModel
-
-    var body: some View {
-        if scanViewModel.isConnectingToBLE {
-            ZStack {
-                Color.appOverlayScrim.ignoresSafeArea()
-                VStack(spacing: 20) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .appTextPrimary))
-                        .scaleEffect(1.5)
-                    Text("Connecting to device...")
-                        .font(LimiTypography.headline)
-                        .foregroundColor(.appTextPrimary)
-                }
-            }
         }
     }
 }

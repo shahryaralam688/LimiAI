@@ -142,7 +142,6 @@ struct SchedulingSummaryView: View {
     
     private var saveButton: some View {
         LimiPrimaryButton(title: "Save Changes") {
-            print("✅ Schedule updated: \(schedule.type) at \(schedule.time)")
             dismiss()
         }
     }

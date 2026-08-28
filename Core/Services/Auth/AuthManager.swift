@@ -28,8 +28,6 @@ class AuthManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: tokenKey)
 
         #if DEBUG
-        print("Token saved (length: \(token.count))")
-        print("Auth expiry scheduled")
         #endif
 
         if updateAuthState {
@@ -46,7 +44,6 @@ class AuthManager: ObservableObject {
         UserDefaults.standard.set(role, forKey: roleKey)
         UserDefaults.standard.synchronize()
         #if DEBUG
-        print("Role saved")
         #endif
     }
 
@@ -74,13 +71,55 @@ class AuthManager: ObservableObject {
         return "Bearer \(trimmed)"
     }
 
+    /// Stable per-account key for phone-local caches (virtual devices, removed devices, etc.).
+    func sessionCacheKey() -> String {
+        guard let token = getToken()?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !token.isEmpty else {
+            return ""
+        }
+        if let subject = Self.jwtSubject(from: token) {
+            return subject
+        }
+        return "token-\(token.hashValue)"
+    }
+
+    private static func jwtSubject(from token: String) -> String? {
+        let raw = token.hasPrefix("Bearer ") ? String(token.dropFirst(7)) : token
+        let parts = raw.split(separator: ".")
+        guard parts.count >= 2 else { return nil }
+
+        var payload = String(parts[1])
+        let remainder = payload.count % 4
+        if remainder > 0 {
+            payload += String(repeating: "=", count: 4 - remainder)
+        }
+        payload = payload
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        guard let data = Data(base64Encoded: payload),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+
+        for key in ["sub", "userId", "user_id", "id", "_id"] {
+            if let value = json[key] as? String {
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty { return trimmed }
+            }
+            if let value = json[key] as? Int {
+                return String(value)
+            }
+        }
+        return nil
+    }
+
     func isTokenValid() -> Bool {
         let expiryTime = UserDefaults.standard.double(forKey: expiryKey)
         let currentTime = Date().timeIntervalSince1970
 
         guard expiryTime > currentTime else {
             #if DEBUG
-            print("Auth token expired — clearing session")
             #endif
             clearToken()
             return false
@@ -106,7 +145,6 @@ class AuthManager: ObservableObject {
         }
 
         #if DEBUG
-        print("Auth session cleared")
         #endif
 
         NotificationCenter.default.post(name: .limiAuthSessionDidChange, object: nil)

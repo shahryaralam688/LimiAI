@@ -28,7 +28,7 @@ public final class ThrottledSender: ObservableObject {
     @Published public private(set) var lastError: LimiTransportError?
 
     public init(deviceId: String, transport: LimiTransport = .shared) {
-        self.deviceId = deviceId.uppercased()
+        self.deviceId = LimiDeviceNaming.normalizedHardwareId(deviceId)
         self.transport = transport
     }
 
@@ -108,10 +108,8 @@ public final class ThrottledSender: ObservableObject {
                 await MainActor.run { self?.lastError = nil }
             } catch let err as LimiTransportError {
                 await MainActor.run { self?.lastError = err }
-                print("⚠️ [ThrottledSender] \(deviceId) failed: \(err.localizedDescription)")
             } catch {
                 await MainActor.run { self?.lastError = .deviceUnreachable }
-                print("⚠️ [ThrottledSender] \(deviceId) unknown error: \(error.localizedDescription)")
             }
         }
     }

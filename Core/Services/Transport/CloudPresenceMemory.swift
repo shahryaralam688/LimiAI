@@ -2,13 +2,13 @@
 //  CloudPresenceMemory.swift
 //  Limi
 //
-//  Remembers which devices were last seen cloud-online so Case 3 remote
-//  lists still populate after a missed `device_status` event (Passthrough).
+//  Remembers device ids seen on cloud for Home list seeding (Case 3).
+//  Does NOT mean live Online — that requires a fresh `device_status`.
 //
 
 import Foundation
 
-/// Persists last-known MQTT presence per hardware id.
+/// Persists last-known MQTT presence per hardware id (list seed only).
 public final class CloudPresenceMemory {
     public static let shared = CloudPresenceMemory()
 
@@ -56,5 +56,16 @@ public final class CloudPresenceMemory {
         lock.lock()
         defer { lock.unlock() }
         return cache.compactMap { $0.value ? $0.key : nil }
+    }
+
+    /// Drop presence memory for a device (local delete from this phone).
+    public func remove(deviceId: String) {
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
+        guard !key.isEmpty else { return }
+        lock.lock()
+        cache.removeValue(forKey: key)
+        let snapshot = cache
+        lock.unlock()
+        UserDefaults.standard.set(snapshot, forKey: defaultsKey)
     }
 }

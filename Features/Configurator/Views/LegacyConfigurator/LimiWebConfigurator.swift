@@ -134,7 +134,6 @@ struct LimiWebViewCon: UIViewRepresentable {
 
         // Load
         isLoading = true
-        print("[WebView] Loading URL: \(url.absoluteString)")
         webView.load(URLRequest(url: url))
 
         return webView
@@ -153,10 +152,9 @@ struct LimiWebViewCon: UIViewRepresentable {
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             switch message.name {
             case "logger":
-                print("[WebView JS Console] \(message.body)")
+                break
             case "buttonClicked":
                 if let snapId = message.body as? String {
-                    print("[SnapID] Received: \(snapId)")
                     DispatchQueue.main.async { self.isLoading.wrappedValue = true }
                     ConfiguratorDownloadService.downloadIfNeeded(snapId: snapId) { _ in
                         DispatchQueue.main.async {
@@ -165,28 +163,16 @@ struct LimiWebViewCon: UIViewRepresentable {
                     }
                     if let mac = macAddress, !mac.isEmpty {
                         DeviceDownloadStore.shared.set(downloadId: snapId, forMac: mac)
-                        print("[SnapID] Stored mapping mac=\(mac) -> downloadId=\(snapId)")
-                        // Read-back prints for verification
-                        if let stored = DeviceDownloadStore.shared.get(forMac: mac) {
-                            print("[SnapID] Read-back for mac=\(mac): \(stored)")
-                        } else {
-                            print("[SnapID] Read-back failed for mac=\(mac)")
-                        }
-                        let allMap = DeviceDownloadStore.shared.all()
-                        print("[SnapID] Current Map: \(allMap)")
                     }
-                } else {
-                    print("[SnapID] Received non-string body: \(message.body)")
                 }
             default:
-                print("[WebView Message] name=\(message.name) body=\(message.body)")
+                break
             }
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             if navigationAction.targetFrame == nil {
-                print("[WebView] Intercepted navigation with no targetFrame. Forcing load.")
                 webView.load(navigationAction.request)
                 decisionHandler(.cancel)
             } else {
@@ -195,7 +181,6 @@ struct LimiWebViewCon: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            print("[WebView] Started loading...")
             isLoading.wrappedValue = true
         }
 
@@ -205,19 +190,16 @@ struct LimiWebViewCon: UIViewRepresentable {
 //        }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            print("[WebView] Navigation failed: \(error.localizedDescription)")
             isLoading.wrappedValue = false
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            print("[WebView] Failed provisional load: \(error.localizedDescription)")
             isLoading.wrappedValue = false
         }
 
         // Handle alert, confirm etc. if JS uses it
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                      initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-            print("[WebView] JS Alert: \(message)")
             completionHandler()
         }
         
@@ -347,9 +329,7 @@ struct LimiContentViewcCon: View {
         .onAppear {
             if let token = AuthManager.shared.getToken() {
                 let url = AppURLs.Web.configurator(token: token)
-                print("Configurator URL: \(url)")
             } else {
-                print("No token found")
             }
         }
     }
