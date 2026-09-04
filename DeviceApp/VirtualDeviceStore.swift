@@ -35,7 +35,7 @@ final class VirtualDeviceStore: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
-                if AuthManager.shared.getToken() == nil {
+                if !AuthManager.shared.isAuthenticated || AuthManager.shared.getToken() == nil {
                     self.resetForSignOut()
                 } else {
                     self.adoptCurrentUserAndPull()
@@ -147,6 +147,50 @@ final class VirtualDeviceStore: ObservableObject {
             )
             await self.refreshFromBackend(force: true)
         }
+    }
+
+    /// Explicitly create a BRAND-NEW virtual device from the given hardware ids.
+    /// Never merges into an existing cloud group — always a fresh `vd-` id.
+    /// Ids already belonging to a group should be filtered out by the caller.
+    func createVirtualDevice(hardwareIds: [String]) {
+        let keys = hardwareIds
+            .map { LimiDeviceNaming.normalizedHardwareId($0) }
+            .filter { !$0.isEmpty }
+        let unique = Array(Set(keys)).sorted()
+
+        guard !unique.isEmpty else {
+            lastSyncMessage = "Select at least one online device to group."
+            return
+        }
+        guard AuthManager.shared.authorizationHeaderValue() != nil else {
+            lastSyncMessage = "Sign in to create a virtual device."
+            return
+        }
+
+        let newId = Self.generateVirtualDeviceID()
+        let colonMacs = unique.map { LimiDeviceNaming.colonSeparatedMAC(from: $0) }
+
+        // Optimistic local reflection so Home/toggles update immediately.
+        var next = Set(enabledHardwareIds)
+        unique.forEach { next.insert($0) }
+        enabledHardwareIds = next.sorted()
+        virtualDeviceID = newId
+        persist()
+
+        DeviceConsole.log(
+            .config,
+            "virtual-device CREATE NEW id=\(newId) macs=\(unique.joined(separator: " | "))"
+        )
+
+        enqueueSync {
+            await self.postGroupUpdate(virtualDeviceId: newId, macAddresses: colonMacs)
+            await self.refreshFromBackend(force: true)
+        }
+    }
+
+    /// Fresh cloud-style id (`vd-XXXXXXXX`) — always unique, never reuses existing.
+    private static func generateVirtualDeviceID() -> String {
+        "vd-" + String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)).lowercased()
     }
 
     /// Picks which cloud / local virtual device to update, and the full MAC list to POST.

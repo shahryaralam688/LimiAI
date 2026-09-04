@@ -14,25 +14,40 @@ class AuthManager: ObservableObject {
     private let tokenKey = "authToken"
     private let expiryKey = "authTokenExpiry"
     private let roleKey = "authRole"
+    private let keychainQueue = DispatchQueue(label: "limi.auth.keychain", qos: .utility)
+    /// Set immediately on logout so getToken / sessionCacheKey stop returning
+    /// the old JWT before the async Keychain delete finishes.
+    private var sessionInvalidated = false
+    /// Survives the logout→login race: a pending Keychain delete must not drop
+    /// a token we just saved in this process.
+    private var memoryToken: String?
+    private var keychainGeneration = 0
 
     init() {
+        // Keep init off the main-thread watchdog path: no SecItemDelete, no
+        // filesystem wipe. Expired sessions are cleaned lightly / async.
         migrateTokenFromUserDefaultsIfNeeded()
-        self.isAuthenticated = isTokenValid()
+        self.memoryToken = AuthTokenKeychain.read(account: tokenKey)
+        self.isAuthenticated = peekTokenValid()
     }
 
     func saveToken(_ token: String, expiryInSeconds: TimeInterval = 600000, updateAuthState: Bool = true) {
         let expiryTime = Date().timeIntervalSince1970 + expiryInSeconds
+        sessionInvalidated = false
+        memoryToken = token
+        // Invalidate any in-flight logout delete so it cannot erase this login.
+        keychainGeneration += 1
 
         AuthTokenKeychain.save(token, account: tokenKey)
         UserDefaults.standard.set(expiryTime, forKey: expiryKey)
         UserDefaults.standard.removeObject(forKey: tokenKey)
 
-        #if DEBUG
-        #endif
-
         if updateAuthState {
-            DispatchQueue.main.async {
-                self.isAuthenticated = true
+            let publish: () -> Void = { self.isAuthenticated = true }
+            if Thread.isMainThread {
+                publish()
+            } else {
+                DispatchQueue.main.async(execute: publish)
             }
         }
 
@@ -43,8 +58,6 @@ class AuthManager: ObservableObject {
     func saveRole(_ role: String) {
         UserDefaults.standard.set(role, forKey: roleKey)
         UserDefaults.standard.synchronize()
-        #if DEBUG
-        #endif
     }
 
     func getRole() -> String? {
@@ -52,12 +65,16 @@ class AuthManager: ObservableObject {
     }
 
     func getToken() -> String? {
-        if isTokenValid() {
-            return AuthTokenKeychain.read(account: tokenKey)
-        } else {
-            clearToken()
+        guard peekTokenValid() else {
+            if !sessionInvalidated {
+                invalidateSessionLightly(deleteScans: false)
+            }
             return nil
         }
+        if let memoryToken, !memoryToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return memoryToken
+        }
+        return AuthTokenKeychain.read(account: tokenKey)
     }
 
     /// Standard `Authorization` header for Limi REST API calls (`Bearer <jwt>`).
@@ -72,8 +89,11 @@ class AuthManager: ObservableObject {
     }
 
     /// Stable per-account key for phone-local caches (virtual devices, removed devices, etc.).
+    /// Read-only — must not invalidate the session (that stalled splash / flipped auth).
     func sessionCacheKey() -> String {
-        guard let token = getToken()?.trimmingCharacters(in: .whitespacesAndNewlines),
+        guard isTokenValid(),
+              let token = (memoryToken ?? AuthTokenKeychain.read(account: tokenKey))?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
               !token.isEmpty else {
             return ""
         }
@@ -114,55 +134,121 @@ class AuthManager: ObservableObject {
         return nil
     }
 
+    /// Read-only validity check — never deletes Keychain / scans (safe at launch).
     func isTokenValid() -> Bool {
-        let expiryTime = UserDefaults.standard.double(forKey: expiryKey)
-        let currentTime = Date().timeIntervalSince1970
-
-        guard expiryTime > currentTime else {
-            #if DEBUG
-            #endif
-            clearToken()
-            return false
-        }
-
-        guard AuthTokenKeychain.read(account: tokenKey) != nil else {
-            clearToken()
-            return false
-        }
-
-        return true
+        peekTokenValid()
     }
 
+    /// Explicit sign-out. Heavy cleanup (Keychain + RoomPlan files) runs off-main.
     func clearToken() {
-        AuthTokenKeychain.delete(account: tokenKey)
-        UserDefaults.standard.removeObject(forKey: tokenKey)
-        UserDefaults.standard.removeObject(forKey: expiryKey)
-
-        RoominatorFileManager.shared.deleteAllScans()
-
-        DispatchQueue.main.async {
-            self.isAuthenticated = false
-        }
-
-        #if DEBUG
-        #endif
-
-        NotificationCenter.default.post(name: .limiAuthSessionDidChange, object: nil)
+        invalidateSessionLightly(deleteScans: true)
     }
 
     func clearRole() {
         UserDefaults.standard.removeObject(forKey: roleKey)
     }
 
+    // MARK: - Private
+
+    /// Expiry + Keychain presence only. No deletes.
+    private func peekTokenValid() -> Bool {
+        guard !sessionInvalidated else { return false }
+        let token = (memoryToken ?? AuthTokenKeychain.read(account: tokenKey))?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !token.isEmpty else {
+            return false
+        }
+
+        let currentTime = Date().timeIntervalSince1970
+        var expiryTime = UserDefaults.standard.double(forKey: expiryKey)
+
+        // Legacy sessions sometimes have a Keychain token but no client expiry
+        // (0). Treating that as expired caused Profile to show "token expired"
+        // / wipe the session even when the JWT was still good.
+        if expiryTime <= 0 {
+            if let jwtExp = Self.jwtExpiry(from: token) {
+                expiryTime = jwtExp
+            } else {
+                expiryTime = currentTime + 600_000
+            }
+            UserDefaults.standard.set(expiryTime, forKey: expiryKey)
+        }
+
+        return expiryTime > currentTime
+    }
+
+    private static func jwtExpiry(from token: String) -> TimeInterval? {
+        let raw = token.hasPrefix("Bearer ") ? String(token.dropFirst(7)) : token
+        let parts = raw.split(separator: ".")
+        guard parts.count >= 2 else { return nil }
+
+        var payload = String(parts[1])
+        let remainder = payload.count % 4
+        if remainder > 0 {
+            payload += String(repeating: "=", count: 4 - remainder)
+        }
+        payload = payload
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        guard let data = Data(base64Encoded: payload),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        if let exp = json["exp"] as? TimeInterval {
+            return exp
+        }
+        if let exp = json["exp"] as? Int {
+            return TimeInterval(exp)
+        }
+        return nil
+    }
+
+    /// Clears session state without blocking the main thread on Keychain/FS.
+    private func invalidateSessionLightly(deleteScans: Bool) {
+        sessionInvalidated = true
+        memoryToken = nil
+        keychainGeneration += 1
+        let generation = keychainGeneration
+        UserDefaults.standard.removeObject(forKey: tokenKey)
+        UserDefaults.standard.removeObject(forKey: expiryKey)
+
+        let account = tokenKey
+        let shouldWipeScans = deleteScans
+        keychainQueue.async {
+            guard generation == self.keychainGeneration else { return }
+            AuthTokenKeychain.delete(account: account)
+            if shouldWipeScans {
+                RoominatorFileManager.shared.deleteAllScans()
+            }
+        }
+
+        let publish: () -> Void = {
+            self.isAuthenticated = false
+            NotificationCenter.default.post(name: .limiAuthSessionDidChange, object: nil)
+        }
+        if Thread.isMainThread {
+            publish()
+        } else {
+            DispatchQueue.main.async(execute: publish)
+        }
+    }
+
     // MARK: - One-time migration
 
     private func migrateTokenFromUserDefaultsIfNeeded() {
-        guard AuthTokenKeychain.read(account: tokenKey) == nil else { return }
+        // Only migrate when legacy UserDefaults token exists — avoid Keychain
+        // round-trips that can stall launch under the debugger.
         guard let legacyToken = UserDefaults.standard.string(forKey: tokenKey),
               !legacyToken.isEmpty else { return }
-
-        AuthTokenKeychain.save(legacyToken, account: tokenKey)
+        if AuthTokenKeychain.read(account: tokenKey) == nil {
+            AuthTokenKeychain.save(legacyToken, account: tokenKey)
+        }
         UserDefaults.standard.removeObject(forKey: tokenKey)
+        if UserDefaults.standard.double(forKey: expiryKey) <= 0 {
+            let fallback = Date().timeIntervalSince1970 + 600_000
+            UserDefaults.standard.set(fallback, forKey: expiryKey)
+        }
     }
 }
 

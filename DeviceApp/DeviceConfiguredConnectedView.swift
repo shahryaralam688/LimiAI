@@ -12,6 +12,7 @@ struct DeviceConfiguredConnectedView: View {
     let managementItems: [DeviceHomeUIPreviewItem]
     var onOpen: (String) -> Void
     var onToggle: (String) -> Void
+    var onCreateVirtualDevice: (([String]) -> Void)? = nil
     var onDismiss: () -> Void
 
     @ObservedObject private var virtualDeviceStore = VirtualDeviceStore.shared
@@ -66,7 +67,8 @@ struct DeviceConfiguredConnectedView: View {
         NavigationLink {
             VirtualDeviceManagementView(
                 items: managementItems,
-                onToggle: onToggle
+                onToggle: onToggle,
+                onCreateVirtualDevice: onCreateVirtualDevice
             )
         } label: {
             DeviceNeumorphicListRow(

@@ -61,6 +61,9 @@
 		10AB0000000000000000B015 /* DevicePowerMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C015 /* DevicePowerMemoryStore.swift */; };
 		10AB0000000000000000B016 /* PresenceSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C016 /* PresenceSnapshotStore.swift */; };
 		10AB0000000000000000B017 /* DevicePresenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C017 /* DevicePresenceCoordinator.swift */; };
+		10AB0000000000000000B097 /* SessionDeviceCacheCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C097 /* SessionDeviceCacheCoordinator.swift */; };
+		10AB0000000000000000B098 /* VirtualDeviceSequenceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C098 /* VirtualDeviceSequenceStore.swift */; };
+		10AB0000000000000000B099 /* SocketPresenceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C099 /* SocketPresenceLifecycle.swift */; };
 		10AB0000000000000000B10D /* CloudOfflineLocalSwitchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00D /* CloudOfflineLocalSwitchCoordinator.swift */; };
 		10AB0000000000000000B10E /* CloudOfflineLocalSwitchAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00E /* CloudOfflineLocalSwitchAlert.swift */; };
 		10AB0000000000000000B10F /* CloudPresenceMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C00F /* CloudPresenceMemory.swift */; };
@@ -72,6 +75,9 @@
 		10AB0000000000000000B115 /* DevicePowerMemoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C015 /* DevicePowerMemoryStore.swift */; };
 		10AB0000000000000000B116 /* PresenceSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C016 /* PresenceSnapshotStore.swift */; };
 		10AB0000000000000000B117 /* DevicePresenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C017 /* DevicePresenceCoordinator.swift */; };
+		10AB0000000000000000B197 /* SessionDeviceCacheCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C097 /* SessionDeviceCacheCoordinator.swift */; };
+		10AB0000000000000000B198 /* VirtualDeviceSequenceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C098 /* VirtualDeviceSequenceStore.swift */; };
+		10AB0000000000000000B199 /* SocketPresenceLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C099 /* SocketPresenceLifecycle.swift */; };
 		10ADD0182FA4E929008A89D8 /* AddDeviceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */; };
 		10ADDT012FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADDT002FA4E929008A89D8 /* DemoScanDevicesViewModelTests.swift */; };
 		10AICHT012FA4E929008A89D8 /* VoiceViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AICHT002FA4E929008A89D8 /* VoiceViewModelTests.swift */; };
@@ -115,7 +121,6 @@
 		10VDGS0212FA4E929008A89D8 /* VirtualDeviceGroupingSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10VDGS0012FA4E929008A89D8 /* VirtualDeviceGroupingSpec.swift */; };
 		10WIFP0112FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10WIFP0012FA4E929008A89D8 /* WiFiProvisioningCoordinator.swift */; };
 		144B460D5657CDF9C75F7790 /* LimiDeviceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10LIMN0012FA4E929008A89D8 /* LimiDeviceNaming.swift */; };
-		144B460E5657CDF9C75F7791 /* VirtualDeviceGroupingSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10VDGS0012FA4E929008A89D8 /* VirtualDeviceGroupingSpec.swift */; };
 		146F228B2B7DE6ACADEF8946 /* BluetoothManager+GATTWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BCB0032FA4E929008A89D8 /* BluetoothManager+GATTWrite.swift */; };
 		160208298260B5F976F9C5C9 /* DeviceTransportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10AB0000000000000000C003 /* DeviceTransportState.swift */; };
 		17E1F52113CE54C6D9BBC632 /* Amenti-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9ADA72D42D6DD73C0044A7CF /* Amenti-Light.otf */; };
@@ -223,6 +228,8 @@
 		9D762012343DDA95CBC621D0 /* FloatingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105F476C2FA4E929008A89D8 /* FloatingWindow.swift */; };
 		9F1E0416F8C7D3FC22BCAFD9 /* AddDeviceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */; };
 		A1ADVB0122FA4E929008A89D8 /* AddDeviceVirtualGroupingBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1ADVB0022FA4E929008A89D8 /* AddDeviceVirtualGroupingBridge.swift */; };
+		A1CHPAT0122FA4E929008A89D8 /* ChannelEffectPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CHPAT0022FA4E929008A89D8 /* ChannelEffectPattern.swift */; };
+		A1CHPAT0222FA4E929008A89D8 /* ChannelEffectPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CHPAT0022FA4E929008A89D8 /* ChannelEffectPattern.swift */; };
 		A1CONN0122FA4E929008A89D8 /* DeviceConfiguredConnectedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CONN0022FA4E929008A89D8 /* DeviceConfiguredConnectedView.swift */; };
 		A1DEL0122FA4E929008A89D8 /* ConfiguredDeviceRemoval.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DEL0022FA4E929008A89D8 /* ConfiguredDeviceRemoval.swift */; };
 		A1DEVUX0122FA4E929008A89D8 /* DeviceAppUX.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */; };
@@ -248,6 +255,8 @@
 		A1H5TOK0122FA4E929008A89D8 /* HomeUI5Tokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H5TOK0022FA4E929008A89D8 /* HomeUI5Tokens.swift */; };
 		A1H5VW0122FA4E929008A89D8 /* HomeUI5HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1H5VW0022FA4E929008A89D8 /* HomeUI5HomeView.swift */; };
 		A1HOMUI0122FA4E929008A89D8 /* DeviceHomeUITheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */; };
+		A1HPAT0122FA4E929008A89D8 /* HubChannelPatternBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HPAT0022FA4E929008A89D8 /* HubChannelPatternBar.swift */; };
+		A1HSEQ0122FA4E929008A89D8 /* HubSequenceEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HSEQ0022FA4E929008A89D8 /* HubSequenceEditorView.swift */; };
 		A1NUNI00122FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */; };
 		A1NUNI00222FA4E929008A89D8 /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */; };
 		A1NUNI10122FA4E929008A89D8 /* Nunito-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */; };
@@ -256,10 +265,12 @@
 		A1NUNI20222FA4E929008A89D8 /* Nunito-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */; };
 		A1NUNI30122FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */; };
 		A1NUNI30222FA4E929008A89D8 /* Nunito-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */; };
+		A1PROFMSG0122FA4E929008A89D8 /* DeviceProfileMessaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PROFMSG0022FA4E929008A89D8 /* DeviceProfileMessaging.swift */; };
 		A1REMEM0122FA4E929008A89D8 /* RememberedLimiDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */; };
 		A1ROOM0112FA4E929008A89D8 /* RoomControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */; };
 		A1ROOM0122FA4E929008A89D8 /* RoomControlViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */; };
 		A1SMOVR0122FA4E929008A89D8 /* DeviceSmartHomeOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */; };
+		A1SWIPE0122FA4E929008A89D8 /* SessionRememberedDeviceWipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SWIPE0022FA4E929008A89D8 /* SessionRememberedDeviceWipe.swift */; };
 		A1VCSM0122FA4E929008A89D8 /* VirtualCommandSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1VCSM0022FA4E929008A89D8 /* VirtualCommandSender.swift */; };
 		A1VCSM0222FA4E929008A89D8 /* VirtualCommandSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1VCSM0022FA4E929008A89D8 /* VirtualCommandSender.swift */; };
 		A1VDEV0122FA4E929008A89D8 /* VirtualDeviceGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1VDEV0022FA4E929008A89D8 /* VirtualDeviceGroup.swift */; };
@@ -391,6 +402,9 @@
 		10AB0000000000000000C015 /* DevicePowerMemoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePowerMemoryStore.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C016 /* PresenceSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceSnapshotStore.swift; sourceTree = "<group>"; };
 		10AB0000000000000000C017 /* DevicePresenceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePresenceCoordinator.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C097 /* SessionDeviceCacheCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDeviceCacheCoordinator.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C098 /* VirtualDeviceSequenceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualDeviceSequenceStore.swift; sourceTree = "<group>"; };
+		10AB0000000000000000C099 /* SocketPresenceLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketPresenceLifecycle.swift; sourceTree = "<group>"; };
 		10ADD0012FA4E929008A89D8 /* AddDeviceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceCoordinator.swift; sourceTree = "<group>"; };
 		10ADD0022FA4E929008A89D8 /* DemoScanDevicesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanDevicesViewModel.swift; sourceTree = "<group>"; };
 		10ADD0032FA4E929008A89D8 /* DemoScanBluetoothAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoScanBluetoothAdapter.swift; sourceTree = "<group>"; };
@@ -510,6 +524,7 @@
 		9ADA72EA2D6DD73C0044A7CF /* Poppins-ThinItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-ThinItalic.ttf"; sourceTree = "<group>"; };
 		9AF3A3AA2DA58E8E004EADAA /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		A1ADVB0022FA4E929008A89D8 /* AddDeviceVirtualGroupingBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AddDeviceVirtualGroupingBridge.swift; sourceTree = "<group>"; };
+		A1CHPAT0022FA4E929008A89D8 /* ChannelEffectPattern.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChannelEffectPattern.swift; sourceTree = "<group>"; };
 		A1CONN0022FA4E929008A89D8 /* DeviceConfiguredConnectedView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceConfiguredConnectedView.swift; sourceTree = "<group>"; };
 		A1DEL0022FA4E929008A89D8 /* ConfiguredDeviceRemoval.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfiguredDeviceRemoval.swift; sourceTree = "<group>"; };
 		A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceAppUX.swift; sourceTree = "<group>"; };
@@ -535,14 +550,18 @@
 		A1H5TOK0022FA4E929008A89D8 /* HomeUI5Tokens.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI5Tokens.swift; sourceTree = "<group>"; };
 		A1H5VW0022FA4E929008A89D8 /* HomeUI5HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeUI5HomeView.swift; sourceTree = "<group>"; };
 		A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceHomeUITheme.swift; sourceTree = "<group>"; };
+		A1HPAT0022FA4E929008A89D8 /* HubChannelPatternBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HubChannelPatternBar.swift; sourceTree = "<group>"; };
+		A1HSEQ0022FA4E929008A89D8 /* HubSequenceEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HubSequenceEditorView.swift; sourceTree = "<group>"; };
 		A1NUNI00022FA4E929008A89D8 /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
 		A1NUNI10022FA4E929008A89D8 /* Nunito-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-SemiBold.ttf"; sourceTree = "<group>"; };
 		A1NUNI20022FA4E929008A89D8 /* Nunito-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Bold.ttf"; sourceTree = "<group>"; };
 		A1NUNI30022FA4E929008A89D8 /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
+		A1PROFMSG0022FA4E929008A89D8 /* DeviceProfileMessaging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceProfileMessaging.swift; sourceTree = "<group>"; };
 		A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RememberedLimiDevice.swift; sourceTree = "<group>"; };
 		A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomControlView.swift; sourceTree = "<group>"; };
 		A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomControlViewModel.swift; sourceTree = "<group>"; };
 		A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSmartHomeOverview.swift; sourceTree = "<group>"; };
+		A1SWIPE0022FA4E929008A89D8 /* SessionRememberedDeviceWipe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionRememberedDeviceWipe.swift; sourceTree = "<group>"; };
 		A1VCSM0022FA4E929008A89D8 /* VirtualCommandSender.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VirtualCommandSender.swift; sourceTree = "<group>"; };
 		A1VDEV0022FA4E929008A89D8 /* VirtualDeviceGroup.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VirtualDeviceGroup.swift; sourceTree = "<group>"; };
 		A1VDHG0022FA4E929008A89D8 /* VirtualDeviceHomeGrouping.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VirtualDeviceHomeGrouping.swift; sourceTree = "<group>"; };
@@ -758,6 +777,7 @@
 				10AB0000000000000000C00A /* LimiTransportError.swift */,
 				10AB0000000000000000C00B /* ThrottledSender.swift */,
 				A1VCSM0022FA4E929008A89D8 /* VirtualCommandSender.swift */,
+				A1CHPAT0022FA4E929008A89D8 /* ChannelEffectPattern.swift */,
 				A1VDSG0022FA4E929008A89D8 /* VirtualDeviceScanGrouping.swift */,
 				A1VMPR0022FA4E929008A89D8 /* VirtualMasterPresence.swift */,
 				10AB0000000000000000C00C /* TransportMediumPreference.swift */,
@@ -772,6 +792,9 @@
 				10AB0000000000000000C015 /* DevicePowerMemoryStore.swift */,
 				10AB0000000000000000C016 /* PresenceSnapshotStore.swift */,
 				10AB0000000000000000C017 /* DevicePresenceCoordinator.swift */,
+				10AB0000000000000000C099 /* SocketPresenceLifecycle.swift */,
+				10AB0000000000000000C097 /* SessionDeviceCacheCoordinator.swift */,
+				10AB0000000000000000C098 /* VirtualDeviceSequenceStore.swift */,
 			);
 			path = Transport;
 			sourceTree = "<group>";
@@ -1128,12 +1151,14 @@
 				B5BA5C4580A420566968812B /* DeviceSignInView.swift */,
 				A1H1SPL0022FA4E929008A89D8 /* DeviceSplashView.swift */,
 				A1H1MSG0022FA4E929008A89D8 /* DeviceSignInMessaging.swift */,
+				A1PROFMSG0022FA4E929008A89D8 /* DeviceProfileMessaging.swift */,
 				5D822FD4946E318EDF8E2244 /* DeviceHomeView.swift */,
 				A1SMOVR0022FA4E929008A89D8 /* DeviceSmartHomeOverview.swift */,
 				A1HOMUI0022FA4E929008A89D8 /* DeviceHomeUITheme.swift */,
 				A1HUIG0022FA4E929008A89D8 /* HomeUI */,
 				A1DEVUX0022FA4E929008A89D8 /* DeviceAppUX.swift */,
 				A1REMEM0022FA4E929008A89D8 /* RememberedLimiDevice.swift */,
+				A1SWIPE0022FA4E929008A89D8 /* SessionRememberedDeviceWipe.swift */,
 				A1DEL0022FA4E929008A89D8 /* ConfiguredDeviceRemoval.swift */,
 				A1CONN0022FA4E929008A89D8 /* DeviceConfiguredConnectedView.swift */,
 				A1VDEV0022FA4E929008A89D8 /* VirtualDeviceGroup.swift */,
@@ -1142,6 +1167,8 @@
 				A1VDHG0022FA4E929008A89D8 /* VirtualDeviceHomeGrouping.swift */,
 				A1ADVB0022FA4E929008A89D8 /* AddDeviceVirtualGroupingBridge.swift */,
 				A1VMCT0022FA4E929008A89D8 /* VirtualMasterControlView.swift */,
+				A1HPAT0022FA4E929008A89D8 /* HubChannelPatternBar.swift */,
+				A1HSEQ0022FA4E929008A89D8 /* HubSequenceEditorView.swift */,
 				A1ROOM0012FA4E929008A89D8 /* RoomControlView.swift */,
 				A1ROOM0022FA4E929008A89D8 /* RoomControlViewModel.swift */,
 				7A4656334143A2B67C5B96E6 /* DeviceAddFlowView.swift */,
@@ -1794,6 +1821,7 @@
 				10AB0000000000000000B00A /* LimiTransportError.swift in Sources */,
 				10AB0000000000000000B00B /* ThrottledSender.swift in Sources */,
 				A1VCSM0222FA4E929008A89D8 /* VirtualCommandSender.swift in Sources */,
+				A1CHPAT0222FA4E929008A89D8 /* ChannelEffectPattern.swift in Sources */,
 				A1VDSG0222FA4E929008A89D8 /* VirtualDeviceScanGrouping.swift in Sources */,
 				A1VMPR0222FA4E929008A89D8 /* VirtualMasterPresence.swift in Sources */,
 				10AB0000000000000000B00C /* TransportMediumPreference.swift in Sources */,
@@ -1808,6 +1836,9 @@
 				10AB0000000000000000B015 /* DevicePowerMemoryStore.swift in Sources */,
 				10AB0000000000000000B016 /* PresenceSnapshotStore.swift in Sources */,
 				10AB0000000000000000B017 /* DevicePresenceCoordinator.swift in Sources */,
+				10AB0000000000000000B099 /* SocketPresenceLifecycle.swift in Sources */,
+				10AB0000000000000000B097 /* SessionDeviceCacheCoordinator.swift in Sources */,
+				10AB0000000000000000B098 /* VirtualDeviceSequenceStore.swift in Sources */,
 				10PH13A02FA4E929008A89D8 /* LimiAPIError.swift in Sources */,
 				10BCB0112FA4E929008A89D8 /* BluetoothManager.swift in Sources */,
 				10BCB0122FA4E929008A89D8 /* BluetoothManager+BackgroundScan.swift in Sources */,
@@ -1844,6 +1875,7 @@
 				6EEB73A9AD185AC9332CCDF7 /* DeviceSignInView.swift in Sources */,
 				A1H1SPL0122FA4E929008A89D8 /* DeviceSplashView.swift in Sources */,
 				A1H1MSG0122FA4E929008A89D8 /* DeviceSignInMessaging.swift in Sources */,
+				A1PROFMSG0122FA4E929008A89D8 /* DeviceProfileMessaging.swift in Sources */,
 				1895B4B355FD496A15745B18 /* DeviceHomeView.swift in Sources */,
 				A1SMOVR0122FA4E929008A89D8 /* DeviceSmartHomeOverview.swift in Sources */,
 				A1HOMUI0122FA4E929008A89D8 /* DeviceHomeUITheme.swift in Sources */,
@@ -1870,6 +1902,7 @@
 				A1ROOM0122FA4E929008A89D8 /* RoomControlViewModel.swift in Sources */,
 				A1DEVUX0122FA4E929008A89D8 /* DeviceAppUX.swift in Sources */,
 				A1REMEM0122FA4E929008A89D8 /* RememberedLimiDevice.swift in Sources */,
+				A1SWIPE0122FA4E929008A89D8 /* SessionRememberedDeviceWipe.swift in Sources */,
 				A1DEL0122FA4E929008A89D8 /* ConfiguredDeviceRemoval.swift in Sources */,
 				A1CONN0122FA4E929008A89D8 /* DeviceConfiguredConnectedView.swift in Sources */,
 				A1VDEV0122FA4E929008A89D8 /* VirtualDeviceGroup.swift in Sources */,
@@ -1877,11 +1910,14 @@
 				A1VDMV0122FA4E929008A89D8 /* VirtualDeviceManagementView.swift in Sources */,
 				A1VDHG0122FA4E929008A89D8 /* VirtualDeviceHomeGrouping.swift in Sources */,
 				A1VCSM0122FA4E929008A89D8 /* VirtualCommandSender.swift in Sources */,
+				A1CHPAT0122FA4E929008A89D8 /* ChannelEffectPattern.swift in Sources */,
 				A1VDSG0122FA4E929008A89D8 /* VirtualDeviceScanGrouping.swift in Sources */,
 				10VDGS0112FA4E929008A89D8 /* VirtualDeviceGroupingSpec.swift in Sources */,
 				A1VMPR0122FA4E929008A89D8 /* VirtualMasterPresence.swift in Sources */,
 				A1ADVB0122FA4E929008A89D8 /* AddDeviceVirtualGroupingBridge.swift in Sources */,
 				A1VMCT0122FA4E929008A89D8 /* VirtualMasterControlView.swift in Sources */,
+				A1HPAT0122FA4E929008A89D8 /* HubChannelPatternBar.swift in Sources */,
+				A1HSEQ0122FA4E929008A89D8 /* HubSequenceEditorView.swift in Sources */,
 				35C26BA0472B3635667B2FCD /* DeviceAddFlowView.swift in Sources */,
 				2DFE71C6C14E0480A3730D25 /* DeviceControlView.swift in Sources */,
 				2E9B11D3F0A4C58217D6B402 /* DeviceProfileView.swift in Sources */,
@@ -1933,6 +1969,9 @@
 				10AB0000000000000000B115 /* DevicePowerMemoryStore.swift in Sources */,
 				10AB0000000000000000B116 /* PresenceSnapshotStore.swift in Sources */,
 				10AB0000000000000000B117 /* DevicePresenceCoordinator.swift in Sources */,
+				10AB0000000000000000B199 /* SocketPresenceLifecycle.swift in Sources */,
+				10AB0000000000000000B197 /* SessionDeviceCacheCoordinator.swift in Sources */,
+				10AB0000000000000000B198 /* VirtualDeviceSequenceStore.swift in Sources */,
 				82BFA108A8657469096252BC /* LimiAPIError.swift in Sources */,
 				2731E7EC6A9E5C66CB2845C7 /* BluetoothManager.swift in Sources */,
 				734C43065BB0A67AAA181175 /* BluetoothManager+BackgroundScan.swift in Sources */,
@@ -1948,7 +1987,6 @@
 				3F6BEC0F6A2541DB8CA1080E /* HomeRoute.swift in Sources */,
 				85ED9A9ACA47238CC77C85D0 /* BLEDevice.swift in Sources */,
 				144B460D5657CDF9C75F7790 /* LimiDeviceNaming.swift in Sources */,
-				144B460E5657CDF9C75F7791 /* VirtualDeviceGroupingSpec.swift in Sources */,
 				1869F184FD05E1F75CE0F7F6 /* Card.swift in Sources */,
 				10PEND0212FA4E929008A89D8 /* PendantModelCatalog.swift in Sources */,
 				E4DE16AD2564F438FC44059F /* PingPoller.swift in Sources */,

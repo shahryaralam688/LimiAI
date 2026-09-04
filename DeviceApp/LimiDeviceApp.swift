@@ -16,19 +16,23 @@ struct LimiDeviceApp: App {
     private let modelContainer: ModelContainer
 
     init() {
+        // Keep App.init minimal — anything heavy here can kill the process
+        // before Xcode attaches (CoreDeviceError 10004 / white screen).
         modelContainer = Self.makeModelContainer()
-        DeviceScheduleEngine.shared.configure(container: modelContainer)
     }
 
     var body: some Scene {
         WindowGroup {
+            // Do NOT touch LimiTransport / Bonjour / Socket here — that races
+            // UIKit scene restore and can leave a stuck white launch screen.
+            // Heavy services warm up inside DeviceRootView after first paint.
             DeviceRootView()
-                .environment(\.appEnvironment, .live)
-                .environmentObject(LimiTransport.shared)
                 .tint(HomeUI1Color.accentGreen)
                 .preferredColorScheme(.dark)
-                // First paint = Soft UI canvas (not system white).
                 .background(HomeUI1Color.canvas.ignoresSafeArea())
+                .onAppear {
+                    DeviceScheduleEngine.shared.configure(container: modelContainer)
+                }
         }
         .modelContainer(modelContainer)
         .onChange(of: scenePhase) { _, phase in

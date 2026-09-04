@@ -33,6 +33,11 @@ struct DeviceAddFlowView: View {
         .interactiveDismissDisabled(isProvisioning)
         .onAppear { viewModel.onAppear() }
         .onAppear {
+            // Re-sync cloud virtual-group specs whenever a hub MAC is newly resolved,
+            // so the identified member folds into its hub card.
+            viewModel.scanViewModel.onIdentityResolved = {
+                AddDeviceVirtualGroupingBridge.sync(into: viewModel.scanViewModel)
+            }
             AddDeviceVirtualGroupingBridge.sync(into: viewModel.scanViewModel)
         }
         .onChange(of: virtualDeviceStore.enabledHardwareIds) { _, _ in
@@ -212,6 +217,13 @@ private struct DeviceScanList: View {
                             UIApplication.shared.open(url)
                         }
                     }
+                } else if visibleDevices.isEmpty && !scanViewModel.identitiesSettled {
+                    statusBody(
+                        title: "Identifying Hubs",
+                        message: "Checking nearby hubs over Bluetooth…",
+                        systemImage: "dot.radiowaves.left.and.right",
+                        showsProgress: true
+                    )
                 } else if visibleDevices.isEmpty && hasWaitedForScan {
                     statusBody(
                         title: "No Devices Nearby",
@@ -296,15 +308,20 @@ private struct DeviceScanList: View {
                 }
                 .padding(.top, 8)
 
+                if scanViewModel.isResolvingIdentities {
+                    identifyingBar
+                }
+
                 ForEach(visibleDevices) { device in
+                    let gating = memberResolveGating(device)
                     Button {
-                        onSelectDevice(device)
+                        if !gating { onSelectDevice(device) }
                     } label: {
-                        scanRow(device)
+                        scanRow(device, gating: gating)
                     }
                     .buttonStyle(.plain)
                     .opacity(scanViewModel.deviceOpacity(device))
-                    .disabled(scanViewModel.isDeviceDisabled(device))
+                    .disabled(scanViewModel.isDeviceDisabled(device) || gating)
                 }
 
                 Text("Make sure your LIMI device is powered on and nearby.")
@@ -317,22 +334,71 @@ private struct DeviceScanList: View {
         }
     }
 
-    private func scanRow(_ device: BLEDevice) -> some View {
-        DeviceNeumorphicListRow(
+    // Thin "identifying hubs" bar shown while unconfigured hubs are resolved over BLE.
+    private var identifyingBar: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .tint(HomeUI1Color.accentGreen)
+                .controlSize(.small)
+            Text("Identifying nearby hubs over Bluetooth…")
+                .font(HomeUI1Type.caption(12))
+                .foregroundStyle(HomeUI1Color.textSecondary)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .homeUI1Elevation(.recessed, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.canvas)
+    }
+
+    /// Members found vs total for a virtual master row (nil for non-hubs).
+    private func memberFoundTotal(_ device: BLEDevice) -> (found: Int, total: Int)? {
+        guard let master = device.virtualMaster else { return nil }
+        return (master.memberDevices.count, master.memberHardwareIds.count)
+    }
+
+    /// Hub card stays gated (non-tappable, shows loader) until all members are
+    /// identified OR background resolution has settled.
+    private func memberResolveGating(_ device: BLEDevice) -> Bool {
+        guard scanViewModel.isResolvingIdentities,
+              let counts = memberFoundTotal(device) else { return false }
+        return counts.found < counts.total
+    }
+
+    private func scanRow(_ device: BLEDevice, gating: Bool = false) -> some View {
+        let connected = scanViewModel.isDeviceConnected(device)
+        return DeviceNeumorphicListRow(
             title: device.name,
-            subtitle: statusText(device),
+            subtitle: gating ? gatingSubtitle(device) : statusText(device),
             systemImage: device.isVirtualMaster
                 ? "link.circle.fill"
                 : (device.deviceType == .bluetooth ? "lamp.table" : "wifi"),
-            isAccent: scanViewModel.isDeviceConnected(device),
-            showsChevron: !scanViewModel.isDeviceConnected(device),
-            trailing: scanViewModel.isDeviceConnected(device)
-                ? AnyView(
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(HomeUI1Color.accentGreen)
-                )
-                : nil
+            isAccent: connected && !gating,
+            showsChevron: !connected && !gating,
+            trailing: rowTrailing(device, connected: connected, gating: gating)
         )
+    }
+
+    private func rowTrailing(_ device: BLEDevice, connected: Bool, gating: Bool) -> AnyView? {
+        if gating {
+            return AnyView(
+                ProgressView()
+                    .tint(HomeUI1Color.accentGreen)
+                    .controlSize(.small)
+            )
+        }
+        if connected {
+            return AnyView(
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(HomeUI1Color.accentGreen)
+            )
+        }
+        return nil
+    }
+
+    private func gatingSubtitle(_ device: BLEDevice) -> String {
+        guard let counts = memberFoundTotal(device) else { return "Identifying…" }
+        return "Identifying… \(counts.found) of \(counts.total) found"
     }
 
     private func statusText(_ device: BLEDevice) -> String {
@@ -353,7 +419,8 @@ private struct DeviceScanList: View {
                     return VirtualMasterPresence.defaultWiFiLANCheck(hardwareId: hw)
                 }
             )
-            return "\(presence.scanSubtitleSuffix) · Master · \(hubs)"
+            let hub = VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: master.memberHardwareIds.count)
+            return "\(presence.scanSubtitleSuffix) · \(hub) · \(hubs)"
         }
         if device.deviceType == .bluetooth {
             let hw = device.resolvedHardwareId()

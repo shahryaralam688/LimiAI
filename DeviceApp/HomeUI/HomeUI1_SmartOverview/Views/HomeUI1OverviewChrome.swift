@@ -47,6 +47,8 @@ enum DeviceLightMood: String, CaseIterable, Identifiable {
 struct DeviceSoftIconButton: View {
     let systemImage: String
     var size: CGFloat = 46
+    /// Unread-style red dot (e.g. cloud→BLE offer on the bell).
+    var showsBadge: Bool = false
     var action: () -> Void
 
     var body: some View {
@@ -56,8 +58,23 @@ struct DeviceSoftIconButton: View {
                 .foregroundStyle(HomeUI1Color.textSecondary)
                 .frame(width: size, height: size)
                 .homeUI1CircleElevation(.two)
+                .overlay(alignment: .topTrailing) {
+                    if showsBadge {
+                        Circle()
+                            .fill(Color(red: 0.92, green: 0.28, blue: 0.28))
+                            .frame(width: 10, height: 10)
+                            .overlay(
+                                Circle()
+                                    .strokeBorder(HomeUI1Color.surface, lineWidth: 1.5)
+                            )
+                            .offset(x: -2, y: 2)
+                            .accessibilityHidden(true)
+                    }
+                }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(showsBadge ? .updatesFrequently : [])
+        .accessibilityValue(showsBadge ? "Unread" : "")
     }
 }
 
@@ -67,6 +84,8 @@ struct DeviceSmartHomeHeader: View {
     var avatarImage: UIImage?
     var onNotifications: (() -> Void)?
     var onConnectedDevices: (() -> Void)?
+    /// Red dot on the bell — cloud disconnected / local switch offer.
+    var showsNotificationBadge: Bool = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
@@ -86,9 +105,17 @@ struct DeviceSmartHomeHeader: View {
                 }
                 .accessibilityLabel("Connected Devices")
             }
-            DeviceSoftIconButton(systemImage: "bell") {
+            DeviceSoftIconButton(
+                systemImage: "bell",
+                showsBadge: showsNotificationBadge
+            ) {
                 onNotifications?()
             }
+            .accessibilityLabel(
+                showsNotificationBadge
+                    ? "Notifications, cloud disconnected"
+                    : "Notifications"
+            )
         }
         .padding(14)
         .homeUI1Elevation(.two, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
@@ -444,6 +471,7 @@ struct DeviceManageRowCard: View {
 
             if isOnline {
                 compactPowerToggle
+                    .contentShape(Rectangle())
             } else {
                 Text("Offline")
                     .font(HomeUI1Type.caption(11))
@@ -455,9 +483,8 @@ struct DeviceManageRowCard: View {
         }
         .padding(16)
         .homeUI1Elevation(.three, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.surface)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityLabel("\(name), \(isOnline ? "online" : "offline")")
-        .accessibilityAddTraits(.isButton)
     }
 
     private var identity: some View {

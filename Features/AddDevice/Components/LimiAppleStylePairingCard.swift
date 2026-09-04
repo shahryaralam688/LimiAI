@@ -2,7 +2,7 @@
 //  LimiAppleStylePairingCard.swift
 //  Limi
 //
-//  AirPods-style pairing card — bottom sheet, 3D product hero, Connect / status states.
+//  AirPods-style pairing card — bottom sheet, looping hub video, Connect / status states.
 //
 
 import SwiftUI
@@ -127,13 +127,12 @@ struct LimiAppleStylePairingCard: View {
         VStack(spacing: 0) {
             headerRow
 
-            LimiPairingModelView(
-                bundledName: modelName,
-                isAnimating: animatesModel,
-                visualScale: 2.6
-            )
-                .frame(height: 200)
-                .padding(.top, 4)
+            LimiPairingHeroVideoView()
+                .frame(height: 220)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 4)
+                .accessibilityLabel("Hub preview")
 
             if let subtitleText {
                 Text(subtitleText)

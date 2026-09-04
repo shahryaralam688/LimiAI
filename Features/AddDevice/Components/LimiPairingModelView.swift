@@ -12,6 +12,8 @@ struct LimiPairingModelView: UIViewRepresentable {
     var bundledName: String = LimiPairingAssets.defaultModelName
     var isAnimating: Bool = false
     var allowsInteraction: Bool = false
+    /// Slow, continuous turntable spin while idle (pauses during a drag, resumes after).
+    var autoRotates: Bool = false
     /// Larger = fills more of the viewport. Setup hero uses ~3.2; compact cards ~2.0.
     var visualScale: Float = 2.0
 
@@ -34,7 +36,8 @@ struct LimiPairingModelView: UIViewRepresentable {
     func updateUIView(_ uiView: ARView, context: Context) {
         context.coordinator.isAnimating = isAnimating
         context.coordinator.allowsInteraction = allowsInteraction
-        if isAnimating {
+        context.coordinator.autoRotates = autoRotates
+        if isAnimating || autoRotates {
             context.coordinator.startFloatAnimationIfNeeded()
         } else {
             context.coordinator.stopFloatAnimation()
@@ -76,7 +79,7 @@ struct LimiPairingModelView: UIViewRepresentable {
 
         let largest = max(bounds.extents.x, bounds.extents.y, bounds.extents.z)
         if largest > 0 {
-            let scale = context.coordinator.visualScale / largest
+            let scale = visualScale / largest
             container.scale = SIMD3<Float>(repeating: scale)
         }
 
@@ -96,30 +99,39 @@ struct LimiPairingModelView: UIViewRepresentable {
         var visualScale: Float = 2.0
         var isAnimating = false
         var allowsInteraction = false
+        var autoRotates = false
+
         private var displayLink: CADisplayLink?
-        private var startTime: CFTimeInterval = 0
-        private var accumulatedYaw: Float = 0
-        private var accumulatedPitch: Float = 0
+        private var lastTimestamp: CFTimeInterval = 0
+        private var elapsed: CFTimeInterval = 0
+
+        /// Persisted orientation from user drags. Auto-rotation adds on top of this.
+        private var yaw: Float = 0
+        private var pitch: Float = 0
+        private var autoYaw: Float = 0
+        private var isDragging = false
+
+        private static let autoRotateSpeed: Float = 0.35   // rad/s — one turn ≈ 18s
+        private static let dragSensitivity: Float = 0.008
+        private static let maxPitch: Float = .pi / 6
+        private static let floatAmplitude: Float = 0.04
 
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            guard allowsInteraction, let view = gesture.view, let model = modelEntity else { return }
+            guard allowsInteraction, let view = gesture.view else { return }
 
             let translation = gesture.translation(in: view)
-            let sensitivity: Float = 0.006
-            var newYaw = accumulatedYaw + Float(translation.x) * sensitivity
-            var newPitch = accumulatedPitch + Float(translation.y) * sensitivity
-            let minPitch: Float = -.pi / 6
-            let maxPitch: Float = .pi / 6
-            newPitch = max(min(newPitch, maxPitch), minPitch)
-
-            let yawQuat = simd_quatf(angle: newYaw, axis: SIMD3<Float>(0, 1, 0))
-            let pitchQuat = simd_quatf(angle: newPitch, axis: SIMD3<Float>(1, 0, 0))
-            model.orientation = yawQuat * pitchQuat
+            let dragYaw = yaw + Float(translation.x) * Self.dragSensitivity
+            var dragPitch = pitch + Float(translation.y) * Self.dragSensitivity
+            dragPitch = max(min(dragPitch, Self.maxPitch), -Self.maxPitch)
 
             switch gesture.state {
+            case .began, .changed:
+                isDragging = true
+                applyOrientation(yaw: dragYaw + autoYaw, pitch: dragPitch)
             case .ended, .cancelled, .failed:
-                accumulatedYaw = newYaw
-                accumulatedPitch = newPitch
+                isDragging = false
+                yaw = dragYaw
+                pitch = dragPitch
                 gesture.setTranslation(.zero, in: view)
             default:
                 break
@@ -128,8 +140,8 @@ struct LimiPairingModelView: UIViewRepresentable {
 
         func startFloatAnimationIfNeeded() {
             stopFloatAnimation()
-            guard isAnimating, modelEntity != nil else { return }
-            startTime = CACurrentMediaTime()
+            guard isAnimating || autoRotates, modelEntity != nil else { return }
+            lastTimestamp = CACurrentMediaTime()
             let link = CADisplayLink(target: self, selector: #selector(tick))
             link.add(to: .main, forMode: .common)
             displayLink = link
@@ -144,9 +156,27 @@ struct LimiPairingModelView: UIViewRepresentable {
         }
 
         @objc private func tick() {
-            guard isAnimating, let modelEntity else { return }
-            let t = CACurrentMediaTime() - startTime
-            modelEntity.position.y = Float(sin(t * 2.2) * 0.04)
+            guard let modelEntity else { return }
+            let now = CACurrentMediaTime()
+            let dt = now - lastTimestamp
+            lastTimestamp = now
+            elapsed += dt
+
+            if isAnimating {
+                modelEntity.position.y = Float(sin(elapsed * 2.2)) * Self.floatAmplitude
+            }
+
+            if autoRotates, !isDragging {
+                autoYaw += Self.autoRotateSpeed * Float(dt)
+                applyOrientation(yaw: yaw + autoYaw, pitch: pitch)
+            }
+        }
+
+        private func applyOrientation(yaw: Float, pitch: Float) {
+            guard let modelEntity else { return }
+            let yawQuat = simd_quatf(angle: yaw, axis: SIMD3<Float>(0, 1, 0))
+            let pitchQuat = simd_quatf(angle: pitch, axis: SIMD3<Float>(1, 0, 0))
+            modelEntity.orientation = yawQuat * pitchQuat
         }
 
         deinit {

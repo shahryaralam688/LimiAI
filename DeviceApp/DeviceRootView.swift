@@ -11,10 +11,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DeviceRootView: View {
     @ObservedObject private var auth = AuthManager.shared
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
     @State private var showSplash = true
     @State private var didWarmHeavyServices = false
 
@@ -30,8 +32,8 @@ struct DeviceRootView: View {
                 .transition(.opacity)
                 .zIndex(10)
             } else if auth.isAuthenticated {
+                // Cloud→BLE offer uses home notification badge (not a blocking alert).
                 DeviceMainTabView()
-                    .cloudOfflineLocalSwitchAlert()
                     .transition(.opacity)
             } else {
                 DeviceSignInView()
@@ -41,8 +43,22 @@ struct DeviceRootView: View {
         .preferredColorScheme(.dark)
         .animation(.easeInOut(duration: 0.35), value: showSplash)
         .animation(.easeInOut(duration: 0.25), value: auth.isAuthenticated)
+        .onAppear {
+            SessionDeviceCacheCoordinator.shared.attachSwiftDataWipe { [modelContext] in
+                SessionRememberedDeviceWipe.deleteAll(in: modelContext)
+            }
+        }
         .task {
             await warmHeavyServicesIfNeeded()
+        }
+        .task(id: showSplash) {
+            // Failsafe: never leave user on a blank/white launch forever.
+            guard showSplash else { return }
+            try? await Task.sleep(nanoseconds: 2_800_000_000)
+            guard !Task.isCancelled else { return }
+            if showSplash {
+                finishSplash()
+            }
         }
         .onChange(of: auth.isAuthenticated) { _, _ in
             // Only connect after splash — avoids socket work during cold launch.
@@ -59,6 +75,8 @@ struct DeviceRootView: View {
         }
         .onChange(of: showSplash) { _, showing in
             if !showing {
+                // Cache/session work after splash is gone — never blocks this screen.
+                SessionDeviceCacheCoordinator.shared.start()
                 syncCloudConnection()
             }
         }
@@ -93,6 +111,26 @@ struct DeviceRootView: View {
         BluetoothManager.shared.configureForDeviceCompanionApp()
         _ = LimiTransport.shared
         _ = DeviceTransportRegistry.shared
+
+        // App-global (tab-independent) presence lifecycle: clear stale MQTT on
+        // disconnect and re-probe on reconnect regardless of the active tab.
+        // Inject the virtual-device member ids so presence re-probes also cover
+        // hubs that are only known through cloud virtual groups.
+        SocketPresenceLifecycle.virtualDeviceIdProvider = {
+            var keys = Set<String>()
+            for member in VirtualDeviceStore.shared.enabledHardwareIds {
+                let key = LimiDeviceNaming.normalizedHardwareId(member)
+                if !key.isEmpty { keys.insert(key) }
+            }
+            for group in VirtualDeviceStore.shared.remoteGroups {
+                for mac in group.mac_addresses {
+                    let key = LimiDeviceNaming.normalizedHardwareIdFromMAC(mac)
+                    if !key.isEmpty { keys.insert(key) }
+                }
+            }
+            return keys
+        }
+        SocketPresenceLifecycle.shared.start()
     }
 }
 

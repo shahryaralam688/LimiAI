@@ -1298,6 +1298,16 @@ final class WiFiProvisioningCoordinator {
         let hw = LimiDeviceNaming.normalizedHardwareId(hardwareId)
         guard !hw.isEmpty else { return false }
 
+        // A hub whose cloud link is NOT live (no fresh heartbeat) but which is present over
+        // BLE (advertising / connected) has dropped Wi‑Fi and is a provisioning candidate.
+        // Never let a *stale* cloud cache (raw mqttConnected / lastPresence snapshot that the
+        // Add Device flow can't clear while it holds the radio) filter it out — that made the
+        // Wi‑Fi list refuse to load after a live Wi‑Fi→BLE switch on the Add Device screen.
+        if !VirtualMasterPresence.isLiveCloudOnline(hardwareId: hw),
+           BLECloudFallbackService.shared.presenceKind(for: hw) != .unreachable {
+            return false
+        }
+
         if DeviceTransportRegistry.shared.state(for: hw).mqttConnected { return true }
 
         if VirtualMasterPresence.effectiveCloudOnline(hardwareId: hw) { return true }

@@ -38,6 +38,16 @@ public enum TransportMediumPreference: String, CaseIterable, Codable, Hashable {
         case .ble: return "BLE"
         }
     }
+
+    /// Compact chip label so Auto / MQTT / LAN / BLE fit one row on all iPhones.
+    public var chipTitle: String {
+        switch self {
+        case .automatic: return "Auto"
+        case .mqtt: return "MQTT"
+        case .webSocket: return "LAN"
+        case .ble: return "BLE"
+        }
+    }
 }
 
 /// Persisted `@Published` store for SwiftUI pickers + LimiTransport reads.

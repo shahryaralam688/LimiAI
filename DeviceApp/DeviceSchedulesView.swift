@@ -427,8 +427,33 @@ struct DeviceScheduleEditView: View {
     @State private var turnOn = true
     @State private var channel = 0
     @State private var repeatDays: Set<Int> = []
+    @State private var saveErrorMessage: String?
+
+    // Behaviour when turned ON.
+    @State private var brightness: Double = 70
+    /// 0 = warm (ww 100 / cw 0) … 100 = cool (ww 0 / cw 100).
+    @State private var coolness: Double = 40
+    @State private var lightColor: Color = .white
 
     private var usesHomeUI1: Bool { homeUITheme.selected == .one }
+
+    /// RGB color control only for RGB channels on individual devices; hubs use CCT.
+    private var isRGBSelection: Bool {
+        if device.isVirtualMaster { return false }
+        let types = device.channelTypes
+        if channel == 0 {
+            return !types.isEmpty && types.allSatisfy { $0.uppercased() == "RGB" }
+        }
+        let index = channel - 1
+        return types.indices.contains(index) && types[index].uppercased() == "RGB"
+    }
+
+    private func rgbComponents(_ color: Color) -> (Int, Int, Int) {
+        let ui = UIColor(color)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: &a)
+        return (Int(r * 255), Int(g * 255), Int(b * 255))
+    }
 
     var body: some View {
         NavigationStack {
@@ -456,6 +481,17 @@ struct DeviceScheduleEditView: View {
                 }
             }
             .onAppear(perform: loadExisting)
+            .alert(
+                "Couldn't Save Schedule",
+                isPresented: Binding(
+                    get: { saveErrorMessage != nil },
+                    set: { if !$0 { saveErrorMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { saveErrorMessage = nil }
+            } message: {
+                Text(saveErrorMessage ?? "Something went wrong. Please try again.")
+            }
         }
     }
 
@@ -485,7 +521,7 @@ struct DeviceScheduleEditView: View {
                             }
                         }
 
-                        if device.chennalCount > 1 {
+                        if !device.isVirtualMaster && device.chennalCount > 1 {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Channel")
                                     .font(HomeUI1Type.caption(12))
@@ -497,6 +533,48 @@ struct DeviceScheduleEditView: View {
                                         ForEach(1...device.chennalCount, id: \.self) { ch in
                                             channelChip(title: "Ch \(ch)", value: ch)
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if turnOn {
+                        HomeUI1ControlSectionCard(title: "Light") {
+                            VStack(alignment: .leading, spacing: 16) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("Brightness")
+                                            .font(HomeUI1Type.caption(12))
+                                            .foregroundStyle(HomeUI1Color.textSecondary)
+                                        Spacer()
+                                        Text("\(Int(brightness))%")
+                                            .font(HomeUI1Type.caption(12))
+                                            .foregroundStyle(HomeUI1Color.textSecondary)
+                                    }
+                                    Slider(value: $brightness, in: 1...100, step: 1)
+                                        .tint(HomeUI1Color.accentGreen)
+                                }
+
+                                if isRGBSelection {
+                                    ColorPicker(selection: $lightColor, supportsOpacity: false) {
+                                        Text("Color")
+                                            .font(HomeUI1Type.body(14))
+                                            .foregroundStyle(HomeUI1Color.textPrimary)
+                                    }
+                                } else {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text("Warm")
+                                                .font(HomeUI1Type.caption(12))
+                                                .foregroundStyle(HomeUI1Color.textSecondary)
+                                            Spacer()
+                                            Text("Cool")
+                                                .font(HomeUI1Type.caption(12))
+                                                .foregroundStyle(HomeUI1Color.textSecondary)
+                                        }
+                                        Slider(value: $coolness, in: 0...100, step: 1)
+                                            .tint(HomeUI1Color.accentGreen)
                                     }
                                 }
                             }
@@ -606,11 +684,37 @@ struct DeviceScheduleEditView: View {
                 }
                 .pickerStyle(.segmented)
 
-                if device.chennalCount > 1 {
+                if !device.isVirtualMaster && device.chennalCount > 1 {
                     Picker("Channel", selection: $channel) {
                         Text("All channels").tag(0)
                         ForEach(1...device.chennalCount, id: \.self) { ch in
                             Text("Channel \(ch)").tag(ch)
+                        }
+                    }
+                }
+            }
+
+            if turnOn {
+                Section("Light") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("Brightness")
+                            Spacer()
+                            Text("\(Int(brightness))%").foregroundStyle(.secondary)
+                        }
+                        Slider(value: $brightness, in: 1...100, step: 1)
+                    }
+
+                    if isRGBSelection {
+                        ColorPicker("Color", selection: $lightColor, supportsOpacity: false)
+                    } else {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text("Warm")
+                                Spacer()
+                                Text("Cool").foregroundStyle(.secondary)
+                            }
+                            Slider(value: $coolness, in: 0...100, step: 1)
                         }
                     }
                 }
@@ -668,12 +772,28 @@ struct DeviceScheduleEditView: View {
         turnOn = schedule.turnOn
         channel = schedule.channel
         repeatDays = Set(schedule.repeatDays)
+        brightness = Double(schedule.brightness)
+        coolness = Double(schedule.cw)
+        lightColor = Color(
+            red: Double(schedule.red) / 255,
+            green: Double(schedule.green) / 255,
+            blue: Double(schedule.blue) / 255
+        )
     }
 
     private func save() {
         let components = Calendar.current.dateComponents([.hour, .minute], from: time)
         let hour = components.hour ?? 0
         let minute = components.minute ?? 0
+
+        let useRGB = isRGBSelection
+        let (r, g, b) = rgbComponents(lightColor)
+        let cwValue = Int(coolness.rounded())
+        let wwValue = 100 - cwValue
+        let brightnessValue = Int(brightness.rounded())
+        let isHub = device.isVirtualMaster
+        let virtualID = device.uuid
+        let members = device.memberChannelMacs ?? []
 
         let target: DeviceSchedule
         if let schedule {
@@ -684,6 +804,16 @@ struct DeviceScheduleEditView: View {
             schedule.repeatDays = Array(repeatDays)
             schedule.isEnabled = true
             schedule.lastFiredAt = nil
+            schedule.isHub = isHub
+            schedule.virtualDeviceID = virtualID
+            schedule.memberMacsRaw = members.joined(separator: ",")
+            schedule.brightness = brightnessValue
+            schedule.ww = wwValue
+            schedule.cw = cwValue
+            schedule.red = r
+            schedule.green = g
+            schedule.blue = b
+            schedule.useRGB = useRGB
             target = schedule
         } else {
             target = DeviceSchedule(
@@ -694,12 +824,31 @@ struct DeviceScheduleEditView: View {
                 hour: hour,
                 minute: minute,
                 repeatDays: Array(repeatDays),
-                turnOn: turnOn
+                turnOn: turnOn,
+                isHub: isHub,
+                virtualDeviceID: virtualID,
+                memberMacs: members,
+                brightness: brightnessValue,
+                ww: wwValue,
+                cw: cwValue,
+                red: r,
+                green: g,
+                blue: b,
+                useRGB: useRGB
             )
             modelContext.insert(target)
         }
 
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            if schedule == nil {
+                modelContext.delete(target)
+            }
+            saveErrorMessage = "Your schedule couldn't be saved. Please try again."
+            return
+        }
+
         DeviceScheduleEngine.shared.requestNotificationPermissionIfNeeded()
         DeviceScheduleEngine.shared.syncNotifications(for: target)
         dismiss()

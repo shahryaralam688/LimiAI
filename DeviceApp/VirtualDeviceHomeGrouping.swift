@@ -9,8 +9,12 @@
 import Foundation
 
 enum VirtualDeviceHomeGrouping {
-    static let masterDisplayName = VirtualDeviceGroupingSpec.defaultMasterDisplayName
+    static let masterDisplayName = VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: 1)
     static let masterRowIDPrefix = "virtual-master:"
+
+    static func hubDisplayName(pendantCount: Int) -> String {
+        VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: pendantCount)
+    }
 
     static func masterRowID(virtualDeviceID: String) -> String {
         masterRowIDPrefix + virtualDeviceID
@@ -18,6 +22,17 @@ enum VirtualDeviceHomeGrouping {
 
     static func isMasterRowID(_ id: String) -> Bool {
         id.hasPrefix(masterRowIDPrefix)
+    }
+
+    /// Cloud `vd-…` id used for pattern_control and Sequence storage.
+    static func virtualDeviceId(from device: WifiDevice) -> String {
+        if isMasterRowID(device.id) {
+            let stripped = String(device.id.dropFirst(masterRowIDPrefix.count))
+            if !stripped.isEmpty { return stripped }
+        }
+        let uuid = device.uuid.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !uuid.isEmpty { return uuid }
+        return device.chennalMac.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Removes member MAC rows and inserts one virtual-master row per group.
@@ -66,13 +81,25 @@ enum VirtualDeviceHomeGrouping {
                 memberHardwareIds: memberOrder
             )
 
+            let hubLabel = hubDisplayName(pendantCount: memberOrder.count)
+            let deviceName: String = {
+                if group.displayName.isEmpty { return hubLabel }
+                if group.displayName == "Master Device"
+                    || group.displayName.hasPrefix("Master Device") {
+                    return hubLabel
+                }
+                // Keep disambiguated labels like "Hub-2 · abc12345".
+                if group.displayName.hasPrefix("Hub-") { return group.displayName }
+                return hubLabel
+            }()
+
             let master = WifiDevice(
                 id: masterRowID(virtualDeviceID: stableVirtualID),
                 uuid: stableVirtualID,
                 chennalMac: stableVirtualID,
                 chennalCount: memberOrder.count,
                 channelTypes: channelTypes,
-                deviceName: group.displayName,
+                deviceName: deviceName,
                 isOnline: presenceOnline,
                 memberChannelMacs: memberOrder
             )
@@ -94,10 +121,14 @@ enum VirtualDeviceHomeGrouping {
         masterName: String = masterDisplayName
     ) -> [WifiDevice] {
         guard !enabledMemberHardwareIds.isEmpty else { return devices }
+        let hubName = hubDisplayName(pendantCount: enabledMemberHardwareIds.count)
+        let label = masterName == Self.masterDisplayName || masterName == "Master Device"
+            ? hubName
+            : masterName
         let spec = VirtualDeviceGroupingSpec(
             virtualDeviceID: virtualDeviceID,
             memberHardwareIds: enabledMemberHardwareIds,
-            displayName: masterName
+            displayName: label
         )
         return apply(devices: devices, groups: [spec])
     }

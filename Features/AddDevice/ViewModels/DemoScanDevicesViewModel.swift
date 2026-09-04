@@ -23,6 +23,18 @@ final class DemoScanDevicesViewModel: ObservableObject {
     @Published private(set) var bleConnectError: String?
     /// Set when user picks a virtual master row — drives sequential BLE provisioning.
     @Published private(set) var selectedVirtualMaster: VirtualMasterScanMetadata?
+    /// True while unconfigured hubs are being identified over BLE (connect → read MAC).
+    @Published private(set) var isResolvingIdentities = false
+    /// False while identification is still in progress — used to hide not-yet-identified
+    /// hubs so an unresolved hub is never shown as an "individual" device prematurely.
+    @Published private(set) var identitiesSettled = true
+
+    /// Fired after a new peripheral→MAC mapping is learned so DeviceApp can re-sync
+    /// cloud virtual-group specs (kept as a closure to avoid a DeviceApp dependency here).
+    var onIdentityResolved: (() -> Void)?
+
+    /// Resolves unconfigured hub MACs over BLE (F001) so scan rows can fold into hubs.
+    let identityResolver = BLEIdentityResolver()
 
     private var virtualGroupingSpecs: [VirtualDeviceGroupingSpec] = []
     private var virtualDeviceIDForGrouping: String = ""
@@ -55,10 +67,37 @@ final class DemoScanDevicesViewModel: ObservableObject {
         self.allowedNames = allowedNames
 
         wireLiveObservers()
+        wireIdentityResolver()
 
         $scannedDevices
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.rebuildDeviceList() }
+            .store(in: &cancellables)
+    }
+
+    private func wireIdentityResolver() {
+        identityResolver.onResolved = { [weak self] in
+            guard let self else { return }
+            self.rebuildDeviceList()
+            self.onIdentityResolved?()
+        }
+        identityResolver.$isBusy
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] busy in
+                guard let self else { return }
+                self.isResolvingIdentities = busy
+                // When resolving settles, refresh so gated hub cards become tappable.
+                self.rebuildDeviceList()
+            }
+            .store(in: &cancellables)
+        identityResolver.$isSettled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] settled in
+                guard let self else { return }
+                self.identitiesSettled = settled
+                // Reveal / hide not-yet-identified hubs as the settled state flips.
+                self.rebuildDeviceList()
+            }
             .store(in: &cancellables)
     }
 
@@ -110,6 +149,7 @@ final class DemoScanDevicesViewModel: ObservableObject {
         scanRefreshTimer = Timer.publish(every: 12, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.ble.refreshScan() }
+        identityResolver.start()
         rebuildDeviceList()
     }
 
@@ -156,6 +196,7 @@ final class DemoScanDevicesViewModel: ObservableObject {
         presenceTimer = nil
         scanRefreshTimer?.cancel()
         scanRefreshTimer = nil
+        identityResolver.stop()
     }
 
     /// Call from DeviceApp when virtual-device membership changes (Add Device scan grouping).
@@ -172,7 +213,9 @@ final class DemoScanDevicesViewModel: ObservableObject {
                 VirtualDeviceGroupingSpec(
                     virtualDeviceID: virtualDeviceID,
                     memberHardwareIds: enabledHardwareIds,
-                    displayName: VirtualDeviceScanGrouping.masterDisplayName
+                    displayName: VirtualDeviceGroupingSpec.hubDisplayName(
+                        pendantCount: enabledHardwareIds.count
+                    )
                 )
             ]
         }
@@ -197,8 +240,16 @@ final class DemoScanDevicesViewModel: ObservableObject {
         bleConnectWaitTask = nil
         isReadingWifiList = false
         bleConnectError = nil
+        // Free the radio for provisioning — pause background MAC resolution.
+        identityResolver.stop()
         selectedVirtualMaster = virtualMaster
-        selectedName = virtualMaster != nil ? VirtualDeviceScanGrouping.masterDisplayName : name
+        if let virtualMaster {
+            selectedName = VirtualDeviceGroupingSpec.hubDisplayName(
+                pendantCount: virtualMaster.memberHardwareIds.count
+            )
+        } else {
+            selectedName = name
+        }
         selectedId = id
         ssidNameArray = []
         DeviceConsole.log(
@@ -306,6 +357,8 @@ final class DemoScanDevicesViewModel: ObservableObject {
         isConnectingToBLE = false
         bleConnectError = message
         DeviceConsole.log(.add, "BLE connect failed — \(message)")
+        // Back on the scan list — resume background MAC resolution.
+        if AddDeviceFlowActivityGate.isActive { identityResolver.start() }
     }
 
     func clearBLEConnectError() {
@@ -326,6 +379,8 @@ final class DemoScanDevicesViewModel: ObservableObject {
         showAddWifi = false
         ssidNameArray = []
         selectedVirtualMaster = nil
+        // Returning to the scan list — resume background MAC resolution.
+        if AddDeviceFlowActivityGate.isActive { identityResolver.start() }
     }
 
     func connectWiFiDevice(_ device: BLEDevice) {
@@ -394,7 +449,19 @@ final class DemoScanDevicesViewModel: ObservableObject {
 
     func shouldRender(_ device: BLEDevice) -> Bool {
         if device.isVirtualMaster { return true }
+        // Do not show a not-yet-identified hub as an individual device until
+        // identification settles — it may still belong to a virtual device.
+        if !identitiesSettled, isUnidentifiedHub(device) {
+            return false
+        }
         return (device.deviceType == .bluetooth && ble.isBluetoothOn) || device.deviceType == .wifi
+    }
+
+    /// A BLE hub advertising a provisioning name whose MAC is not yet known.
+    private func isUnidentifiedHub(_ device: BLEDevice) -> Bool {
+        device.deviceType == .bluetooth
+            && LimiDeviceNaming.isBLEProvisioningHubName(device.name)
+            && device.resolvedHardwareId().isEmpty
     }
 
     /// First live BLE member for Wi‑Fi list — same member-aware pick as master provisioning.

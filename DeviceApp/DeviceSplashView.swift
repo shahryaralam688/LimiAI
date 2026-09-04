@@ -12,16 +12,20 @@ struct DeviceSplashView: View {
     var onFinished: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var glow: CGFloat = 0
-    @State private var backgroundOpacity: Double = 0
-    @State private var brandOpacity: Double = 0
-    @State private var taglineOpacity: Double = 0
-    @State private var logoScale: CGFloat = 0.92
+    /// Start opaque so force-quit → relaunch never flashes system white.
+    @State private var glow: CGFloat = 0.55
+    @State private var backgroundOpacity: Double = 1
+    @State private var brandOpacity: Double = 0.92
+    @State private var taglineOpacity: Double = 0.85
+    @State private var logoScale: CGFloat = 1
     @State private var didFinish = false
     @State private var introTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
+            // Always-on Soft UI canvas — never transparent.
+            HomeUI1Color.canvas.ignoresSafeArea()
+
             fullBleedBackground
 
             // Soft fade / vignette so logo stays readable
@@ -121,18 +125,6 @@ struct DeviceSplashView: View {
             .homeUI1Elevation(.three, cornerRadius: HomeUI1Radius.lg, fill: HomeUI1Color.surface.opacity(0.82))
             .scaleEffect(logoScale)
             .opacity(brandOpacity)
-
-            Text("AI Device")
-                .font(HomeUI1Type.body(15))
-                .foregroundStyle(HomeUI1Color.accentGreen)
-                .opacity(brandOpacity)
-
-            Text("Your lights. Ready.")
-                .font(HomeUI1Type.regular(14))
-                .foregroundStyle(HomeUI1Color.textPrimary.opacity(0.92))
-                .multilineTextAlignment(.center)
-                .opacity(taglineOpacity)
-                .shadow(color: .black.opacity(0.45), radius: 6, y: 2)
         }
     }
 
@@ -141,18 +133,16 @@ struct DeviceSplashView: View {
     private func startIntro() {
         introTask?.cancel()
         didFinish = false
-        glow = 0
-        backgroundOpacity = 0
-        brandOpacity = 0
-        taglineOpacity = 0
-        logoScale = 0.92
+        // Keep canvas/brand visible from first frame (no opacity-0 flash).
+        backgroundOpacity = 1
+        brandOpacity = max(brandOpacity, 0.92)
+        taglineOpacity = max(taglineOpacity, 0.85)
+        logoScale = 1
 
         if reduceMotion {
             glow = 1
-            backgroundOpacity = 1
             brandOpacity = 1
             taglineOpacity = 1
-            logoScale = 1
             introTask = Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 450_000_000)
                 guard !Task.isCancelled else { return }
@@ -162,23 +152,13 @@ struct DeviceSplashView: View {
         }
 
         introTask = Task { @MainActor in
-            withAnimation(.easeOut(duration: 0.7)) {
-                backgroundOpacity = 1
+            withAnimation(.easeOut(duration: 0.55)) {
                 glow = 1
-            }
-
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            guard !Task.isCancelled else { return }
-
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.86)) {
                 brandOpacity = 1
-                logoScale = 1
-            }
-            withAnimation(.easeOut(duration: 0.4)) {
                 taglineOpacity = 1
             }
 
-            try? await Task.sleep(nanoseconds: 1_100_000_000)
+            try? await Task.sleep(nanoseconds: 1_200_000_000)
             guard !Task.isCancelled else { return }
             finishOnce()
         }

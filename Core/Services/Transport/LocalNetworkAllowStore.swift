@@ -55,11 +55,15 @@ public final class LocalNetworkAllowStore {
         UserDefaults.standard.set(snapshot, forKey: defaultsKey)
     }
 
-    /// Test helper — clears session + disk allows.
-    public func resetForTests() {
+    public func removeAll() {
         lock.lock()
         allowedIds.removeAll()
         lock.unlock()
         UserDefaults.standard.removeObject(forKey: defaultsKey)
+    }
+
+    /// Test helper — clears session + disk allows.
+    public func resetForTests() {
+        removeAll()
     }
 }

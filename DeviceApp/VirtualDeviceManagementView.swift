@@ -12,9 +12,18 @@ struct VirtualDeviceManagementView: View {
     @ObservedObject private var store = VirtualDeviceStore.shared
     let items: [DeviceHomeUIPreviewItem]
     var onToggle: (String) -> Void
+    /// Create a brand-new virtual device from the given item ids (online, not yet grouped).
+    var onCreateVirtualDevice: (([String]) -> Void)? = nil
     var onDismiss: (() -> Void)? = nil
 
+    @State private var showCreateSheet = false
+
     private var hasCloudGroups: Bool { !store.remoteGroups.isEmpty }
+
+    /// Online devices on this phone that are not already part of a virtual device.
+    private var creatableItems: [DeviceHomeUIPreviewItem] {
+        items.filter { $0.isOnline && !$0.isPowerOn }
+    }
 
     private var relevantCloudGroups: [VirtualDeviceRemotePayload] {
         let configured = Set(
@@ -50,6 +59,9 @@ struct VirtualDeviceManagementView: View {
                         )
                     } else {
                         syncCard
+                        if onCreateVirtualDevice != nil {
+                            createNewCard
+                        }
                         if hasCloudGroups {
                             cloudGroupsCard
                         }
@@ -64,6 +76,16 @@ struct VirtualDeviceManagementView: View {
             .refreshable {
                 await store.refreshFromBackend(force: true)
             }
+        }
+        .sheet(isPresented: $showCreateSheet) {
+            CreateVirtualDeviceSheet(
+                candidates: creatableItems,
+                onCreate: { selectedIds in
+                    onCreateVirtualDevice?(selectedIds)
+                    showCreateSheet = false
+                },
+                onCancel: { showCreateSheet = false }
+            )
         }
         .navigationTitle("Virtual Devices")
         .navigationBarTitleDisplayMode(.inline)
@@ -99,6 +121,38 @@ struct VirtualDeviceManagementView: View {
                 }
                 .accessibilityLabel("Virtual device actions")
             }
+        }
+    }
+
+    private var createNewCard: some View {
+        HomeUI1ControlSectionCard(
+            title: "Create New Virtual Device",
+            footer: creatableItems.isEmpty
+                ? "No online devices available to group. Only online devices that aren’t already in a virtual device can be added."
+                : "\(creatableItems.count) online device(s) can be grouped into a new virtual device."
+        ) {
+            Button {
+                DeviceAppGuidance.lightImpact()
+                showCreateSheet = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text("Create New Virtual Device")
+                        .font(HomeUI1Type.body(15))
+                    Spacer()
+                }
+                .foregroundStyle(
+                    creatableItems.isEmpty ? HomeUI1Color.textSecondary : HomeUI1Color.accentGreen
+                )
+                .padding(.vertical, 12)
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .homeUI1Elevation(.one, cornerRadius: HomeUI1Radius.nav, fill: HomeUI1Color.surface)
+            }
+            .buttonStyle(.plain)
+            .disabled(creatableItems.isEmpty)
+            .opacity(creatableItems.isEmpty ? 0.55 : 1)
         }
     }
 
@@ -197,6 +251,81 @@ struct VirtualDeviceManagementView: View {
                     .homeUI1Elevation(.one, cornerRadius: HomeUI1Radius.nav, fill: HomeUI1Color.surfaceRaised)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Create new virtual device (pick online, ungrouped devices)
+
+private struct CreateVirtualDeviceSheet: View {
+    let candidates: [DeviceHomeUIPreviewItem]
+    var onCreate: ([String]) -> Void
+    var onCancel: () -> Void
+
+    @State private var selectedIds: Set<String> = []
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if candidates.isEmpty {
+                    ContentUnavailableView(
+                        "No Devices Available",
+                        systemImage: "link.badge.plus",
+                        description: Text("Only online devices that aren’t already in a virtual device can be grouped.")
+                    )
+                } else {
+                    List {
+                        Section {
+                            ForEach(candidates) { item in
+                                Button {
+                                    toggle(item.id)
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: selectedIds.contains(item.id) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(selectedIds.contains(item.id) ? Color.green : Color.secondary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(item.name)
+                                                .foregroundStyle(.primary)
+                                            Text(item.subtitle.isEmpty ? "Online" : item.subtitle)
+                                                .font(.footnote)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+                                    }
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        } header: {
+                            Text("Online devices")
+                        } footer: {
+                            Text("Select the devices to combine into one new virtual device.")
+                        }
+                    }
+                }
+            }
+            .navigationTitle("New Virtual Device")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Create") {
+                        onCreate(Array(selectedIds))
+                    }
+                    .disabled(selectedIds.isEmpty)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func toggle(_ id: String) {
+        if selectedIds.contains(id) {
+            selectedIds.remove(id)
+        } else {
+            selectedIds.insert(id)
         }
     }
 }

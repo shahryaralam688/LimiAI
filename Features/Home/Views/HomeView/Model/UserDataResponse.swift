@@ -49,37 +49,73 @@ class UserDataManager: ObservableObject {
     private init() {}
     
     func fetchUserData() async {
-        guard let token = AuthManager.shared.getToken() else {
+        guard AuthManager.shared.getToken() != nil else {
             await MainActor.run {
-                self.errorMessage = "No authentication token found"
+                self.errorMessage = "Your session has expired. Please sign in again."
+                self.isLoading = false
             }
             return
         }
-        
+
         await MainActor.run {
             self.isLoading = true
             self.errorMessage = nil
         }
-        
+
         do {
             let userData = try await performFetchUserData()
             await MainActor.run {
                 self.userData = userData
                 self.isLoading = false
+                self.errorMessage = nil
                 ContextManager.shared.updateHomeUserDisplayName(userData.username)
             }
-            
-            // Load profile image
+
             if let imageUrl = URL(string: userData.profilePicture?.url ?? "") {
                 await loadProfileImage(from: imageUrl)
             }
-            
+
         } catch {
             await MainActor.run {
-                self.errorMessage = error.localizedDescription
+                self.errorMessage = Self.friendlyFetchError(error)
                 self.isLoading = false
             }
         }
+    }
+
+    private static func friendlyFetchError(_ error: Error) -> String {
+        if let api = error as? LimiAPIError {
+            switch api {
+            case .missingAuth:
+                return "Your session has expired. Please sign in again."
+            case .httpStatus(let code, let message):
+                if code == 401 || code == 403 {
+                    return "Your session has expired. Please sign in again."
+                }
+                let lower = (message ?? "").lowercased()
+                if lower.contains("token expired")
+                    || lower.contains("jwt expired")
+                    || lower.contains("invalid token")
+                    || lower.contains("unauthorized") {
+                    return "Your session has expired. Please sign in again."
+                }
+                if let message, !message.isEmpty {
+                    return message
+                }
+                return "Couldn't load your profile. Please try again."
+            case .transport:
+                return "No internet connection. Check Wi‑Fi or mobile data, then try again."
+            default:
+                return api.errorDescription ?? "Couldn't load your profile. Please try again."
+            }
+        }
+        let lower = error.localizedDescription.lowercased()
+        if lower.contains("token expired")
+            || lower.contains("unauthorized")
+            || lower.contains("401") {
+            return "Your session has expired. Please sign in again."
+        }
+        return error.localizedDescription
     }
     
     private func performFetchUserData() async throws -> UserData {
@@ -125,6 +161,14 @@ class UserDataManager: ObservableObject {
             await fetchUserData()
         }
     }
+
+    func resetForSignOut() {
+        userData = nil
+        profileImage = nil
+        isLoading = false
+        errorMessage = nil
+        ImageCache.shared.clearAll()
+    }
 }
 
 
@@ -144,5 +188,9 @@ final class ImageCache {
 
     func clear(for url: String) {
         cache.removeValue(forKey: url)
+    }
+
+    func clearAll() {
+        cache.removeAll()
     }
 }

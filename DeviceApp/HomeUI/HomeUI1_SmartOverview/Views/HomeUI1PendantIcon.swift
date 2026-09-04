@@ -2,9 +2,9 @@
 //  HomeUI1PendantIcon.swift
 //  LIMI AI Device — Home UI 1
 //
-//  Living-room scene with horizontal globe pendant:
-//  ON  = user photo (lights warm / on)
-//  OFF = same scene (lights off)
+//  Dining-room hub scene (woven pendants over table):
+//  ON  = warm lit photo
+//  OFF = same photo, dulled (desaturated / darkened)
 //  Fills the featured media container edge-to-edge.
 //
 
@@ -22,7 +22,7 @@ struct HomeUI1PendantHero: View {
             Image(lit ? "HomeUI1PendantOn" : "HomeUI1PendantOff")
                 .resizable()
                 .scaledToFill()
-                // Keep chandelier visible — crop from the top of the frame.
+                // Prefer the hanging pendants — crop from the top of the frame.
                 .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
                 .clipped()
         }
@@ -31,7 +31,7 @@ struct HomeUI1PendantHero: View {
                 colors: [
                     Color.black.opacity(0.08),
                     Color.clear,
-                    Color.black.opacity(lit ? 0.05 : 0.14)
+                    Color.black.opacity(lit ? 0.05 : 0.18)
                 ],
                 startPoint: .top,
                 endPoint: .bottom

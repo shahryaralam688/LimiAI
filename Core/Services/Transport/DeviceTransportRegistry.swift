@@ -71,11 +71,21 @@ public final class DeviceTransportRegistry {
             .receive(on: RunLoop.main)
             .sink { [weak self] update in
                 guard let self else { return }
-                DeviceConsole.log(
-                    .presence,
-                    "registry update id=\(update.deviceId) mqttConnected=\(update.connected)"
-                )
                 let key = LimiDeviceNaming.normalizedHardwareId(update.deviceId)
+
+                // The backend heart-beats `device_status=on` every few seconds. Only the
+                // *transition* (off↔on) is UI-relevant; forwarding every identical heartbeat
+                // rebuilt the whole Home list every ~5s. Freshness (`lastMQTTPresenceAt`) and
+                // the presence caches still update on every beat below — only the UI publisher
+                // (and its log) are gated on an actual change.
+                let changed = self.lastPresence[key] != update.connected
+                if changed {
+                    DeviceConsole.log(
+                        .presence,
+                        "registry update id=\(update.deviceId) mqttConnected=\(update.connected)"
+                    )
+                }
+
                 self.state(for: key).updateMQTTPresence(connected: update.connected)
                 self.lastPresence[key] = update.connected
                 CloudPresenceMemory.shared.record(
@@ -87,6 +97,8 @@ public final class DeviceTransportRegistry {
                     isOnline: update.connected,
                     path: update.connected ? .cloud : .offline
                 )
+
+                guard changed else { return }
                 self.presenceChangeSubject.send(update)
                 Task { @MainActor in
                     CloudOfflineLocalSwitchCoordinator.shared.handleMQTTPresence(
@@ -125,6 +137,20 @@ public final class DeviceTransportRegistry {
         }
     }
 
+    /// Clear a single hub's live cloud presence (e.g. stale heartbeat → BLE handoff).
+    /// Clears BOTH the per-device state flag AND the registry's `lastPresence` cache so
+    /// `presenceSnapshot()` consumers (e.g. Add Device's "already online" filter) don't
+    /// keep treating a dropped hub as cloud-online. Fresh `device_status` re-proves Online.
+    public func markCloudPresenceDropped(_ deviceId: String) {
+        let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
+        guard !key.isEmpty else { return }
+        let deviceState = state(for: key)
+        if deviceState.mqttConnected {
+            deviceState.updateMQTTPresence(connected: false)
+        }
+        lastPresence[key] = false
+    }
+
     /// Clear live MQTT flags (e.g. Socket reconnect). Fresh `device_status` must re-prove Online.
     public func clearLiveMQTTPresence() {
         for (key, state) in states {
@@ -134,6 +160,17 @@ public final class DeviceTransportRegistry {
             lastPresence[key] = false
         }
         DeviceConsole.log(.presence, "cleared live MQTT — waiting for fresh device_status")
+    }
+
+    /// Logout / account switch — drop in-memory presence so Home cannot seed
+    /// the previous account's hubs. Disk presence must already be cleared.
+    public func resetSessionCaches() {
+        for state in states.values where state.mqttConnected {
+            state.updateMQTTPresence(connected: false)
+        }
+        states.removeAll()
+        lastPresence.removeAll()
+        DeviceConsole.log(.presence, "cleared session registry (account change)")
     }
 
     /// Drop registry bookkeeping when the user deletes the device from this phone.

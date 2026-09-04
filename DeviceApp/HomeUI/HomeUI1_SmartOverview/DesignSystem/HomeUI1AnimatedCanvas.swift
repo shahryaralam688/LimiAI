@@ -7,9 +7,13 @@
 
 import SwiftUI
 
-/// Full-bleed animated background for Home UI 1.
+/// Full-bleed ambient background for Home UI 1.
+///
+/// Rendered statically (no per-frame animation): the gradients are rasterized
+/// once and cached, so stacking this behind multiple screens costs ~0 ongoing
+/// GPU/CPU. A fixed `drift` picks a settled, balanced composition.
 struct HomeUI1AnimatedCanvas: View {
-    @State private var drift: CGFloat = 0
+    private let drift: CGFloat = 0.5
 
     var body: some View {
         ZStack {
@@ -50,10 +54,6 @@ struct HomeUI1AnimatedCanvas: View {
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-        .onAppear {
-            withAnimation(HomeUI1Motion.ambient.repeatForever(autoreverses: true)) {
-                drift = 1
-            }
-        }
+        .drawingGroup()
     }
 }

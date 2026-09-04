@@ -12,6 +12,19 @@ import Foundation
 enum DeviceConsole {
     static var isEnabled = true
 
+    /// Presence-lifecycle debug channel switch. When `true`, ALL normal `[Device]…` logs are
+    /// muted and only `focus(...)` `[LIFECYCLE]` lines print — handy while debugging presence.
+    /// Kept `false` in production so neither the (per-5s heartbeat) lifecycle logs nor a wall
+    /// of `[Device]` logs spam the console. Flip to `true` locally to trace the presence flow.
+    static var focusMode = false
+
+    /// Task-focused presence channel. Only prints while `focusMode` is on, so the frequent
+    /// heartbeat / handoff traces stay out of the production console.
+    static func focus(_ message: String) {
+        guard focusMode else { return }
+        print("🔵 [LIFECYCLE] \(message)")
+    }
+
     enum Area: String {
         case socket = "Socket"
         case presence = "Presence"
@@ -28,19 +41,19 @@ enum DeviceConsole {
     private static let bleDiscoverThrottle: TimeInterval = 8
 
     static func log(_ area: Area, _ message: String) {
-        guard isEnabled else { return }
+        guard isEnabled, !focusMode else { return }
         print("[Device][\(area.rawValue)] \(message)")
     }
 
     /// Visual separator so multi-device runs are easy to spot in Xcode.
     static func banner(_ title: String) {
-        guard isEnabled else { return }
+        guard isEnabled, !focusMode else { return }
         print("[Device]========== \(title) ==========")
     }
 
     /// Log configured-peripheral advertisements without flooding the console.
     static func bleAdvertisement(name: String, uuid: String, rssi: NSNumber, isConfiguredTarget: Bool) {
-        guard isEnabled, isConfiguredTarget else { return }
+        guard isEnabled, !focusMode, isConfiguredTarget else { return }
         let key = uuid.uppercased()
         let now = Date()
         if let last = lastBLEDiscoverLog[key], now.timeIntervalSince(last) < bleDiscoverThrottle {
@@ -53,7 +66,7 @@ enum DeviceConsole {
     // MARK: - Debug dumps (2nd-device Wi-Fi setup)
 
     static func dumpConfiguredStore(reason: String) {
-        guard isEnabled else { return }
+        guard isEnabled, !focusMode else { return }
         let records = ConfiguredBLEDeviceStore.shared.allRecords
         log(.config, "STORE DUMP (\(reason)) count=\(records.count)")
         if records.isEmpty {
@@ -69,7 +82,7 @@ enum DeviceConsole {
     }
 
     static func dumpBonjourOnline(reason: String) {
-        guard isEnabled else { return }
+        guard isEnabled, !focusMode else { return }
         let devices = BonjourServiceBrowser.shared.discoveredWiFiDevices
         let online = devices.filter { $0.deviceType == .wifi && $0.reachability == .online }
         log(.bonjour, "ONLINE DUMP (\(reason)) online=\(online.count) total=\(devices.count)")
@@ -89,7 +102,7 @@ enum DeviceConsole {
         reason: String,
         devices: [(name: String, hardwareId: String, online: Bool, configured: Bool)]
     ) {
-        guard isEnabled else { return }
+        guard isEnabled, !focusMode else { return }
         log(.home, "LIST DUMP (\(reason)) count=\(devices.count)")
         for (index, d) in devices.enumerated() {
             log(

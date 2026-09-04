@@ -3,3 +3,12 @@
 LIMI_API_BASE_URL = https:/$()/dev.api.limitless-lighting.co.uk/
 // Use the stable default toolchain path (matches Limi-Debug.xcconfig).
 LIBRARY_SEARCH_PATHS = /usr/lib/swift "$(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME)"
+
+// LLDB attach: project Debug defaults to `dwarf`, so symbols live in the
+// on-device binary. LLDB then reads device memory (USB/Wi-Fi), shows
+// "Launching is taking longer than expected", and iOS often SIGKILLs
+// at dyld`lldb_image_notifier. Local dSYMs keep attach on the Mac.
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
+DWARF_DSYM_FILE_SHOULD_ACCOMPANY_PRODUCT = YES
+// Extra debug dylib adds another image for LLDB to resolve on device.
+ENABLE_DEBUG_DYLIB = NO

@@ -85,7 +85,8 @@ class LightControllingSocket: ObservableObject {
             .sink { [weak self] _ in
                 guard let self else { return }
                 let token = Self.currentConnectAuthToken()
-                if LightControllingSocketAuthPolicy.shouldForceDisconnect(token: token) {
+                if !AuthManager.shared.isAuthenticated
+                    || LightControllingSocketAuthPolicy.shouldForceDisconnect(token: token) {
                     self.wantsConnection = false
                     self.socket.disconnect()
                     return
@@ -275,6 +276,54 @@ class LightControllingSocket: ObservableObject {
             DeviceConsole.log(
                 .socket,
                 "← virtual_light_control ack rtt=\(String(format: "%.0f", roundTrip * 1000))ms ok=\(didReceiveAck)"
+            )
+            acknowledgment?(roundTrip, didReceiveAck)
+        }
+    }
+
+    /// Hub (virtual master) pattern control — dedicated event.
+    /// Payload: `{ "deviceId": "<hub virtualID>", "pattern": "<name>", "devices": ["3CDC75FEBB58"] }`.
+    /// `devices` is the member MAC list on that virtual id (12-hex, no colons).
+    func sendHubPatternControl(
+        virtualDeviceId: String,
+        patternName: String,
+        deviceIds: [String] = [],
+        acknowledgment: ((TimeInterval, Bool) -> Void)? = nil
+    ) {
+        let trimmedID = virtualDeviceId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedName = patternName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedID.isEmpty, !trimmedName.isEmpty else { return }
+        guard socket.status == .connected else {
+            DeviceConsole.log(.socket, "skip pattern_control — socket not connected id=\(trimmedID)")
+            return
+        }
+
+        var seen = Set<String>()
+        let devices = deviceIds.compactMap { raw -> String? in
+            let hw = LimiDeviceNaming.normalizedHardwareId(raw)
+            guard hw.count == 12, hw.allSatisfy(\.isHexDigit), seen.insert(hw).inserted else {
+                return nil
+            }
+            return hw
+        }
+
+        let payload: [String: Any] = [
+            "deviceId": trimmedID,
+            "pattern": trimmedName,
+            "devices": devices,
+        ]
+
+        let sentAt = Date()
+        DeviceConsole.log(
+            .socket,
+            "→ pattern_control id=\(trimmedID) pattern=\(trimmedName) devices=\(devices.joined(separator: ","))"
+        )
+        socket.emitWithAck("pattern_control", payload).timingOut(after: 5.0) { data in
+            let roundTrip = Date().timeIntervalSince(sentAt)
+            let didReceiveAck = !data.isEmpty
+            DeviceConsole.log(
+                .socket,
+                "← pattern_control ack rtt=\(String(format: "%.0f", roundTrip * 1000))ms ok=\(didReceiveAck)"
             )
             acknowledgment?(roundTrip, didReceiveAck)
         }

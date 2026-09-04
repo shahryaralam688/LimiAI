@@ -60,6 +60,25 @@ public struct LocalControlSwitchOffer: Identifiable, Equatable {
         let paths = parts.isEmpty ? "local network / BLE" : parts.joined(separator: " / ")
         return "Your device is not connected to the cloud. Do you want to switch over \(paths) control?"
     }
+
+    /// Short copy for notification-style UX (home bell badge).
+    public var notificationTitle: String { "Cloud disconnected" }
+
+    public var notificationBody: String {
+        if canUseWebSocket {
+            return "Tap to allow local network control for this device."
+        }
+        if canUseBLE {
+            return "Tap to switch to Bluetooth control."
+        }
+        return "Local control may still be available."
+    }
+
+    public var acceptButtonTitle: String {
+        if canUseWebSocket { return "Use local network" }
+        if canUseBLE { return "Use Bluetooth" }
+        return "Switch"
+    }
 }
 
 @MainActor
@@ -67,6 +86,9 @@ public final class CloudOfflineLocalSwitchCoordinator: ObservableObject {
     public static let shared = CloudOfflineLocalSwitchCoordinator()
 
     @Published public private(set) var activeOffer: LocalControlSwitchOffer?
+
+    /// Unread-style badge for home notification bell (Device app).
+    public var hasUnreadLocalSwitchOffer: Bool { activeOffer != nil }
 
     /// Devices the user already declined this app session (avoid spam).
     private var declinedDeviceIds: Set<String> = []

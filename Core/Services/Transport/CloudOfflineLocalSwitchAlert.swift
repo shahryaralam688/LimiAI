@@ -2,8 +2,9 @@
 //  CloudOfflineLocalSwitchAlert.swift
 //  Limi
 //
-//  Shared Yes/No alert for cloud-offline → local WS/BLE switch.
-//  Attach once at each app root so both LIMI AI and LIMI AI Device share UX.
+//  Optional blocking Yes/No alert for cloud-offline → local WS/BLE switch.
+//  LIMI AI Device uses the home notification bell badge instead
+//  (`DeviceLocalSwitchInboxSheet`) — do not attach this on DeviceRootView.
 //
 
 import SwiftUI
@@ -38,7 +39,7 @@ private struct CloudOfflineLocalSwitchAlertModifier: ViewModifier {
 }
 
 public extension View {
-    /// Shows the cloud-offline → local network / BLE switch confirmation.
+    /// Blocking alert UX. Prefer notification-badge inbox on Device app Home.
     func cloudOfflineLocalSwitchAlert() -> some View {
         modifier(CloudOfflineLocalSwitchAlertModifier())
     }

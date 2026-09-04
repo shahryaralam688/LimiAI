@@ -21,6 +21,7 @@ struct DeviceHomeView: View {
     @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
     @ObservedObject private var presenceCoordinator = DevicePresenceCoordinator.shared
     @ObservedObject private var virtualDeviceStore = VirtualDeviceStore.shared
+    @ObservedObject private var localSwitchCoordinator = CloudOfflineLocalSwitchCoordinator.shared
 
     // MARK: - Device state (mirrors ConnectedDevicesView)
     @State private var wifiDevices: [WifiDevice] = []
@@ -32,8 +33,10 @@ struct DeviceHomeView: View {
 
     @State private var selectedDevice: WifiDevice?
     @State private var scheduleDevice: WifiDevice?
+    @State private var sequenceTarget: HubSequenceTarget?
     @State private var showAddDevice = false
     @State private var showConfiguredConnected = false
+    @State private var showLocalSwitchInbox = false
 
     // MARK: - Rename (local, SwiftData)
     @State private var renameTargetDevice: WifiDevice?
@@ -85,236 +88,285 @@ struct DeviceHomeView: View {
     }
 
     var body: some View {
+        homeRoot
+    }
+
+    /// Keep each chain short — SwiftUI type-checker chokes on one long modifier pile.
+    private var homeRoot: some View {
+        homeLifecycleScene
+    }
+
+    private var homeLifecycleScene: some View {
+        homeLifecycleBluetooth
+            .onChange(of: scenePhase) { _, phase in
+                handleScenePhase(phase)
+            }
+    }
+
+    private var homeLifecycleBluetooth: some View {
+        homeLifecycleVirtual
+            .onChange(of: bluetooth.isConnected) { _, _ in
+                refreshDisplayedDevices()
+            }
+            .onChange(of: bluetooth.isBluetoothOn) { _, _ in
+                refreshDisplayedDevices()
+            }
+            .onChange(of: bluetooth.bleLastSeen) { _, _ in
+                scheduleBLEPresenceRefresh()
+            }
+    }
+
+    private var homeLifecycleVirtual: some View {
+        homeLifecycleSocket
+            .onChange(of: virtualDeviceStore.enabledHardwareIds) { _, _ in
+                refreshDisplayedDevices()
+            }
+            .onChange(of: virtualDeviceStore.remoteGroups) { _, _ in
+                refreshDisplayedDevices()
+                requestPresenceRefresh(reason: .homeAppear, force: true)
+            }
+            .onChange(of: virtualDeviceStore.virtualDeviceID) { _, _ in
+                refreshDisplayedDevices()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .limiAuthSessionDidChange)) { _ in
+                if AuthManager.shared.getToken() != nil {
+                    virtualDeviceStore.refreshFromBackendIfNeeded()
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .limiDeviceSessionDidChange)) { _ in
+                clearHomeListForSessionChange()
+            }
+    }
+
+    private var homeLifecycleSocket: some View {
+        homeLifecyclePresence
+            .onChange(of: socket.connectionStatus) { _, status in
+                handleSocketStatus(status)
+            }
+            .onChange(of: presenceCoordinator.isRefreshing) { wasRefreshing, isRefreshing in
+                if wasRefreshing, !isRefreshing {
+                    refreshDisplayedDevices()
+                }
+            }
+    }
+
+    private var homeLifecyclePresence: some View {
+        homeWithAlerts
+            .onAppear(perform: handleHomeAppear)
+            .onDisappear { bonjourBrowser.stopBrowsing() }
+            .onChange(of: presenceCoordinator.powerOffHint) { _, hint in
+                guard let hint else { return }
+                groupActionMessage = hint
+                DeviceAppGuidance.warningNotification()
+            }
+            .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
+                processDiscoveredDevices(newDevices)
+                if !wifiDevices.isEmpty {
+                    isInitialDiscovery = false
+                }
+            }
+            .onReceive(DeviceTransportRegistry.shared.presenceChangePublisher) { update in
+                applyCloudPresence(deviceId: update.deviceId, connected: update.connected)
+                if update.connected {
+                    isInitialDiscovery = false
+                }
+            }
+    }
+
+    private var homeWithAlerts: some View {
+        homeWithSheets
+            .modifier(DeviceHomeRenameAlertModifier(
+                renameTargetDevice: $renameTargetDevice,
+                renameInput: $renameInput,
+                onSave: {
+                    saveCustomDeviceName()
+                    renameTargetDevice = nil
+                },
+                onReset: {
+                    renameInput = ""
+                    saveCustomDeviceName()
+                    renameTargetDevice = nil
+                }
+            ))
+            .modifier(DeviceHomeRoomAlertModifier(
+                newRoomTargetDevice: $newRoomTargetDevice,
+                newRoomInput: $newRoomInput,
+                onCreate: {
+                    if let device = newRoomTargetDevice {
+                        assignRoom(newRoomInput, to: device)
+                    }
+                    newRoomTargetDevice = nil
+                }
+            ))
+            .modifier(DeviceHomeOfflineAlertModifier(
+                offlineAlertDevice: $offlineAlertDevice,
+                onSchedules: {
+                    if let device = offlineAlertDevice {
+                        scheduleDevice = device
+                    }
+                    offlineAlertDevice = nil
+                }
+            ))
+            .modifier(DeviceHomeDeleteAlertModifier(
+                deleteTargetDevice: $deleteTargetDevice,
+                onDelete: {
+                    if let device = deleteTargetDevice {
+                        deleteConfiguredDevice(device)
+                    }
+                    deleteTargetDevice = nil
+                }
+            ))
+    }
+
+    private var homeWithSheets: some View {
+        homeNavigationRoot
+            .sheet(isPresented: $showAddDevice) {
+                DeviceAddFlowView()
+            }
+            .sheet(isPresented: $showConfiguredConnected) {
+                configuredConnectedSheet
+            }
+            .sheet(isPresented: $showLocalSwitchInbox) {
+                DeviceLocalSwitchInboxSheet()
+            }
+            .sheet(item: $selectedDevice) { device in
+                selectedDeviceSheet(device)
+            }
+            .sheet(item: $scheduleDevice) { device in
+                scheduleDeviceSheet(device)
+            }
+            .sheet(item: $sequenceTarget) { target in
+                sequenceEditorSheet(target)
+            }
+    }
+
+    private var homeNavigationRoot: some View {
         NavigationStack {
             Group {
                 if isGuestInstaller {
-                    ContentUnavailableView {
-                        Label("Sign In Required", systemImage: "person.crop.circle.badge.questionmark")
-                    } description: {
-                        Text("Please sign in with your account to view and control your Wi-Fi devices.")
-                    } actions: {
-                        Button("Sign Out", role: .destructive) {
-                            AuthManager.shared.clearToken()
-                        }
-                        .buttonStyle(.bordered)
-                    }
+                    guestInstallerUnavailable
                 } else {
                     smartHomeOverview
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .sheet(isPresented: $showAddDevice) {
-            DeviceAddFlowView()
-        }
-        .sheet(isPresented: $showConfiguredConnected) {
-            NavigationStack {
-                DeviceConfiguredConnectedView(
-                    items: configuredConnectedPreviewItems,
-                    managementItems: virtualDeviceManagementItems,
-                    onOpen: { id in
-                        showConfiguredConnected = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                            openDeviceById(id)
-                        }
-                    },
-                    onToggle: { toggleVirtualDeviceMembershipById($0) },
-                    onDismiss: { showConfiguredConnected = false }
-                )
+    }
+
+    private var guestInstallerUnavailable: some View {
+        ContentUnavailableView {
+            Label("Sign In Required", systemImage: "person.crop.circle.badge.questionmark")
+        } description: {
+            Text("Please sign in with your account to view and control your Wi-Fi devices.")
+        } actions: {
+            Button("Sign Out", role: .destructive) {
+                AuthManager.shared.clearToken()
             }
-            .onAppear { refreshConnectedDevicesList() }
+            .buttonStyle(.bordered)
         }
-        .sheet(item: $selectedDevice) { device in
-            NavigationStack {
-                DeviceControlDestination(device: device, displayName: displayName(for: device))
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { selectedDevice = nil }
-                        }
-                        ToolbarItem(placement: .topBarTrailing) {
-                            NavigationLink {
-                                DeviceSchedulesView(device: device, displayName: displayName(for: device))
-                            } label: {
-                                Image(systemName: "clock")
-                            }
-                            .accessibilityLabel("Schedules")
-                        }
+    }
+
+    private var configuredConnectedSheet: some View {
+        NavigationStack {
+            DeviceConfiguredConnectedView(
+                items: configuredConnectedPreviewItems,
+                managementItems: virtualDeviceManagementItems,
+                onOpen: { id in
+                    showConfiguredConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        openDeviceById(id)
                     }
-            }
+                },
+                onToggle: { toggleVirtualDeviceMembershipById($0) },
+                onCreateVirtualDevice: { createVirtualDeviceFromIds($0) },
+                onDismiss: { showConfiguredConnected = false }
+            )
         }
-        .sheet(item: $scheduleDevice) { device in
-            NavigationStack {
-                DeviceSchedulesView(device: device, displayName: displayName(for: device))
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { scheduleDevice = nil }
-                        }
+        .onAppear { refreshConnectedDevicesList() }
+    }
+
+    private func selectedDeviceSheet(_ device: WifiDevice) -> some View {
+        NavigationStack {
+            DeviceControlDestination(device: device, displayName: displayName(for: device))
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") { selectedDevice = nil }
                     }
-            }
-        }
-        .alert(
-            "Rename Device",
-            isPresented: Binding(
-                get: { renameTargetDevice != nil },
-                set: { if !$0 { renameTargetDevice = nil } }
-            )
-        ) {
-            TextField("Device name", text: $renameInput)
-            Button("Save") {
-                saveCustomDeviceName()
-                renameTargetDevice = nil
-            }
-            Button("Reset") {
-                renameInput = ""
-                saveCustomDeviceName()
-                renameTargetDevice = nil
-            }
-            Button("Cancel", role: .cancel) { renameTargetDevice = nil }
-        } message: {
-            Text("This name will be saved only on this phone. Tip: start it with a room name (e.g. \"Living Room 1\") to group it automatically.")
-        }
-        .alert(
-            "New Room",
-            isPresented: Binding(
-                get: { newRoomTargetDevice != nil },
-                set: { if !$0 { newRoomTargetDevice = nil } }
-            )
-        ) {
-            TextField("Room name", text: $newRoomInput)
-            Button("Create") {
-                if let device = newRoomTargetDevice {
-                    assignRoom(newRoomInput, to: device)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            DeviceSchedulesView(device: device, displayName: displayName(for: device))
+                        } label: {
+                            Image(systemName: "clock")
+                        }
+                        .accessibilityLabel("Schedules")
+                    }
                 }
-                newRoomTargetDevice = nil
-            }
-            Button("Cancel", role: .cancel) { newRoomTargetDevice = nil }
-        } message: {
-            Text("e.g. Living Room, Bedroom, Office")
         }
-        .alert(
-            DeviceAppGuidance.offlineTitle,
-            isPresented: Binding(
-                get: { offlineAlertDevice != nil },
-                set: { if !$0 { offlineAlertDevice = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) {}
-            Button("Schedules") {
-                if let device = offlineAlertDevice {
-                    scheduleDevice = device
+    }
+
+    private func scheduleDeviceSheet(_ device: WifiDevice) -> some View {
+        NavigationStack {
+            DeviceSchedulesView(device: device, displayName: displayName(for: device))
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") { scheduleDevice = nil }
+                    }
                 }
-                offlineAlertDevice = nil
-            }
-        } message: {
-            Text(DeviceAppGuidance.offlineMessage)
         }
-        .alert(
-            "Remove Device",
-            isPresented: Binding(
-                get: { deleteTargetDevice != nil },
-                set: { if !$0 { deleteTargetDevice = nil } }
-            )
-        ) {
-            Button("Remove", role: .destructive) {
-                if let device = deleteTargetDevice {
-                    deleteConfiguredDevice(device)
-                }
-                deleteTargetDevice = nil
+    }
+
+    private func sequenceEditorSheet(_ target: HubSequenceTarget) -> some View {
+        NavigationStack {
+            HubSequenceEditorView(target: target) { hardwareId in
+                memberSequenceDisplayName(hardwareId: hardwareId, members: target.memberHardwareIds)
             }
-            Button("Cancel", role: .cancel) { deleteTargetDevice = nil }
-        } message: {
-            Text("Remove this device from this phone? You can add it again later by setting it up or rediscovering it.")
         }
-        .onAppear {
-            UserDataManager.shared.refreshUserData()
-            loadSavedDeviceNames()
-            loadRoomAssignments()
-            loadSavedPowerStates()
-            loadRememberedDevices()
-            fetchLinkedDevicesFromCloud()
+        .presentationDetents([.medium, .large])
+    }
+
+    private func handleHomeAppear() {
+        UserDataManager.shared.refreshUserData()
+        loadSavedDeviceNames()
+        loadRoomAssignments()
+        loadSavedPowerStates()
+        loadRememberedDevices()
+        fetchLinkedDevicesFromCloud()
+        seedCloudDevicesFromPresence()
+        seedConfiguredBLEDevices()
+        virtualDeviceStore.configure(context: modelContext)
+        bonjourBrowser.startBrowsing()
+        scheduleDiscoveryTimeout()
+        refreshDisplayedDevices()
+        requestPresenceRefreshIfNeeded()
+    }
+
+    private func handleSocketStatus(_ status: LightControllingSocket.ConnectionStatus) {
+        // NOTE: the cloud-presence side effects (clear live MQTT on disconnect, BLE/presence
+        // re-probe on connect) are owned app-globally by `SocketPresenceLifecycle` so they
+        // run on every tab. Here we only do the Home-view UI work (seed rows + rebuild) and
+        // must NOT duplicate the clear/refresh — that caused a double clear + a cancelled-and
+        // -restarted refresh on every reconnect.
+        switch status {
+        case .connecting:
+            refreshDisplayedDevices()
+        case .disconnected:
+            refreshDisplayedDevices()
+        case .connected:
             seedCloudDevicesFromPresence()
-            seedConfiguredBLEDevices()
-            virtualDeviceStore.configure(context: modelContext)
+            fetchLinkedDevicesFromCloud()
+            refreshDisplayedDevices()
+        }
+    }
+
+    private func handleScenePhase(_ phase: ScenePhase) {
+        switch phase {
+        case .active:
             bonjourBrowser.startBrowsing()
-            scheduleDiscoveryTimeout()
-            refreshDisplayedDevices()
-            requestPresenceRefreshIfNeeded()
-        }
-        .onDisappear {
+            requestPresenceRefresh(reason: .homeAppear)
+        case .background:
             bonjourBrowser.stopBrowsing()
-            // Presence refresh keeps running at app level — no blocking overlay.
-        }
-        .onChange(of: presenceCoordinator.powerOffHint) { _, hint in
-            guard let hint else { return }
-            groupActionMessage = hint
-            DeviceAppGuidance.warningNotification()
-        }
-        .onReceive(bonjourBrowser.$discoveredWiFiDevices) { newDevices in
-            processDiscoveredDevices(newDevices)
-            if !wifiDevices.isEmpty {
-                isInitialDiscovery = false
-            }
-        }
-        .onReceive(DeviceTransportRegistry.shared.presenceChangePublisher) { update in
-            applyCloudPresence(deviceId: update.deviceId, connected: update.connected)
-            if update.connected {
-                isInitialDiscovery = false
-            }
-        }
-        .onChange(of: socket.connectionStatus) { _, status in
-            switch status {
-            case .connecting:
-                refreshDisplayedDevices()
-            case .disconnected:
-                // Drop stale Online; fresh Online needs a live device_status after connect.
-                DeviceTransportRegistry.shared.clearLiveMQTTPresence()
-                refreshDisplayedDevices()
-            case .connected:
-                seedCloudDevicesFromPresence()
-                fetchLinkedDevicesFromCloud()
-                requestPresenceRefresh(reason: .mqttReconnect, force: true)
-                refreshDisplayedDevices()
-            }
-        }
-        .onChange(of: virtualDeviceStore.enabledHardwareIds) { _, _ in
-            refreshDisplayedDevices()
-        }
-        .onChange(of: virtualDeviceStore.remoteGroups) { _, _ in
-            refreshDisplayedDevices()
-            requestPresenceRefresh(reason: .homeAppear, force: true)
-        }
-        .onChange(of: virtualDeviceStore.virtualDeviceID) { _, _ in
-            refreshDisplayedDevices()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .limiAuthSessionDidChange)) { _ in
-            refreshDisplayedDevices()
-            virtualDeviceStore.refreshFromBackendIfNeeded()
-        }
-        .onChange(of: bluetooth.isConnected) { _, _ in
-            refreshDisplayedDevices()
-        }
-        .onChange(of: bluetooth.isBluetoothOn) { _, _ in
-            refreshDisplayedDevices()
-        }
-        .onChange(of: bluetooth.bleLastSeen) { _, _ in
-            // Coalesce advertisement updates — dictionary churn was spamming per-frame.
-            scheduleBLEPresenceRefresh()
-        }
-        .onChange(of: presenceCoordinator.isRefreshing) { wasRefreshing, isRefreshing in
-            if wasRefreshing, !isRefreshing {
-                refreshDisplayedDevices()
-            }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            switch phase {
-            case .active:
-                bonjourBrowser.startBrowsing()
-                requestPresenceRefresh(reason: .homeAppear)
-            case .background:
-                bonjourBrowser.stopBrowsing()
-            default:
-                break
-            }
+        default:
+            break
         }
     }
 
@@ -399,8 +451,19 @@ struct DeviceHomeView: View {
         let key = normalizeHardwareId(hardwareId)
         let live = localOnline || cloudOnline || bleOnline
         if live {
-            let path: PresenceSnapshotPath = cloudOnline ? .cloud : (bleOnline ? .ble : .local)
-            PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: path)
+            // Only re-record a `.cloud` snapshot when cloud is *live* (fresh heartbeat).
+            // A snapshot-derived cloudOnline must NOT rewrite the snapshot — that
+            // self-refresh kept "Online · Cloud" alive forever until an app restart.
+            let liveCloud = VirtualMasterPresence.isLiveCloudOnline(hardwareId: key)
+            if liveCloud {
+                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .cloud)
+            } else if bleOnline {
+                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .ble)
+            } else if localOnline {
+                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .local)
+            }
+            // (cloudOnline true but only snapshot-derived: return online for grace, but
+            // leave the snapshot untouched so it can age out and flip to BLE/offline.)
             return true
         }
 
@@ -440,14 +503,9 @@ struct DeviceHomeView: View {
         Array(Set(roomAssignments.values)).sorted()
     }
 
-    /// Filter chips: real rooms + demo Kitchen / Living Room (if missing).
+    /// Filter chips: only real rooms the user has actually created (no demo placeholders).
     private var filterBarRooms: [String] {
-        var rooms = knownRooms
-        for name in ["Kitchen", "Office"] {
-            let exists = rooms.contains { $0.caseInsensitiveCompare(name) == .orderedSame }
-            if !exists { rooms.append(name) }
-        }
-        return rooms
+        knownRooms
     }
 
     private func room(for device: WifiDevice) -> String? {
@@ -460,8 +518,10 @@ struct DeviceHomeView: View {
 
     /// Devices visible for the current room + search filters.
     private var filteredDevices: [WifiDevice] {
-        wifiDevices.filter { device in
-            if let selectedRoomFilter, room(for: device) != selectedRoomFilter {
+        // Ignore a stale room selection that no longer maps to any real room.
+        let activeRoomFilter = selectedRoomFilter.flatMap { knownRooms.contains($0) ? $0 : nil }
+        return wifiDevices.filter { device in
+            if let activeRoomFilter, room(for: device) != activeRoomFilter {
                 return false
             }
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -538,6 +598,24 @@ struct DeviceHomeView: View {
         virtualDeviceStore.setEnabled(next, hardwareId: key)
     }
 
+    /// Resolves selected management-item ids to hardware MACs and creates a brand-new
+    /// virtual device (fresh `vd-` id) — never merges into an existing group.
+    private func createVirtualDeviceFromIds(_ ids: [String]) {
+        let idSet = Set(ids)
+        var macs: [String] = []
+        for device in rawWifiDevices where idSet.contains(device.id) {
+            if device.isVirtualMaster, let members = device.memberChannelMacs, !members.isEmpty {
+                macs.append(contentsOf: members.map { normalizeHardwareId($0) })
+            } else {
+                macs.append(normalizeHardwareId(device.chennalMac))
+            }
+        }
+        let unique = Array(Set(macs.filter { !$0.isEmpty }))
+        guard !unique.isEmpty else { return }
+        DeviceAppGuidance.lightImpact()
+        virtualDeviceStore.createVirtualDevice(hardwareIds: unique)
+    }
+
     /// Opens Connected Devices sheet after refreshing live presence (Cloud / BLE / Local).
     private func openConfiguredConnectedSheet() {
         DeviceAppGuidance.lightImpact()
@@ -612,7 +690,9 @@ struct DeviceHomeView: View {
                         userName: greetingUserName,
                         greeting: timeGreeting,
                         avatarImage: userDataManager.profileImage,
-                        onConnectedDevices: { openConfiguredConnectedSheet() }
+                        onNotifications: { showLocalSwitchInbox = true },
+                        onConnectedDevices: { openConfiguredConnectedSheet() },
+                        showsNotificationBadge: localSwitchCoordinator.hasUnreadLocalSwitchOffer
                     )
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
@@ -635,10 +715,12 @@ struct DeviceHomeView: View {
                             .padding(.horizontal, 20)
                     }
 
-                    DeviceRoomFilterBar(
-                        rooms: filterBarRooms,
-                        selectedRoom: $selectedRoomFilter
-                    )
+                    if !filterBarRooms.isEmpty {
+                        DeviceRoomFilterBar(
+                            rooms: filterBarRooms,
+                            selectedRoom: $selectedRoomFilter
+                        )
+                    }
 
                     overviewBody
                         .padding(.horizontal, 20)
@@ -702,7 +784,7 @@ struct DeviceHomeView: View {
                 }
                 .padding(.top, 4)
 
-                VStack(spacing: 12) {
+                LazyVStack(spacing: 12) {
                     ForEach(filteredDevices) { device in
                         DeviceManageRowCard(
                             name: displayName(for: device),
@@ -793,6 +875,17 @@ struct DeviceHomeView: View {
         } label: {
             Label("Schedules", systemImage: "clock")
         }
+        if device.isVirtualMaster, let members = device.memberChannelMacs, !members.isEmpty {
+            Button {
+                sequenceTarget = HubSequenceTarget(
+                    id: virtualDeviceId(for: device),
+                    displayName: displayName(for: device),
+                    memberHardwareIds: members
+                )
+            } label: {
+                Label("Sequence", systemImage: "list.number")
+            }
+        }
         Button {
             featuredDeviceId = device.id
         } label: {
@@ -879,8 +972,8 @@ struct DeviceHomeView: View {
 
     private func manageSubtitle(for device: WifiDevice) -> String {
         if device.isVirtualMaster {
-            let channels = device.chennalCount == 1 ? "1 hub" : "\(device.chennalCount) hubs"
-            return "\(channels) · Master · \(statusText(for: device))"
+            let pendants = device.chennalCount == 1 ? "1 pendant" : "\(device.chennalCount) pendants"
+            return "\(pendants) · \(statusText(for: device))"
         }
         let channels = device.chennalCount == 1 ? "1 channel" : "\(device.chennalCount) channels"
         let types = Set(device.channelTypes).sorted().joined(separator: "/")
@@ -900,11 +993,26 @@ struct DeviceHomeView: View {
         let key = powerPreferenceKey(for: device)
         if let stored = devicePowerOn[key] { return stored }
         if let persisted = DevicePowerMemoryStore.shared.isOn(for: key) { return persisted }
+        // Hub: derive from members when hub itself has no stored state yet.
+        if device.isVirtualMaster, let members = device.memberChannelMacs, !members.isEmpty {
+            return members.contains { memberMac in
+                let memberKey = normalizeHardwareId(memberMac)
+                if let stored = devicePowerOn[memberKey] { return stored }
+                return DevicePowerMemoryStore.shared.isOn(for: memberKey) ?? false
+            }
+        }
         return false
     }
 
     private func rememberPowerState(for device: WifiDevice, on: Bool) {
         let key = powerPreferenceKey(for: device)
+        devicePowerOn[key] = on
+        DevicePowerMemoryStore.shared.setOn(on, for: key)
+    }
+
+    private func rememberPowerState(hardwareId: String, on: Bool) {
+        let key = normalizeHardwareId(hardwareId)
+        guard !key.isEmpty else { return }
         devicePowerOn[key] = on
         DevicePowerMemoryStore.shared.setOn(on, for: key)
     }
@@ -925,33 +1033,17 @@ struct DeviceHomeView: View {
         selectedDevice = device
     }
 
+    /// Home card power toggle — individual boards via LimiTransport;
+    /// Hub OFF → `virtual_light_control`; Hub ON → fan-out to all member MACs.
     private func togglePower(for device: WifiDevice) {
-        if device.isVirtualMaster, let members = device.memberChannelMacs {
-            guard device.isOnline else {
-                DeviceAppGuidance.warningNotification()
-                offlineAlertDevice = device
-                return
-            }
-            let anyOn = members.contains { memberMac in
-                rawWifiDevices.first(where: {
-                    normalizeHardwareId($0.chennalMac) == normalizeHardwareId(memberMac)
-                }).map { isPowerOn(for: $0) } ?? false
-            }
-            let next = !anyOn
-            DeviceAppGuidance.lightImpact()
-            for memberMac in members {
-                guard let member = rawWifiDevices.first(where: {
-                    normalizeHardwareId($0.chennalMac) == normalizeHardwareId(memberMac)
-                }) else { continue }
-                rememberPowerState(for: member, on: next)
-                if member.isOnline {
-                    sendPower(to: member, on: next)
-                }
-            }
-            rememberPowerState(for: device, on: next)
+        if device.isVirtualMaster {
+            toggleHubPower(for: device)
             return
         }
+        toggleIndividualPower(for: device)
+    }
 
+    private func toggleIndividualPower(for device: WifiDevice) {
         guard device.isOnline else {
             DeviceAppGuidance.warningNotification()
             offlineAlertDevice = device
@@ -960,7 +1052,141 @@ struct DeviceHomeView: View {
         let next = !isPowerOn(for: device)
         rememberPowerState(for: device, on: next)
         DeviceAppGuidance.lightImpact()
-        sendPower(to: device, on: next)
+        sendIndividualPower(to: device, on: next)
+    }
+
+    private func toggleHubPower(for device: WifiDevice) {
+        guard device.isOnline else {
+            DeviceAppGuidance.warningNotification()
+            offlineAlertDevice = device
+            return
+        }
+        let members = (device.memberChannelMacs ?? [])
+            .map { normalizeHardwareId($0) }
+            .filter { !$0.isEmpty }
+        guard !members.isEmpty else {
+            groupActionMessage = "Hub has no member devices"
+            DeviceAppGuidance.warningNotification()
+            return
+        }
+
+        let next = !isPowerOn(for: device)
+        DeviceAppGuidance.lightImpact()
+        rememberPowerState(for: device, on: next)
+        for mac in members {
+            rememberPowerState(hardwareId: mac, on: next)
+        }
+
+        if next {
+            sendHubPowerOn(memberIds: members, hub: device)
+        } else {
+            sendHubPowerOff(hub: device, memberIds: members)
+        }
+    }
+
+    private func virtualDeviceId(for hub: WifiDevice) -> String {
+        VirtualDeviceHomeGrouping.virtualDeviceId(from: hub)
+    }
+
+    /// OFF: one hub message so backend fans out / master board handles group off.
+    private func sendHubPowerOff(hub: WifiDevice, memberIds: [String]) {
+        let virtualId = virtualDeviceId(for: hub)
+        let command: LimiCommand = .power(channel: 1, on: false)
+        LightControllingSocket.shared.connect()
+
+        Task { @MainActor in
+            if LightControllingSocket.shared.connectionStatus != .connected {
+                try? await Task.sleep(nanoseconds: 450_000_000)
+            }
+
+            if !virtualId.isEmpty, LightControllingSocket.shared.connectionStatus == .connected {
+                LightControllingSocket.shared.sendVirtualLightControl(
+                    virtualDeviceId: virtualId,
+                    command: command.toVirtualCommandPayload()
+                )
+                DeviceConsole.log(.home, "hub power OFF → virtual_light_control id=\(virtualId)")
+                DeviceAppGuidance.successNotification()
+                return
+            }
+
+            do {
+                try await LimiTransport.shared.sendGroupCommand(command, deviceIds: memberIds)
+                DeviceConsole.log(.home, "hub power OFF → group_light_control members=\(memberIds.count)")
+                DeviceAppGuidance.successNotification()
+            } catch {
+                rememberPowerState(for: hub, on: true)
+                for mac in memberIds { rememberPowerState(hardwareId: mac, on: true) }
+                groupActionMessage = DeviceAppGuidance.message(for: error)
+                DeviceAppGuidance.warningNotification()
+            }
+        }
+    }
+
+    /// ON: turn every member on (group fan-out). Does not depend on local member rows.
+    private func sendHubPowerOn(memberIds: [String], hub: WifiDevice) {
+        let command: LimiCommand = .cct(channel: 1, brightness: 70, ww: 100, cw: 40)
+        LightControllingSocket.shared.connect()
+
+        Task { @MainActor in
+            do {
+                try await LimiTransport.shared.sendGroupCommand(command, deviceIds: memberIds)
+                DeviceConsole.log(.home, "hub power ON → group_light_control members=\(memberIds.count)")
+                DeviceAppGuidance.successNotification()
+            } catch {
+                var anySuccess = false
+                for mac in memberIds {
+                    do {
+                        try await LimiTransport.shared.sendCommand(command, for: mac)
+                        anySuccess = true
+                    } catch {
+                        DeviceConsole.log(.home, "hub power ON member \(mac) failed: \(error.localizedDescription)")
+                    }
+                }
+                if anySuccess {
+                    DeviceAppGuidance.successNotification()
+                } else {
+                    rememberPowerState(for: hub, on: false)
+                    for mac in memberIds { rememberPowerState(hardwareId: mac, on: false) }
+                    groupActionMessage = DeviceAppGuidance.message(for: error)
+                    DeviceAppGuidance.warningNotification()
+                }
+            }
+        }
+    }
+
+    /// Hub preset (mood): same path as the hub control screen — one `virtual_light_control`
+    /// to the hub's virtual device id. Falls back to a group fan-out when no virtual id exists.
+    private func sendHubMood(_ mood: DeviceLightMood, hub: WifiDevice, memberIds: [String]) {
+        let virtualId = virtualDeviceId(for: hub)
+        let command = mood.command
+        LightControllingSocket.shared.connect()
+
+        Task { @MainActor in
+            if LightControllingSocket.shared.connectionStatus != .connected {
+                try? await Task.sleep(nanoseconds: 450_000_000)
+            }
+
+            if !virtualId.isEmpty, LightControllingSocket.shared.connectionStatus == .connected {
+                LightControllingSocket.shared.sendVirtualLightControl(
+                    virtualDeviceId: virtualId,
+                    command: command.toVirtualCommandPayload()
+                )
+                DeviceConsole.log(.home, "hub mood \(mood.rawValue) → virtual_light_control id=\(virtualId)")
+                DeviceAppGuidance.successNotification()
+                return
+            }
+
+            do {
+                try await LimiTransport.shared.sendGroupCommand(command, deviceIds: memberIds)
+                DeviceConsole.log(.home, "hub mood \(mood.rawValue) → group_light_control members=\(memberIds.count)")
+                DeviceAppGuidance.successNotification()
+            } catch {
+                rememberPowerState(for: hub, on: false)
+                for mac in memberIds { rememberPowerState(hardwareId: mac, on: false) }
+                groupActionMessage = DeviceAppGuidance.message(for: error)
+                DeviceAppGuidance.warningNotification()
+            }
+        }
     }
 
     private func applyMood(_ mood: DeviceLightMood, to device: WifiDevice) {
@@ -972,24 +1198,36 @@ struct DeviceHomeView: View {
         selectedMood = mood
         rememberPowerState(for: device, on: true)
         DeviceAppGuidance.lightImpact()
+
+        if device.isVirtualMaster, let members = device.memberChannelMacs, !members.isEmpty {
+            let ids = members.map { normalizeHardwareId($0) }.filter { !$0.isEmpty }
+            for mac in ids { rememberPowerState(hardwareId: mac, on: true) }
+            sendHubMood(mood, hub: device, memberIds: ids)
+            return
+        }
+
         Task { @MainActor in
             do {
                 try await LimiTransport.shared.sendCommand(mood.command, for: device.chennalMac)
                 DeviceAppGuidance.successNotification()
             } catch {
+                rememberPowerState(for: device, on: false)
                 groupActionMessage = DeviceAppGuidance.message(for: error)
                 DeviceAppGuidance.warningNotification()
             }
         }
     }
 
-    private func sendPower(to device: WifiDevice, on: Bool) {
+    private func sendIndividualPower(to device: WifiDevice, on: Bool) {
         let command: LimiCommand = on
             ? .cct(channel: 1, brightness: 70, ww: 100, cw: 40)
             : .power(channel: 1, on: false)
+        let key = normalizeHardwareId(device.chennalMac)
+        LightControllingSocket.shared.connect()
         Task { @MainActor in
             do {
-                try await LimiTransport.shared.sendCommand(command, for: device.chennalMac)
+                try await LimiTransport.shared.sendCommand(command, for: key)
+                DeviceConsole.log(.home, "device power \(on ? "ON" : "OFF") → \(key)")
                 DeviceAppGuidance.successNotification()
             } catch {
                 rememberPowerState(for: device, on: !on)
@@ -1303,8 +1541,10 @@ struct DeviceHomeView: View {
     private func isBLEOnline(_ deviceId: String) -> Bool {
         let key = normalizeHardwareId(deviceId)
         guard !key.isEmpty else { return false }
+        // isCloudOnline is freshness-aware: a stale cloud hub reports false here so BLE
+        // can take over. (No separate raw mqttConnected gate — that kept BLE suppressed
+        // while a dropped hub's mqttConnected stayed stale-true.)
         if isCloudOnline(key) { return false }
-        if DeviceTransportRegistry.shared.state(for: key).mqttConnected { return false }
         guard bluetooth.isBluetoothOn else { return false }
         guard let bleUUID = ConfiguredBLEDeviceStore.shared.blePeripheralUUID(for: key) else {
             return false
@@ -1417,12 +1657,60 @@ struct DeviceHomeView: View {
 
     // MARK: - Remembered + linked devices (Case 3 seed)
 
-    private func loadRememberedDevices() {
+    /// Previous account's Home RAM + SwiftData remembered hubs — not rooms/schedules/theme.
+    private func clearHomeListForSessionChange() {
+        knownWifiDevices.removeAll()
+        wifiDevices = []
+        rawWifiDevices = []
+        allocatedWifiDeviceIds.removeAll()
+        uploadedDeviceIds.removeAll()
+        devicePowerOn.removeAll()
+        featuredDeviceId = nil
+        selectedDevice = nil
+        deleteRememberedDevices()
+        refreshDisplayedDevices()
+    }
+
+    private func deleteRememberedDevices() {
         let descriptor = FetchDescriptor<RememberedLimiDevice>()
         guard let rows = try? modelContext.fetch(descriptor) else { return }
         for row in rows {
+            modelContext.delete(row)
+        }
+        try? modelContext.save()
+    }
+
+    private func loadRememberedDevices() {
+        let descriptor = FetchDescriptor<RememberedLimiDevice>()
+        guard let rows = try? modelContext.fetch(descriptor) else { return }
+
+        // Phone-global SwiftData can still hold the previous account's hubs if
+        // Home was not mounted at logout. Only keep rows that belong to this
+        // session (configured BLE or this user's virtual groups).
+        var allowed = Set<String>()
+        for record in ConfiguredBLEDeviceStore.shared.allRecords {
+            let key = normalizeHardwareId(record.hardwareId)
+            if !key.isEmpty { allowed.insert(key) }
+        }
+        for member in virtualDeviceStore.enabledHardwareIds {
+            let key = normalizeHardwareId(member)
+            if !key.isEmpty { allowed.insert(key) }
+        }
+        for group in virtualDeviceStore.remoteGroups {
+            for mac in group.mac_addresses {
+                let key = LimiDeviceNaming.normalizedHardwareIdFromMAC(mac)
+                if !key.isEmpty { allowed.insert(key) }
+            }
+        }
+
+        var didDeleteOrphan = false
+        for row in rows {
             let key = normalizeHardwareId(row.deviceID)
-            guard !key.isEmpty else { continue }
+            if key.isEmpty || !allowed.contains(key) {
+                modelContext.delete(row)
+                didDeleteOrphan = true
+                continue
+            }
             if LocallyRemovedDeviceStore.shared.contains(key) { continue }
             if knownWifiDevices.values.contains(where: { normalizeHardwareId($0.chennalMac) == key }) {
                 continue
@@ -1436,6 +1724,9 @@ struct DeviceHomeView: View {
                 deviceName: row.displayName,
                 isOnline: false
             )
+        }
+        if didDeleteOrphan {
+            try? modelContext.save()
         }
     }
 
@@ -1516,6 +1807,25 @@ struct DeviceHomeView: View {
             return customName
         }
         return device.deviceName
+    }
+
+    private func memberSequenceDisplayName(hardwareId: String, members: [String]) -> String {
+        let hw = normalizeHardwareId(hardwareId)
+        if let raw = rawWifiDevices.first(where: { normalizeHardwareId($0.chennalMac) == hw }) {
+            return displayName(for: raw)
+        }
+        if let known = knownWifiDevices.values.first(where: { normalizeHardwareId($0.chennalMac) == hw }) {
+            return displayName(for: known)
+        }
+        if let name = ConfiguredBLEDeviceStore.shared.record(for: hw)?.displayName {
+            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        let ordered = members.map { normalizeHardwareId($0) }.filter { !$0.isEmpty }
+        if let index = ordered.firstIndex(of: hw) {
+            return ordered.count > 1 ? "Hub \(index + 1)" : "Hub"
+        }
+        return hw
     }
 
     private func beginRenaming(_ device: WifiDevice) {
@@ -1662,7 +1972,7 @@ struct DeviceControlDestination: View {
     var body: some View {
         if device.isVirtualMaster {
             VirtualMasterControlView(
-                virtualDeviceID: device.uuid,
+                virtualDeviceID: VirtualDeviceHomeGrouping.virtualDeviceId(from: device),
                 displayName: displayName,
                 memberHardwareIds: device.memberChannelMacs ?? [],
                 memberChannelTypes: device.channelTypes
@@ -1769,6 +2079,168 @@ struct DeviceChannelsView: View {
         let index = channel - 1
         guard device.channelTypes.indices.contains(index) else { return "CCT" }
         return device.channelTypes[index].uppercased() == "RGB" ? "RGB" : "CCT"
+    }
+}
+
+// MARK: - Home alert modifiers (kept in-file so the editor always resolves them)
+
+struct DeviceHomeRenameAlertModifier: ViewModifier {
+    @Binding var renameTargetDevice: WifiDevice?
+    @Binding var renameInput: String
+    var onSave: () -> Void
+    var onReset: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert(
+            "Rename Device",
+            isPresented: Binding(
+                get: { renameTargetDevice != nil },
+                set: { if !$0 { renameTargetDevice = nil } }
+            )
+        ) {
+            TextField("Device name", text: $renameInput)
+            Button("Save", action: onSave)
+            Button("Reset", action: onReset)
+            Button("Cancel", role: .cancel) { renameTargetDevice = nil }
+        } message: {
+            Text("This name will be saved only on this phone. Tip: start it with a room name (e.g. \"Living Room 1\") to group it automatically.")
+        }
+    }
+}
+
+struct DeviceHomeRoomAlertModifier: ViewModifier {
+    @Binding var newRoomTargetDevice: WifiDevice?
+    @Binding var newRoomInput: String
+    var onCreate: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert(
+            "New Room",
+            isPresented: Binding(
+                get: { newRoomTargetDevice != nil },
+                set: { if !$0 { newRoomTargetDevice = nil } }
+            )
+        ) {
+            TextField("Room name", text: $newRoomInput)
+            Button("Create", action: onCreate)
+            Button("Cancel", role: .cancel) { newRoomTargetDevice = nil }
+        } message: {
+            Text("e.g. Living Room, Bedroom, Office")
+        }
+    }
+}
+
+struct DeviceHomeOfflineAlertModifier: ViewModifier {
+    @Binding var offlineAlertDevice: WifiDevice?
+    var onSchedules: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert(
+            DeviceAppGuidance.offlineTitle,
+            isPresented: Binding(
+                get: { offlineAlertDevice != nil },
+                set: { if !$0 { offlineAlertDevice = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+            Button("Schedules", action: onSchedules)
+        } message: {
+            Text(DeviceAppGuidance.offlineMessage)
+        }
+    }
+}
+
+struct DeviceHomeDeleteAlertModifier: ViewModifier {
+    @Binding var deleteTargetDevice: WifiDevice?
+    var onDelete: () -> Void
+
+    func body(content: Content) -> some View {
+        content.alert(
+            "Remove Device",
+            isPresented: Binding(
+                get: { deleteTargetDevice != nil },
+                set: { if !$0 { deleteTargetDevice = nil } }
+            )
+        ) {
+            Button("Remove", role: .destructive, action: onDelete)
+            Button("Cancel", role: .cancel) { deleteTargetDevice = nil }
+        } message: {
+            Text("Remove this device from this phone? You can add it again later by setting it up or rediscovering it.")
+        }
+    }
+}
+
+// MARK: - Local switch notification inbox
+
+struct DeviceLocalSwitchInboxSheet: View {
+    @ObservedObject private var coordinator = CloudOfflineLocalSwitchCoordinator.shared
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let offer = coordinator.activeOffer {
+                    offerList(offer)
+                } else {
+                    ContentUnavailableView(
+                        "You're all caught up",
+                        systemImage: "bell.slash",
+                        description: Text("Cloud and local control alerts will show up here.")
+                    )
+                }
+            }
+            .navigationTitle("Notifications")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func offerList(_ offer: LocalControlSwitchOffer) -> some View {
+        List {
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(offer.notificationTitle, systemImage: "icloud.slash")
+                        .font(.headline)
+                    Text(offer.notificationBody)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text(offer.deviceId)
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section {
+                Text(offer.alertMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Button {
+                    coordinator.accept()
+                    dismiss()
+                } label: {
+                    Label(
+                        offer.acceptButtonTitle,
+                        systemImage: offer.canUseBLE ? "antenna.radiowaves.left.and.right" : "wifi"
+                    )
+                }
+                .tint(.green)
+
+                Button("Not now", role: .cancel) {
+                    coordinator.decline()
+                    dismiss()
+                }
+            }
+        }
     }
 }
 

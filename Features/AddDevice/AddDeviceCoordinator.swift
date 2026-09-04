@@ -258,7 +258,8 @@ final class AddDeviceFlowViewModel: ObservableObject {
 
     private func startMasterProvisioning(ssid: String, master: VirtualMasterScanMetadata) {
         let hubCount = master.memberHardwareIds.count
-        step = .provisioning(phase: "Preparing Master Device (0 of \(hubCount))…")
+        let hub = VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: hubCount)
+        step = .provisioning(phase: "Preparing \(hub) (0 of \(hubCount))…")
 
         WiFiProvisioningCoordinator.shared.provisionMasterGroup(
             master: master,

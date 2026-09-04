@@ -55,11 +55,15 @@ public final class DevicePowerMemoryStore {
         UserDefaults.standard.set(snapshot, forKey: defaultsKey)
     }
 
-    /// Test helper — clears session + disk.
-    public func resetForTests() {
+    public func removeAll() {
         lock.lock()
         states.removeAll()
         lock.unlock()
         UserDefaults.standard.removeObject(forKey: defaultsKey)
+    }
+
+    /// Test helper — clears session + disk.
+    public func resetForTests() {
+        removeAll()
     }
 }

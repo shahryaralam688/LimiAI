@@ -2,7 +2,7 @@
 //  LimiAppleDeviceSetupView.swift
 //  Limi
 //
-//  Apple-style post-BLE setup — interactive 3D hero + Wi-Fi / password steps.
+//  Apple-style post-BLE setup — looping hub video + Wi-Fi / password steps.
 //
 
 import SwiftUI
@@ -59,34 +59,12 @@ struct LimiAppleDeviceSetupView: View {
 
     private var heroSection: some View {
         VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                Color.brandHighlight.opacity(0.22),
-                                Color.clear
-                            ],
-                            center: .center,
-                            startRadius: 40,
-                            endRadius: 180
-                        )
-                    )
-                    .frame(width: 320, height: 320)
-                    .scaleEffect(heroAppeared ? 1 : 0.85)
-                    .opacity(heroAppeared ? 1 : 0)
-
-                LimiPairingModelView(
-                    bundledName: modelName,
-                    isAnimating: true,
-                    allowsInteraction: true,
-                    visualScale: 3.4
-                )
-                .frame(height: 300)
-                .scaleEffect(heroAppeared ? 1 : 0.9)
+            LimiPairingHeroVideoView(cornerRadius: 28)
+                .frame(height: 240)
+                .padding(.horizontal, 8)
+                .scaleEffect(heroAppeared ? 1 : 0.94)
                 .opacity(heroAppeared ? 1 : 0)
-            }
-            .padding(.top, 4)
+                .padding(.top, 4)
 
             Text(displayName)
                 .font(LimiTypography.title2)
@@ -95,11 +73,6 @@ struct LimiAppleDeviceSetupView: View {
             Text(subtitle)
                 .font(LimiTypography.subheadline)
                 .foregroundColor(.appTextSecondary)
-
-            Text("Drag to rotate")
-                .font(LimiTypography.caption)
-                .foregroundColor(.appTextMuted)
-                .padding(.top, 2)
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 12)

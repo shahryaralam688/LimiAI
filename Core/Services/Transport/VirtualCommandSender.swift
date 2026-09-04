@@ -15,7 +15,7 @@ extension LimiCommand {
     func toVirtualCommandPayload() -> [String: Any] {
         switch self {
         case .power(_, let on):
-            return ["power": on ? "on" : "off"]
+            return ["state": on ? "on" : "off"]
         case .cct(_, let brightness, let ww, let cw):
             return [
                 "power": "on",

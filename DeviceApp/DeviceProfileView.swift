@@ -25,7 +25,9 @@ struct DeviceProfileView: View {
     @State private var showSignOutConfirm = false
     @State private var photoItem: PhotosPickerItem?
     @State private var isSavingProfile = false
-    @State private var profileErrorMessage: String?
+    @State private var bannerMessage: String?
+    @State private var bannerKind: DeviceProfileMessageKind = .error
+    @State private var showSessionExpiredConfirm = false
 
     private var usesHomeUI1: Bool { homeUITheme.selected == .one }
     private var usesHomeUI2: Bool { homeUITheme.selected == .two }
@@ -38,6 +40,25 @@ struct DeviceProfileView: View {
         let name = userDataManager.userData?.username?.trimmingCharacters(in: .whitespacesAndNewlines)
         if let name, !name.isEmpty { return name }
         return isGuestInstaller ? "Guest" : "User"
+    }
+
+    private var activeBannerMessage: String? {
+        if let bannerMessage { return bannerMessage }
+        if let raw = userDataManager.errorMessage {
+            return DeviceProfileMessaging.friendly(raw, context: .load)
+        }
+        return nil
+    }
+
+    private var activeBannerKind: DeviceProfileMessageKind {
+        if bannerMessage != nil { return bannerKind }
+        if userDataManager.errorMessage != nil { return .error }
+        return .error
+    }
+
+    private var bannerNeedsSignIn: Bool {
+        guard let message = activeBannerMessage else { return false }
+        return DeviceProfileMessaging.isSessionExpiredMessage(message)
     }
 
     var body: some View {
@@ -56,13 +77,20 @@ struct DeviceProfileView: View {
             .homeUI1TabRootChrome(enabled: usesHomeUI1)
             .homeUI2TabRootChrome(enabled: usesHomeUI2)
             .refreshable {
-                await userDataManager.fetchUserData()
+                await reloadProfile(showSuccess: false)
             }
         }
         .onAppear {
             if !isGuestInstaller {
                 userDataManager.refreshUserData()
             }
+        }
+        .onChange(of: userDataManager.errorMessage) { _, raw in
+            guard let raw, !raw.isEmpty else { return }
+            presentBanner(
+                DeviceProfileMessaging.friendly(raw, context: .load),
+                kind: .error
+            )
         }
         .alert("Edit Name", isPresented: $showEditName) {
             TextField("Your name", text: $nameInput)
@@ -71,19 +99,19 @@ struct DeviceProfileView: View {
         } message: {
             Text("This name is shown on your LIMI account.")
         }
-        .alert(
-            "Profile Update Failed",
-            isPresented: Binding(
-                get: { profileErrorMessage != nil },
-                set: { if !$0 { profileErrorMessage = nil } }
-            )
-        ) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(profileErrorMessage ?? "")
-        }
         .confirmationDialog("Sign out of LIMI AI Device?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) { signOut() }
+            Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog(
+            "Session expired",
+            isPresented: $showSessionExpiredConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Sign In Again", role: .destructive) { signOut() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(DeviceProfileMessaging.sessionExpired)
         }
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
@@ -97,13 +125,15 @@ struct DeviceProfileView: View {
         ZStack {
             HomeUI1ControlScreenBackground()
 
-            ScrollView(showsIndicators: false) {
+            DeviceProfileVerticalScroll {
                 VStack(alignment: .leading, spacing: 18) {
                     HomeUI1PageTitle(
                         title: "Profile",
                         subtitle: "Account, control path, and device permissions"
                     )
                     .padding(.top, 8)
+
+                    profileStatusBanner
 
                     homeUI1AccountCard
                     homeUI1DeviceControlCard
@@ -124,13 +154,15 @@ struct DeviceProfileView: View {
         ZStack {
             HomeUI2ControlScreenBackground()
 
-            ScrollView(showsIndicators: false) {
+            DeviceProfileVerticalScroll {
                 VStack(alignment: .leading, spacing: 18) {
                     HomeUI2PageTitle(
                         title: "Settings",
                         subtitle: "Account, control path, and device permissions"
                     )
                     .padding(.top, 8)
+
+                    profileStatusBanner
 
                     homeUI2AccountCard
                     homeUI2DeviceControlCard
@@ -233,14 +265,14 @@ struct DeviceProfileView: View {
                     .font(HomeUI2Type.body(13))
                     .foregroundStyle(HomeUI2Color.textSecondary)
 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(TransportMediumPreference.allCases, id: \.self) { medium in
                         let selected = transportPreference.preference == medium
                         Button {
                             DeviceAppGuidance.lightImpact()
                             transportPreference.preference = medium
                         } label: {
-                            Text(medium.shortTitle)
+                            Text(medium.chipTitle)
                                 .font(HomeUI2Type.body(12))
                                 .foregroundStyle(
                                     selected
@@ -248,8 +280,8 @@ struct DeviceProfileView: View {
                                         : HomeUI2Color.textSecondary
                                 )
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.85)
-                                .padding(.horizontal, 10)
+                                .minimumScaleFactor(0.7)
+                                .padding(.horizontal, 4)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .background(
@@ -261,6 +293,7 @@ struct DeviceProfileView: View {
                         .accessibilityLabel(medium.pickerTitle)
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
 
             HomeUI2InsetRow {
@@ -439,14 +472,14 @@ struct DeviceProfileView: View {
                     .font(HomeUI1Type.body(13))
                     .foregroundStyle(HomeUI1Color.textSecondary)
 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(TransportMediumPreference.allCases, id: \.self) { medium in
                         let selected = transportPreference.preference == medium
                         Button {
                             DeviceAppGuidance.lightImpact()
                             transportPreference.preference = medium
                         } label: {
-                            Text(medium.shortTitle)
+                            Text(medium.chipTitle)
                                 .font(HomeUI1Type.body(12))
                                 .foregroundStyle(
                                     selected
@@ -454,8 +487,8 @@ struct DeviceProfileView: View {
                                         : HomeUI1Color.textSecondary
                                 )
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.85)
-                                .padding(.horizontal, 10)
+                                .minimumScaleFactor(0.7)
+                                .padding(.horizontal, 4)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity)
                                 .homeUI1Elevation(
@@ -468,6 +501,7 @@ struct DeviceProfileView: View {
                         .accessibilityLabel(medium.pickerTitle)
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
 
             HStack {
@@ -481,6 +515,25 @@ struct DeviceProfileView: View {
             }
             .padding(14)
             .homeUI1Elevation(.recessed, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.canvas)
+
+            NavigationLink {
+                BLEMacProbeTestView()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "ladybug")
+                        .foregroundStyle(HomeUI1Color.accentGreen)
+                    Text("BLE MAC Probe (Test)")
+                        .font(HomeUI1Type.body(15))
+                        .foregroundStyle(HomeUI1Color.textPrimary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(HomeUI1Color.textSecondary)
+                }
+                .padding(14)
+                .homeUI1Elevation(.recessed, cornerRadius: HomeUI1Radius.md, fill: HomeUI1Color.canvas)
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -607,6 +660,30 @@ struct DeviceProfileView: View {
 
     private var systemListBody: some View {
         List {
+            if let message = activeBannerMessage {
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(message)
+                            .font(.footnote)
+                            .foregroundStyle(activeBannerKind == .success ? .green : .primary)
+
+                        HStack(spacing: 12) {
+                            if bannerNeedsSignIn {
+                                Button("Sign In Again") { showSessionExpiredConfirm = true }
+                                    .buttonStyle(.borderedProminent)
+                            } else if activeBannerKind == .error {
+                                Button("Try Again") {
+                                    Task { await reloadProfile(showSuccess: true) }
+                                }
+                            }
+                            Button("Dismiss") { clearBanner() }
+                                .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
             accountSection
             deviceControlSection
             permissionsSection
@@ -697,6 +774,12 @@ struct DeviceProfileView: View {
             LabeledContent("Devices Found") {
                 Text("\(onlineDeviceCount) online")
             }
+
+            NavigationLink {
+                BLEMacProbeTestView()
+            } label: {
+                Label("BLE MAC Probe (Test)", systemImage: "ladybug")
+            }
         } header: {
             Text("Device Control")
         } footer: {
@@ -774,32 +857,133 @@ struct DeviceProfileView: View {
     }
 
     private func signOut() {
+        clearBanner()
+        userDataManager.errorMessage = nil
         VirtualDeviceStore.shared.resetForSignOut()
         AuthManager.shared.clearToken()
         AuthManager.shared.clearRole()
         BluetoothManager.shared.disconnectAllDevices()
     }
 
+    // MARK: - Status banner
+
+    @ViewBuilder
+    private var profileStatusBanner: some View {
+        if let message = activeBannerMessage {
+            DeviceNeumorphicStatusBanner(
+                message: message,
+                kind: signInKind(from: activeBannerKind),
+                retryTitle: bannerNeedsSignIn
+                    ? "Sign In Again"
+                    : (activeBannerKind == .error ? "Try Again" : nil),
+                onRetry: {
+                    if bannerNeedsSignIn {
+                        showSessionExpiredConfirm = true
+                    } else {
+                        Task { await reloadProfile(showSuccess: true) }
+                    }
+                },
+                onDismiss: { clearBanner() }
+            )
+        }
+    }
+
+    private func signInKind(from kind: DeviceProfileMessageKind) -> DeviceSignInMessageKind {
+        switch kind {
+        case .info: return .info
+        case .success: return .success
+        case .error: return .error
+        }
+    }
+
+    private func presentBanner(_ message: String, kind: DeviceProfileMessageKind) {
+        bannerMessage = message
+        bannerKind = kind
+        if kind == .error {
+            DeviceAppGuidance.warningNotification()
+        } else if kind == .success {
+            DeviceAppGuidance.successNotification()
+        }
+    }
+
+    private func clearBanner() {
+        bannerMessage = nil
+        userDataManager.errorMessage = nil
+    }
+
+    private func reloadProfile(showSuccess: Bool) async {
+        clearBanner()
+        guard !isGuestInstaller else { return }
+        guard AuthManager.shared.getToken() != nil else {
+            presentBanner(DeviceProfileMessaging.sessionExpired, kind: .error)
+            return
+        }
+        await userDataManager.fetchUserData()
+        if let raw = userDataManager.errorMessage {
+            presentBanner(DeviceProfileMessaging.friendly(raw, context: .load), kind: .error)
+        } else if showSuccess {
+            presentBanner("Profile loaded.", kind: .success)
+        }
+    }
+
     // MARK: - Profile update (same PATCH editProfile endpoint as the main app)
 
     private func uploadPickedPhoto(_ item: PhotosPickerItem) async {
-        defer { photoItem = nil }
-        guard let data = try? await item.loadTransferable(type: Data.self),
-              let image = UIImage(data: data) else {
-            profileErrorMessage = "Couldn't load the selected photo."
-            return
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self) else {
+                await MainActor.run {
+                    photoItem = nil
+                    presentBanner(DeviceProfileMessaging.photoLoadFailed, kind: .error)
+                }
+                return
+            }
+            guard let image = UIImage(data: data) else {
+                await MainActor.run {
+                    photoItem = nil
+                    presentBanner(DeviceProfileMessaging.photoLoadFailed, kind: .error)
+                }
+                return
+            }
+            guard data.count < 8_000_000 else {
+                await MainActor.run {
+                    photoItem = nil
+                    presentBanner("That photo is too large. Choose a smaller image.", kind: .error)
+                }
+                return
+            }
+            await MainActor.run {
+                photoItem = nil
+                saveProfile(username: displayName, image: image)
+            }
+        } catch {
+            await MainActor.run {
+                photoItem = nil
+                presentBanner(
+                    DeviceProfileMessaging.friendly(error: error, context: .photo),
+                    kind: .error
+                )
+            }
         }
-        saveProfile(username: displayName, image: image)
     }
 
     private func saveProfile(username: String, image: UIImage?) {
         let trimmedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedUsername.isEmpty else {
-            profileErrorMessage = "Please enter a valid name."
+            presentBanner(DeviceProfileMessaging.nameRequired, kind: .error)
             return
         }
+        guard !isGuestInstaller else {
+            presentBanner("Sign in with a LIMI account to update your profile.", kind: .error)
+            return
+        }
+        guard AuthManager.shared.getToken() != nil else {
+            presentBanner(DeviceProfileMessaging.sessionExpired, kind: .error)
+            return
+        }
+        guard !isSavingProfile else { return }
 
         isSavingProfile = true
+        clearBanner()
         Task {
             do {
                 try await patchProfile(username: trimmedUsername, image: image)
@@ -807,12 +991,26 @@ struct DeviceProfileView: View {
                     isSavingProfile = false
                     userDataManager.userData?.username = trimmedUsername
                     if let image { userDataManager.profileImage = image }
+                    presentBanner(DeviceProfileMessaging.successSaved, kind: .success)
                 }
                 await userDataManager.fetchUserData()
+                if let raw = userDataManager.errorMessage {
+                    await MainActor.run {
+                        // Save succeeded; keep a soft load warning if refresh fails.
+                        presentBanner(
+                            DeviceProfileMessaging.friendly(raw, context: .load),
+                            kind: .error
+                        )
+                    }
+                }
             } catch {
                 await MainActor.run {
                     isSavingProfile = false
-                    profileErrorMessage = error.localizedDescription
+                    let friendly = DeviceProfileMessaging.friendly(error: error, context: .save)
+                    presentBanner(friendly, kind: .error)
+                    if DeviceProfileMessaging.isSessionExpiredMessage(friendly) {
+                        showSessionExpiredConfirm = true
+                    }
                 }
             }
         }
@@ -820,7 +1018,7 @@ struct DeviceProfileView: View {
 
     private func patchProfile(username: String, image: UIImage?) async throws {
         guard let url = URL(string: APIConstants.editProfile) else {
-            throw URLError(.badURL)
+            throw LimiAPIError.invalidURL
         }
         guard var request = LimiHTTPClient.buildRequest(url: url, method: "PATCH", contentType: nil) else {
             throw LimiHTTPClientError.missingAuth
@@ -835,7 +1033,10 @@ struct DeviceProfileView: View {
         body.append("Content-Disposition: form-data; name=\"username\"\r\n\r\n".data(using: .utf8)!)
         body.append("\(username)\r\n".data(using: .utf8)!)
 
-        if let image, let imageData = image.jpegData(compressionQuality: 0.8) {
+        if let image {
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                throw LimiAPIError.invalidBody
+            }
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"profilePicture\"; filename=\"profile.jpg\"\r\n".data(using: .utf8)!)
             body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
@@ -847,12 +1048,25 @@ struct DeviceProfileView: View {
 
         let (data, response) = try await LimiHTTPClient.data(for: request)
         guard (200..<300).contains(response.statusCode) else {
-            let message = String(data: data, encoding: .utf8) ?? "Unknown error occurred"
-            throw NSError(
-                domain: "ProfileUpdateError",
-                code: response.statusCode,
-                userInfo: [NSLocalizedDescriptionKey: message]
-            )
+            throw LimiAPIError.from(httpStatus: response.statusCode, data: data)
+        }
+    }
+}
+
+/// Vertical-only page scroll. Pins content to the container width so
+/// Control Path chips and neumorphic shadows cannot rubber-band sideways
+/// (reproduced on iPhone 17 Pro Max; Home already stays vertical).
+private struct DeviceProfileVerticalScroll<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        GeometryReader { geo in
+            ScrollView(.vertical, showsIndicators: false) {
+                content()
+                    .frame(width: geo.size.width, alignment: .leading)
+            }
+            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+            .clipped()
         }
     }
 }

@@ -68,6 +68,18 @@ class SelectedDevicesStorage: ObservableObject {
         }
     }
 
+    func removeAll() {
+        items = []
+        UserDefaults.standard.removeObject(forKey: listKey)
+        UserDefaults.standard.removeObject(forKey: lastNameKey)
+        UserDefaults.standard.removeObject(forKey: lastUUIDKey)
+    }
+
+    /// Account switch — selected-device list is phone-global.
+    func adoptCurrentSession() {
+        removeAll()
+    }
+
     func lastSelected() -> SelectedDevice? {
         if let uuid = UserDefaults.standard.string(forKey: lastUUIDKey),
            let name = UserDefaults.standard.string(forKey: lastNameKey) {

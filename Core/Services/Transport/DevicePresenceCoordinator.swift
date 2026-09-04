@@ -120,13 +120,53 @@ public final class DevicePresenceCoordinator: ObservableObject {
             for id in ids {
                 if Task.isCancelled { return }
                 let state = DeviceTransportRegistry.shared.state(for: id)
-                if state.mqttConnected {
+                let liveCloud = VirtualMasterPresence.isLiveCloudOnline(hardwareId: id)
+                let bleKind = BLECloudFallbackService.shared.presenceKind(for: id)
+                let bleVisible: Bool = {
+                    switch bleKind {
+                    case .liveConnected, .advertising: return true
+                    case .unreachable: return false
+                    }
+                }()
+
+                // 1) Fresh cloud heartbeat → trust cloud, drop any BLE fallback.
+                if liveCloud {
                     BLECloudFallbackService.shared.releaseIfCloudRestored(hardwareId: id)
                     PresenceSnapshotStore.shared.record(deviceId: id, isOnline: true, path: .cloud)
                     continue
                 }
+
+                // Cloud is NOT fresh from here on. Decide the ground truth so a stale
+                // `.cloud` snapshot cannot keep the hub "Online · Cloud" forever.
+                if state.mqttConnected {
+                    // 2) Cloud stale but BLE advertising → the hub is physically local and
+                    // dropped off Wi‑Fi. Positive local evidence, so hand off cloud → BLE now.
+                    if bleVisible {
+                        DeviceTransportRegistry.shared.markCloudPresenceDropped(id)
+                        DeviceConsole.focus("cloud→BLE handoff id=\(id) (cloud stale + BLE present)")
+                        BLECloudFallbackService.shared.prepareBLEIfCloudMissing(hardwareId: id)
+                        PresenceSnapshotStore.shared.record(deviceId: id, isOnline: true, path: .ble)
+                        continue
+                    }
+
+                    // 3) No local evidence. Only after a long hard TTL do we call it offline —
+                    // this avoids falsely offlining a quiet but genuinely-online remote hub.
+                    let silence = state.lastMQTTPresenceAt.map { Date().timeIntervalSince($0) } ?? .greatestFiniteMagnitude
+                    if silence > VirtualMasterPresence.cloudPresenceHardTTL {
+                        DeviceTransportRegistry.shared.markCloudPresenceDropped(id)
+                        DeviceConsole.focus("cloud hard-expired id=\(id) silence=\(Int(silence))s (no heartbeat, no BLE) → offline")
+                        PresenceSnapshotStore.shared.record(deviceId: id, isOnline: false, path: .offline)
+                        continue
+                    }
+
+                    // Within grace, no local signal — keep showing cloud (do not flap offline).
+                    PresenceSnapshotStore.shared.record(deviceId: id, isOnline: true, path: .cloud)
+                    continue
+                }
+
+                // 4) mqtt already cleared → resolve purely from BLE, overwriting stale snapshot.
                 guard ConfiguredBLEDeviceStore.shared.hasConfiguredBLE(for: id) else { continue }
-                switch BLECloudFallbackService.shared.presenceKind(for: id) {
+                switch bleKind {
                 case .liveConnected, .advertising:
                     PresenceSnapshotStore.shared.record(deviceId: id, isOnline: true, path: .ble)
                 case .unreachable:

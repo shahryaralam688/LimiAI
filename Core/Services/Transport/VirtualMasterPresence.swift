@@ -9,6 +9,26 @@
 import Foundation
 
 enum VirtualMasterPresence {
+    /// A cloud hub is treated as *live* only while a definite `device_status` arrived
+    /// within this window. Used together with a positive BLE signal to hand a hub off
+    /// from cloud → BLE when its Wi‑Fi drops without an explicit `off` ever arriving.
+    static let cloudPresenceTTL: TimeInterval = 45
+
+    /// Absolute ceiling: if there has been no definite cloud presence for this long AND
+    /// no local (BLE) evidence, the hub is considered offline. Kept generous so a quiet
+    /// but genuinely-online remote hub is never falsely marked offline.
+    static let cloudPresenceHardTTL: TimeInterval = 300
+
+    /// Live cloud = the registry flag AND a fresh heartbeat (no stale snapshot fallback).
+    /// This is the authoritative "is it really on cloud right now" check used to decide
+    /// whether to record a `.cloud` snapshot — prevents the snapshot self-refresh loop.
+    static func isLiveCloudOnline(hardwareId: String) -> Bool {
+        let key = LimiDeviceNaming.normalizedHardwareId(hardwareId)
+        guard !key.isEmpty else { return false }
+        let state = DeviceTransportRegistry.shared.state(for: key)
+        return state.mqttConnected && state.isCloudPresenceFresh(ttl: cloudPresenceTTL)
+    }
+
     enum Transport: Equatable {
         case offline
         case internet
@@ -250,8 +270,11 @@ enum VirtualMasterPresence {
         let key = LimiDeviceNaming.normalizedHardwareId(hardwareId)
         guard !key.isEmpty else { return false }
 
-        if DeviceTransportRegistry.shared.state(for: key).mqttConnected {
-            return true
+        let state = DeviceTransportRegistry.shared.state(for: key)
+        if state.mqttConnected {
+            // Trust the live cloud flag only while presence is fresh. A long heartbeat
+            // silence means the hub dropped off Wi‑Fi even though no `off` event arrived.
+            return state.isCloudPresenceFresh(ttl: cloudPresenceTTL)
         }
 
         guard LightControllingSocket.shared.isConnected else { return false }

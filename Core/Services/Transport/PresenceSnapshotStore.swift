@@ -61,12 +61,24 @@ public final class PresenceSnapshotStore {
     ) {
         let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
         guard !key.isEmpty else { return }
+
+        lock.lock()
+        // De-dupe rapid identical records (e.g. many Home renders / poll ticks in a row):
+        // if the last write for this hub had the same online+path very recently, skip both
+        // the timestamp refresh and the UserDefaults encode. Avoids synchronous disk-write
+        // jank on the main thread without affecting the TTL semantics (sub-2s granularity).
+        if let existing = cache[key],
+           existing.isOnline == isOnline,
+           existing.path == path,
+           existing.age < 2.0 {
+            lock.unlock()
+            return
+        }
         let entry = DevicePresenceSnapshot(
             isOnline: isOnline,
             path: path,
             updatedAt: Date()
         )
-        lock.lock()
         cache[key] = entry
         let snapshot = cache
         lock.unlock()
@@ -89,12 +101,16 @@ public final class PresenceSnapshotStore {
         }
     }
 
-    #if DEBUG
-    func resetForTests() {
+    public func removeAll() {
         lock.lock()
         cache = [:]
         lock.unlock()
         UserDefaults.standard.removeObject(forKey: defaultsKey)
+    }
+
+    #if DEBUG
+    func resetForTests() {
+        removeAll()
     }
     #endif
 }

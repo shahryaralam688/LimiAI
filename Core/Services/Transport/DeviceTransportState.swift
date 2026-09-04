@@ -20,6 +20,18 @@ public final class DeviceTransportState: ObservableObject {
     /// or forced true by a 503 mqtt_active response on a WebSocket attempt).
     @Published public private(set) var mqttConnected: Bool = false
 
+    /// Timestamp of the most recent *definite online* presence event. The backend
+    /// heart-beats `device_status` while a hub is on cloud, so a long silence means
+    /// the hub dropped its Wi‑Fi even though no explicit `off` ever arrived. Used to
+    /// expire a stale cloud link so BLE / offline can surface without an app restart.
+    @Published public private(set) var lastMQTTPresenceAt: Date?
+
+    /// True when a definite online presence event arrived within `ttl` seconds.
+    public func isCloudPresenceFresh(ttl: TimeInterval) -> Bool {
+        guard mqttConnected, let last = lastMQTTPresenceAt else { return false }
+        return Date().timeIntervalSince(last) <= ttl
+    }
+
     /// Most recently resolved LAN IP from Bonjour. Required to build
     /// `ws://<device-ip>/ws`.
     @Published public private(set) var deviceIP: String? = nil
@@ -102,6 +114,14 @@ public final class DeviceTransportState: ObservableObject {
     public func updateMQTTPresence(connected: Bool) {
         runOnMain { [weak self] in
             guard let self = self else { return }
+            if connected {
+                let previous = self.lastMQTTPresenceAt
+                self.lastMQTTPresenceAt = Date()
+                if DeviceConsole.focusMode, let previous {
+                    let gap = Int(Date().timeIntervalSince(previous).rounded())
+                    DeviceConsole.focus("heartbeat id=\(self.deviceId) gap=\(gap)s since last online event")
+                }
+            }
             if self.mqttConnected != connected { self.mqttConnected = connected }
         }
     }
@@ -111,6 +131,7 @@ public final class DeviceTransportState: ObservableObject {
     public func forceMQTTActive() {
         runOnMain { [weak self] in
             guard let self = self else { return }
+            self.lastMQTTPresenceAt = Date()
             if !self.mqttConnected { self.mqttConnected = true }
         }
     }

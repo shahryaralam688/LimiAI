@@ -2,10 +2,10 @@
 //  ChannelEffectPattern.swift
 //  Limi
 //
-//  Named multi-channel light patterns for Master / hub control.
-//  Wire shape (envelope):
-//    { "deviceId": "<id>", "command": { "channel": 0, "pattern": { ... } } }
-//  Socket event name is intentionally not bound here yet.
+//  Named multi-channel light patterns for Hub (All) control only.
+//  UI: DeviceApp/HubChannelPatternBar on VirtualMasterControlView `.all` tab.
+//  Wire command: { "channel": 0, "pattern": { "target":"channels", "name":… } }
+//  Sent today via `virtual_light_control` (fan-out); event can change later.
 //
 
 import Foundation

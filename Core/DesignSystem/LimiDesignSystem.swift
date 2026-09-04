@@ -139,22 +139,33 @@ enum LimiFont {
     }
 }
 
+/// App-wide type scale, mapped to Apple's semantic text styles so every token
+/// scales automatically with Dynamic Type (accessibility) and adapts to the
+/// device's optical sizing. Display/heading/action tokens use SF Pro Rounded to
+/// pair with the app's soft neumorphic surfaces; text tokens use SF Pro.
+///
+/// Token names are stable — screens keep calling `LimiTypography.body` etc.
 enum LimiTypography {
-    static let largeTitle: Font = LimiFont.amenti(size: 28, weight: .bold)
-    static let title: Font = LimiFont.amenti(size: 24, weight: .bold)
-    static let title2: Font = LimiFont.amentiMedium(size: 22)
-    static let title3: Font = LimiFont.amentiMedium(size: 20)
-    static let headline: Font = LimiFont.poppins(size: 17, weight: .semibold)
-    static let body: Font = LimiFont.poppins(size: 16, weight: .regular)
-    static let callout: Font = LimiFont.poppins(size: 15, weight: .medium)
-    static let subheadline: Font = LimiFont.poppins(size: 14, weight: .regular)
-    static let footnote: Font = LimiFont.poppins(size: 13, weight: .medium)
-    static let caption: Font = LimiFont.poppins(size: 12, weight: .medium)
-    static let caption2: Font = LimiFont.poppins(size: 11, weight: .medium)
-    /// Primary CTA label — Poppins SemiBold 17
-    static let button: Font = LimiFont.poppins(size: 17, weight: .semibold)
-    /// Secondary pill / compact actions
-    static let buttonSmall: Font = LimiFont.poppins(size: 14, weight: .semibold)
+    // Display & headings — SF Pro Rounded.
+    static let largeTitle: Font = .system(.largeTitle, design: .rounded, weight: .bold)
+    static let title: Font = .system(.title, design: .rounded, weight: .bold)
+    static let title2: Font = .system(.title2, design: .rounded, weight: .semibold)
+    static let title3: Font = .system(.title3, design: .rounded, weight: .semibold)
+    static let headline: Font = .system(.headline, design: .rounded, weight: .semibold)
+
+    // Body & secondary text — SF Pro. Slightly heavier weights improve
+    // legibility on low-contrast neumorphic backgrounds.
+    static let body: Font = .system(.body, design: .default, weight: .regular)
+    static let callout: Font = .system(.callout, design: .default, weight: .medium)
+    static let subheadline: Font = .system(.subheadline, design: .default, weight: .regular)
+    static let footnote: Font = .system(.footnote, design: .default, weight: .medium)
+    static let caption: Font = .system(.caption, design: .default, weight: .medium)
+    static let caption2: Font = .system(.caption2, design: .default, weight: .medium)
+
+    /// Primary CTA label.
+    static let button: Font = .system(.headline, design: .rounded, weight: .semibold)
+    /// Secondary pill / compact actions.
+    static let buttonSmall: Font = .system(.subheadline, design: .rounded, weight: .semibold)
 }
 
 /// Standard SF Symbol sizes — use instead of ad‑hoc `.font(.system(size: …))`.

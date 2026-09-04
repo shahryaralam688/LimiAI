@@ -134,6 +134,15 @@ public final class ConfiguredBLEDeviceStore {
         DeviceConsole.log(.config, "removed hardwareId=\(key)")
     }
 
+    /// Logout / account switch — this store is phone-global, not per-user.
+    public func removeAll() {
+        lock.lock()
+        records.removeAll()
+        lock.unlock()
+        UserDefaults.standard.removeObject(forKey: Self.storageKey)
+        DeviceConsole.log(.config, "cleared configured BLE devices (session change)")
+    }
+
     private func persist() {
         lock.lock()
         let snapshot = Array(records.values)

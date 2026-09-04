@@ -58,6 +58,14 @@ public final class CloudPresenceMemory {
         return cache.compactMap { $0.value ? $0.key : nil }
     }
 
+    /// Logout / account switch — ids are phone-global, not per-user.
+    public func removeAll() {
+        lock.lock()
+        cache.removeAll()
+        lock.unlock()
+        UserDefaults.standard.removeObject(forKey: defaultsKey)
+    }
+
     /// Drop presence memory for a device (local delete from this phone).
     public func remove(deviceId: String) {
         let key = LimiDeviceNaming.normalizedHardwareId(deviceId)

@@ -2,8 +2,9 @@
 //  VirtualMasterControlView.swift
 //  LIMI AI Device
 //
-//  Master Device control — tab between all hubs (virtual_light_control)
-//  and each member hub individually.
+//  Hub control — All tab (virtual_light_control + channel patterns) and
+//  each member hub individually (no patterns on member tabs).
+//  Top member chips follow the saved Sequence order for this virtual hub.
 //
 
 import SwiftUI
@@ -17,6 +18,7 @@ struct VirtualMasterControlView: View {
     @ObservedObject private var socket = LightControllingSocket.shared
     @ObservedObject private var homeUITheme = DeviceHomeUIThemeStore.shared
     @ObservedObject private var bonjour = BonjourServiceBrowser.shared
+    @ObservedObject private var sequenceStore = VirtualDeviceSequenceStore.shared
 
     @State private var selectedScope: MasterControlScope = .all
     @State private var presenceTick = 0
@@ -34,13 +36,21 @@ struct VirtualMasterControlView: View {
             .filter { !$0.isEmpty }
     }
 
+    /// Top chips + Hub 1/2 labels: saved Sequence order, else cloud member order.
+    private var sequencedMembers: [String] {
+        sequenceStore.orderedItems(
+            virtualDeviceId: virtualDeviceID,
+            members: normalizedMembers
+        ).map(\.hardwareId)
+    }
+
     private var scopes: [MasterControlScope] {
         var items: [MasterControlScope] = [.all]
-        items.append(contentsOf: normalizedMembers.map { .member($0) })
+        items.append(contentsOf: sequencedMembers.map { .member($0) })
         return items
     }
 
-    private var showsMemberTabs: Bool { !normalizedMembers.isEmpty }
+    private var showsMemberTabs: Bool { !sequencedMembers.isEmpty }
 
     private var onlineCounts: (online: Int, total: Int) {
         _ = presenceTick
@@ -91,6 +101,11 @@ struct VirtualMasterControlView: View {
         }
         .onReceive(bonjour.$discoveredWiFiDevices) { _ in
             presenceTick &+= 1
+        }
+        .onChange(of: sequencedMembers) { _, members in
+            if case .member(let hardwareId) = selectedScope, !members.contains(hardwareId) {
+                selectedScope = .all
+            }
         }
     }
 
@@ -159,8 +174,17 @@ struct VirtualMasterControlView: View {
     private var controlContent: some View {
         switch selectedScope {
         case .all:
-            CCTLEDPreviewView(virtualDeviceID: virtualDeviceID)
-                .id("virtual-cct-\(virtualDeviceID)")
+            // Patterns ONLY on Hub All control — never on member tabs.
+            VStack(spacing: 0) {
+                HubChannelPatternBar(
+                    virtualDeviceID: virtualDeviceID,
+                    memberHardwareIds: normalizedMembers,
+                    pendantCount: normalizedMembers.count,
+                    usesHomeUI1: usesHomeUI1
+                )
+                CCTLEDPreviewView(virtualDeviceID: virtualDeviceID)
+                    .id("virtual-cct-\(virtualDeviceID)")
+            }
         case .member(let hardwareId):
             memberControlView(hardwareId: hardwareId)
                 .id("member-cct-\(hardwareId)")
@@ -216,10 +240,11 @@ struct VirtualMasterControlView: View {
         switch scope {
         case .all:
             let counts = onlineCounts
-            if counts.total == 0 { return "Master" }
-            if counts.online == 0 { return "Master · Offline" }
-            if counts.online == counts.total { return "Master · Online" }
-            return "Master · \(counts.online)/\(counts.total)"
+            let hub = VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: max(counts.total, 1))
+            if counts.total == 0 { return hub }
+            if counts.online == 0 { return "\(hub) · Offline" }
+            if counts.online == counts.total { return "\(hub) · Online" }
+            return "\(hub) · \(counts.online)/\(counts.total)"
         case .member(let hardwareId):
             let name = memberDisplayName(for: hardwareId)
             return memberIsOnline(hardwareId) ? "\(name) · Online" : "\(name) · Offline"
@@ -250,8 +275,8 @@ struct VirtualMasterControlView: View {
         }), !match.name.isEmpty {
             return match.name
         }
-        if let index = normalizedMembers.firstIndex(of: hw) {
-            return normalizedMembers.count > 1 ? "Hub \(index + 1)" : "Hub"
+        if let index = sequencedMembers.firstIndex(of: hw) {
+            return sequencedMembers.count > 1 ? "Hub \(index + 1)" : "Hub"
         }
         return "Hub"
     }

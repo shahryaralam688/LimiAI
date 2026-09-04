@@ -144,6 +144,15 @@ struct DeviceSchedulesHubView: View {
     private var usesHomeUI1: Bool { homeUITheme.selected == .one }
     private var usesHomeUI2: Bool { homeUITheme.selected == .two }
 
+    /// Same grouping as Home: hub (virtual master) rows + individual devices.
+    private var scheduleDevices: [WifiDevice] {
+        let base = remembered.map { wifiDevice(from: $0) }
+        return VirtualDeviceHomeGrouping.apply(
+            devices: base,
+            groups: VirtualDeviceStore.shared.cloudHomeGroupingSpecs()
+        )
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -194,15 +203,15 @@ struct DeviceSchedulesHubView: View {
                             footer: "No schedules yet. Pick a device to create one."
                         ) {
                             VStack(spacing: 10) {
-                                ForEach(remembered, id: \.deviceID) { device in
+                                ForEach(scheduleDevices, id: \.id) { device in
                                     NavigationLink {
                                         DeviceSchedulesView(
-                                            device: wifiDevice(from: device),
-                                            displayName: device.displayName
+                                            device: device,
+                                            displayName: device.deviceName
                                         )
                                     } label: {
                                         homeUI1DeviceLinkRow(
-                                            title: device.displayName,
+                                            title: device.deviceName,
                                             systemImage: "lightbulb.led.fill"
                                         )
                                     }
@@ -228,15 +237,15 @@ struct DeviceSchedulesHubView: View {
                             footer: "Open a device to manage its schedules."
                         ) {
                             VStack(spacing: 10) {
-                                ForEach(remembered, id: \.deviceID) { device in
+                                ForEach(scheduleDevices, id: \.id) { device in
                                     NavigationLink {
                                         DeviceSchedulesView(
-                                            device: wifiDevice(from: device),
-                                            displayName: device.displayName
+                                            device: device,
+                                            displayName: device.deviceName
                                         )
                                     } label: {
                                         homeUI1DeviceLinkRow(
-                                            title: device.displayName,
+                                            title: device.deviceName,
                                             systemImage: "clock.fill"
                                         )
                                     }
@@ -333,15 +342,15 @@ struct DeviceSchedulesHubView: View {
                             footer: "No schedules yet. Pick a device to create one."
                         ) {
                             VStack(spacing: 10) {
-                                ForEach(remembered, id: \.deviceID) { device in
+                                ForEach(scheduleDevices, id: \.id) { device in
                                     NavigationLink {
                                         DeviceSchedulesView(
-                                            device: wifiDevice(from: device),
-                                            displayName: device.displayName
+                                            device: device,
+                                            displayName: device.deviceName
                                         )
                                     } label: {
                                         HomeUI2LinkRow(
-                                            title: device.displayName,
+                                            title: device.deviceName,
                                             systemImage: "lightbulb.led.fill"
                                         )
                                     }
@@ -363,15 +372,15 @@ struct DeviceSchedulesHubView: View {
                             footer: "Open a device to manage its schedules."
                         ) {
                             VStack(spacing: 10) {
-                                ForEach(remembered, id: \.deviceID) { device in
+                                ForEach(scheduleDevices, id: \.id) { device in
                                     NavigationLink {
                                         DeviceSchedulesView(
-                                            device: wifiDevice(from: device),
-                                            displayName: device.displayName
+                                            device: device,
+                                            displayName: device.deviceName
                                         )
                                     } label: {
                                         HomeUI2LinkRow(
-                                            title: device.displayName,
+                                            title: device.deviceName,
                                             systemImage: "clock.fill"
                                         )
                                     }
@@ -433,14 +442,14 @@ struct DeviceSchedulesHubView: View {
         } else if schedules.isEmpty {
             List {
                 Section {
-                    ForEach(remembered, id: \.deviceID) { device in
+                    ForEach(scheduleDevices, id: \.id) { device in
                         NavigationLink {
                             DeviceSchedulesView(
-                                device: wifiDevice(from: device),
-                                displayName: device.displayName
+                                device: device,
+                                displayName: device.deviceName
                             )
                         } label: {
-                            Label(device.displayName, systemImage: "lightbulb.led")
+                            Label(device.deviceName, systemImage: "lightbulb.led")
                         }
                     }
                 } header: {
@@ -469,14 +478,14 @@ struct DeviceSchedulesHubView: View {
                 }
 
                 Section("Add / Edit") {
-                    ForEach(remembered, id: \.deviceID) { device in
+                    ForEach(scheduleDevices, id: \.id) { device in
                         NavigationLink {
                             DeviceSchedulesView(
-                                device: wifiDevice(from: device),
-                                displayName: device.displayName
+                                device: device,
+                                displayName: device.deviceName
                             )
                         } label: {
-                            Label(device.displayName, systemImage: "clock")
+                            Label(device.deviceName, systemImage: "clock")
                         }
                     }
                 }

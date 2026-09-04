@@ -220,7 +220,7 @@ final class DemoScanDevicesViewModelTests: XCTestCase {
 
         XCTAssertEqual(grouped.count, 1)
         XCTAssertTrue(grouped.first?.isVirtualMaster == true)
-        XCTAssertEqual(grouped.first?.name, "Master Device")
+        XCTAssertEqual(grouped.first?.name, "Hub-2")
         XCTAssertEqual(grouped.first?.virtualMaster?.memberHardwareIds, [macA, macB])
         XCTAssertEqual(grouped.first?.reachability, .online)
     }

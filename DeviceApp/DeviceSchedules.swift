@@ -22,7 +22,8 @@ import UserNotifications
 @Model
 final class DeviceSchedule {
     @Attribute(.unique) var scheduleID: UUID
-    /// chennalMac (uppercased not required; engine normalizes).
+    /// For individual devices this is the chennalMac. For hubs it is the
+    /// virtual device id (`vd-…`) — matches the list filter in the UI.
     var deviceID: String
     /// Display name at creation time, shown in list + notifications.
     var deviceName: String
@@ -38,6 +39,26 @@ final class DeviceSchedule {
     var isEnabled: Bool
     var lastFiredAt: Date?
 
+    // MARK: - Hub routing (added; defaults keep old schedules valid)
+
+    /// True when the target is a virtual master (hub). Routes via `virtual_light_control`.
+    var isHub: Bool = false
+    /// Virtual device id used for hub fan-out (`vd-…`).
+    var virtualDeviceID: String = ""
+    /// Comma-separated member MACs — fallback group fan-out when no virtual id.
+    var memberMacsRaw: String = ""
+
+    // MARK: - Behaviour (added; how the light looks when turned ON)
+
+    var brightness: Int = 70
+    var ww: Int = 100
+    var cw: Int = 40
+    var red: Int = 255
+    var green: Int = 255
+    var blue: Int = 255
+    /// When true the ON command is RGB; otherwise CCT (ww/cw).
+    var useRGB: Bool = false
+
     init(
         deviceID: String,
         deviceName: String,
@@ -47,7 +68,17 @@ final class DeviceSchedule {
         minute: Int,
         repeatDays: [Int],
         turnOn: Bool,
-        isEnabled: Bool = true
+        isEnabled: Bool = true,
+        isHub: Bool = false,
+        virtualDeviceID: String = "",
+        memberMacs: [String] = [],
+        brightness: Int = 70,
+        ww: Int = 100,
+        cw: Int = 40,
+        red: Int = 255,
+        green: Int = 255,
+        blue: Int = 255,
+        useRGB: Bool = false
     ) {
         self.scheduleID = UUID()
         self.deviceID = deviceID
@@ -60,6 +91,24 @@ final class DeviceSchedule {
         self.turnOn = turnOn
         self.isEnabled = isEnabled
         self.lastFiredAt = nil
+        self.isHub = isHub
+        self.virtualDeviceID = virtualDeviceID
+        self.memberMacsRaw = memberMacs.joined(separator: ",")
+        self.brightness = brightness
+        self.ww = ww
+        self.cw = cw
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.useRGB = useRGB
+    }
+
+    /// Member MACs for hub fan-out fallback.
+    var memberMacs: [String] {
+        memberMacsRaw
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
     }
 }
 
@@ -176,22 +225,78 @@ final class DeviceScheduleEngine: ObservableObject {
     }
 
     private func fire(_ schedule: DeviceSchedule) {
+        if schedule.isHub {
+            fireHub(schedule)
+        } else {
+            fireIndividual(schedule)
+        }
+    }
+
+    /// Command that describes how the light should behave for a channel.
+    private func command(for schedule: DeviceSchedule, channel: Int) -> LimiCommand {
+        guard schedule.turnOn else {
+            return .power(channel: channel, on: false)
+        }
+        if schedule.useRGB {
+            return .rgb(
+                channel: channel,
+                brightness: schedule.brightness,
+                red: schedule.red,
+                green: schedule.green,
+                blue: schedule.blue
+            )
+        }
+        return .cct(
+            channel: channel,
+            brightness: schedule.brightness,
+            ww: schedule.ww,
+            cw: schedule.cw
+        )
+    }
+
+    /// Individual device: per-MAC transport, one command per targeted channel.
+    private func fireIndividual(_ schedule: DeviceSchedule) {
         let deviceId = schedule.deviceID.uppercased()
         let channels: [Int] = schedule.channel == 0
             ? Array(1...max(schedule.channelCount, 1))
             : [schedule.channel]
 
         for channel in channels {
+            let cmd = command(for: schedule, channel: channel)
             Task {
-                try? await LimiTransport.shared.sendCommand(
-                    .power(channel: channel, on: schedule.turnOn),
-                    for: deviceId
-                )
+                try? await LimiTransport.shared.sendCommand(cmd, for: deviceId)
             }
             // Keep the control screens' persisted power state in sync.
             let key = "\(schedule.deviceID)-\(channel)"
             UserDefaults.standard.set(schedule.turnOn, forKey: "cct-lamp-state-\(key)")
             UserDefaults.standard.set(schedule.turnOn, forKey: "rgb-lamp-state-\(key)")
+        }
+    }
+
+    /// Hub (virtual master): same path as the hub control screen —
+    /// one `virtual_light_control` to the hub's virtual id, group fan-out as fallback.
+    private func fireHub(_ schedule: DeviceSchedule) {
+        let cmd = command(for: schedule, channel: 1)
+        let virtualId = schedule.virtualDeviceID.trimmingCharacters(in: .whitespaces)
+        let members = schedule.memberMacs
+
+        LightControllingSocket.shared.connect()
+        Task { @MainActor in
+            if LightControllingSocket.shared.connectionStatus != .connected {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+
+            if !virtualId.isEmpty, LightControllingSocket.shared.connectionStatus == .connected {
+                LightControllingSocket.shared.sendVirtualLightControl(
+                    virtualDeviceId: virtualId,
+                    command: cmd.toVirtualCommandPayload()
+                )
+                return
+            }
+
+            if !members.isEmpty {
+                try? await LimiTransport.shared.sendGroupCommand(cmd, deviceIds: members)
+            }
         }
     }
 

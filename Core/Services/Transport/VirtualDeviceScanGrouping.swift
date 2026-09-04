@@ -8,8 +8,13 @@
 import Foundation
 
 enum VirtualDeviceScanGrouping {
-    static let masterDisplayName = "Master Device"
+    /// Prefer `hubDisplayName(pendantCount:)` — kept for call sites that need a fallback.
+    static let masterDisplayName = VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: 1)
     static let masterRowIDPrefix = "virtual-master:"
+
+    static func hubDisplayName(pendantCount: Int) -> String {
+        VirtualDeviceGroupingSpec.hubDisplayName(pendantCount: pendantCount)
+    }
 
     static func masterRowID(virtualDeviceID: String) -> String {
         masterRowIDPrefix + virtualDeviceID
@@ -82,7 +87,16 @@ enum VirtualDeviceScanGrouping {
                 }
             )
             let masterIP = sortedMembers.first(where: { ($0.ipAddress ?? "").isEmpty == false })?.ipAddress
-            let label = group.displayName.isEmpty ? masterName : group.displayName
+            let hubLabel = hubDisplayName(pendantCount: memberOrder.count)
+            let label: String = {
+                if group.displayName.isEmpty { return hubLabel }
+                // Replace legacy "Master Device" labels with Hub-{count}.
+                if group.displayName == "Master Device"
+                    || group.displayName.hasPrefix("Master Device") {
+                    return hubLabel
+                }
+                return group.displayName
+            }()
 
             let master = BLEDevice(
                 name: label,
@@ -117,12 +131,16 @@ enum VirtualDeviceScanGrouping {
         masterName: String = masterDisplayName
     ) -> [BLEDevice] {
         guard !enabledMemberHardwareIds.isEmpty else { return devices }
+        let hubName = hubDisplayName(pendantCount: enabledMemberHardwareIds.count)
+        let label = masterName == Self.masterDisplayName || masterName == "Master Device"
+            ? hubName
+            : masterName
         let spec = VirtualDeviceGroupingSpec(
             virtualDeviceID: virtualDeviceID,
             memberHardwareIds: enabledMemberHardwareIds,
-            displayName: masterName
+            displayName: label
         )
-        return apply(devices: devices, groups: [spec], masterName: masterName)
+        return apply(devices: devices, groups: [spec], masterName: label)
     }
 
     /// Prefer online Wi‑Fi over BLE, then fresher lastSeen.

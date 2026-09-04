@@ -38,7 +38,7 @@ struct DeviceSignInView: View {
                             .font(HomeUI1Type.regular(15))
                             .foregroundStyle(HomeUI1Color.textSecondary)
 
-                        Text("Sign in to manage lights on this phone")
+                        Text("Sign in to manage your Limi devices")
                             .font(HomeUI1Type.caption(12))
                             .foregroundStyle(HomeUI1Color.textSecondary.opacity(0.85))
                     }
