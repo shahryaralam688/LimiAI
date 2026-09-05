@@ -72,4 +72,21 @@ final class ConfiguratorModelStoreTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: destination.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: legacyURL.path))
     }
+
+    func testBundledModelExtensionsPreferUSDZOverUSDA() {
+        XCTAssertEqual(ConfiguratorModelStore.bundledModelExtensions.first, "usdz")
+        XCTAssertTrue(ConfiguratorModelStore.bundledModelExtensions.contains("usda"))
+    }
+
+    func testVirtualHubModelIsDedicatedStemNotAPendant() {
+        XCTAssertEqual(VirtualHub3DModel.bundledName, "root")
+        XCTAssertFalse(PendantModelCatalog.models.contains(VirtualHub3DModel.bundledName))
+        XCTAssertNotEqual(VirtualHub3DModel.bundledName, PendantModelCatalog.unknownDefault)
+    }
+
+    func testDevicePendantLookupDoesNotResolveToHubModel() {
+        let pendant = PendantModelCatalog.bundledName(for: "CHROME")
+        XCTAssertEqual(pendant, "ball_Chrome_pendant")
+        XCTAssertNotEqual(pendant, VirtualHub3DModel.bundledName)
+    }
 }

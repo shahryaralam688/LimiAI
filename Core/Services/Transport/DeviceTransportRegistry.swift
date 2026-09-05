@@ -145,10 +145,16 @@ public final class DeviceTransportRegistry {
         let key = LimiDeviceNaming.normalizedHardwareId(deviceId)
         guard !key.isEmpty else { return }
         let deviceState = state(for: key)
-        if deviceState.mqttConnected {
+        let wasConnected = deviceState.mqttConnected
+        if wasConnected {
             deviceState.updateMQTTPresence(connected: false)
         }
         lastPresence[key] = false
+        CloudPresenceMemory.shared.record(deviceId: key, connected: false)
+        PresenceSnapshotStore.shared.record(deviceId: key, isOnline: false, path: .offline)
+        if wasConnected {
+            presenceChangeSubject.send(MQTTPresenceUpdate(deviceId: key, connected: false))
+        }
     }
 
     /// Clear live MQTT flags (e.g. Socket reconnect). Fresh `device_status` must re-prove Online.

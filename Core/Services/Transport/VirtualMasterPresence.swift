@@ -9,15 +9,13 @@
 import Foundation
 
 enum VirtualMasterPresence {
-    /// A cloud hub is treated as *live* only while a definite `device_status` arrived
-    /// within this window. Used together with a positive BLE signal to hand a hub off
-    /// from cloud → BLE when its Wi‑Fi drops without an explicit `off` ever arriving.
-    static let cloudPresenceTTL: TimeInterval = 45
+    /// Heartbeats arrive about once a second while the hub is on cloud.
+    /// Used by Add Device to tell “is it really on right now”.
+    static let cloudPresenceTTL: TimeInterval = 10
 
-    /// Absolute ceiling: if there has been no definite cloud presence for this long AND
-    /// no local (BLE) evidence, the hub is considered offline. Kept generous so a quiet
-    /// but genuinely-online remote hub is never falsely marked offline.
-    static let cloudPresenceHardTTL: TimeInterval = 300
+    /// Backend stops `on` when the hub dies, then sends `off` (`heartbeat_timeout`)
+    /// after 2 minutes. Home stays Online for this window, then Offline.
+    static let backendOfflineGrace: TimeInterval = 120
 
     /// Live cloud = the registry flag AND a fresh heartbeat (no stale snapshot fallback).
     /// This is the authoritative "is it really on cloud right now" check used to decide
@@ -227,6 +225,18 @@ enum VirtualMasterPresence {
         return Summary(isOnline: true, transport: .online)
     }
 
+    /// GATT / recent advertisement only — does not consult MQTT (avoids recursion).
+    static func hasLocalBLEEvidence(hardwareId: String) -> Bool {
+        let hw = LimiDeviceNaming.normalizedHardwareId(hardwareId)
+        guard !hw.isEmpty else { return false }
+        guard BluetoothManager.shared.isBluetoothOn else { return false }
+        guard let uuid = ConfiguredBLEDeviceStore.shared.blePeripheralUUID(for: hw) else {
+            return false
+        }
+        if BluetoothManager.shared.isLiveConnected(forPeripheralUUID: uuid) { return true }
+        return BluetoothManager.shared.hasRecentAdvertisement(forPeripheralUUID: uuid, within: 15)
+    }
+
     /// BLE visibility for a member MAC **only when not MQTT-online**.
     static func isBLEVisible(
         hardwareId: String,
@@ -265,37 +275,14 @@ enum VirtualMasterPresence {
         effectiveCloudOnline(hardwareId: hardwareId)
     }
 
-    /// Live MQTT registry flag, or a recent cloud snapshot while Socket.IO is connected.
+    /// `on` (every ~1s) → Online. `off` (including `heartbeat_timeout`) → Offline.
+    /// After the last `on`, stay Online until the backend 2-minute `off`.
     static func effectiveCloudOnline(hardwareId: String) -> Bool {
         let key = LimiDeviceNaming.normalizedHardwareId(hardwareId)
         guard !key.isEmpty else { return false }
-
         let state = DeviceTransportRegistry.shared.state(for: key)
-        if state.mqttConnected {
-            // Trust the live cloud flag only while presence is fresh. A long heartbeat
-            // silence means the hub dropped off Wi‑Fi even though no `off` event arrived.
-            return state.isCloudPresenceFresh(ttl: cloudPresenceTTL)
-        }
-
-        guard LightControllingSocket.shared.isConnected else { return false }
-
-        if CloudPresenceMemory.shared.lastConnected(deviceId: key) == false {
-            return false
-        }
-
-        if let snap = PresenceSnapshotStore.shared.snapshot(for: key),
-           snap.age <= PresenceSnapshotStore.staleOnlineTTL {
-            switch snap.path {
-            case .cloud:
-                return snap.isOnline
-            case .offline:
-                return false
-            default:
-                break
-            }
-        }
-
-        return false
+        guard state.mqttConnected else { return false }
+        return state.isCloudPresenceFresh(ttl: backendOfflineGrace)
     }
 
     /// True when the hub is visible on the local network via Bonjour/mDNS.

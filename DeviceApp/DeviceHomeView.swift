@@ -441,53 +441,6 @@ struct DeviceHomeView: View {
         )
     }
 
-    /// Stale-while-revalidate: live paths win; snapshot fills gaps during silent refresh.
-    private func resolvedIsOnline(
-        hardwareId: String,
-        localOnline: Bool,
-        cloudOnline: Bool,
-        bleOnline: Bool
-    ) -> Bool {
-        let key = normalizeHardwareId(hardwareId)
-        let live = localOnline || cloudOnline || bleOnline
-        if live {
-            // Only re-record a `.cloud` snapshot when cloud is *live* (fresh heartbeat).
-            // A snapshot-derived cloudOnline must NOT rewrite the snapshot — that
-            // self-refresh kept "Online · Cloud" alive forever until an app restart.
-            let liveCloud = VirtualMasterPresence.isLiveCloudOnline(hardwareId: key)
-            if liveCloud {
-                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .cloud)
-            } else if bleOnline {
-                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .ble)
-            } else if localOnline {
-                PresenceSnapshotStore.shared.record(deviceId: key, isOnline: true, path: .local)
-            }
-            // (cloudOnline true but only snapshot-derived: return online for grace, but
-            // leave the snapshot untouched so it can age out and flip to BLE/offline.)
-            return true
-        }
-
-        // Different Wi‑Fi / cloud reconnect: keep last cloud online until TTL expires
-        // or a fresh device_status proves offline.
-        if socket.isConnected,
-           let snap = PresenceSnapshotStore.shared.snapshot(for: key),
-           snap.isOnline,
-           snap.path == .cloud,
-           snap.age <= PresenceSnapshotStore.staleOnlineTTL {
-            return true
-        }
-
-        if presenceCoordinator.isRefreshing || !presenceCoordinator.sessionRefreshCompleted,
-           let snap = PresenceSnapshotStore.shared.snapshot(for: key),
-           snap.isOnline,
-           snap.age <= PresenceSnapshotStore.staleOnlineTTL {
-            return true
-        }
-
-        PresenceSnapshotStore.shared.record(deviceId: key, isOnline: false, path: .offline)
-        return false
-    }
-
     private func scheduleDiscoveryTimeout() {
         guard isInitialDiscovery else { return }
         Task { @MainActor in
@@ -1449,16 +1402,8 @@ struct DeviceHomeView: View {
             let key = normalizeHardwareId(device.chennalMac)
             guard !key.isEmpty else { continue }
 
-            let localOnline = isLocalOnline(device)
-            let cloudOnline = isCloudOnline(device.chennalMac)
-            let bleOnline = isBLEOnline(device.chennalMac)
             var copy = device
-            copy.isOnline = resolvedIsOnline(
-                hardwareId: key,
-                localOnline: localOnline,
-                cloudOnline: cloudOnline,
-                bleOnline: bleOnline
-            )
+            copy.isOnline = isCloudOnline(key)
 
             if let existing = byHardware[key] {
                 let existingIsBonjour = existing.id != key
@@ -1525,55 +1470,18 @@ struct DeviceHomeView: View {
         VirtualMasterPresence.effectiveCloudOnline(hardwareId: deviceId)
     }
 
-    private func isLocalOnline(_ device: WifiDevice) -> Bool {
-        let key = normalizeHardwareId(device.chennalMac)
-        // Bonjour/WS Online only after user allowed local network for this device.
-        guard LocalNetworkAllowStore.shared.isAllowed(for: key) else { return false }
-        if let raw = knownWifiDevices[device.id] {
-            return raw.isOnline
-        }
-        return DeviceTransportRegistry.shared.state(for: key).wifiConnected
-    }
-
-    /// BLE Online: live GATT connection, or a recent advertisement.
-    /// Connected hubs often stop advertising — do not require ads in that case.
-    /// Cache-only / powered-off boards stay Offline.
-    private func isBLEOnline(_ deviceId: String) -> Bool {
-        let key = normalizeHardwareId(deviceId)
-        guard !key.isEmpty else { return false }
-        // isCloudOnline is freshness-aware: a stale cloud hub reports false here so BLE
-        // can take over. (No separate raw mqttConnected gate — that kept BLE suppressed
-        // while a dropped hub's mqttConnected stayed stale-true.)
-        if isCloudOnline(key) { return false }
-        guard bluetooth.isBluetoothOn else { return false }
-        guard let bleUUID = ConfiguredBLEDeviceStore.shared.blePeripheralUUID(for: key) else {
-            return false
-        }
-        if bluetooth.isLiveConnected(forPeripheralUUID: bleUUID) { return true }
-        if bluetooth.isReady(forPeripheralUUID: bleUUID) { return true }
-        return bluetooth.hasRecentAdvertisement(forPeripheralUUID: bleUUID, within: 15)
-    }
-
     private func statusText(for device: WifiDevice) -> String {
         if device.isVirtualMaster, let members = device.memberChannelMacs {
             return masterStatusText(memberHardwareIds: members)
         }
-        let cloud = isCloudOnline(device.chennalMac)
-        let local = isLocalOnline(device)
-        let ble = isBLEOnline(device.chennalMac)
-
-        // Priority labels: Cloud → BLE → Local (Bonjour after allow).
-        if cloud { return "Online · Cloud" }
-        if ble { return "Online · BLE" }
-        if local { return "Online · Local" }
-        return "Offline"
+        return isCloudOnline(device.chennalMac) ? "Online · Cloud" : "Offline"
     }
 
     private func masterStatusText(memberHardwareIds: [String]) -> String {
         VirtualMasterPresence.masterCardCloudStatusLabel(memberHardwareIds: memberHardwareIds)
     }
 
-    /// Re-sync master row flags from backend `device_status` (all offline → card offline).
+    /// Hub / virtual device: Online only from backend `device_status`. BLE is setup-only.
     private func applyMasterPresence(to devices: [WifiDevice]) -> [WifiDevice] {
         devices.map { device in
             guard device.isVirtualMaster, let members = device.memberChannelMacs, !members.isEmpty else {
@@ -1583,18 +1491,6 @@ struct DeviceHomeView: View {
             copy.isOnline = VirtualMasterPresence.isAnyMemberCloudOnline(memberHardwareIds: members)
             return copy
         }
-    }
-
-    private func memberIsOnline(_ hardwareId: String) -> Bool {
-        let key = normalizeHardwareId(hardwareId)
-        guard !key.isEmpty else { return false }
-        if isCloudOnline(key) { return true }
-        if let row = knownWifiDevices.values.first(where: {
-            normalizeHardwareId($0.chennalMac) == key
-        }) {
-            if isLocalOnline(row) { return true }
-        }
-        return isBLEOnline(key)
     }
 
     /// Keep configured BLE hubs in the list even when Bonjour/cloud are quiet.

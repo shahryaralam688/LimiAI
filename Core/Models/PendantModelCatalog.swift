@@ -9,6 +9,15 @@
 import Combine
 import Foundation
 
+/// 3D asset used only on the virtual-hub **All** control screen.
+/// Individual member hubs keep using `PendantModelCatalog`.
+///
+/// Bundled as `art.scnassets/root.usdz`, built from `mount1Add`
+/// (`root.usda` + `mesh/`). Hub All screen only.
+enum VirtualHub3DModel {
+    static let bundledName = "root"
+}
+
 enum PendantModelCatalog {
     /// Bundled resource names (no `.usdz`) under `art.scnassets`.
     static let models: [String] = [

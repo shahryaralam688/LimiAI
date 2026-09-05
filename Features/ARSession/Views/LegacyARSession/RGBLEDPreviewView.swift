@@ -786,7 +786,7 @@ struct RGBLEDPreviewContainer: UIViewRepresentable {
         arView.cameraMode = .nonAR
         arView.environment.background = .color(UIColor(Color.appCanvasPrimary))
 
-        guard let loadedEntity = ConfiguratorModelStore.loadEntity(
+        guard let loadedEntity = ConfiguratorModelStore.loadPreviewEntity(
             downloadId: downloadId,
             bundledName: bundledName
         ) else {

@@ -5,6 +5,8 @@ import RealityKit
 enum ConfiguratorModelStore {
     private static let folderName = "Configurator"
     static let defaultAssetsSubdirectory = "art.scnassets"
+    /// RealityKit load order. Complete `.usdz` packages win over composition `.usda`.
+    static let bundledModelExtensions = ["usdz", "usda", "usd", "usdc", "reality"]
 
     static func directoryURL() -> URL {
         let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
@@ -63,10 +65,15 @@ enum ConfiguratorModelStore {
         name: String,
         subdirectory: String = defaultAssetsSubdirectory
     ) -> URL? {
-        Bundle.main.url(forResource: name, withExtension: "usdz", subdirectory: subdirectory)
+        for ext in bundledModelExtensions {
+            if let url = Bundle.main.url(forResource: name, withExtension: ext, subdirectory: subdirectory) {
+                return url
+            }
+        }
+        return nil
     }
 
-    /// Downloaded file when present, otherwise bundled `bundledName.usdz`.
+    /// Downloaded file when present, otherwise bundled `bundledName` (usdz, then usda).
     static func resolveModelURL(
         downloadId: String?,
         bundledName: String,
@@ -84,6 +91,10 @@ enum ConfiguratorModelStore {
         do {
             return try Entity.load(contentsOf: url)
         } catch {
+            DeviceConsole.log(
+                .home,
+                "3D model load FAIL \(url.lastPathComponent): \(error.localizedDescription)"
+            )
             return nil
         }
     }
@@ -93,6 +104,17 @@ enum ConfiguratorModelStore {
             return nil
         }
         return loadEntity(from: url)
+    }
+
+    /// Control-screen load: requested asset first, then the default pendant
+    /// so a missing or incomplete hub USDA never blanks the UI.
+    static func loadPreviewEntity(downloadId: String?, bundledName: String) -> Entity? {
+        if let entity = loadEntity(downloadId: downloadId, bundledName: bundledName) {
+            return entity
+        }
+        let fallback = PendantModelCatalog.unknownDefault
+        guard bundledName != fallback else { return nil }
+        return loadEntity(downloadId: nil, bundledName: fallback)
     }
 
     /// Resolved preview URL: downloaded snap when present, otherwise bundled USDZ.

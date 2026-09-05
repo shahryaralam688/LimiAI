@@ -174,7 +174,7 @@ struct VirtualMasterControlView: View {
     private var controlContent: some View {
         switch selectedScope {
         case .all:
-            // Patterns ONLY on Hub All control — never on member tabs.
+            // Hub All only: dedicated 3D hub scene. Member tabs keep per-device pendants.
             VStack(spacing: 0) {
                 HubChannelPatternBar(
                     virtualDeviceID: virtualDeviceID,
@@ -182,8 +182,11 @@ struct VirtualMasterControlView: View {
                     pendantCount: normalizedMembers.count,
                     usesHomeUI1: usesHomeUI1
                 )
-                CCTLEDPreviewView(virtualDeviceID: virtualDeviceID)
-                    .id("virtual-cct-\(virtualDeviceID)")
+                CCTLEDPreviewView(
+                    virtualDeviceID: virtualDeviceID,
+                    bundledName: VirtualHub3DModel.bundledName
+                )
+                .id("virtual-cct-\(virtualDeviceID)-\(VirtualHub3DModel.bundledName)")
             }
         case .member(let hardwareId):
             memberControlView(hardwareId: hardwareId)

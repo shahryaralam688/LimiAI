@@ -422,6 +422,73 @@ final class TransportCaseLogicTests: XCTestCase {
         XCTAssertFalse(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
     }
 
+    func testMasterCardCloud_lastOnStaysOnlineWithoutSnapshotOrBLE() {
+        let mac = "3CDC75FEBF48"
+        DeviceTransportRegistry.shared.state(for: mac).updateMQTTPresence(connected: true)
+        defer { DeviceTransportRegistry.shared.forgetDevice(deviceId: mac) }
+
+        XCTAssertTrue(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
+        XCTAssertEqual(
+            VirtualMasterPresence.masterCardCloudStatusLabel(memberHardwareIds: [mac]),
+            "Online · Cloud"
+        )
+    }
+
+    func testMasterCardCloud_staysOnlineDuringBackendTwoMinuteOffWindow() {
+        let mac = "80B54EC1C270"
+        let state = DeviceTransportRegistry.shared.state(for: mac)
+        state.applyMQTTPresenceForTests(
+            connected: true,
+            lastPresenceAt: Date().addingTimeInterval(-90)
+        )
+        defer { DeviceTransportRegistry.shared.forgetDevice(deviceId: mac) }
+
+        XCTAssertTrue(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
+    }
+
+    func testMasterCardCloud_offlineAfterTwoMinuteHeartbeatTimeout() {
+        let mac = "80B54EC1C270"
+        let state = DeviceTransportRegistry.shared.state(for: mac)
+        state.applyMQTTPresenceForTests(
+            connected: true,
+            lastPresenceAt: Date().addingTimeInterval(-121)
+        )
+        defer { DeviceTransportRegistry.shared.forgetDevice(deviceId: mac) }
+
+        XCTAssertFalse(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
+        XCTAssertEqual(
+            VirtualMasterPresence.masterCardCloudStatusLabel(memberHardwareIds: [mac]),
+            "Offline"
+        )
+    }
+
+    func testMasterCardCloud_explicitOffGoesOfflineImmediately() {
+        let mac = "80B54EC1C270"
+        DeviceTransportRegistry.shared.state(for: mac).updateMQTTPresence(connected: true)
+        DeviceTransportRegistry.shared.state(for: mac).updateMQTTPresence(connected: false)
+        defer { DeviceTransportRegistry.shared.forgetDevice(deviceId: mac) }
+
+        XCTAssertFalse(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
+    }
+
+    func testMasterCardCloud_snapshotAloneIsNotOnline() {
+        let mac = "3CDC75FDF1C4"
+        PresenceSnapshotStore.shared.resetForTests()
+        PresenceSnapshotStore.shared.record(deviceId: mac, isOnline: true, path: .cloud)
+        CloudPresenceMemory.shared.record(deviceId: mac, connected: true)
+        defer {
+            PresenceSnapshotStore.shared.resetForTests()
+            CloudPresenceMemory.shared.remove(deviceId: mac)
+            DeviceTransportRegistry.shared.forgetDevice(deviceId: mac)
+        }
+
+        XCTAssertFalse(VirtualMasterPresence.isMemberCloudOnline(hardwareId: mac))
+        XCTAssertEqual(
+            VirtualMasterPresence.masterCardCloudStatusLabel(memberHardwareIds: [mac]),
+            "Offline"
+        )
+    }
+
     // MARK: - Helpers
 
     private func waitForMain() {

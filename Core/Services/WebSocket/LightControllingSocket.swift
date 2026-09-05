@@ -166,7 +166,7 @@ class LightControllingSocket: ObservableObject {
                 DeviceConsole.log(.presence, "← device_status (empty payload) — no id/status")
                 return
             }
-            var parsed: (deviceId: String, status: String, pendantTypes: String?)?
+            var parsed: (deviceId: String, status: String, pendantTypes: String?, reason: String?)?
             if let dict = raw as? [String: Any] {
                 parsed = Self.parseDeviceStatusDict(dict)
             } else if let jsonString = raw as? String,
@@ -179,9 +179,10 @@ class LightControllingSocket: ObservableObject {
             if let parsed {
                 let hw = LimiDeviceNaming.normalizedHardwareId(parsed.deviceId)
                 let pendant = parsed.pendantTypes.map { " pendant=\($0)" } ?? ""
+                let reason = parsed.reason.map { " reason=\($0)" } ?? ""
                 DeviceConsole.log(
                     .presence,
-                    "← SOCKET device_status id=\(parsed.deviceId) hw=\(hw) status=\(parsed.status)\(pendant)"
+                    "← SOCKET device_status id=\(parsed.deviceId) hw=\(hw) status=\(parsed.status)\(pendant)\(reason)"
                 )
                 DevicePendantTypeStore.shared.update(
                     deviceId: parsed.deviceId,
@@ -534,13 +535,16 @@ class LightControllingSocket: ObservableObject {
         presenceHandlers.removeAll { $0.0 == id }
     }
 
-    private static func parseDeviceStatusDict(_ dict: [String: Any]) -> (deviceId: String, status: String, pendantTypes: String?) {
+    private static func parseDeviceStatusDict(
+        _ dict: [String: Any]
+    ) -> (deviceId: String, status: String, pendantTypes: String?, reason: String?) {
         let deviceId = dict["deviceId"] as? String ?? "<unknown>"
         let status = dict["status"] as? String ?? "<unknown>"
         let pendantTypes = (dict["pendantTypes"] as? String)
             ?? (dict["pendantType"] as? String)
             ?? (dict["pendant_types"] as? String)
-        return (deviceId, status, pendantTypes)
+        let reason = dict["reason"] as? String
+        return (deviceId, status, pendantTypes, reason)
     }
 
     /// Generic emit-with-ack helper used by the transport layer to publish
@@ -573,7 +577,7 @@ class LightControllingSocket: ObservableObject {
     }
 
     private static func compactDict(_ dict: [String: Any]) -> String {
-        let keys = ["deviceId", "virtual_device_id", "status", "pendantTypes", "pendantType", "firmwareVersion", "command", "reset", "channel", "onoff", "power"]
+        let keys = ["deviceId", "virtual_device_id", "status", "reason", "pendantTypes", "pendantType", "firmwareVersion", "command", "reset", "channel", "onoff", "power"]
         var parts: [String] = []
         for key in keys {
             if let value = dict[key] {

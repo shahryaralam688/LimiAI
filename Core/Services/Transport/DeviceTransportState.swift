@@ -20,10 +20,8 @@ public final class DeviceTransportState: ObservableObject {
     /// or forced true by a 503 mqtt_active response on a WebSocket attempt).
     @Published public private(set) var mqttConnected: Bool = false
 
-    /// Timestamp of the most recent *definite online* presence event. The backend
-    /// heart-beats `device_status` while a hub is on cloud, so a long silence means
-    /// the hub dropped its Wi‑Fi even though no explicit `off` ever arrived. Used to
-    /// expire a stale cloud link so BLE / offline can surface without an app restart.
+    /// Timestamp of the most recent `device_status=on`. Backend heartbeats `on`
+    /// about once a second, then sends `off` (`heartbeat_timeout`) after 2 minutes.
     @Published public private(set) var lastMQTTPresenceAt: Date?
 
     /// True when a definite online presence event arrived within `ttl` seconds.
@@ -125,6 +123,16 @@ public final class DeviceTransportState: ObservableObject {
             if self.mqttConnected != connected { self.mqttConnected = connected }
         }
     }
+
+    #if DEBUG
+    public func applyMQTTPresenceForTests(connected: Bool, lastPresenceAt: Date?) {
+        runOnMain { [weak self] in
+            guard let self else { return }
+            self.mqttConnected = connected
+            self.lastMQTTPresenceAt = lastPresenceAt
+        }
+    }
+    #endif
 
     /// Hard override: a WebSocket attempt was rejected with 503 mqtt_active,
     /// proving the device is on MQTT regardless of what we previously believed.

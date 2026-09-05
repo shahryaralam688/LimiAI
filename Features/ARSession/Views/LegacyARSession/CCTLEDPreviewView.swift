@@ -57,12 +57,12 @@ struct CCTLEDPreviewView: View {
         _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: id))
     }
 
-    /// Virtual master device — all CCT commands go through Socket.IO.
+    /// Virtual master hub All tab — `VirtualHub3DModel` only, never a member pendant.
     init(virtualDeviceID: String, bundledName: String? = nil) {
         self.virtualDeviceID = virtualDeviceID
         self.chennalMac = nil
         self.chennelPosition = 1
-        self.bundledName = bundledName ?? "ball_Chrome_pendant"
+        self.bundledName = bundledName ?? VirtualHub3DModel.bundledName
         self.downloadId = nil
         _commandRouter = StateObject(wrappedValue: CommandRouter(deviceId: nil, virtualDeviceId: virtualDeviceID))
         _transportState = StateObject(wrappedValue: DeviceTransportRegistry.shared.state(for: "VIRTUAL"))
@@ -968,7 +968,7 @@ struct CCTLEDPreviewContainer: UIViewRepresentable {
         arView.cameraMode = .nonAR
         arView.environment.background = .color(UIColor(Color.appCanvasPrimary))
 
-        guard let loadedEntity = ConfiguratorModelStore.loadEntity(
+        guard let loadedEntity = ConfiguratorModelStore.loadPreviewEntity(
             downloadId: downloadId,
             bundledName: bundledName
         ) else {

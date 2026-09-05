@@ -18,7 +18,6 @@
 
 import Combine
 import Foundation
-import UIKit
 
 @MainActor
 final class SocketPresenceLifecycle: ObservableObject {
@@ -27,13 +26,10 @@ final class SocketPresenceLifecycle: ObservableObject {
     private var cancellable: AnyCancellable?
     private var started = false
     private var lastStatus: LightControllingSocket.ConnectionStatus?
+    private var heartbeatWatchTimer: Timer?
 
-    /// How often to actively re-check presence while the app is foregrounded. This is the
-    /// standard "presence poll" — every tick we log each hub's live signals and run a
-    /// silent refresh so a hub that silently left Wi‑Fi resolves to BLE / offline without
-    /// an app restart. Foreground-only so it never drains battery in the background.
-    private static let revalidateInterval: TimeInterval = 20
-    private var revalidateTimer: Timer?
+    /// How often to apply the backend 2-minute `heartbeat_timeout` window.
+    private static let heartbeatWatchInterval: TimeInterval = 15
 
     /// Supplies the normalized hardware ids of virtual-device members known to this
     /// phone. The virtual-device store lives in the device app target, so it is injected
@@ -55,43 +51,26 @@ final class SocketPresenceLifecycle: ObservableObject {
                 Task { @MainActor in self?.handle(status) }
             }
 
-        revalidateTimer = Timer.scheduledTimer(
-            withTimeInterval: Self.revalidateInterval,
+        heartbeatWatchTimer = Timer.scheduledTimer(
+            withTimeInterval: Self.heartbeatWatchInterval,
             repeats: true
         ) { [weak self] _ in
-            Task { @MainActor in self?.revalidateStaleCloudPresence() }
+            Task { @MainActor in self?.expireSilentHeartbeats() }
         }
     }
 
-    /// Presence poll (foreground only). This does **nothing** while every hub is fresh on
-    /// cloud — no BLE scan, no list rebuild, no flicker. It only acts when a hub's cloud
-    /// heartbeat has gone stale (silent Wi‑Fi drop), triggering one silent refresh that
-    /// resolves ground truth (BLE handoff / offline) without an app restart.
-    private func revalidateStaleCloudPresence() {
-        guard UIApplication.shared.applicationState != .background else { return }
-
-        // Add Device / provisioning reserves the BLE radio for the Wi‑Fi list read + credential
-        // write. A background scan here would make that time out ("try again") — so stay out.
-        guard !AddDeviceFlowActivityGate.isActive, !WiFiProvisioningActivityGate.isActive else {
-            return
+    /// Backend contract: `on` every ~1s. When those stop, `off` arrives after 2 minutes.
+    /// If the `off` is late or lost, drop the hub here so Home does not stay Online forever.
+    private func expireSilentHeartbeats() {
+        guard LightControllingSocket.shared.isConnected else { return }
+        for state in DeviceTransportRegistry.shared.allStates {
+            guard state.mqttConnected else { continue }
+            guard !state.isCloudPresenceFresh(ttl: VirtualMasterPresence.backendOfflineGrace) else {
+                continue
+            }
+            DeviceConsole.focus("heartbeat timeout id=\(state.deviceId) — no on for 2m → Offline")
+            DeviceTransportRegistry.shared.markCloudPresenceDropped(state.deviceId)
         }
-
-        // Only re-probe when a hub actually looks stale (was on cloud, but the heartbeat
-        // stopped arriving within the TTL). Healthy, fresh hubs never trigger extra work.
-        let hasStaleHub = DeviceTransportRegistry.shared.allStates.contains {
-            $0.mqttConnected && !$0.isCloudPresenceFresh(ttl: VirtualMasterPresence.cloudPresenceTTL)
-        }
-        guard hasStaleHub else { return }
-
-        let ids = Self.sessionDeviceIds()
-        guard !ids.isEmpty else { return }
-
-        DeviceConsole.focus("revalidate — stale cloud hub → presence re-probe (\(ids.count) hub(s))")
-        DevicePresenceCoordinator.shared.requestRefresh(
-            deviceIds: ids,
-            reason: .homeAppear,
-            force: true
-        )
     }
 
     private func handle(_ status: LightControllingSocket.ConnectionStatus) {
@@ -103,8 +82,9 @@ final class SocketPresenceLifecycle: ObservableObject {
             DeviceConsole.focus("socket=connecting (prev=\(prev))")
 
         case .disconnected:
-            DeviceConsole.focus("socket=disconnected (prev=\(prev)) → clearing live MQTT presence")
-            DeviceTransportRegistry.shared.clearLiveMQTTPresence()
+            // Keep last `on`. Phone socket down ≠ hub off. Fresh `on` or the
+            // 2-minute backend `off` / heartbeat window decides Offline.
+            DeviceConsole.focus("socket=disconnected (prev=\(prev)) — keeping last device_status")
 
         case .connected:
             // Don't grab the BLE radio for a presence refresh while the Add Device /
